@@ -1,6 +1,7 @@
-package org.jacpfx;
+package org.jacpfx.entity.decoder;
 
 import org.jacpfx.common.util.Serializer;
+import org.jacpfx.entity.Payload;
 import org.jacpfx.vertx.websocket.decoder.Decoder;
 
 import java.io.IOException;
@@ -9,12 +10,11 @@ import java.util.Optional;
 /**
  * Created by Andy Moncsek on 18.11.15.
  */
-public class ExampleByteDecoderMyTest implements Decoder.ByteDecoder<MyTestObject> {
+public class ExampleByteDecoderPayload implements Decoder.ByteDecoder<Payload<String>> {
     @Override
-    public Optional<MyTestObject> decode(byte[] input) {
+    public Optional<Payload<String>> decode(byte[] input) {
         try {
-            MyTestObject result = (MyTestObject)Serializer.deserialize(input);
-            return Optional.ofNullable(result);
+            return Optional.ofNullable((Payload<String>)Serializer.deserialize(input));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

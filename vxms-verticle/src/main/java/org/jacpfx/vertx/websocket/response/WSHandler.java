@@ -1,13 +1,11 @@
 package org.jacpfx.vertx.websocket.response;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import org.jacpfx.vertx.websocket.registry.WSEndpoint;
 import org.jacpfx.vertx.websocket.decoder.Decoder;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
-import org.jacpfx.vertx.websocket.registry.WSRegistry;
+import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
+import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -23,13 +21,13 @@ import java.util.stream.Stream;
  */
 public class WSHandler {
     private final static ExecutorService EXECUTOR = Executors.newCachedThreadPool(); // TODO use fixed size and get amount of vertcle instances
-    private final WSEndpoint endpoint;
+    private final WebSocketEndpoint endpoint;
     private final Vertx vertx;
-    private final WSRegistry registry;
+    private final WebSocketRegistry registry;
     private byte[] value;
 
 
-    public WSHandler(WSRegistry registry, WSEndpoint endpoint, byte[] value, Vertx vertx) {
+    public WSHandler(WebSocketRegistry registry, WebSocketEndpoint endpoint, byte[] value, Vertx vertx) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.registry = registry;
@@ -41,7 +39,7 @@ public class WSHandler {
      *
      * @return {@see WSEndpoint}
      */
-    public WSEndpoint endpoint() {
+    public WebSocketEndpoint endpoint() {
         return this.endpoint;
     }
 
@@ -95,11 +93,11 @@ public class WSHandler {
     }
 
     public class TargetType {
-        private final WSEndpoint endpoint;
+        private final WebSocketEndpoint endpoint;
         private final Vertx vertx;
         private final boolean async;
 
-        private TargetType(WSEndpoint endpoint, Vertx vertx, boolean async) {
+        private TargetType(WebSocketEndpoint endpoint, Vertx vertx, boolean async) {
             this.endpoint = endpoint;
             this.vertx = vertx;
             this.async = async;
@@ -110,19 +108,19 @@ public class WSHandler {
         }
 
         public ResponseType toAll() {
-            return new ResponseType(new WSEndpoint[]{endpoint}, vertx, async, CommType.ALL);
+            return new ResponseType(new WebSocketEndpoint[]{endpoint}, vertx, async, CommType.ALL);
         }
 
-        public ResponseType toAllBut(WSEndpoint... endpoint) {
+        public ResponseType toAllBut(WebSocketEndpoint... endpoint) {
             // TODO iteration over stream / filter
             return new ResponseType(endpoint, vertx, async, CommType.ALL_BUT_CALLER);
         }
 
         public ResponseType toCaller() {
-            return new ResponseType(new WSEndpoint[]{endpoint}, vertx, async, CommType.CALLER);
+            return new ResponseType(new WebSocketEndpoint[]{endpoint}, vertx, async, CommType.CALLER);
         }
 
-        public ResponseType to(WSEndpoint... endpoint) {
+        public ResponseType to(WebSocketEndpoint... endpoint) {
             return new ResponseType(endpoint, vertx, async, CommType.TO);
         }
 
@@ -130,12 +128,12 @@ public class WSHandler {
     }
 
     public class ResponseType {
-        private final WSEndpoint[] endpoint;
+        private final WebSocketEndpoint[] endpoint;
         private final Vertx vertx;
         private final boolean async;
         private final CommType commType;
 
-        private ResponseType(WSEndpoint[] endpoint, Vertx vertx, final boolean async, final CommType commType) {
+        private ResponseType(WebSocketEndpoint[] endpoint, Vertx vertx, final boolean async, final CommType commType) {
             this.endpoint = endpoint;
             this.vertx = vertx;
             this.async = async;
@@ -156,7 +154,7 @@ public class WSHandler {
     }
 
     public class ExecuteWSResponse {
-        private final WSEndpoint[] endpoint;
+        private final WebSocketEndpoint[] endpoint;
         private final Vertx vertx;
         private final boolean async;
         private final CommType commType;
@@ -165,7 +163,7 @@ public class WSHandler {
         private final Supplier<Serializable> objectSupplier;
         private final Encoder encoder;
 
-        private ExecuteWSResponse(WSEndpoint[] endpoint, Vertx vertx, boolean async, CommType commType, Supplier<byte[]> byteSupplier, Supplier<String> stringSupplier, Supplier<Serializable> objectSupplier, Encoder encoder) {
+        private ExecuteWSResponse(WebSocketEndpoint[] endpoint, Vertx vertx, boolean async, CommType commType, Supplier<byte[]> byteSupplier, Supplier<String> stringSupplier, Supplier<Serializable> objectSupplier, Encoder encoder) {
             this.endpoint = endpoint;
             this.vertx = vertx;
             this.async = async;
@@ -210,55 +208,7 @@ public class WSHandler {
             }
         }
 
-        // TODO check if CompleteableFuture must be executed in vertx.executeBlocking
-        private void executeBlocking() {
-            Optional.ofNullable(byteSupplier).
-                    ifPresent(supplier -> this.vertx.executeBlocking(handler -> {
-                                try {
-                                    handler.complete(supplier.get());
-                                } catch (Exception e) {
-                                    handler.fail(e);
-                                }
 
-                            }, (Handler<AsyncResult<byte[]>>) result ->
-                                    // TODO handle exception
-                                    Optional.ofNullable(result.result()).ifPresent(byteResult -> sendBinary(byteResult))
-                    ));
-
-
-            Optional.ofNullable(stringSupplier).
-                    ifPresent(supplier -> this.vertx.executeBlocking(handler -> {
-                                try {
-                                    handler.complete(supplier.get());
-                                } catch (Exception e) {
-                                    handler.fail(e);
-                                }
-
-                            }, (Handler<AsyncResult<String>>) result ->
-                                    // TODO handle exception
-                                    Optional.ofNullable(result.result()).ifPresent(stringResult -> sendText(stringResult))
-                    ));
-
-
-            Optional.ofNullable(objectSupplier).
-                    ifPresent(supplier -> this.vertx.executeBlocking(handler -> {
-                                try {
-                                    handler.complete(supplier.get());
-                                } catch (Exception e) {
-                                    handler.fail(e);
-                                }
-
-                            }, (Handler<AsyncResult<Serializable>>) result ->
-                                    // TODO handle exception
-                                    Optional.ofNullable(result.result()).ifPresent(value1 -> serialize(value1, encoder).ifPresent(val -> {
-                                        if (val instanceof String) {
-                                            sendText((String) val);
-                                        } else {
-                                            sendBinary((byte[]) val);
-                                        }
-                                    }))
-                    ));
-        }
 
         // TODO handle exceptions
         private Optional<?> serialize(Serializable value, Encoder encoder) {

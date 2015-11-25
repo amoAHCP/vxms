@@ -11,16 +11,16 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 17.11.15.
  */
-public interface WSRegistry {
+public interface WebSocketRegistry {
     public static final String WS_REGISTRY = "wsRegistry";
     public static final String WS_ENDPOINT_HOLDER = "wsEndpointHolder";
     public static final String WS_LOCK = "wsLock";
     public static final String REGISTRY = "registry";
     void removeAndExecuteOnClose(ServerWebSocket serverSocket, Runnable onFinishRemove);
 
-    void findEndpointsAndExecute(WSEndpoint currentEndpoint, Consumer<WSEndpoint> onFinishRegistration);
+    void findEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> onFinishRegistration);
 
-    void registerAndExecute(ServerWebSocket serverSocket, Consumer<WSEndpoint> onFinishRegistration);
+    void registerAndExecute(ServerWebSocket serverSocket, Consumer<WebSocketEndpoint> onFinishRegistration);
 
     default byte[] serialize(Object payload) {
         try {

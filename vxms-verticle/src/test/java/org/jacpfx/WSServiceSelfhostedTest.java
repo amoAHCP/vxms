@@ -13,8 +13,12 @@ import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.OperationType;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.common.Type;
+import org.jacpfx.entity.MyTestObject;
+import org.jacpfx.entity.decoder.ExampleByteDecoderMyTest;
+import org.jacpfx.entity.decoder.ExampleByteDecoderPayload;
+import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.entity.Payload;
-import org.jacpfx.vertx.services.VertxServiceEndpoint;
+import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.jacpfx.vertx.websocket.response.WSHandler;
 import org.junit.Before;
 import org.junit.Test;
@@ -436,7 +440,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
 
     @org.jacpfx.common.ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
-    public class WsServiceOne extends VertxServiceEndpoint {
+    public class WsServiceOne extends VxmsEndpoint {
         @Path("/wsEndpintOne")
         @OperationType(Type.WEBSOCKET)
         public void wsEndpointOne(WSHandler reply) {

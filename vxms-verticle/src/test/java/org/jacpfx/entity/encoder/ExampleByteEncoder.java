@@ -1,4 +1,4 @@
-package org.jacpfx;
+package org.jacpfx.entity.encoder;
 
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.entity.Payload;

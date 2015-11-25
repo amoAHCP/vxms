@@ -1,4 +1,4 @@
-package org.jacpfx;
+package org.jacpfx.entity;
 
 import java.io.Serializable;
 

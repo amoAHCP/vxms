@@ -14,14 +14,14 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 15.11.15.
  */
-public class LocalWSRegistry implements  WSRegistry {
+public class LocalWebSocketRegistry implements WebSocketRegistry {
 
-    private static final Logger log = LoggerFactory.getLogger(LocalWSRegistry.class);
+    private static final Logger log = LoggerFactory.getLogger(LocalWebSocketRegistry.class);
 
 
     private final Vertx vertx;
 
-    public LocalWSRegistry(Vertx vertx) {
+    public LocalWebSocketRegistry(Vertx vertx) {
         this.vertx = vertx;
     }
 
@@ -47,15 +47,15 @@ public class LocalWSRegistry implements  WSRegistry {
     }
 
     @Override
-    public void findEndpointsAndExecute(WSEndpoint currentEndpoint, Consumer<WSEndpoint> onFinishRegistration) {
+    public void findEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> onFinishRegistration) {
         findFilterAndExecute(currentEndpoint,(endpoint->true),onFinishRegistration);
     }
 
-    public void findOtherEndpointsAndExecute(WSEndpoint currentEndpoint, Consumer<WSEndpoint> onFinishRegistration) {
+    public void findOtherEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> onFinishRegistration) {
         findFilterAndExecute(currentEndpoint,(endpoint->!endpoint.equals(currentEndpoint)),onFinishRegistration);
     }
 
-    private void findFilterAndExecute(WSEndpoint currentEndpoint, Function<WSEndpoint,Boolean> filter,Consumer<WSEndpoint> onFinishRegistration) {
+    private void findFilterAndExecute(WebSocketEndpoint currentEndpoint, Function<WebSocketEndpoint,Boolean> filter, Consumer<WebSocketEndpoint> onFinishRegistration) {
         final SharedData sharedData = this.vertx.sharedData();
         final LocalMap<String, byte[]> wsRegistry = sharedData.getLocalMap(WS_REGISTRY);
         Optional.ofNullable(getWSEndpointHolderFromSharedData(wsRegistry)).
@@ -69,35 +69,35 @@ public class LocalWSRegistry implements  WSRegistry {
 
 
     @Override
-    public void registerAndExecute(ServerWebSocket serverSocket, Consumer<WSEndpoint> onFinishRegistration) {
+    public void registerAndExecute(ServerWebSocket serverSocket, Consumer<WebSocketEndpoint> onFinishRegistration) {
         final SharedData sharedData = this.vertx.sharedData();
         final LocalMap<String, byte[]> wsRegistry = sharedData.getLocalMap(WS_REGISTRY);
-        final WSEndpointHolder holder = getWSEndpointHolderFromSharedData(wsRegistry);
+        final WebSocketEndpointHolder holder = getWSEndpointHolderFromSharedData(wsRegistry);
         final String path = serverSocket.path();
-        final WSEndpoint endpoint = new WSEndpoint(serverSocket.binaryHandlerID(), serverSocket.textHandlerID(), path);
+        final WebSocketEndpoint endpoint = new WebSocketEndpoint(serverSocket.binaryHandlerID(), serverSocket.textHandlerID(), path);
 
         replaceOrAddEndpoint(wsRegistry, holder, endpoint);
         onFinishRegistration.accept(endpoint);
     }
 
 
-    private void replaceOrAddEndpoint(LocalMap<String, byte[]> wsRegistry, WSEndpointHolder holder, WSEndpoint endpoint) {
+    private void replaceOrAddEndpoint(LocalMap<String, byte[]> wsRegistry, WebSocketEndpointHolder holder, WebSocketEndpoint endpoint) {
         if (holder != null) {
             holder.add(endpoint);
             wsRegistry.replace(WS_ENDPOINT_HOLDER, serialize(holder));
 
         } else {
-            final WSEndpointHolder holderTemp = new WSEndpointHolder();
+            final WebSocketEndpointHolder holderTemp = new WebSocketEndpointHolder();
             holderTemp.add(endpoint);
             wsRegistry.put(WS_ENDPOINT_HOLDER, serialize(holderTemp));
         }
     }
 
 
-    private WSEndpointHolder getWSEndpointHolderFromSharedData(final LocalMap<String, byte[]> wsRegistry) {
+    private WebSocketEndpointHolder getWSEndpointHolderFromSharedData(final LocalMap<String, byte[]> wsRegistry) {
         final byte[] holderPayload = wsRegistry.get(WS_ENDPOINT_HOLDER);
         if (holderPayload != null) {
-            return (WSEndpointHolder) deserialize(holderPayload);
+            return (WebSocketEndpointHolder) deserialize(holderPayload);
         }
 
         return null;

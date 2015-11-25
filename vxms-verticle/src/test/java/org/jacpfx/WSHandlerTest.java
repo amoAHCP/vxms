@@ -1,6 +1,8 @@
 package org.jacpfx;
 
 import org.jacpfx.common.util.Serializer;
+import org.jacpfx.entity.MyTestObject;
+import org.jacpfx.entity.decoder.ExampleByteDecoderMyTest;
 import org.jacpfx.vertx.websocket.response.WSHandler;
 import org.junit.Test;
 

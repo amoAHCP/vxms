@@ -6,12 +6,12 @@ import java.io.Serializable;
  * Represents the WebSocket session with it's binary- and texthandler id and it's url
  * Created by Andy Moncsek on 12.12.14.
  */
-public class WSEndpoint implements Serializable {
+public class WebSocketEndpoint implements Serializable {
     private final String binaryHandlerId;
     private final String textHandlerId;
     private final String url;
 
-    public WSEndpoint(final String binaryHandlerId, final String textHandlerId, final String url) {
+    public WebSocketEndpoint(final String binaryHandlerId, final String textHandlerId, final String url) {
         this.binaryHandlerId = binaryHandlerId;
         this.textHandlerId = textHandlerId;
         this.url = url;
@@ -32,9 +32,9 @@ public class WSEndpoint implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof WSEndpoint)) return false;
+        if (!(o instanceof WebSocketEndpoint)) return false;
 
-        WSEndpoint that = (WSEndpoint) o;
+        WebSocketEndpoint that = (WebSocketEndpoint) o;
 
         if (binaryHandlerId != null ? !binaryHandlerId.equals(that.binaryHandlerId) : that.binaryHandlerId != null)
             return false;
