@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -20,7 +21,8 @@ import java.util.stream.Stream;
  * Created by Andy Moncsek on 17.11.15.
  */
 public class WebSocketHandler {
-    private final static ExecutorService EXECUTOR = Executors.newCachedThreadPool(); // TODO use fixed size and get amount of vertcle instances
+    private final static int cpuCount =Runtime.getRuntime().availableProcessors();
+    private final static ExecutorService EXECUTOR = Executors.newFixedThreadPool(cpuCount<=2?cpuCount:cpuCount%2==0?cpuCount/2:cpuCount);  // TODO use instance count!!
     private final WebSocketEndpoint endpoint;
     private final Vertx vertx;
     private final WebSocketRegistry registry;
@@ -174,10 +176,22 @@ public class WebSocketHandler {
             this.encoder = encoder;
         }
 
+        public ExecuteWSResponse onError(Consumer<Throwable> ce){
+            return this;
+        }
+
+        public ExecuteWSResponse retry(int count){
+            return this;
+        }
+
+        public ExecuteWSResponse timeout(long timeout){
+            return this;
+        }
+
         public void execute() {
             if (async) {
                 Optional.ofNullable(byteSupplier).
-                        ifPresent(supplier -> CompletableFuture.supplyAsync(byteSupplier, EXECUTOR).thenAccept(this::sendBinary));
+                        ifPresent(supplier -> CompletableFuture.supplyAsync(byteSupplier,EXECUTOR).thenAccept(this::sendBinary));
                 Optional.ofNullable(stringSupplier).
                         ifPresent(supplier -> CompletableFuture.supplyAsync(stringSupplier, EXECUTOR).thenAccept(this::sendText));
                 Optional.ofNullable(objectSupplier).

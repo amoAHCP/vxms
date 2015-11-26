@@ -61,6 +61,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         long endTime = System.currentTimeMillis();
         log.info("start time: " + (endTime - startTime) + "ms");
         startFuture.complete();
+
     }
 
     private void initSelfHostedService() {
@@ -195,7 +196,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
     private void invokeWebSocketMethod(byte[] payload, Method method, WebSocketEndpoint endpoint) throws Throwable {
-        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload, method, endpoint, webSocketRegistry, this.vertx), this);
+        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload, method, endpoint, webSocketRegistry, this.vertx, null), this);
 
     }
 

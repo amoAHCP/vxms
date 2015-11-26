@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class ReflectionUtil {
 
 
-    public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx) {
+    public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx, Throwable t) {
         final java.lang.reflect.Parameter[] parameters = method.getParameters();
         final Object[] parameterResult = new Object[parameters.length];
         int i = 0;
@@ -23,6 +23,10 @@ public class ReflectionUtil {
         for (java.lang.reflect.Parameter p : parameters) {
             if (WebSocketHandler.class.equals(p.getType())) {
                 parameterResult[i] = new WebSocketHandler(webSocketRegistry, endpoint, payload, vertx);
+            } else if (WebSocketEndpoint.class.equals(p.getType())) {
+                parameterResult[i] = endpoint;
+            } else if (Throwable.class.isAssignableFrom(p.getType())) {
+                parameterResult[i] = t;
             }
 
             i++;
@@ -32,38 +36,12 @@ public class ReflectionUtil {
     }
 
     public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint) {
-        final java.lang.reflect.Parameter[] parameters = method.getParameters();
-        final Object[] parameterResult = new Object[parameters.length];
-        int i = 0;
-
-        for (java.lang.reflect.Parameter p : parameters) {
-            if (WebSocketEndpoint.class.equals(p.getType())) {
-                parameterResult[i] = endpoint;
-            }
-
-            i++;
-        }
-
-        return parameterResult;
+        return invokeWebSocketParameters(null, method, endpoint, null, null, null);
     }
 
 
     public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint, Throwable t) {
-        final java.lang.reflect.Parameter[] parameters = method.getParameters();
-        final Object[] parameterResult = new Object[parameters.length];
-        int i = 0;
-
-        for (java.lang.reflect.Parameter p : parameters) {
-            if (WebSocketEndpoint.class.equals(p.getType())) {
-                parameterResult[i] = endpoint;
-            } else if(Throwable.class.isAssignableFrom(p.getType())) {
-                parameterResult[i] = t;
-            }
-
-            i++;
-        }
-
-        return parameterResult;
+        return invokeWebSocketParameters(null, method, endpoint, null, null, t);
     }
 
     public static void genericMethodInvocation(Method method, Supplier<Object[]> supplier, Object invokeTo) throws Throwable {
@@ -78,7 +56,7 @@ public class ReflectionUtil {
         } catch (InvocationTargetException e) {
             throw e.getTargetException();
         } catch (Exception e) {
-           throw e;
+            throw e;
         }
     }
 

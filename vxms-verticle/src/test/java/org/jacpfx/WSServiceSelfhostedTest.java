@@ -223,7 +223,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                         System.out.println("round trip time simpleConnectOnTenThreads: " + (endTime - startTime) + "ms");
                     });
 
-                   // ws.writeFrame(new WebSocketFrameImpl("zhello"));
+                    // ws.writeFrame(new WebSocketFrameImpl("zhello"));
                     ws.writeFinalTextFrame("zhello");
                 });
 
@@ -268,7 +268,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/binaryReply", ws -> {
 
             ws.handler((data) -> {
-                System.out.println("client data binaryReply:" );
+                System.out.println("client data binaryReply:");
                 assertNotNull(data.getBytes());
                 try {
                     Payload<String> payload = (Payload<String>) Serializer.deserialize(data.getBytes());
@@ -293,18 +293,17 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
     }
 
 
-
     @Test
     public void testGetObjectAndReplyObject() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
         getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/getObjectAndReplyObject", ws -> {
 
             ws.handler((data) -> {
-                System.out.println("client data objectReply:" );
+                System.out.println("client data objectReply:");
                 assertNotNull(data.getBytes());
                 try {
                     Payload<String> payload = (Payload<String>) Serializer.deserialize(data.getBytes());
-                    System.out.println("value:::"+payload.getValue());
+                    System.out.println("value:::" + payload.getValue());
                     assertTrue(payload.equals(new Payload<String>("xhello")));
                     System.out.println(payload);
                 } catch (IOException e) {
@@ -316,7 +315,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 testComplete();
 
             });
-            Payload<String> p = new  Payload<String>("xhello");
+            Payload<String> p = new Payload<String>("xhello");
             try {
                 ws.write(Buffer.buffer(Serializer.serialize(p)));
             } catch (IOException e) {
@@ -336,7 +335,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectReply", ws -> {
 
             ws.handler((data) -> {
-                System.out.println("client data objectReply:" );
+                System.out.println("client data objectReply:");
                 assertNotNull(data.getBytes());
                 try {
                     Payload<String> payload = (Payload<String>) Serializer.deserialize(data.getBytes());
@@ -461,7 +460,6 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         }
 
 
-
         @OnWebSocketMessage("/mutilpeReplyToAll")
         public void wsEndpointThreeReplyToAll(WebSocketHandler reply) {
             replyToAllAsync(reply.payload().getString() + "-3", reply);
@@ -525,7 +523,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                     byteResponse(() -> {
                         try {
                             Payload<String> p = new Payload<String>(reply.payload().getString().get());
-                            byte[] b= Serializer.serialize(p);
+                            byte[] b = Serializer.serialize(p);
                             return b;
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -542,39 +540,39 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             reply.
                     response().
                     toCaller().
-                    objectResponse(()->new Payload<String>(reply.payload().getString().get()),new ExampleByteEncoder()).
+                    objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
 
         @OnWebSocketOpen("/getObjectAndReplyObject")
         public void wsEndpointGetObjectAndReplyObjectOnOpen(WebSocketEndpoint endpoint) {
-            System.out.println("OnOpen Endpoint: "+endpoint);
+            System.out.println("OnOpen Endpoint: " + endpoint);
         }
 
         @OnWebSocketClose("/getObjectAndReplyObject")
         public void wsEndpointGetObjectAndReplyObjectOnClose(WebSocketEndpoint endpoint) {
-            System.out.println("OnClose Endpoint: "+endpoint);
+            System.out.println("OnClose Endpoint: " + endpoint);
         }
 
         @OnWebSocketError("/getObjectAndReplyObject")
-        public void wsEndpointGetObjectAndReplyObjectOnError(Throwable t,WebSocketEndpoint endpoint) {
-            System.out.println("OnError Endpoint: "+endpoint+" :::"+t.getLocalizedMessage());
+        public void wsEndpointGetObjectAndReplyObjectOnError(Throwable t, WebSocketHandler reply, WebSocketEndpoint endpoint) {
+            System.out.println("OnError Endpoint: " + endpoint + " :::" + t.getLocalizedMessage());
         }
 
         @OnWebSocketMessage("/getObjectAndReplyObject")
         public void wsEndpointGetObjectAndReplyObject(WebSocketHandler reply) {
-          //  throw new NullPointerException("dfsdfs");
+            //  throw new NullPointerException("dfsdfs");
             System.out.println("1:-----------");
-            reply.payload().getObject(MyTestObject.class, new ExampleByteDecoderMyTest()).ifPresent(payload ->{
+            reply.payload().getObject(MyTestObject.class, new ExampleByteDecoderMyTest()).ifPresent(payload -> {
                 System.out.println("should never be called");
             });
             System.out.println("2:-----------");
-            reply.payload().getObject(Payload.class, new ExampleByteDecoderPayload()).ifPresent(payload ->{
+            reply.payload().getObject(Payload.class, new ExampleByteDecoderPayload()).ifPresent(payload -> {
                 reply.
                         response().
                         toCaller().
-                        objectResponse(()->new Payload<String>((String) payload.getValue()),new ExampleByteEncoder()).
+                        objectResponse(() -> new Payload<String>((String) payload.getValue()), new ExampleByteEncoder()).
                         execute();
             });
 
@@ -602,13 +600,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                     async().
                     toAll().
                     stringResponse(() -> {
-                try {
-                    TimeUnit.MILLISECONDS.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return name + Thread.currentThread();
-            }).execute();
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        return name + Thread.currentThread();
+                    }).execute();
         }
     }
 
