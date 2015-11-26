@@ -52,4 +52,13 @@ public class WebSocketEndpoint implements Serializable {
         result = 31 * result + (url != null ? url.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "WebSocketEndpoint{" +
+                "binaryHandlerId='" + binaryHandlerId + '\'' +
+                ", textHandlerId='" + textHandlerId + '\'' +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

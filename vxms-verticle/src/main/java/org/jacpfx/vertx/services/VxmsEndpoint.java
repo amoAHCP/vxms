@@ -10,19 +10,21 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.jacpfx.common.Operation;
-import org.jacpfx.common.OperationType;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.vertx.services.util.ConfigurationUtil;
 import org.jacpfx.vertx.services.util.ReflectionUtil;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketClose;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketError;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketMessage;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketOpen;
 import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
-import org.jacpfx.vertx.websocket.response.WSHandler;
+import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         port = ConfigurationUtil.getEndpointPort(getConfig(), this.getClass());
         host = ConfigurationUtil.getEndpointHost(getConfig(), this.getClass());
         // collect all service operations in service for descriptor
-        descriptor = createInfoObject(getAllOperationsInService(this.getClass().getDeclaredMethods()), port);
+        descriptor = createInfoObject(getAllWebSocketOperationsInService(this.getClass().getDeclaredMethods()), port);
         // register info (keepAlive) handler
         vertx.eventBus().consumer(ConfigurationUtil.serviceName(getConfig(), this.getClass()) + "-info", this::info);
 
@@ -70,15 +72,14 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost(host)
                     .setPort(port));
 
-            initWSHandlerInstance();
+            initWebSocketRegistryInstance();
             registerWebSocketHandler(server);
             server.listen();
-            System.out.println("..");
         }
     }
 
 
-    private void initWSHandlerInstance() {
+    private void initWebSocketRegistryInstance() {
         if (clustered) {
             webSocketRegistry = null;
         } else {
@@ -102,6 +103,19 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         log.info(value);
     }
 
+    private boolean filterWebSocketMethods(final Method method, final String methodName) {
+        if (method.isAnnotationPresent(OnWebSocketMessage.class) && method.getAnnotation(OnWebSocketMessage.class).value().equalsIgnoreCase(methodName))
+            return true;
+        if (method.isAnnotationPresent(OnWebSocketOpen.class) && method.getAnnotation(OnWebSocketOpen.class).value().equalsIgnoreCase(methodName))
+            return true;
+        if (method.isAnnotationPresent(OnWebSocketClose.class) && method.getAnnotation(OnWebSocketClose.class).value().equalsIgnoreCase(methodName))
+            return true;
+        if (method.isAnnotationPresent(OnWebSocketError.class) && method.getAnnotation(OnWebSocketError.class).value().equalsIgnoreCase(methodName))
+            return true;
+
+        return false;
+    }
+
     private void registerWebSocketHandler(HttpServer server) {
         server.websocketHandler((serverSocket) -> {
             if (serverSocket.path().equals("wsServiceInfo")) {
@@ -115,55 +129,83 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 serverSocket.pause();
                 final String methodName = path.replace(sName, "");
                 final Method[] declaredMethods = this.getClass().getDeclaredMethods();
-                Stream.of(declaredMethods).parallel().
-                        filter(method -> method.isAnnotationPresent(OperationType.class) && method.getAnnotation(OperationType.class).value().equals(Type.WEBSOCKET)).
-                        filter(method1 -> method1.isAnnotationPresent(Path.class) && method1.getAnnotation(Path.class).value().equalsIgnoreCase(methodName)).
-                        findFirst().
-                        ifPresent(wsMethod -> {
+                final List<Method> webSocketMethodsForURL = Stream.of(declaredMethods).
+                        filter(method1 -> filterWebSocketMethods(method1, methodName)).collect(Collectors.toList());
 
-                            // only for testing
-                            webSocketRegistry.registerAndExecute(serverSocket, endpoint -> {
-                                log("register:+ " + endpoint.getUrl());
-
+                if (webSocketMethodsForURL.isEmpty()) {
+                    serverSocket.reject();
+                } else {
+                    webSocketRegistry.registerAndExecute(serverSocket, endpoint -> {
+                        log("register:+ " + endpoint.getUrl());
+                        webSocketMethodsForURL.stream().forEach(method -> {
+                            if (method.isAnnotationPresent(OnWebSocketMessage.class)) {
                                 serverSocket.handler(handler -> {
                                             log("invoke endpoint " + endpoint.getUrl());
-                                            final byte[] bytes = handler.getBytes();
-                                            invokeWebSocketMethod(bytes, wsMethod, endpoint);
+                                            // TODO clean up try catch mess!!!
+                                            try {
+                                                invokeWebSocketMethod(handler.getBytes(), method, endpoint);
+                                            } catch (final Throwable throwable) {
+
+                                                webSocketMethodsForURL.stream().filter(m -> m.isAnnotationPresent(OnWebSocketError.class)).findFirst().ifPresent(errorMethod -> {
+                                                    try {
+                                                        invokeWebSocketOnErrorMethod(errorMethod, endpoint, throwable);
+                                                    } catch (Throwable throwable1) {
+                                                        serverSocket.reject();
+                                                        throwable1.printStackTrace();
+                                                    }
+                                                });
+
+
+                                            }
                                             log("RUN:::::");
                                         }
                                 );
-                                serverSocket.exceptionHandler(ex -> {
-                                    //TODO  move definition to sendToWSService and notify method about the status
-                                    ex.printStackTrace();
-                                });
-                                serverSocket.drainHandler(drain -> {
-                                    //TODO  move definition to sendToWSService and notify method about the status
-                                    log("drain");
-                                });
-                                serverSocket.endHandler(end -> {
-                                    //TODO  move definition to sendToWSService and notify method about the status
-                                    log("end ::::::::::");
-                                });
+                            } else if (method.isAnnotationPresent(OnWebSocketOpen.class)) {
+                                try {
+                                    invokeWebSocketOnOpenCloseMethod(method, endpoint);
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
+                            } else if (method.isAnnotationPresent(OnWebSocketClose.class)) {
                                 serverSocket.closeHandler(close -> {
-                                    // webSocketRegistry.findRouteSocketInRegistryAndRemove(serverSocket);
-                                    log("close");
+                                    try {
+                                        invokeWebSocketOnOpenCloseMethod(method, endpoint);
+                                    } catch (Throwable throwable) {
+                                        throwable.printStackTrace();
+                                    }
                                 });
-
-
-                                serverSocket.resume();
-                            });
-
-
+                            } else if (method.isAnnotationPresent(OnWebSocketError.class)) {
+                                serverSocket.exceptionHandler(exception -> {
+                                    try {
+                                        invokeWebSocketOnErrorMethod(method, endpoint, exception);
+                                    } catch (Throwable throwable) {
+                                        throwable.printStackTrace();
+                                    }
+                                });
+                            }
                         });
+                        serverSocket.resume();
+                    });
+                }
+
+
             }
 
         });
     }
 
-    private void invokeWebSocketMethod(byte[] payload, Method method, WebSocketEndpoint endpoint) {
-        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWSParameters(payload, method, endpoint, webSocketRegistry, this.vertx), this);
+    private void invokeWebSocketMethod(byte[] payload, Method method, WebSocketEndpoint endpoint) throws Throwable {
+        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload, method, endpoint, webSocketRegistry, this.vertx), this);
+
     }
 
+    private void invokeWebSocketOnOpenCloseMethod(Method method, WebSocketEndpoint endpoint) throws Throwable {
+        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(method, endpoint), this);
+    }
+
+    private void invokeWebSocketOnErrorMethod(Method method, WebSocketEndpoint endpoint, Throwable t) throws Throwable {
+        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(method, endpoint, t), this);
+    }
 
     private ServiceInfo createInfoObject(List<Operation> operations, Integer port) {
         return new ServiceInfo(ConfigurationUtil.serviceName(getConfig(), this.getClass()), null, ConfigurationUtil.getHostName(), null, null, port, operations.toArray(new Operation[operations.size()]));
@@ -176,32 +218,27 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
      * @param allMethods methods in serviceVerticle
      * @return a list of all operation in service
      */
-    private List<Operation> getAllOperationsInService(final Method[] allMethods) {
+    private List<Operation> getAllWebSocketOperationsInService(final Method[] allMethods) {
         return Stream.of(allMethods).parallel().
-                filter(m -> m.isAnnotationPresent(Path.class)).
-                map(this::mapServiceMethod).collect(Collectors.toList());
+                filter(m -> m.isAnnotationPresent(OnWebSocketMessage.class)).
+                map(this::mapWebSocketMethod).collect(Collectors.toList());
     }
 
-    private Operation mapServiceMethod(Method method) {
-        final Path path = method.getDeclaredAnnotation(Path.class);
+    private Operation mapWebSocketMethod(Method method) {
+        final OnWebSocketMessage path = method.getDeclaredAnnotation(OnWebSocketMessage.class);
         final Produces produces = method.getDeclaredAnnotation(Produces.class);
         final Consumes consumes = method.getDeclaredAnnotation(Consumes.class);
-        final OperationType opType = method.getDeclaredAnnotation(OperationType.class);
-        if (opType == null)
+        if (path == null)
             throw new MissingResourceException("missing OperationType ", this.getClass().getName(), "");
         final String[] mimeTypes = produces != null ? produces.value() : null;
         final String[] consumeTypes = consumes != null ? consumes.value() : null;
         final String url = ConfigurationUtil.serviceName(getConfig(), this.getClass()).concat(path.value());
         final List<String> parameters = new ArrayList<>();
 
-        switch (opType.value()) {
+        parameters.addAll(getWSParameter(method));
 
-            case WEBSOCKET:
-                parameters.addAll(getWSParameter(method));
-                break;
-        }
-        // TODO add service description!!!
-        return new Operation(path.value(), null, url, opType.value().name(), mimeTypes, consumeTypes, parameters.toArray(new String[parameters.size()]));
+        // TODO add service description (description about service itself)!!!
+        return new Operation(path.value(), null, url, Type.WEBSOCKET.name(), mimeTypes, consumeTypes, parameters.toArray(new String[parameters.size()]));
     }
 
 
@@ -214,7 +251,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     private List<String> getWSParameter(Method method) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         final List<String> classes = Stream.of(parameterTypes).
-                filter(component -> !component.equals(WSHandler.class)).
+                filter(component -> !component.equals(WebSocketHandler.class)).
                 map(Class::getName).
                 collect(Collectors.toList());
         if (classes.size() > 1)

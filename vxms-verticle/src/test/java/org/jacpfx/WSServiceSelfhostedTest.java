@@ -1,5 +1,6 @@
 package org.jacpfx;
 
+
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -10,20 +11,23 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
-import org.jacpfx.common.OperationType;
+import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.common.Type;
 import org.jacpfx.entity.MyTestObject;
+import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.decoder.ExampleByteDecoderMyTest;
 import org.jacpfx.entity.decoder.ExampleByteDecoderPayload;
 import org.jacpfx.entity.encoder.ExampleByteEncoder;
-import org.jacpfx.entity.Payload;
 import org.jacpfx.vertx.services.VxmsEndpoint;
-import org.jacpfx.vertx.websocket.response.WSHandler;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketClose;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketError;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketMessage;
+import org.jacpfx.vertx.websocket.annotation.OnWebSocketOpen;
+import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
+import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.Path;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -439,17 +443,15 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
     }
 
 
-    @org.jacpfx.common.ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
-        @Path("/wsEndpintOne")
-        @OperationType(Type.WEBSOCKET)
-        public void wsEndpointOne(WSHandler reply) {
+        @OnWebSocketMessage("/wsEndpintOne")
+        public void wsEndpointOne(WebSocketHandler reply) {
 
         }
 
-        @Path("/wsEndpintTwo")
-        @OperationType(Type.WEBSOCKET)
-        public void wsEndpointTwo(WSHandler reply) {
+        @OnWebSocketMessage("/wsEndpintTwo")
+        public void wsEndpointTwo(WebSocketHandler reply) {
 
             replyAsyncTwo(reply.payload().getString() + "-3", reply);
             replyAsyncTwo(reply.payload().getString() + "-4", reply);
@@ -460,9 +462,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
 
 
-        @Path("/mutilpeReplyToAll")
-        @OperationType(Type.WEBSOCKET)
-        public void wsEndpointThreeReplyToAll(WSHandler reply) {
+        @OnWebSocketMessage("/mutilpeReplyToAll")
+        public void wsEndpointThreeReplyToAll(WebSocketHandler reply) {
             replyToAllAsync(reply.payload().getString() + "-3", reply);
             replyToAllAsync(reply.payload().getString() + "-4", reply);
             replyToAllAsync(reply.payload().getString() + "-5", reply);
@@ -472,16 +473,14 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         }
 
 
-        @Path("/wsEndpintFour")
-        @OperationType(Type.WEBSOCKET)
-        public void wsEndpointThreeReplyToAllTwo(WSHandler reply) {
+        @OnWebSocketMessage("/wsEndpintFour")
+        public void wsEndpointThreeReplyToAllTwo(WebSocketHandler reply) {
             replyToAllAsync(reply.payload().getString() + "-3", reply);
             System.out.println("+++ wsEndpointThreeReplyToAllTwo-4: " + reply.payload().getString() + "   :::" + this);
         }
 
-        @Path("/simpleConnectAndWrite")
-        @OperationType(Type.WEBSOCKET)
-        public void wsEndpointHello(WSHandler reply) {
+        @OnWebSocketMessage("/simpleConnectAndWrite")
+        public void wsEndpointHello(WebSocketHandler reply) {
 
 
             reply.
@@ -492,9 +491,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointHello-1: " + name + "   :::" + this);
         }
 
-        @Path("/replyto1")
-        @OperationType(Type.WEBSOCKET)
-        public void wsEndpointReplyTo(WSHandler reply) {
+        @OnWebSocketMessage("/replyto1")
+        public void wsEndpointReplyTo(WebSocketHandler reply) {
 
 
             reply.
@@ -506,11 +504,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         }
 
 
-        @Path("/asyncReply")
-        @OperationType(Type.WEBSOCKET)
-        // @Encoder
-        // @Decoder
-        public void wsEndpointAsyncReply(WSHandler reply) {
+        @OnWebSocketMessage("/asyncReply")
+        public void wsEndpointAsyncReply(WebSocketHandler reply) {
 
             reply.
                     response().
@@ -521,11 +516,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointAsyncReply-1: " + name + "   :::" + this);
         }
 
-        @Path("/binaryReply")
-        @OperationType(Type.WEBSOCKET)
-        // @Encoder
-        // @Decoder
-        public void wsEndpointBinaryReply(WSHandler reply) {
+        @OnWebSocketMessage("/binaryReply")
+        public void wsEndpointBinaryReply(WebSocketHandler reply) {
 
             reply.
                     response().
@@ -544,11 +536,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
 
-        @Path("/objectReply")
-        @OperationType(Type.WEBSOCKET)
-        // @Encoder
-        // @Decoder
-        public void wsEndpointObjectReply(WSHandler reply) {
+        @OnWebSocketMessage("/objectReply")
+        public void wsEndpointObjectReply(WebSocketHandler reply) {
 
             reply.
                     response().
@@ -558,11 +547,24 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
 
-        @Path("/getObjectAndReplyObject")
-        @OperationType(Type.WEBSOCKET)
-        // @Encoder
-        // @Decoder
-        public void wsEndpointGetObjectAndReplyObject(WSHandler reply) {
+        @OnWebSocketOpen("/getObjectAndReplyObject")
+        public void wsEndpointGetObjectAndReplyObjectOnOpen(WebSocketEndpoint endpoint) {
+            System.out.println("OnOpen Endpoint: "+endpoint);
+        }
+
+        @OnWebSocketClose("/getObjectAndReplyObject")
+        public void wsEndpointGetObjectAndReplyObjectOnClose(WebSocketEndpoint endpoint) {
+            System.out.println("OnClose Endpoint: "+endpoint);
+        }
+
+        @OnWebSocketError("/getObjectAndReplyObject")
+        public void wsEndpointGetObjectAndReplyObjectOnError(Throwable t,WebSocketEndpoint endpoint) {
+            System.out.println("OnError Endpoint: "+endpoint+" :::"+t.getLocalizedMessage());
+        }
+
+        @OnWebSocketMessage("/getObjectAndReplyObject")
+        public void wsEndpointGetObjectAndReplyObject(WebSocketHandler reply) {
+          //  throw new NullPointerException("dfsdfs");
             System.out.println("1:-----------");
             reply.payload().getObject(MyTestObject.class, new ExampleByteDecoderMyTest()).ifPresent(payload ->{
                 System.out.println("should never be called");
@@ -583,7 +585,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         }
 
 
-        private void replyAsyncTwo(String name, WSHandler reply) {
+        private void replyAsyncTwo(String name, WebSocketHandler reply) {
             reply.response().async().toCaller().stringResponse(() -> {
                 try {
                     TimeUnit.MILLISECONDS.sleep(1000);
@@ -594,7 +596,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             }).execute();
         }
 
-        private void replyToAllAsync(String name, WSHandler reply) {
+        private void replyToAllAsync(String name, WebSocketHandler reply) {
             reply.
                     response().
                     async().

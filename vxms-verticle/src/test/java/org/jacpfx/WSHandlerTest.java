@@ -3,7 +3,7 @@ package org.jacpfx;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.entity.MyTestObject;
 import org.jacpfx.entity.decoder.ExampleByteDecoderMyTest;
-import org.jacpfx.vertx.websocket.response.WSHandler;
+import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class WSHandlerTest
     public void testPayloadDecoding() throws IOException {
         MyTestObject input = new MyTestObject("andy","M");
         byte[] b =Serializer.serialize(new MyTestObject("andy","M"));
-        WSHandler handler = new WSHandler(null,null,b,null);
+        WebSocketHandler handler = new WebSocketHandler(null,null,b,null);
 
         Optional<MyTestObject> output = handler.payload().getObject(MyTestObject.class,new ExampleByteDecoderMyTest());
         assertTrue(input.equals(output.get()));

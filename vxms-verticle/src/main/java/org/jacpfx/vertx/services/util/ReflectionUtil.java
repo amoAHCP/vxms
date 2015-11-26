@@ -3,7 +3,7 @@ package org.jacpfx.vertx.services.util;
 import io.vertx.core.Vertx;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
-import org.jacpfx.vertx.websocket.response.WSHandler;
+import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,14 +15,14 @@ import java.util.function.Supplier;
 public class ReflectionUtil {
 
 
-    public static  Object[] invokeWSParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx) {
+    public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx) {
         final java.lang.reflect.Parameter[] parameters = method.getParameters();
         final Object[] parameterResult = new Object[parameters.length];
         int i = 0;
 
         for (java.lang.reflect.Parameter p : parameters) {
-            if (p.getType().equals(WSHandler.class)) {
-                parameterResult[i] = new WSHandler(webSocketRegistry, endpoint, payload, vertx);
+            if (WebSocketHandler.class.equals(p.getType())) {
+                parameterResult[i] = new WebSocketHandler(webSocketRegistry, endpoint, payload, vertx);
             }
 
             i++;
@@ -31,7 +31,42 @@ public class ReflectionUtil {
         return parameterResult;
     }
 
-    public static void genericMethodInvocation(Method method, Supplier<Object[]> supplier, Object invokeTo) {
+    public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint) {
+        final java.lang.reflect.Parameter[] parameters = method.getParameters();
+        final Object[] parameterResult = new Object[parameters.length];
+        int i = 0;
+
+        for (java.lang.reflect.Parameter p : parameters) {
+            if (WebSocketEndpoint.class.equals(p.getType())) {
+                parameterResult[i] = endpoint;
+            }
+
+            i++;
+        }
+
+        return parameterResult;
+    }
+
+
+    public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint, Throwable t) {
+        final java.lang.reflect.Parameter[] parameters = method.getParameters();
+        final Object[] parameterResult = new Object[parameters.length];
+        int i = 0;
+
+        for (java.lang.reflect.Parameter p : parameters) {
+            if (WebSocketEndpoint.class.equals(p.getType())) {
+                parameterResult[i] = endpoint;
+            } else if(Throwable.class.isAssignableFrom(p.getType())) {
+                parameterResult[i] = t;
+            }
+
+            i++;
+        }
+
+        return parameterResult;
+    }
+
+    public static void genericMethodInvocation(Method method, Supplier<Object[]> supplier, Object invokeTo) throws Throwable {
         try {
             final Object returnValue = method.invoke(invokeTo, supplier.get());
             if (returnValue != null) {
@@ -41,7 +76,9 @@ public class ReflectionUtil {
             e.printStackTrace();
 
         } catch (InvocationTargetException e) {
-
+            throw e.getTargetException();
+        } catch (Exception e) {
+           throw e;
         }
     }
 

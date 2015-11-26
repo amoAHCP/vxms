@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 /**
  * Created by Andy Moncsek on 17.11.15.
  */
-public class WSHandler {
+public class WebSocketHandler {
     private final static ExecutorService EXECUTOR = Executors.newCachedThreadPool(); // TODO use fixed size and get amount of vertcle instances
     private final WebSocketEndpoint endpoint;
     private final Vertx vertx;
@@ -27,7 +27,7 @@ public class WSHandler {
     private byte[] value;
 
 
-    public WSHandler(WebSocketRegistry registry, WebSocketEndpoint endpoint, byte[] value, Vertx vertx) {
+    public WebSocketHandler(WebSocketRegistry registry, WebSocketEndpoint endpoint, byte[] value, Vertx vertx) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.registry = registry;
