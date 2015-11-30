@@ -40,9 +40,7 @@ public class ReflectionUtil {
     }
 
 
-    public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint, Throwable t) {
-        return invokeWebSocketParameters(null, method, endpoint, null, null, t);
-    }
+
 
     public static void genericMethodInvocation(Method method, Supplier<Object[]> supplier, Object invokeTo) throws Throwable {
         try {

@@ -2,6 +2,8 @@ package org.jacpfx.vertx.websocket.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import org.jacpfx.common.CustomSupplier;
+import org.jacpfx.common.exceptions.EndpointExecutionException;
 import org.jacpfx.vertx.websocket.decoder.Decoder;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
@@ -14,15 +16,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
  * Created by Andy Moncsek on 17.11.15.
  */
 public class WebSocketHandler {
-    private final static int cpuCount =Runtime.getRuntime().availableProcessors();
-    private final static ExecutorService EXECUTOR = Executors.newFixedThreadPool(cpuCount<=2?cpuCount:cpuCount%2==0?cpuCount/2:cpuCount);  // TODO use instance count!!
+    private final static int cpuCount = Runtime.getRuntime().availableProcessors();
+    private final static ExecutorService EXECUTOR = Executors.newFixedThreadPool(cpuCount <= 2 ? cpuCount : cpuCount % 2 == 0 ? cpuCount / 2 : cpuCount);  // TODO use instance count!!
     private final WebSocketEndpoint endpoint;
     private final Vertx vertx;
     private final WebSocketRegistry registry;
@@ -142,16 +144,16 @@ public class WebSocketHandler {
             this.commType = commType;
         }
 
-        public ExecuteWSResponse byteResponse(Supplier<byte[]> byteSupplier) {
-            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, null, null, null);
+        public ExecuteWSResponse byteResponse(CustomSupplier<byte[]> byteSupplier) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, null, null, null, null, null, null, null, 0, 0L);
         }
 
-        public ExecuteWSResponse stringResponse(Supplier<String> stringSupplier) {
-            return new ExecuteWSResponse(endpoint, vertx, async, commType, null, stringSupplier, null, null);
+        public ExecuteWSResponse stringResponse(CustomSupplier<String> stringSupplier) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, null, stringSupplier, null, null, null, null, null, null, 0, 0L);
         }
 
-        public ExecuteWSResponse objectResponse(Supplier<Serializable> objectSupplier, Encoder encoder) {
-            return new ExecuteWSResponse(endpoint, vertx, async, commType, null, null, objectSupplier, encoder);
+        public ExecuteWSResponse objectResponse(CustomSupplier<Serializable> objectSupplier, Encoder encoder) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, null, null, objectSupplier, encoder, null, null, null, null, 0, 0L);
         }
     }
 
@@ -160,12 +162,18 @@ public class WebSocketHandler {
         private final Vertx vertx;
         private final boolean async;
         private final CommType commType;
-        private final Supplier<byte[]> byteSupplier;
-        private final Supplier<String> stringSupplier;
-        private final Supplier<Serializable> objectSupplier;
+        private final CustomSupplier<byte[]> byteSupplier;
+        private final CustomSupplier<String> stringSupplier;
+        private final CustomSupplier<Serializable> objectSupplier;
         private final Encoder encoder;
+        private final Consumer<Throwable> errorHandler; // TODO replace by function?
+        private final Function<Throwable, byte[]> errorHandlerByte; // TODO replace by function?
+        private final Function<Throwable, String> errorHandlerString; // TODO replace by function?
+        private final Function<Throwable, Serializable> errorHandlerObject; // TODO replace by function?
+        private final int retryCount;
+        private final long timeout;
 
-        private ExecuteWSResponse(WebSocketEndpoint[] endpoint, Vertx vertx, boolean async, CommType commType, Supplier<byte[]> byteSupplier, Supplier<String> stringSupplier, Supplier<Serializable> objectSupplier, Encoder encoder) {
+        private ExecuteWSResponse(WebSocketEndpoint[] endpoint, Vertx vertx, boolean async, CommType commType, CustomSupplier<byte[]> byteSupplier, CustomSupplier<String> stringSupplier, CustomSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, Function<Throwable, String> errorHandlerString, Function<Throwable, Serializable> errorHandlerObject, int retryCount, long timeout) {
             this.endpoint = endpoint;
             this.vertx = vertx;
             this.async = async;
@@ -174,28 +182,125 @@ public class WebSocketHandler {
             this.stringSupplier = stringSupplier;
             this.objectSupplier = objectSupplier;
             this.encoder = encoder;
+            this.errorHandler = errorHandler;
+            this.errorHandlerByte = errorHandlerByte;
+            this.errorHandlerString = errorHandlerString;
+            this.errorHandlerObject = errorHandlerObject;
+            this.retryCount = retryCount;
+            this.timeout = timeout;
         }
 
-        public ExecuteWSResponse onError(Consumer<Throwable> ce){
-            return this;
+        public ExecuteWSResponse onError(Consumer<Throwable> errorHandler) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
         }
 
-        public ExecuteWSResponse retry(int count){
-            return this;
+        public ExecuteWSResponse onByteResponseError(Function<Throwable, byte[]> errorHandlerByte) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
         }
 
-        public ExecuteWSResponse timeout(long timeout){
-            return this;
+        public ExecuteWSResponse onStringResponseError(Function<Throwable, String> errorHandlerString) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
+        }
+
+        public ExecuteWSResponse onObjectResponseError(Function<Throwable, Serializable> errorHandlerObject) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
+        }
+
+
+        public ExecuteWSResponse retry(int retryCount) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
+        }
+
+        // TODO implement delay, but throw exception when not in async mode!
+        public ExecuteWSResponse delay(int retryCount) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
+        }
+
+        public ExecuteWSResponse timeout(long timeout) {
+            return new ExecuteWSResponse(endpoint, vertx, async, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount, timeout);
         }
 
         public void execute() {
             if (async) {
                 Optional.ofNullable(byteSupplier).
-                        ifPresent(supplier -> CompletableFuture.supplyAsync(byteSupplier,EXECUTOR).thenAccept(this::sendBinary));
+                        ifPresent(supplier -> CompletableFuture.supplyAsync(() -> {
+                            byte[] result = new byte[0];
+                            int retry = retryCount > 0 ? retryCount : 0;
+                            while (retry >= 0) {
+
+                                try {
+                                    result = supplier.get();
+                                    retry = -1;
+                                } catch (Throwable e) {
+                                    retry--;
+                                    if (retry < 0) {
+                                        if (errorHandler != null) {
+                                            errorHandler.accept(e);
+                                        }
+                                        if (errorHandlerByte != null) {
+                                            result = errorHandlerByte.apply(e);
+                                        }
+                                        if(errorHandler==null && errorHandlerByte==null) {
+                                            throw new EndpointExecutionException(e);
+                                        }
+                                    }
+                                }
+                            }
+
+                            return result;
+                        }, EXECUTOR).thenAccept(this::sendBinary));
                 Optional.ofNullable(stringSupplier).
-                        ifPresent(supplier -> CompletableFuture.supplyAsync(stringSupplier, EXECUTOR).thenAccept(this::sendText));
+                        ifPresent(supplier -> CompletableFuture.supplyAsync(() -> {
+                            String result = "";
+                            int retry = retryCount > 0 ? retryCount : 0;
+                            while (retry >= 0) {
+
+                                try {
+                                    result = supplier.get();
+                                    retry = -1;
+                                } catch (Throwable e) {
+                                    retry--;
+                                    if (retry < 0) {
+                                        if (errorHandler != null) {
+                                            errorHandler.accept(e);
+                                        }
+                                        if (errorHandlerString != null) {
+                                            result = errorHandlerString.apply(e);
+                                        }
+                                        if(errorHandler==null && errorHandlerString==null) {
+                                            throw new EndpointExecutionException(e);
+                                        }
+                                    }
+                                }
+                            }
+                            return result;
+                        }, EXECUTOR).thenAccept(this::sendText));
                 Optional.ofNullable(objectSupplier).
-                        ifPresent(supplier -> CompletableFuture.supplyAsync(objectSupplier, EXECUTOR).thenAccept(value -> serialize(value, encoder).ifPresent(val -> {
+                        ifPresent(supplier -> CompletableFuture.supplyAsync(() -> {
+                            Serializable result = "";
+                            int retry = retryCount > 0 ? retryCount : 0;
+                            while (retry >= 0) {
+
+                                try {
+                                    result = supplier.get();
+                                    retry = -1;
+                                } catch (Throwable e) {
+                                    retry--;
+                                    if (retry < 0) {
+                                        if (errorHandler != null) {
+                                            errorHandler.accept(e);
+                                        }
+                                        if (errorHandlerObject != null) {
+                                            result = errorHandlerObject.apply(e);
+                                        }
+                                        if(errorHandler==null && errorHandlerObject==null) {
+                                            throw new EndpointExecutionException(e);
+                                        }
+                                    }
+                                }
+                            }
+                            return result;
+                        }, EXECUTOR).thenAccept(value -> serialize(value, encoder).ifPresent(val -> {
                             if (val instanceof String) {
                                 sendText((String) val);
                             } else {
@@ -205,23 +310,98 @@ public class WebSocketHandler {
             } else {
                 // TODO check for exception, think about @OnError method execution
                 Optional.ofNullable(byteSupplier).
-                        ifPresent(supplier -> Optional.ofNullable(supplier.get()).ifPresent(this::sendBinary));
+                        ifPresent(supplier -> {
+                            byte[] result = null;
+                            int retry = retryCount > 0 ? retryCount : 0;
+                            while (retry >= 0) {
+
+                                try {
+                                    result = supplier.get();
+                                    retry = -1;
+                                } catch (Throwable e) {
+                                    retry--;
+                                    if (retry < 0) {
+                                        if (errorHandler != null) {
+                                            errorHandler.accept(e);
+                                        }
+                                        if (errorHandlerByte != null) {
+                                            result = errorHandlerByte.apply(e);
+                                        }
+                                        if(errorHandler==null && errorHandlerByte==null) {
+                                            throw new EndpointExecutionException(e);
+                                        }
+                                    }
+                                }
+                            }
+
+                            Optional.ofNullable(result).ifPresent(this::sendBinary);
+                        });
                 // TODO check for exception, think about @OnError method execution
                 Optional.ofNullable(stringSupplier).
-                        ifPresent(supplier -> Optional.ofNullable(supplier.get()).ifPresent(this::sendText));
-                // TODO check for exception, think about @OnError method execution
-                Optional.ofNullable(objectSupplier).
-                        ifPresent(supplier -> Optional.ofNullable(supplier.get()).ifPresent(value -> serialize(value, encoder).ifPresent(val -> {
-                            if (val instanceof String) {
-                                sendText((String) val);
-                            } else {
-                                sendBinary((byte[]) val);
-                            }
-                        })));
+                        ifPresent(supplier -> {
+                            String result = null;
+                            int retry = retryCount > 0 ? retryCount : 0;
+                            while (retry >= 0) {
 
+                                try {
+                                    result = supplier.get();
+                                    retry = -1;
+                                } catch (Throwable e) {
+                                    retry--;
+                                    if (retry < 0) {
+                                        if (errorHandler != null) {
+                                            errorHandler.accept(e);
+                                        }
+                                        if (errorHandlerString != null) {
+                                            result = errorHandlerString.apply(e);
+                                        }
+                                        if(errorHandler==null && errorHandlerString==null) {
+                                            throw new EndpointExecutionException(e);
+                                        }
+                                    }
+                                }
+                            }
+
+                            Optional.ofNullable(result).ifPresent(this::sendText);
+                        });
+                // TODO check for exception, think about @OnError method execution
+
+                Optional.ofNullable(objectSupplier).
+                        ifPresent(supplier -> {
+                            Serializable result = null;
+                            int retry = retryCount > 0 ? retryCount : 0;
+                            while (retry >= 0) {
+
+                                try {
+                                    result = supplier.get();
+                                    retry = -1;
+                                } catch (Throwable e) {
+                                    retry--;
+                                    if (retry < 0) {
+                                        if (errorHandler != null) {
+                                            errorHandler.accept(e);
+                                        }
+                                        if (errorHandlerObject != null) {
+                                            result = errorHandlerObject.apply(e);
+                                        }
+                                        if(errorHandler==null && errorHandlerObject==null) {
+                                            throw new EndpointExecutionException(e);
+                                        }
+                                    }
+
+                                }
+                            }
+
+                            Optional.ofNullable(result).ifPresent(value -> serialize(value, encoder).ifPresent(val -> {
+                                if (val instanceof String) {
+                                    sendText((String) val);
+                                } else {
+                                    sendBinary((byte[]) val);
+                                }
+                            }));
+                        });
             }
         }
-
 
 
         // TODO handle exceptions
