@@ -148,7 +148,7 @@ public class WebSocketHandler {
 
         @Override
         public ResponseTypeAsync toAllBut(WebSocketEndpoint... endpoint) {
-            // TODO iteration over stream / filter
+            // TODO iteration over stream / filter  .
             return new ResponseTypeAsync(endpoint, vertx, CommType.ALL_BUT_CALLER, errorMethodHandler);
         }
 
