@@ -21,7 +21,7 @@ public class WSHandlerTest
     public void testPayloadDecoding() throws IOException {
         MyTestObject input = new MyTestObject("andy","M");
         byte[] b =Serializer.serialize(new MyTestObject("andy","M"));
-        WebSocketHandler handler = new WebSocketHandler(null,null,b,null);
+        WebSocketHandler handler = new WebSocketHandler(null,null,b,null, null);
 
         Optional<MyTestObject> output = handler.payload().getObject(MyTestObject.class,new ExampleByteDecoderMyTest());
         assertTrue(input.equals(output.get()));

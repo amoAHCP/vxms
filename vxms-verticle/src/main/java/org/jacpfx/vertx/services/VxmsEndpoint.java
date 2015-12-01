@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -140,16 +141,17 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                         log("register:+ " + endpoint.getUrl());
                         webSocketMethodsForURL.stream().forEach(method -> {
                             if (method.isAnnotationPresent(OnWebSocketMessage.class)) {
+                                final Optional<Method> onErrorMethod = webSocketMethodsForURL.stream().filter(m -> m.isAnnotationPresent(OnWebSocketError.class)).findFirst();
                                 serverSocket.handler(handler -> {
                                             log("invoke endpoint " + endpoint.getUrl());
                                             // TODO clean up try catch mess!!!
                                             try {
-                                                invokeWebSocketMethod(handler.getBytes(), method, endpoint);
+                                                invokeWebSocketMethod(handler.getBytes(), method,onErrorMethod, endpoint);
                                             } catch (final Throwable throwable) {
 
-                                                webSocketMethodsForURL.stream().filter(m -> m.isAnnotationPresent(OnWebSocketError.class)).findFirst().ifPresent(errorMethod -> {
+                                                onErrorMethod.ifPresent(errorMethod -> {
                                                     try {
-                                                        invokeWebSocketOnErrorMethod(handler.getBytes(),errorMethod, endpoint, throwable.getCause());
+                                                        invokeWebSocketOnErrorMethod(handler.getBytes(), errorMethod, endpoint, throwable);
                                                     } catch (Throwable throwable1) {
                                                         serverSocket.close();
                                                         throwable1.printStackTrace();
@@ -178,7 +180,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                             } else if (method.isAnnotationPresent(OnWebSocketError.class)) {
                                 serverSocket.exceptionHandler(exception -> {
                                     try {
-                                        invokeWebSocketOnErrorMethod(new byte[0],method, endpoint, exception);
+                                        invokeWebSocketOnErrorMethod(new byte[0], method, endpoint, exception);
                                     } catch (Throwable throwable) {
                                         throwable.printStackTrace();
                                     }
@@ -195,8 +197,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         });
     }
 
-    private void invokeWebSocketMethod(byte[] payload, Method method, WebSocketEndpoint endpoint) throws Throwable {
-        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload, method, endpoint, webSocketRegistry, this.vertx, null), this);
+    private void invokeWebSocketMethod(byte[] payload, Method method, final Optional<Method> onErrorMethod, WebSocketEndpoint endpoint) throws Throwable {
+        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload, method, endpoint, webSocketRegistry, this.vertx, null,throwable -> onErrorMethod.ifPresent(eMethod -> {
+            try {
+                invokeWebSocketOnErrorMethod(payload,eMethod,endpoint,throwable);
+            } catch (Throwable throwable1) {
+                //TODO handle last Exception
+                throwable1.printStackTrace();
+            }
+        })), this);
 
     }
 
@@ -204,8 +213,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(method, endpoint), this);
     }
 
-    private void invokeWebSocketOnErrorMethod(byte[] payload,Method method, WebSocketEndpoint endpoint, Throwable t) throws Throwable {
-        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload,method, endpoint,webSocketRegistry, this.vertx, t), this);
+    private void invokeWebSocketOnErrorMethod(byte[] payload, Method method, WebSocketEndpoint endpoint, Throwable t) throws Throwable {
+        ReflectionUtil.genericMethodInvocation(method, () -> ReflectionUtil.invokeWebSocketParameters(payload, method, endpoint, webSocketRegistry, this.vertx, t, null), this);
     }
 
     private ServiceInfo createInfoObject(List<Operation> operations, Integer port) {

@@ -359,6 +359,38 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
     }
 
+
+    @Test
+    public void simpleObjectReplyWithTimeout() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectReplyWithTimeout", ws -> {
+
+            ws.handler((data) -> {
+                System.out.println("client data objectReplyWithTimeout:");
+                assertNotNull(data.getBytes());
+                try {
+                    Payload<String> payload = (Payload<String>) Serializer.deserialize(data.getBytes());
+                    assertTrue(payload.equals(new Payload<String>("xhello")));
+                    System.out.println(payload);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                ws.close();
+                testComplete();
+
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
+
     @Test
     public void simpleMutilpeReplyToAll() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
@@ -541,6 +573,19 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                     response().
                     toCaller().
                     objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
+                    execute();
+            System.out.println("binaryReply-1: " + name + "   :::" + this);
+        }
+
+        @OnWebSocketMessage("/objectReplyWithTimeout")
+        public void wsEndpointObjectReplyWithTimeout(WebSocketHandler reply) {
+
+            reply.
+                    response().
+                    async().
+                    toCaller().
+                    objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
+                    timeout(2000).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }

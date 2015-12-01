@@ -7,6 +7,7 @@ import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -15,14 +16,14 @@ import java.util.function.Supplier;
 public class ReflectionUtil {
 
 
-    public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx, Throwable t) {
+    public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx, Throwable t,Consumer<Throwable> errorMethodHandler) {
         final java.lang.reflect.Parameter[] parameters = method.getParameters();
         final Object[] parameterResult = new Object[parameters.length];
         int i = 0;
 
         for (java.lang.reflect.Parameter p : parameters) {
             if (WebSocketHandler.class.equals(p.getType())) {
-                parameterResult[i] = new WebSocketHandler(webSocketRegistry, endpoint, payload, vertx);
+                parameterResult[i] = new WebSocketHandler(webSocketRegistry, endpoint, payload, vertx, errorMethodHandler);
             } else if (WebSocketEndpoint.class.equals(p.getType())) {
                 parameterResult[i] = endpoint;
             } else if (Throwable.class.isAssignableFrom(p.getType())) {
@@ -36,7 +37,7 @@ public class ReflectionUtil {
     }
 
     public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint) {
-        return invokeWebSocketParameters(null, method, endpoint, null, null, null);
+        return invokeWebSocketParameters(null, method, endpoint, null, null, null, null);
     }
 
 
