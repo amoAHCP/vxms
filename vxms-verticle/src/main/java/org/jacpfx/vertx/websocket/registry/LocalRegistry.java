@@ -2,8 +2,6 @@ package org.jacpfx.vertx.websocket.registry;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 
@@ -14,14 +12,13 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 15.11.15.
  */
-public class LocalWebSocketRegistry implements WebSocketRegistry {
+public class LocalRegistry implements WebSocketRegistry {
 
-    private static final Logger log = LoggerFactory.getLogger(LocalWebSocketRegistry.class);
 
 
     private final Vertx vertx;
 
-    public LocalWebSocketRegistry(Vertx vertx) {
+    public LocalRegistry(Vertx vertx) {
         this.vertx = vertx;
     }
 

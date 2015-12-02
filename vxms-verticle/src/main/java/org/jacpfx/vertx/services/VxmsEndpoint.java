@@ -19,7 +19,7 @@ import org.jacpfx.vertx.websocket.annotation.OnWebSocketClose;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketError;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketMessage;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketOpen;
-import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
+import org.jacpfx.vertx.websocket.registry.LocalRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.response.WebSocketHandler;
@@ -85,7 +85,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         if (clustered) {
             webSocketRegistry = null;
         } else {
-            webSocketRegistry = new LocalWebSocketRegistry(this.vertx);
+            webSocketRegistry = new LocalRegistry(this.vertx);
         }
     }
 
