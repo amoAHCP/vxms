@@ -4,7 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import org.jacpfx.common.CustomSupplier;
+import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.exceptions.EndpointExecutionException;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
@@ -23,7 +23,8 @@ import java.util.stream.Stream;
  */
 public class WebSocketExecutionUtil {
 
-    public static <T> T executeRetryAndCatchAsync(CustomSupplier<T> supplier, Future<T> handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Vertx vertx, int retry, long timeout) {
+    public static <T> T
+    executeRetryAndCatchAsync(ThrowableSupplier<T> supplier, Future<T> handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Vertx vertx, int retry, long timeout, long delay) {
 
 
         while (retry >= 0) {
@@ -53,15 +54,9 @@ public class WebSocketExecutionUtil {
             } catch (Throwable e) {
                 retry--;
                 if (retry < 0) {
-                    if (errorHandler != null) {
-                        errorHandler.accept(e);
-                    }
-                    if (errorFunction != null) {
-                        result = errorFunction.apply(e);
-                    }
-                    if (errorHandler == null && errorFunction == null) {
-                        handler.fail(new EndpointExecutionException(e));
-                    }
+                    result = handleError(handler, result, errorHandler, errorFunction, e);
+                } else {
+                    handleDelay(delay);
                 }
             }
         }
@@ -69,7 +64,28 @@ public class WebSocketExecutionUtil {
         return result;
     }
 
-    public static <T> T executeRetryAndCatch(CustomSupplier<T> supplier, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, int retry) {
+    private static void handleDelay(long delay) {
+        try {
+            if(delay>0L)Thread.sleep(delay);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private static <T> T handleError(Future<T> handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Throwable e) {
+        if (errorHandler != null) {
+            errorHandler.accept(e);
+        }
+        if (errorFunction != null) {
+            result = errorFunction.apply(e);
+        }
+        if (errorHandler == null && errorFunction == null) {
+            handler.fail(new EndpointExecutionException(e));
+        }
+        return result;
+    }
+
+    public static <T> T executeRetryAndCatch(ThrowableSupplier<T> supplier, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, int retry) {
         while (retry >= 0) {
 
             try {

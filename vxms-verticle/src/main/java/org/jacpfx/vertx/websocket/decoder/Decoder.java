@@ -5,15 +5,15 @@ import java.util.Optional;
 /**
  * Created by Andy Moncsek on 18.11.15.
  */
-public interface Decoder{
+public interface Decoder<O> {
 
 
 
-    interface ByteDecoder<O> extends Decoder{
+    interface ByteDecoder<O>  extends Decoder<O> {
          Optional<O> decode(byte[] input);
     }
 
-    interface StringDecoder<O> extends Decoder{
+    interface StringDecoder<O> extends Decoder<O> {
          Optional<O> decode(String input);
     }
 }

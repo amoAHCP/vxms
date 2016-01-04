@@ -288,6 +288,32 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
     }
 
+
+
+    @Test
+    public void catchedAsyncStringErrorDelay() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/catchedAsyncStringErrorDelay", ws -> {
+
+            ws.handler((data) -> {
+                assertNotNull(data.getString(0, data.length()));
+
+                String payload = data.getString(0, data.length());
+                assertTrue(payload.equals("xhello"));
+                System.out.println(payload);
+
+                ws.close();
+                testComplete();
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
     public HttpClient getClient() {
         return client;
     }
@@ -298,7 +324,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
         @OnWebSocketMessage("/simpleRetry")
         public void wsEndpointSimpleRetry(WebSocketHandler reply) {
-            AtomicInteger count = new AtomicInteger(3);
+            AtomicInteger count = new AtomicInteger(3);  //objectResponse(null).encoder(new Encoder)
             reply.
                     response().
                     toCaller().
@@ -572,8 +598,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                         t.printStackTrace();
                         try {
                             Payload<String> p = new Payload<String>(reply.payload().getString().get());
-                            byte[] b = Serializer.serialize(p);
-                            return b;
+                            return Serializer.serialize(p);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -599,6 +624,33 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     retry(3).
                     onStringResponseError((t) -> {
                         t.printStackTrace();
+                        return reply.payload().getString().get();
+                    }).
+                    execute();
+        }
+
+        @OnWebSocketMessage("/catchedAsyncStringErrorDelay")
+        public void wsEndpointCatchedAsyncStringErrorDelay(WebSocketHandler reply) {
+            long startTime = System.currentTimeMillis();
+            AtomicInteger count = new AtomicInteger(4);
+            reply.
+                    response().
+                    async().
+                    toCaller().
+                    stringResponse(() -> {
+                        long estimatedTime = System.currentTimeMillis() - startTime;
+                        System.out.println("time: "+ estimatedTime);
+                        if (count.decrementAndGet() >= 0) {
+                            System.out.println("throw");
+                            throw new NullPointerException("test");
+                        }
+
+                        return null;
+                    }).
+                    retry(3).
+                    delay(1000).
+                    onStringResponseError((t) -> {
+                        System.out.print("the stack trace --> ");t.printStackTrace();
                         return reply.payload().getString().get();
                     }).
                     execute();

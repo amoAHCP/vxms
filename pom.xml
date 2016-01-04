@@ -24,7 +24,7 @@
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
 
         <!--Dependency versions-->
-        <vertx.version>3.1.0</vertx.version>
+        <vertx.version>3.2.0</vertx.version>
 
         <junit.version>4.11</junit.version>
 

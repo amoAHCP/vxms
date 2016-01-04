@@ -17,6 +17,7 @@ public class ReflectionUtil {
 
 
     public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx, Throwable t,Consumer<Throwable> errorMethodHandler) {
+        method.setAccessible(true);
         final java.lang.reflect.Parameter[] parameters = method.getParameters();
         final Object[] parameterResult = new Object[parameters.length];
         int i = 0;

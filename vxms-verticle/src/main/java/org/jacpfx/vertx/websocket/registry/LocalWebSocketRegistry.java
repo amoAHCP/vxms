@@ -12,13 +12,13 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 15.11.15.
  */
-public class LocalRegistry implements WebSocketRegistry {
+public class LocalWebSocketRegistry implements WebSocketRegistry {
 
 
 
     private final Vertx vertx;
 
-    public LocalRegistry(Vertx vertx) {
+    public LocalWebSocketRegistry(Vertx vertx) {
         this.vertx = vertx;
     }
 

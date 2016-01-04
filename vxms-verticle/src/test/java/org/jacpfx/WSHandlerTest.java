@@ -23,7 +23,7 @@ public class WSHandlerTest
         byte[] b =Serializer.serialize(new MyTestObject("andy","M"));
         WebSocketHandler handler = new WebSocketHandler(null,null,b,null, null);
 
-        Optional<MyTestObject> output = handler.payload().getObject(MyTestObject.class,new ExampleByteDecoderMyTest());
+        Optional<MyTestObject> output = handler.payload().getObject(new ExampleByteDecoderMyTest());
         assertTrue(input.equals(output.get()));
         System.out.println("sdsdf");
     }

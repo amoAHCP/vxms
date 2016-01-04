@@ -13,7 +13,6 @@ import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.entity.MyTestObject;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.decoder.ExampleByteDecoderMyTest;
 import org.jacpfx.entity.decoder.ExampleByteDecoderPayload;
@@ -555,8 +554,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                     byteResponse(() -> {
                         try {
                             Payload<String> p = new Payload<String>(reply.payload().getString().get());
-                            byte[] b = Serializer.serialize(p);
-                            return b;
+                            return Serializer.serialize(p);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -609,11 +607,11 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         public void wsEndpointGetObjectAndReplyObject(WebSocketHandler reply) {
             //  throw new NullPointerException("dfsdfs");
             System.out.println("1:-----------");
-            reply.payload().getObject(MyTestObject.class, new ExampleByteDecoderMyTest()).ifPresent(payload -> {
+            reply.payload().getObject(new ExampleByteDecoderMyTest()).ifPresent(payload -> {
                 System.out.println("should never be called");
             });
             System.out.println("2:-----------");
-            reply.payload().getObject(Payload.class, new ExampleByteDecoderPayload()).ifPresent(payload -> {
+            reply.payload().getObject(new ExampleByteDecoderPayload()).ifPresent(payload -> {
                 reply.
                         response().
                         toCaller().
