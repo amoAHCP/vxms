@@ -7,18 +7,22 @@ import org.jacpfx.common.util.Serializer;
 
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 17.11.15.
  */
 public interface WebSocketRegistry {
-    public static final String WS_REGISTRY = "wsRegistry";
-    public static final String WS_ENDPOINT_HOLDER = "wsEndpointHolder";
-    public static final String WS_LOCK = "wsLock";
-    public static final String REGISTRY = "registry";
+    String WS_REGISTRY = "wsRegistry";
+    String WS_ENDPOINT_HOLDER = "wsEndpointHolder";
+    String WS_LOCK = "wsLock";
+    String REGISTRY = "registry";
     void removeAndExecuteOnClose(ServerWebSocket serverSocket, Runnable onFinishRemove);
 
-    void findEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> onFinishRegistration);
+    void findEndpointsByURLAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> executeOnMatch);
+
+    void findEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Function<WebSocketEndpoint, Boolean> filter, Consumer<WebSocketEndpoint> executeOnMatch);
+
 
     void registerAndExecute(ServerWebSocket serverSocket, Consumer<WebSocketEndpoint> onFinishRegistration);
 

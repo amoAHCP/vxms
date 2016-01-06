@@ -15,7 +15,6 @@ import java.util.function.Function;
 public class LocalWebSocketRegistry implements WebSocketRegistry {
 
 
-
     private final Vertx vertx;
 
     public LocalWebSocketRegistry(Vertx vertx) {
@@ -23,8 +22,12 @@ public class LocalWebSocketRegistry implements WebSocketRegistry {
     }
 
 
-
-
+    /**
+     * Removes a WebSocket Endpoint from the {@see WebSocketEndpointHolder} and executes th provided method.
+     *
+     * @param serverSocket   the WebSocket to remove
+     * @param onFinishRemove the method to execute after remove
+     */
     @Override
     public void removeAndExecuteOnClose(ServerWebSocket serverSocket, Runnable onFinishRemove) {
         final SharedData sharedData = this.vertx.sharedData();
@@ -44,24 +47,33 @@ public class LocalWebSocketRegistry implements WebSocketRegistry {
     }
 
     @Override
-    public void findEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> onFinishRegistration) {
-        findFilterAndExecute(currentEndpoint,(endpoint->true),onFinishRegistration);
+    public void findEndpointsByURLAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> executeOnMatch) {
+        findEndpointsAndExecute(currentEndpoint, (endpoint -> true), executeOnMatch);
     }
 
-    public void findOtherEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Consumer<WebSocketEndpoint> onFinishRegistration) {
-        findFilterAndExecute(currentEndpoint,(endpoint->!endpoint.equals(currentEndpoint)),onFinishRegistration);
-    }
-
-    private void findFilterAndExecute(WebSocketEndpoint currentEndpoint, Function<WebSocketEndpoint,Boolean> filter, Consumer<WebSocketEndpoint> onFinishRegistration) {
+    @Override
+    public void findEndpointsAndExecute(WebSocketEndpoint currentEndpoint, Function<WebSocketEndpoint, Boolean> filter, Consumer<WebSocketEndpoint> executeOnMatch) {
         final SharedData sharedData = this.vertx.sharedData();
         final LocalMap<String, byte[]> wsRegistry = sharedData.getLocalMap(WS_REGISTRY);
         Optional.ofNullable(getWSEndpointHolderFromSharedData(wsRegistry)).
-                ifPresent(endpointHolder -> endpointHolder.
-                        getAll().
-                        stream().
-                        filter(endpoint -> filter.apply(endpoint)).
-                        filter(endpoint -> endpoint.getUrl().equals(currentEndpoint.getUrl())).
-                        forEach(sameEndpoint -> onFinishRegistration.accept(sameEndpoint)));
+                ifPresent(endpointHolder -> filterAndExecute(currentEndpoint, filter, executeOnMatch, endpointHolder));
+    }
+
+    /**
+     * Filters all Endpoints by provided filter and with the same URL (same endpoint method)
+     *
+     * @param currentEndpoint the Endpoint providing the URL
+     * @param filter          the filter
+     * @param executeOnMatch  method to execute on match
+     * @param endpointHolder  the Endpoint holder
+     */
+    private void filterAndExecute(WebSocketEndpoint currentEndpoint, Function<WebSocketEndpoint, Boolean> filter, Consumer<WebSocketEndpoint> executeOnMatch, WebSocketEndpointHolder endpointHolder) {
+        endpointHolder.
+                getAll().
+                stream().
+                filter(endpoint -> filter.apply(endpoint)).
+                filter(endpoint -> endpoint.getUrl().equals(currentEndpoint.getUrl())).
+                forEach(sameEndpoint -> executeOnMatch.accept(sameEndpoint));
     }
 
 
@@ -99,8 +111,6 @@ public class LocalWebSocketRegistry implements WebSocketRegistry {
 
         return null;
     }
-
-
 
 
 }

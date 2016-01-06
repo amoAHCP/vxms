@@ -17,14 +17,29 @@ public class WebSocketEndpoint implements Serializable {
         this.url = url;
     }
 
+    /**
+     * Returns the binary handler id to send a binary message to the endpoint
+     *
+     * @return the binary handler id
+     */
     public String getBinaryHandlerId() {
         return binaryHandlerId;
     }
 
+    /**
+     * Returns the text handler id to send a text message to the endpoint
+     *
+     * @return the text handler id
+     */
     public String getTextHandlerId() {
         return textHandlerId;
     }
 
+    /**
+     * Returns the Endpoint URL
+     *
+     * @return the Endpoint URL
+     */
     public String getUrl() {
         return url;
     }

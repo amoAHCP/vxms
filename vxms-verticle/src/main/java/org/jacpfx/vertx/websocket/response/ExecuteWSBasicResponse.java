@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 18.12.15.
+ * This class defines several error methods for the response methods and executes the response chain.
  */
 public class ExecuteWSBasicResponse {
     protected final WebSocketEndpoint[] endpoint;
@@ -50,28 +51,59 @@ public class ExecuteWSBasicResponse {
         this.retryCount = retryCount;
     }
 
+    /**
+     * defines an action if an error occurs, this is an intermediate method which will not result in an output value
+     *
+     * @param errorHandler the handler to execute on error
+     * @return the response chain
+     */
     public ExecuteWSBasicResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteWSBasicResponse(endpoint, vertx, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, registry, retryCount);
     }
 
+    /**
+     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     *
+     * @param errorHandlerByte the handler (function) to execute on error
+     * @return the response chain
+     */
     public ExecuteWSBasicResponse onByteResponseError(Function<Throwable, byte[]> errorHandlerByte) {
         return new ExecuteWSBasicResponse(endpoint, vertx, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, registry, retryCount);
     }
 
+    /**
+     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     *
+     * @param errorHandlerString the handler (function) to execute on error
+     * @return the response chain
+     */
     public ExecuteWSBasicResponse onStringResponseError(Function<Throwable, String> errorHandlerString) {
         return new ExecuteWSBasicResponse(endpoint, vertx, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, registry, retryCount);
     }
 
+    /**
+     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     *
+     * @param errorHandlerObject the handler (function) to execute on error
+     * @return the response chain
+     */
     public ExecuteWSBasicResponse onObjectResponseError(Function<Throwable, Serializable> errorHandlerObject) {
         return new ExecuteWSBasicResponse(endpoint, vertx, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, registry, retryCount);
     }
 
-
+    /**
+     * Defines how many times a retry will be done for the response method
+     *
+     * @param retryCount
+     * @return the response chain
+     */
     public ExecuteWSBasicResponse retry(int retryCount) {
         return new ExecuteWSBasicResponse(endpoint, vertx, commType, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, registry, retryCount);
     }
 
-
+    /**
+     * Executes the response chain
+     */
     public void execute() {
         int retry = retryCount > 0 ? retryCount : 0;
         Optional.ofNullable(byteSupplier).

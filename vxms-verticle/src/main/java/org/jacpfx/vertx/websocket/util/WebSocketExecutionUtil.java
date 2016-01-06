@@ -130,10 +130,10 @@ public class WebSocketExecutionUtil {
         switch (commType) {
 
             case ALL:
-                registry.findEndpointsAndExecute(currentEndpoint, match -> vertx.eventBus().send(match.getTextHandlerId(), value));
+                registry.findEndpointsByURLAndExecute(currentEndpoint, match -> vertx.eventBus().send(match.getTextHandlerId(), value));
                 break;
             case ALL_BUT_CALLER:
-                registry.findEndpointsAndExecute(currentEndpoint, match -> {
+                registry.findEndpointsByURLAndExecute(currentEndpoint, match -> {
                     if (!currentEndpoint.equals(match)) vertx.eventBus().send(match.getTextHandlerId(), value);
                 });
                 break;
@@ -152,10 +152,10 @@ public class WebSocketExecutionUtil {
         switch (commType) {
 
             case ALL:
-                registry.findEndpointsAndExecute(currentEndpoint, match -> vertx.eventBus().send(match.getBinaryHandlerId(), Buffer.buffer(value)));
+                registry.findEndpointsByURLAndExecute(currentEndpoint, match -> vertx.eventBus().send(match.getBinaryHandlerId(), Buffer.buffer(value)));
                 break;
             case ALL_BUT_CALLER:
-                registry.findEndpointsAndExecute(currentEndpoint, match -> {
+                registry.findEndpointsByURLAndExecute(currentEndpoint, match -> {
                     if (!currentEndpoint.equals(match))
                         vertx.eventBus().send(match.getBinaryHandlerId(), Buffer.buffer(value));
                 });

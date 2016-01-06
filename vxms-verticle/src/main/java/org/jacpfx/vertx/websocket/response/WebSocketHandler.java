@@ -45,6 +45,11 @@ public class WebSocketHandler {
     }
 
 
+    /**
+     * Returns the start of the response chain.
+     *
+     * @return the target type of your response
+     */
     public TargetType response() {
         return new TargetType(endpoint, vertx, registry, errorMethodHandler, false);
     }

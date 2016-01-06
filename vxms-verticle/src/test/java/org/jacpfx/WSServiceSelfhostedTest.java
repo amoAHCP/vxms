@@ -432,6 +432,43 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         await();
     }
 
+
+    @Test
+    public void simpleMutilpeReplyToreplytoAllBut() throws InterruptedException {
+        ExecutorService s = Executors.newFixedThreadPool(10);
+        final CountDownLatch latch = new CountDownLatch(2);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/replytoAllBut", ws -> {
+
+            ws.handler((data) -> {
+                System.out.println("client data simpleMutilpeReplyToreplytoAllBut 1:" + new String(data.getBytes()));
+                assertNotNull(data.getString(0, data.length()));
+                if (new String(data.getBytes()).equals("2")) latch.countDown();
+                ws.close();
+
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("1"));
+        });
+
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/replytoAllBut", ws -> {
+
+            ws.handler((data) -> {
+                System.out.println("client simpleMutilpeReplyToreplytoAllBut 1.1:" + new String(data.getBytes()));
+                assertNotNull(data.getString(0, data.length()));
+                if (new String(data.getBytes()).equals("1")) latch.countDown();
+                ws.close();
+
+
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("2"));
+
+        });
+
+
+        latch.await();
+    }
+
     @Test
     public void simpleMutilpeReplyToAllThreaded() throws InterruptedException {
         ExecutorService s = Executors.newFixedThreadPool(10);
@@ -498,13 +535,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             replyToAllAsync(reply.payload().getString() + "-5", reply);
             replyToAllAsync(reply.payload().getString() + "-6", reply);
 
-            System.out.println("wsEndpointThreeReplyToAll-2: " + reply.payload().getString() + "   :::" + this);
+            System.out.println("wsEndpointThreeReplyToAll-2: " + reply.payload().getString().get() + "   :::" + this);
         }
 
 
         @OnWebSocketMessage("/wsEndpintFour")
         public void wsEndpointThreeReplyToAllTwo(WebSocketHandler reply) {
-            replyToAllAsync(reply.payload().getString() + "-3", reply);
+            replyToAllAsync(reply.payload().getString().get() + "-3", reply);
             System.out.println("+++ wsEndpointThreeReplyToAllTwo-4: " + reply.payload().getString() + "   :::" + this);
         }
 
@@ -515,7 +552,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             reply.
                     response().
                     toCaller().
-                    stringResponse(() -> reply.payload().getString() + "-2").
+                    stringResponse(() -> reply.payload().getString().get() + "-2").
                     execute();
             System.out.println("wsEndpointHello-1: " + name + "   :::" + this);
         }
@@ -527,7 +564,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             reply.
                     response().
                     to(reply.endpoint()). // reply to yourself
-                    stringResponse(() -> reply.payload().getString() + "-2").
+                    stringResponse(() -> reply.payload().getString().get() + "-2").
                     execute();
             System.out.println("wsEndpointHello-1: " + name + "   :::" + this);
         }
@@ -586,6 +623,18 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                     timeout(2000).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
+        }
+
+        @OnWebSocketMessage("/replytoAllBut")
+        public void wsEndpointReplyToAllBut(WebSocketHandler reply) {
+
+
+            reply.
+                    response().
+                    toAllBut(reply.endpoint()). // reply to other connected sessions
+                    stringResponse(() -> reply.payload().getString().get()).
+                    execute();
+            System.out.println("replytoAllBut: " + name + "   :::" + this);
         }
 
         @OnWebSocketOpen("/getObjectAndReplyObject")
