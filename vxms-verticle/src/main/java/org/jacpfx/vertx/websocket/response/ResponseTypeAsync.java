@@ -25,23 +25,23 @@ public class ResponseTypeAsync extends ResponseType {
      * {@inheritDoc }
      */
     @Override
-    public ExecuteWSResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteWSResponse(endpoint, vertx, commType, byteSupplier, null, null, null, null, errorMethodHandler, null, null, null, registry, 0, 0L, 0L);
+    public ExecuteWSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
+        return new ExecuteWSByteResponse(endpoint, vertx, commType, byteSupplier, null, null, errorMethodHandler, null, registry, 0, 0L, 0L);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public ExecuteWSResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteWSResponse(endpoint, vertx, commType, null, stringSupplier, null, null, null, errorMethodHandler, null, null, null, registry, 0, 0L, 0L);
+    public ExecuteWSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
+        return new ExecuteWSStringResponse(endpoint, vertx, commType, stringSupplier, null, null, errorMethodHandler, null, registry, 0, 0L, 0L);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public ExecuteWSResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteWSResponse(endpoint, vertx, commType, null, null, objectSupplier, encoder, null, errorMethodHandler, null, null, null, registry, 0, 0L, 0L);
+    public ExecuteWSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+        return new ExecuteWSObjectResponse(endpoint, vertx, commType, objectSupplier, encoder, null, errorMethodHandler, null, registry, 0, 0L, 0L);
     }
 }

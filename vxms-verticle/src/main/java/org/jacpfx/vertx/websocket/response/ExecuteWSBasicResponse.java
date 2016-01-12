@@ -17,6 +17,7 @@ import java.util.function.Function;
  * Created by Andy Moncsek on 18.12.15.
  * This class defines several error methods for the response methods and executes the response chain.
  */
+@Deprecated
 public class ExecuteWSBasicResponse {
     protected final WebSocketEndpoint[] endpoint;
     protected final Vertx vertx;

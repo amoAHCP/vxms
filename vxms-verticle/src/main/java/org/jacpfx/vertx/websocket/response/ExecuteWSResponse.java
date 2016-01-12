@@ -18,7 +18,9 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 18.12.15.
  * This class defines several error methods for the response methods and executes the async response chain.
+ *
  */
+@Deprecated
 public class ExecuteWSResponse extends ExecuteWSBasicResponse {
     private final long delay;
     protected final long timeout;
@@ -81,6 +83,7 @@ public class ExecuteWSResponse extends ExecuteWSBasicResponse {
 
     /**
      * Defines the delay (in ms) between the response retries.
+     *
      * @param delay
      * @return the response chain
      */

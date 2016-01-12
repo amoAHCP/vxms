@@ -35,8 +35,8 @@ public class ResponseType {
      * @param byteSupplier supplier which returns the response value as byte array
      * @return @see{org.jacpfx.vertx.websocket.response.ExecuteWSBasicResponse}
      */
-    public ExecuteWSBasicResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteWSBasicResponse(endpoint, vertx, commType, byteSupplier, null, null, null, null, errorMethodHandler, null, null, null, registry, 0);
+    public ExecuteWSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
+        return new ExecuteWSBasicByteResponse(endpoint, vertx, commType, byteSupplier, null, null, errorMethodHandler, null, registry, 0);
     }
 
     /**
@@ -45,8 +45,8 @@ public class ResponseType {
      * @param stringSupplier supplier which returns the response value as String
      * @return @see{org.jacpfx.vertx.websocket.response.ExecuteWSBasicResponse}
      */
-    public ExecuteWSBasicResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteWSBasicResponse(endpoint, vertx, commType, null, stringSupplier, null, null, null, errorMethodHandler, null, null, null, registry, 0);
+    public ExecuteWSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
+        return new ExecuteWSBasicStringResponse(endpoint, vertx, commType, stringSupplier, null, null, errorMethodHandler, null, registry, 0);
     }
 
     /**
@@ -55,7 +55,7 @@ public class ResponseType {
      * @param objectSupplier supplier which returns the response value as Serializable
      * @return @see{org.jacpfx.vertx.websocket.response.ExecuteWSBasicResponse}
      */
-    public ExecuteWSBasicResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteWSBasicResponse(endpoint, vertx, commType, null, null, objectSupplier, encoder, null, errorMethodHandler, null, null, null, registry, 0);
+    public ExecuteWSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+        return new ExecuteWSBasicObjectResponse(endpoint, vertx, commType, objectSupplier, encoder, null, errorMethodHandler, null, registry, 0);
     }
 }
