@@ -61,7 +61,7 @@ public class TargetType {
      *
      * @return @see{org.jacpfx.vertx.websocket.response.ResponseType}
      */
-    public ResponseType toCaller() {
+    public ResponseType reply() {
         return new ResponseType(new WebSocketEndpoint[]{endpoint}, vertx, CommType.CALLER, errorMethodHandler, registry);
     }
 

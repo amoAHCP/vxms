@@ -176,6 +176,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         await();
 
     }
+
     @Test
     public void uncatchedMethodError() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
@@ -289,7 +290,6 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     }
 
 
-
     @Test
     public void catchedAsyncStringErrorDelay() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
@@ -327,7 +327,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(3);  //objectResponse(null).encoder(new Encoder)
             reply.
                     response().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 if (count.decrementAndGet() >= 0) {
                                     System.out.println("throw");
@@ -345,7 +345,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         public void wsEndpointUncatchedError(WebSocketHandler reply) {
             reply.
                     response().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 System.out.println("throw");
                                 throw new NullPointerException("test");
@@ -361,7 +361,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("----failover");
             reply.
                     response().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
 
                                 System.out.println("return payload after failover");
@@ -376,7 +376,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 System.out.println("throw");
                                 throw new NullPointerException("test");
@@ -393,7 +393,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
 
                                 System.out.println("return payload after failover");
@@ -408,7 +408,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 System.out.println("TIMEOUT");
                                 Thread.sleep(5000);
@@ -428,7 +428,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
 
                                 System.out.println("return payload after failover");
@@ -443,7 +443,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 System.out.println("EXCEPTION");
                                 throw new NullPointerException("test");
@@ -462,7 +462,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
 
                                 System.out.println("return payload after failover");
@@ -485,7 +485,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
 
                                 System.out.println("return payload after failover");
@@ -500,7 +500,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 if (count.decrementAndGet() >= 0) {
                                     System.out.println("throw");
@@ -514,7 +514,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     onError((t) ->
                             reply.
                                     response().
-                                    toCaller().
+                                    reply().
                                     objectResponse(() -> {
 
                                                 System.out.println("fallback");
@@ -531,7 +531,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 if (count.decrementAndGet() >= 0) {
                                     System.out.println("throw");
@@ -542,17 +542,22 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     retry(3).
-                    onError((t) ->
+                    onError((t) -> {
+                        System.out.println("error: "+count.get());
+                        if(count.get()<=1){
                             reply.
                                     response().
-                                    toCaller().
+                                    reply().
                                     objectResponse(() -> {
 
                                                 System.out.println("fallback: ");
                                                 t.printStackTrace();
                                                 return new Payload<String>(reply.payload().getString().get());
                                             }, new ExampleByteEncoder()
-                                    ).execute()).
+                                    ).execute();
+                        }
+
+                    }).
                     execute();
         }
 
@@ -561,7 +566,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    toCaller().
+                    reply().
                     objectResponse(() -> {
                                 if (count.decrementAndGet() >= 0) {
                                     System.out.println("throw");
@@ -572,7 +577,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     retry(3).
-                    onObjectResponseError((t) -> {
+                    onErrorResponse((t) -> {
                         t.printStackTrace();
                         return new Payload<String>(reply.payload().getString().get());
                     }).
@@ -584,7 +589,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    toCaller().
+                    reply().
                     byteResponse(() -> {
                         if (count.decrementAndGet() >= 0) {
                             System.out.println("throw");
@@ -594,7 +599,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                         return null;
                     }).
                     retry(3).
-                    onByteResponseError((t) -> {
+                    onErrorResponse((t) -> {
                         t.printStackTrace();
                         try {
                             Payload<String> p = new Payload<String>(reply.payload().getString().get());
@@ -612,7 +617,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    toCaller().
+                    reply().
                     stringResponse(() -> {
                         if (count.decrementAndGet() >= 0) {
                             System.out.println("throw");
@@ -622,7 +627,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                         return null;
                     }).
                     retry(3).
-                    onStringResponseError((t) -> {
+                    onErrorResponse((t) -> {
                         t.printStackTrace();
                         return reply.payload().getString().get();
                     }).
@@ -636,10 +641,10 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     stringResponse(() -> {
                         long estimatedTime = System.currentTimeMillis() - startTime;
-                        System.out.println("time: "+ estimatedTime);
+                        System.out.println("time: " + estimatedTime);
                         if (count.decrementAndGet() >= 0) {
                             System.out.println("throw");
                             throw new NullPointerException("test");
@@ -649,8 +654,9 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     }).
                     retry(3).
                     delay(1000).
-                    onStringResponseError((t) -> {
-                        System.out.print("the stack trace --> ");t.printStackTrace();
+                    onErrorResponse((t) -> {
+                        System.out.print("the stack trace --> ");
+                        t.printStackTrace();
                         return reply.payload().getString().get();
                     }).
                     execute();

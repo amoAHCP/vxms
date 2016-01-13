@@ -551,7 +551,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
             reply.
                     response().
-                    toCaller().
+                    reply().
                     stringResponse(() -> reply.payload().getString().get() + "-2").
                     execute();
             System.out.println("wsEndpointHello-1: " + name + "   :::" + this);
@@ -576,7 +576,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     stringResponse(() -> reply.payload().getString() + "-2").
                     execute();
             System.out.println("wsEndpointAsyncReply-1: " + name + "   :::" + this);
@@ -587,7 +587,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
             reply.
                     response().
-                    toCaller().
+                    reply().
                     byteResponse(() -> {
                         try {
                             Payload<String> p = new Payload<String>(reply.payload().getString().get());
@@ -606,7 +606,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
             reply.
                     response().
-                    toCaller().
+                    reply().
                     objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
@@ -618,7 +618,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             reply.
                     response().
                     async().
-                    toCaller().
+                    reply().
                     objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
                     timeout(2000).
                     execute();
@@ -663,7 +663,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             reply.payload().getObject(new ExampleByteDecoderPayload()).ifPresent(payload -> {
                 reply.
                         response().
-                        toCaller().
+                        reply().
                         objectResponse(() -> new Payload<String>((String) payload.getValue()), new ExampleByteEncoder()).
                         execute();
             });
@@ -676,7 +676,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
 
         private void replyAsyncTwo(String name, WebSocketHandler reply) {
-            reply.response().async().toCaller().stringResponse(() -> {
+            reply.response().async().reply().stringResponse(() -> {
                 try {
                     TimeUnit.MILLISECONDS.sleep(1000);
                 } catch (InterruptedException e) {

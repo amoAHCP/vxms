@@ -11,18 +11,25 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 17.12.15.
  * The TargetType defines the target of the (async) response.
  */
-public class TargetTypeAsync extends TargetType {
-
+public class TargetTypeAsync {
+    protected final WebSocketEndpoint endpoint;
+    protected final Vertx vertx;
+    protected final WebSocketRegistry registry;
+    protected final Consumer<Throwable> errorMethodHandler;
+    protected final boolean async;
 
     protected TargetTypeAsync(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler, boolean async) {
-        super(endpoint, vertx, registry, errorMethodHandler, async);
+        this.endpoint = endpoint;
+        this.vertx = vertx;
+        this.registry = registry;
+        this.errorMethodHandler = errorMethodHandler;
+        this.async = async;
     }
 
 
     /**
      * {@inheritDoc }
      */
-    @Override
     public ResponseTypeAsync toAll() {
         return new ResponseTypeAsync(new WebSocketEndpoint[]{endpoint}, vertx, CommType.ALL, errorMethodHandler, registry);
     }
@@ -30,7 +37,6 @@ public class TargetTypeAsync extends TargetType {
     /**
      * {@inheritDoc }
      */
-    @Override
     public ResponseTypeAsync toAllBut(WebSocketEndpoint... endpoints) {
         return new ResponseTypeAsync(endpoints, vertx, CommType.ALL_BUT_CALLER, errorMethodHandler, registry);
     }
@@ -38,15 +44,13 @@ public class TargetTypeAsync extends TargetType {
     /**
      * {@inheritDoc }
      */
-    @Override
-    public ResponseTypeAsync toCaller() {
+    public ResponseTypeAsync reply() {
         return new ResponseTypeAsync(new WebSocketEndpoint[]{endpoint}, vertx, CommType.CALLER, errorMethodHandler, registry);
     }
 
     /**
      * {@inheritDoc }
      */
-    @Override
     public ResponseTypeAsync to(WebSocketEndpoint... endpoints) {
         return new ResponseTypeAsync(endpoints, vertx, CommType.TO, errorMethodHandler, registry);
     }

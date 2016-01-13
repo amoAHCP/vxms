@@ -14,17 +14,24 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 17.12.15.
  * Defines the type of the (async) response. This can be a byte, string or object response.
  */
-public class ResponseTypeAsync extends ResponseType {
-
+public class ResponseTypeAsync{
+    protected final WebSocketEndpoint[] endpoint;
+    protected final Vertx vertx;
+    protected final CommType commType;
+    protected final Consumer<Throwable> errorMethodHandler;
+    protected final WebSocketRegistry registry;
 
     protected ResponseTypeAsync(WebSocketEndpoint[] endpoint, Vertx vertx, final CommType commType, Consumer<Throwable> errorMethodHandler, WebSocketRegistry registry) {
-        super(endpoint, vertx, commType, errorMethodHandler, registry);
+        this.endpoint = endpoint;
+        this.vertx = vertx;
+        this.commType = commType;
+        this.errorMethodHandler = errorMethodHandler;
+        this.registry = registry;
     }
 
     /**
      * {@inheritDoc }
      */
-    @Override
     public ExecuteWSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
         return new ExecuteWSByteResponse(endpoint, vertx, commType, byteSupplier, null, null, errorMethodHandler, null, registry, 0, 0L, 0L);
     }
@@ -32,7 +39,6 @@ public class ResponseTypeAsync extends ResponseType {
     /**
      * {@inheritDoc }
      */
-    @Override
     public ExecuteWSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
         return new ExecuteWSStringResponse(endpoint, vertx, commType, stringSupplier, null, null, errorMethodHandler, null, registry, 0, 0L, 0L);
     }
@@ -40,7 +46,6 @@ public class ResponseTypeAsync extends ResponseType {
     /**
      * {@inheritDoc }
      */
-    @Override
     public ExecuteWSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
         return new ExecuteWSObjectResponse(endpoint, vertx, commType, objectSupplier, encoder, null, errorMethodHandler, null, registry, 0, 0L, 0L);
     }
