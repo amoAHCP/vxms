@@ -56,6 +56,9 @@ public class WebSocketExecutionUtil {
                 if (retry < 0) {
                     result = handleError(handler, result, errorHandler, errorFunction, e);
                 } else {
+                    if (errorHandler != null) {
+                        errorHandler.accept(e);
+                    }
                     handleDelay(delay);
                 }
             }
@@ -73,9 +76,6 @@ public class WebSocketExecutionUtil {
     }
 
     private static <T> T handleError(Future<T> handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Throwable e) {
-        if (errorHandler != null) {
-            errorHandler.accept(e);
-        }
         if (errorFunction != null) {
             result = errorFunction.apply(e);
         }
@@ -94,14 +94,15 @@ public class WebSocketExecutionUtil {
             } catch (Throwable e) {
                 retry--;
                 if (retry < 0) {
-                    if (errorHandler != null) {
-                        errorHandler.accept(e);
-                    }
                     if (errorFunction != null) {
                         result = errorFunction.apply(e);
                     }
                     if (errorHandler == null && errorFunction == null) {
                         errorMethodHandler.accept(e);
+                    }
+                } else {
+                    if (errorHandler != null) {
+                        errorHandler.accept(e);
                     }
                 }
             }

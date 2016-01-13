@@ -1,16 +1,12 @@
 package org.jacpfx.common;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.http.*;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * // IDEA... create Optional like compleatablefuture Optional.executeAsync().andThan().get();
@@ -139,48 +135,8 @@ public class Operation implements Serializable{
         return Optional.ofNullable(client);
     }
 
-    /**
-     * connect to service method by http (REST get/post ...)
-     * @param method
-     * @param responseHandler
-     * @return The Operation itself @link{org.jacpfx.common.Operation}
-     */
-    // TODO define error handling
-    // TODO add parameter definistion
-    // MultiMap headers = request.headers();
-   // headers.set("content-type", "application/json").set("other-header", "foo");
-    public Operation httpRequest(final HttpMethod method,final Consumer<HttpClientResponse> responseHandler, Object ...requestParameters){
-        // TODO extract correst URL Path
-        // TODO extract REST Parameters and build correct URL
-        getHttpClient().ifPresent(httpClient-> {
-            httpClient.request(method,"URL",response -> {
-                responseHandler.accept(response);
-                System.out.println("Received response with status code " + response.statusCode());
-            }).exceptionHandler(e -> {
-                System.out.println("Received exception: " + e.getMessage());
-                e.printStackTrace();
-            }).end();
-        });
-
-        return new Operation(name,description,url,type,produces,consumes,vertx,parameter);
-    }
-
-    public Operation websocketConnection(Handler<WebSocket> wsConnect) {
-        getHttpClient().ifPresent(httpClient -> {
-            System.out.println("Connect: "+connectionHost+":"+connectionPort+"  "+serviceName.concat(name));
-            httpClient.websocket(connectionPort, connectionHost, serviceName.concat(name),wsConnect) ;
-
-        });
-        return new Operation(name,description,url,type,produces,consumes,vertx,parameter);
-    }
 
 
-    public Operation eventBusSend(final Object message, Consumer<AsyncResult<Message<Object>>>...consumer){
-        getVertx().eventBus().send(serviceName.concat(name),message,handler -> {
-                Stream.of(consumer).forEach(c->c.accept(handler));
-        });
-        return new Operation(name,description,url,type,produces,consumes,vertx,parameter);
-    }
 
 
 

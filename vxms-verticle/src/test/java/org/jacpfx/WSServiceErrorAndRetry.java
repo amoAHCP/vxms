@@ -511,17 +511,21 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     retry(3).
-                    onError((t) ->
-                            reply.
-                                    response().
-                                    reply().
-                                    objectResponse(() -> {
+                    onError((t) ->   {
+                               if(count.get()<=1){
+                                   reply.
+                                           response().
+                                           reply().
+                                           objectResponse(() -> {
 
-                                                System.out.println("fallback");
-                                                t.printStackTrace();
-                                                return new Payload<String>(reply.payload().getString().get());
-                                            }, new ExampleByteEncoder()
-                                    ).execute()).
+                                                       System.out.println("fallback");
+                                                       t.printStackTrace();
+                                                       return new Payload<String>(reply.payload().getString().get());
+                                                   }, new ExampleByteEncoder()
+                                           ).execute();
+                               }
+                    }
+                            ).
                     execute();
         }
 

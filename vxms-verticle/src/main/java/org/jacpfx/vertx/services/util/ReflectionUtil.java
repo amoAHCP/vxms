@@ -1,6 +1,8 @@
 package org.jacpfx.vertx.services.util;
 
 import io.vertx.core.Vertx;
+import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.response.WebSocketHandler;
@@ -37,6 +39,27 @@ public class ReflectionUtil {
         return parameterResult;
     }
 
+    public static Object[] invokeRESTParameters(RoutingContext context, Method method, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
+        method.setAccessible(true);
+        final java.lang.reflect.Parameter[] parameters = method.getParameters();
+        final Object[] parameterResult = new Object[parameters.length];
+        int i = 0;
+
+        for (java.lang.reflect.Parameter p : parameters) {
+            if (RestHandler.class.equals(p.getType())) {
+                parameterResult[i] = new RestHandler(context, vertx,t, errorMethodHandler);
+            } else if (RoutingContext.class.equals(p.getType())) {
+                parameterResult[i] = context;
+            } if (Throwable.class.isAssignableFrom(p.getType())) {
+                parameterResult[i] = t;
+            }
+
+            i++;
+        }
+
+        return parameterResult;
+    }
+
     public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint) {
         return invokeWebSocketParameters(null, method, endpoint, null, null, null, null);
     }
@@ -44,9 +67,9 @@ public class ReflectionUtil {
 
 
 
-    public static void genericMethodInvocation(Method method, Supplier<Object[]> supplier, Object invokeTo) throws Throwable {
+    public static void genericMethodInvocation(Method method, Supplier<Object[]> parameters, Object invokeTo) throws Throwable {
         try {
-            final Object returnValue = method.invoke(invokeTo, supplier.get());
+            final Object returnValue = method.invoke(invokeTo, parameters.get());
             if (returnValue != null) {
                 // TODO throw exception, no return value expected
             }
