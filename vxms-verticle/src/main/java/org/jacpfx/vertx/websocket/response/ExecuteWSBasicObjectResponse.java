@@ -38,9 +38,10 @@ public class ExecuteWSBasicObjectResponse extends ExecuteWSBasicObject{
      * defines an action for errors in byte responses, you can handle the error and return an alternate response value
      *
      * @param errorHandlerObject the handler (function) to execute on error
+     * @param encoder, the Object Encoder {@see org.jacpfx.vertx.websocket.encoder.Encoder}
      * @return the response chain
      */
-    public ExecuteWSBasicObject onErrorResponse(Function<Throwable, Serializable> errorHandlerObject) {
+    public ExecuteWSBasicObject onErrorResponse(Function<Throwable, Serializable> errorHandlerObject, Encoder encoder) {
         return new ExecuteWSBasicObject(endpoint, vertx, commType, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerObject, registry, retryCount);
     }
 

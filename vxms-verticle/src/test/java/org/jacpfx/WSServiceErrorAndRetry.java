@@ -584,7 +584,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     onErrorResponse((t) -> {
                         t.printStackTrace();
                         return new Payload<String>(reply.payload().getString().get());
-                    }).
+                    },new ExampleByteEncoder()).
                     execute();
         }
 
