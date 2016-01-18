@@ -19,16 +19,16 @@ import java.util.function.Function;
  * Created by Andy Moncsek on 12.01.16.
  */
 public class ExecuteRSBasic {
-    private final Vertx vertx;
-    private final Throwable t;
-    private final Consumer<Throwable> errorMethodHandler;
-    private final RoutingContext context;
-    private final Map<String, String> headers;
-    private final boolean async;
-    private final ThrowableSupplier<byte[]> byteSupplier;
-    private final ThrowableSupplier<String> stringSupplier;
-    private final ThrowableSupplier<Serializable> objectSupplier;
-    private final Encoder encoder;
+    protected final Vertx vertx;
+    protected final Throwable t;
+    protected final Consumer<Throwable> errorMethodHandler;
+    protected final RoutingContext context;
+    protected final Map<String, String> headers;
+    protected final boolean async;
+    protected final ThrowableSupplier<byte[]> byteSupplier;
+    protected final ThrowableSupplier<String> stringSupplier;
+    protected final ThrowableSupplier<Serializable> objectSupplier;
+    protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
     protected final Function<Throwable, byte[]> errorHandlerByte;
     protected final Function<Throwable, String> errorHandlerString;
@@ -52,7 +52,6 @@ public class ExecuteRSBasic {
         this.errorHandlerObject = errorHandlerObject;
         this.retryCount = retryCount;
     }
-
 
     public void execute() {
 
@@ -119,7 +118,7 @@ public class ExecuteRSBasic {
                                 }
                             }
                             if (!context.response().ended())
-                                sendObjectResult(WebSocketExecutionUtil.encode(result, encoder), context.response());
+                                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value-> sendObjectResult(value,context.response()));
                         }
                 );
 
