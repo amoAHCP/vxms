@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class RSResponse {
+public class RSAsyncResponse {
     private final Vertx vertx;
     private final Throwable t;
     private final Consumer<Throwable> errorMethodHandler;
@@ -20,7 +20,7 @@ public class RSResponse {
     private final Map<String, String> headers;
     private final boolean async;
 
-    public RSResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async) {
+    public RSAsyncResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -30,19 +30,14 @@ public class RSResponse {
     }
 
 
-
-    public RSAsyncResponse async() {
-        return new RSAsyncResponse(vertx, t, errorMethodHandler, context, headers, true);
-    }
-
     /**
      * Retunrs a byte array to the target type
      *
      * @param byteSupplier supplier which returns the response value as byte array
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
-    public ExecuteRSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSBasicByteResponse(vertx,t,errorMethodHandler,context,headers,async,byteSupplier,null, null, null,  0);
+    public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, null, null, null, 0);
     }
 
     /**
@@ -51,8 +46,8 @@ public class RSResponse {
      * @param stringSupplier supplier which returns the response value as String
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
-    public ExecuteRSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSBasicStringResponse(vertx,t,errorMethodHandler,context,headers,async,stringSupplier,null, null, null, 0);
+    public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, null, null, null, 0);
     }
 
     /**
@@ -61,7 +56,7 @@ public class RSResponse {
      * @param objectSupplier supplier which returns the response value as Serializable
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
-    public ExecuteRSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(vertx,t,errorMethodHandler,context,headers,async,objectSupplier,encoder, null, null,  0);
+    public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, null, null, 0);
     }
 }

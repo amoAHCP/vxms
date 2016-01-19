@@ -65,9 +65,9 @@ public class ExecuteRSBasicResponse extends ExecuteRSBasic {
         return new ExecuteRSBasic(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount);
     }
 
-    public ExecuteRSBasic putHeader(String key,String value) {
+    public ExecuteRSBasicResponse putHeader(String key,String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSBasic(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount);
+        return new ExecuteRSBasicResponse(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, stringSupplier, objectSupplier, encoder, errorHandler, errorHandlerByte, errorHandlerString, errorHandlerObject, retryCount);
     }
 }

@@ -120,6 +120,7 @@ public class WebSocketExecutionUtil {
 
         } catch (Exception e) {
             // TODO ignore serialisation currently... log message
+            e.printStackTrace();
         }
 
         return Optional.empty();

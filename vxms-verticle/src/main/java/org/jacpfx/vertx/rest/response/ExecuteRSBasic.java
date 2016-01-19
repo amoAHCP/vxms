@@ -2,10 +2,9 @@ package org.jacpfx.vertx.rest.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.common.exceptions.EndpointExecutionException;
+import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
@@ -67,13 +66,16 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = handleError(context.response(), result, errorHandler, errorHandlerString, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString, e);
                                     } else {
-                                        handleError(errorHandler, e);
+                                        RESTExecutionHandler.handleError(errorHandler, e);
                                     }
                                 }
                             }
-                            if (!context.response().ended()) context.response().end(result);
+                            if (!context.response().ended()) {
+                                updateResponseHaders();
+                                context.response().end(result);
+                            }
 
                         }
                 );
@@ -90,13 +92,16 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = handleError(context.response(), result, errorHandler, errorHandlerByte, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerByte, e);
                                     } else {
-                                        handleError(errorHandler, e);
+                                        RESTExecutionHandler.handleError(errorHandler, e);
                                     }
                                 }
                             }
-                            if (!context.response().ended()) context.response().end(Buffer.buffer(result));
+                            if (!context.response().ended()) {
+                                updateResponseHaders();
+                                context.response().end(Buffer.buffer(result));
+                            }
                         }
                 );
 
@@ -111,46 +116,26 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = handleError(context.response(), result, errorHandler, errorHandlerObject, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, e);
                                     } else {
-                                        handleError(errorHandler, e);
+                                        RESTExecutionHandler.handleError(errorHandler, e);
                                     }
                                 }
                             }
-                            if (!context.response().ended())
-                                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value-> sendObjectResult(value,context.response()));
+                            if (!context.response().ended()) {
+                                updateResponseHaders();
+                                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
+                            }
+
                         }
                 );
 
 
     }
 
-    private static void sendObjectResult(Object val, HttpServerResponse handler) {
-        if (val instanceof String) {
-            handler.end(String.valueOf(val));
-        } else {
-            handler.end(Buffer.buffer((byte[]) val));
-        }
+    protected void updateResponseHaders() {
+        Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> context.response().putHeader(entry.getKey(), entry.getValue())));
     }
 
 
-    private static <T> T handleError(HttpServerResponse handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Throwable e) {
-        if (errorHandler != null) {
-            errorHandler.accept(e);
-        }
-        if (errorFunction != null) {
-            result = errorFunction.apply(e);
-        }
-        if (errorHandler == null && errorFunction == null) {
-            handler.setStatusCode(500).end(new EndpointExecutionException(e).getMessage());
-        }
-        return result;
-    }
-
-    private static void handleError(Consumer<Throwable> errorHandler, Throwable e) {
-        if (errorHandler != null) {
-            errorHandler.accept(e);
-        }
-
-    }
 }
