@@ -50,8 +50,8 @@ public class WebSocketHandler {
      *
      * @return the target type of your response
      */
-    public TargetType response() {
-        return new TargetType(endpoint, vertx, registry, errorMethodHandler, false);
+    public WSResponse response() {
+        return new WSResponse(endpoint, vertx, registry, errorMethodHandler, false);
     }
 
 

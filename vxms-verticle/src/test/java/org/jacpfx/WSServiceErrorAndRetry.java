@@ -90,9 +90,9 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
 
     @Test
-    public void simpleRetry() throws InterruptedException {
+    public void objectSimpleRetry() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
-        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/simpleRetry", ws -> {
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectSimpleRetry", ws -> {
 
             ws.handler((data) -> {
                 handleInSimpleTests(ws, data);
@@ -107,11 +107,102 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
     }
 
+    @Test
+    public void stringSimpleRetry() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/stringSimpleRetry", ws -> {
+
+            ws.handler((data) -> {
+                handleInSimpleStringTests(ws, data);
+
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
 
     @Test
-    public void uncatchedError() throws InterruptedException {
+    public void objectUncatchedError() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
-        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/uncatchedError", ws -> {
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectUncatchedError", ws -> {
+
+            ws.handler((data) -> {
+                handleInSimpleTests(ws, data);
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+    }
+
+        @Test
+        public void stringUncatchedError() throws InterruptedException {
+            final AtomicInteger counter = new AtomicInteger(0);
+            getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/stringUncatchedError", ws -> {
+
+                ws.handler((data) -> {
+                    handleInSimpleStringTests(ws, data);
+                });
+
+                ws.writeFrame(new WebSocketFrameImpl("xhello"));
+            });
+
+
+            await();
+
+        }
+
+
+
+    @Test
+    public void objectCatchedObjectError() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectCatchedObjectError", ws -> {
+
+            ws.handler((data) -> {
+                handleInSimpleTests(ws, data);
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
+
+
+    @Test
+    public void objectUnCatchedObjectError() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectUnCatchedObjectError", ws -> {
+
+            ws.handler((data) -> {
+                handleInSimpleTests(ws, data);
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
+
+
+
+    @Test
+    public void objectSimpleOnError() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/objectSimpleOnError", ws -> {
 
             ws.handler((data) -> {
                 handleInSimpleTests(ws, data);
@@ -230,22 +321,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     }
 
 
-    @Test
-    public void catchedObjectError() throws InterruptedException {
-        final AtomicInteger counter = new AtomicInteger(0);
-        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/catchedObjectError", ws -> {
 
-            ws.handler((data) -> {
-                handleInSimpleTests(ws, data);
-            });
-
-            ws.writeFrame(new WebSocketFrameImpl("xhello"));
-        });
-
-
-        await();
-
-    }
 
 
     @Test
@@ -322,8 +398,10 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
-        @OnWebSocketMessage("/simpleRetry")
-        public void wsEndpointSimpleRetry(WebSocketHandler reply) {
+        ////----------------- sync objectReply ------------------------------
+
+        @OnWebSocketMessage("/objectSimpleRetry")
+        public void wsEndpointObjectSimpleRetry(WebSocketHandler reply) {
             AtomicInteger count = new AtomicInteger(3);  //objectResponse(null).encoder(new Encoder)
             reply.
                     response().
@@ -341,8 +419,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
 
-        @OnWebSocketMessage("/uncatchedError")
-        public void wsEndpointUncatchedError(WebSocketHandler reply) {
+        @OnWebSocketMessage("/objectUncatchedError")
+        public void wsEndpointObjectUncatchedError(WebSocketHandler reply) {
             reply.
                     response().
                     reply().
@@ -355,8 +433,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
 
-        @OnWebSocketError("/uncatchedError")
-        public void wsEndpointUncatchedErrorOnError(Throwable t, WebSocketHandler reply, WebSocketEndpoint endpoint) {
+        @OnWebSocketError("/objectUncatchedError")
+        public void wsEndpointObjectUncatchedErrorOnError(Throwable t, WebSocketHandler reply, WebSocketEndpoint endpoint) {
             t.printStackTrace();
             System.out.println("----failover");
             reply.
@@ -370,6 +448,157 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     ).retry(3).
                     execute();
         }
+
+        @OnWebSocketMessage("/objectCatchedObjectError")
+        public void wsEndpointObjectCatchedObjectError(WebSocketHandler reply) {
+            AtomicInteger count = new AtomicInteger(4);
+            reply.
+                    response().
+                    reply().
+                    objectResponse(() -> {
+                                if (count.decrementAndGet() >= 0) {
+                                    System.out.println("throw");
+                                    throw new NullPointerException("test");
+                                }
+
+                                return null;
+                            }, new ExampleByteEncoder()
+                    ).
+                    retry(3).
+                    onErrorResponse((t) -> {
+                        t.printStackTrace();
+                        return new Payload<String>(reply.payload().getString().get());
+                    },new ExampleByteEncoder()).
+                    execute();
+        }
+
+        @OnWebSocketMessage("/objectUnCatchedObjectError")
+        public void wsEndpointObjectUnCatchedObjectError(WebSocketHandler reply) {
+            AtomicInteger count = new AtomicInteger(4);
+            reply.
+                    response().
+                    reply().
+                    objectResponse(() -> {
+                                if (count.decrementAndGet() >= 0) {
+                                    System.out.println("throw");
+                                    throw new NullPointerException("test");
+                                }
+
+                                return null;
+                            }, new ExampleByteEncoder()
+                    ).
+                    retry(3).
+                    onErrorResponse((t) -> {
+                        throw new NullPointerException("test");
+                    },new ExampleByteEncoder()).
+                    execute();
+        }
+
+        @OnWebSocketError("/objectUnCatchedObjectError")
+        public void wsEndpointObjectUnCatchedObjectErrorOnError(Throwable t, WebSocketHandler reply, WebSocketEndpoint endpoint) {
+            t.printStackTrace();
+            System.out.println("----failover");
+            reply.
+                    response().
+                    reply().
+                    objectResponse(() -> {
+
+                                System.out.println("return payload after failover");
+                                return new Payload<String>(reply.payload().getString().get());
+                            }, new ExampleByteEncoder()
+                    ).
+                    execute();
+        }
+
+        @OnWebSocketMessage("/objectSimpleOnError")
+        public void wsEndpointObjectSimpleOnError(WebSocketHandler reply) {
+            AtomicInteger count = new AtomicInteger(3);  //objectResponse(null).encoder(new Encoder)
+            reply.
+                    response().
+                    reply().
+                    objectResponse(() -> {
+                                if (count.decrementAndGet() >= 0) {
+                                    System.out.println("throw");
+                                    throw new NullPointerException("test");
+                                }
+                                System.out.println("return payload after 3 retries");
+                                return new Payload<String>(reply.payload().getString().get());
+                            }, new ExampleByteEncoder()
+                    ).
+                    execute();
+            System.out.println("binaryReply-1: " + name + "   :::" + this);
+        }
+
+        @OnWebSocketError("/objectSimpleOnError")
+        public void wsEndpointObjectSimpleOnErrorOnError(Throwable t, WebSocketHandler reply, WebSocketEndpoint endpoint) {
+            t.printStackTrace();
+            System.out.println("----failover");
+            reply.
+                    response().
+                    reply().
+                    objectResponse(() -> {
+
+                                System.out.println("return payload after failover");
+                                return new Payload<String>(reply.payload().getString().get());
+                            }, new ExampleByteEncoder()
+                    ).
+                    execute();
+        }
+
+
+        ////----------------- sync objectReply END ------------------------------
+
+        ////----------------- sync stringReply  ------------------------------
+        @OnWebSocketMessage("/stringSimpleRetry")
+        public void wsEndpointStringSimpleRetry(WebSocketHandler reply) {
+            AtomicInteger count = new AtomicInteger(3);  //objectResponse(null).encoder(new Encoder)
+            reply.
+                    response().
+                    reply().
+                    stringResponse(() -> {
+                                if (count.decrementAndGet() >= 0) {
+                                    System.out.println("throw");
+                                    throw new NullPointerException("test");
+                                }
+                                System.out.println("return payload after 3 retries");
+                                return reply.payload().getString().get();
+                            }
+                    ).retry(3).
+                    execute();
+            System.out.println("stringSimpleRetry-1: " + name + "   :::" + this);
+        }
+
+        @OnWebSocketMessage("/stringUncatchedError")
+        public void wsEndpointStringUncatchedError(WebSocketHandler reply) {
+            reply.
+                    response().
+                    reply().
+                    stringResponse(() -> {
+                                System.out.println("throw");
+                                throw new NullPointerException("test");
+                            }
+                    ).
+                    execute();
+            System.out.println("stringUncatchedError-1: " + name + "   :::" + this);
+        }
+
+        @OnWebSocketError("/stringUncatchedError")
+        public void wsEndpointStringUncatchedErrorOnError(Throwable t, WebSocketHandler reply, WebSocketEndpoint endpoint) {
+            t.printStackTrace();
+            System.out.println("----failover");
+            reply.
+                    response().
+                    reply().
+                    stringResponse(() -> {
+
+                                System.out.println("return payload after failover");
+                                return reply.payload().getString().get();
+                            }
+                    ).retry(3).
+                    execute();
+        }
+
+        ////----------------- sync stringReply END ------------------------------
 
         @OnWebSocketMessage("/uncatchedErrorAsync")
         public void wsEndpointUncatchedErrorAsync(WebSocketHandler reply) {
@@ -565,28 +794,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     execute();
         }
 
-        @OnWebSocketMessage("/catchedObjectError")
-        public void wsEndpointCatchedObjectError(WebSocketHandler reply) {
-            AtomicInteger count = new AtomicInteger(4);
-            reply.
-                    response().
-                    reply().
-                    objectResponse(() -> {
-                                if (count.decrementAndGet() >= 0) {
-                                    System.out.println("throw");
-                                    throw new NullPointerException("test");
-                                }
 
-                                return null;
-                            }, new ExampleByteEncoder()
-                    ).
-                    retry(3).
-                    onErrorResponse((t) -> {
-                        t.printStackTrace();
-                        return new Payload<String>(reply.payload().getString().get());
-                    },new ExampleByteEncoder()).
-                    execute();
-        }
 
         @OnWebSocketMessage("/catchedByteError")
         public void wsEndpointCatchedByteError(WebSocketHandler reply) {
@@ -682,6 +890,16 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        ws.close();
+        testComplete();
+    }
+
+    private void handleInSimpleStringTests(WebSocket ws, Buffer data) {
+        System.out.println("client data simpleRetry:");
+        assertNotNull(data.getBytes());
+        String payload = data.getString(0,data.length());
+        assertTrue(payload.equals("xhello"));
+        System.out.println(payload);
         ws.close();
         testComplete();
     }

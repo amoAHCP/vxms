@@ -11,14 +11,14 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 17.12.15.
  * The TargetType defines the target of the response.
  */
-public class TargetType {
+public class WSResponse {
     protected final WebSocketEndpoint endpoint;
     protected final Vertx vertx;
     protected final WebSocketRegistry registry;
     protected final Consumer<Throwable> errorMethodHandler;
     protected final boolean async;
 
-    protected TargetType(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler, boolean async) {
+    protected WSResponse(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler, boolean async) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.registry = registry;
@@ -31,8 +31,8 @@ public class TargetType {
      *
      * @return @see{org.jacpfx.vertx.websocket.response.TargetTypeAsync}
      */
-    public TargetTypeAsync async() {
-        return new TargetTypeAsync(endpoint, vertx, registry, errorMethodHandler, true);
+    public WSResponseAsync async() {
+        return new WSResponseAsync(endpoint, vertx, registry, errorMethodHandler, true);
     }
 
     /**
