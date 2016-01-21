@@ -390,6 +390,60 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
     }
 
+    @Test
+    public void exceptionTests01() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/exceptionTests01", ws -> {
+
+            ws.handler((data) -> {
+                assertNotNull(data.getString(0, data.length()));
+
+                String payload = data.getString(0, data.length());
+                //assertTrue(payload.equals("xhello"));
+                System.out.println(payload);
+
+                ws.close();
+                testComplete();
+            });
+            ws.closeHandler(handler -> {
+                System.out.println("CLOSED");
+                testComplete();
+            });
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
+    @Test
+    public void exceptionTests02() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/exceptionTests02", ws -> {
+
+            ws.handler((data) -> {
+                assertNotNull(data.getString(0, data.length()));
+
+                String payload = data.getString(0, data.length());
+                //assertTrue(payload.equals("xhello"));
+                System.out.println(payload);
+
+                ws.close();
+                testComplete();
+            });
+            ws.closeHandler(handler -> {
+                System.out.println("CLOSED");
+                testComplete();
+            });
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
     public HttpClient getClient() {
         return client;
     }
@@ -874,8 +928,46 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     execute();
         }
 
+        @OnWebSocketMessage("/exceptionTests01")
+        public void wsEndpointExceptionTests01(WebSocketHandler reply) {
+            reply.
+                    response().
+                    reply().
+                    stringResponse(() -> {
+                        System.out.println("Exception");
+                        throw new NullPointerException("test");
+                    }).
+                    execute();
+            System.out.println("Exception END");
+        }
+
+
+        @OnWebSocketError("/exceptionTests01---")
+        public void wsEndpointExceptionTests01Error(WebSocketHandler reply,Throwable t) {
+            t.printStackTrace();
+            System.out.println("----failover");
+        }
+
+
+        @OnWebSocketMessage("/exceptionTests02")
+        public void wsEndpointExceptionTests02(WebSocketHandler reply) {
+            System.out.println("Exception --XXXX");
+            throw new NullPointerException("test");
+        }
+
+
+        @OnWebSocketError("/exceptionTests02---")
+        public void wsEndpointExceptionTests02Error(WebSocketHandler reply,Throwable t) {
+            t.printStackTrace();
+            System.out.println("----failover");
+            reply.response().reply().stringResponse(()->"").execute();
+        }
+
 
     }
+
+
+
 
 
     private void handleInSimpleTests(WebSocket ws, Buffer data) {

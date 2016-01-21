@@ -2,6 +2,7 @@ package org.jacpfx.vertx.services.util;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.exceptions.EndpointExecutionException;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
@@ -77,6 +78,7 @@ public class ReflectionUtil {
             e.printStackTrace();
 
         } catch (InvocationTargetException e) {
+            if(e.getCause() instanceof EndpointExecutionException) throw e.getCause().getCause();
             throw e.getTargetException();
         } catch (Exception e) {
             throw e;

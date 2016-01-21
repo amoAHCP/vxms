@@ -104,9 +104,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                                             restMethod,
                                             vertx,
                                             null,
-                                            throwable -> {
-                                                // TODO check for Error method and add call to error method
-                                            });
+                                            throwable -> throwable.getStackTrace());
                                     ReflectionUtil.genericMethodInvocation(
                                             restMethod,
                                             () -> parameters, service);

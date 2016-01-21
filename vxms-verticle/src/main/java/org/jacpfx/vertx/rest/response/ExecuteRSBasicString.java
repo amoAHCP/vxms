@@ -66,7 +66,7 @@ public class ExecuteRSBasicString {
                                     context.response().end(result);
                                 } else {
                                     context.response().end();
-                                } ;
+                                }
                             }
 
                         }

@@ -95,17 +95,9 @@ public class WebSocketInitializer {
     private static void invokeEndpoint(Vertx vertx, WebSocketRegistry webSocketRegistry, Object service, ServerWebSocket serverSocket, WebSocketEndpoint endpoint, Method method, Optional<Method> onErrorMethod, Buffer handler) {
         log("invoke endpoint " + endpoint.getUrl());
         try {
-            invokeWebSocketMethod(handler.getBytes(), method, onErrorMethod, endpoint, service, webSocketRegistry, vertx);
+            invokeWebSocketMethod(handler.getBytes(), method, onErrorMethod, endpoint, service, webSocketRegistry, serverSocket, vertx);
         } catch (final Throwable throwable) {
-            onErrorMethod.ifPresent(errorMethod -> {
-                try {
-                    invokeWebSocketOnErrorMethod(handler.getBytes(), errorMethod, endpoint, throwable, service, webSocketRegistry, vertx);
-                } catch (Throwable throwable1) {
-                    serverSocket.close();
-                    throwable1.printStackTrace();
-                }
-            });
-
+            handleException(handler.getBytes(), onErrorMethod, endpoint, service, webSocketRegistry, serverSocket, vertx, throwable);
 
         }
         log("RUN:::::");
@@ -129,7 +121,7 @@ public class WebSocketInitializer {
 
     }
 
-    private static void invokeWebSocketMethod(byte[] payload, Method method, final Optional<Method> onErrorMethod, WebSocketEndpoint endpoint, Object service, WebSocketRegistry webSocketRegistry, Vertx vertx) throws Throwable {
+    private static void invokeWebSocketMethod(byte[] payload, Method method, final Optional<Method> onErrorMethod, WebSocketEndpoint endpoint, Object service, WebSocketRegistry webSocketRegistry, ServerWebSocket serverSocket, Vertx vertx) throws Throwable {
         ReflectionUtil.genericMethodInvocation(
                 method,
                 () -> ReflectionUtil.invokeWebSocketParameters(
@@ -139,17 +131,22 @@ public class WebSocketInitializer {
                         webSocketRegistry,
                         vertx,
                         null,
-                        throwable ->
-                                onErrorMethod.
-                                        ifPresent(eMethod -> {
-                                            try {
-                                                invokeWebSocketOnErrorMethod(payload, eMethod, endpoint, throwable, service, webSocketRegistry, vertx);
-                                            } catch (Throwable throwable1) {
-                                                //TODO handle last Exception, will be thrown when execution of the error method fails too
-                                                throwable1.printStackTrace();
-                                            }
-                                        })), service);
+                        throwable -> handleException(payload, onErrorMethod, endpoint, service, webSocketRegistry, serverSocket, vertx, throwable)), service);
 
+    }
+
+    private static void handleException(byte[] payload, Optional<Method> onErrorMethod, WebSocketEndpoint endpoint, Object service, WebSocketRegistry webSocketRegistry, ServerWebSocket serverSocket, Vertx vertx, Throwable throwable) {
+        if (onErrorMethod.isPresent()) {
+            try {
+                invokeWebSocketOnErrorMethod(payload, onErrorMethod.get(), endpoint, throwable, service, webSocketRegistry, vertx);
+            } catch (Throwable throwable1) {
+                serverSocket.close();
+                throwable1.printStackTrace();
+            }
+        } else {
+            serverSocket.close();
+            throwable.printStackTrace();
+        }
     }
 
     private static void invokeWebSocketOnOpenCloseMethod(Method method, WebSocketEndpoint endpoint, Object service) throws Throwable {

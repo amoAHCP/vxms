@@ -30,7 +30,18 @@ public class ExecuteRSObject extends ExecuteRSBasicObject{
         // TODO implement async
         Optional.ofNullable(objectSupplier).
                 ifPresent(supplier -> {
-                            int retry = retryCount;
+
+                    this.vertx.executeBlocking(handler ->{
+
+
+
+
+                    },false,value->{});
+
+
+
+
+                    int retry = retryCount > 0 ? retryCount : 0;
                             Serializable result = "";
                             while (retry >= 0) {
                                 try {

@@ -35,6 +35,7 @@ public class ExecuteWSString extends ExecuteWSBasicString {
     @Override
     public void execute() {
         int retry = retryCount > 0 ? retryCount : 0;
+
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier ->
                         handleStringResponse(retry, supplier));

@@ -31,8 +31,7 @@ public class WebSocketEndpointHolder implements Serializable {
      */
     public void remove(final WebSocketEndpoint info) {
         final Optional<WebSocketEndpoint> first = getFirstMatch(info);
-        first.ifPresent(present ->
-                infos.remove(present)
+        first.ifPresent(infos::remove
         );
     }
 

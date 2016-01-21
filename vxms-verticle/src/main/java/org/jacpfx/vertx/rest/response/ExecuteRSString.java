@@ -26,7 +26,18 @@ public class ExecuteRSString extends ExecuteRSBasicString{
           // TODO impl async
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier -> {
-                            int retry = retryCount;
+
+                    this.vertx.executeBlocking(handler ->{
+
+
+
+
+                    },false,value->{});
+
+
+
+
+                    int retry = retryCount > 0 ? retryCount : 0;
                             String result = null;
                             while (retry >= 0) {
                                 try {
@@ -47,7 +58,7 @@ public class ExecuteRSString extends ExecuteRSBasicString{
                                     context.response().end(result);
                                 } else {
                                     context.response().end();
-                                } ;
+                                }
                             }
 
                         }

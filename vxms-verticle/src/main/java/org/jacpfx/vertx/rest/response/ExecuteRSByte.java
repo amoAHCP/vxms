@@ -15,20 +15,32 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSByte extends ExecuteRSBasicByte{
+public class ExecuteRSByte extends ExecuteRSBasicByte {
 
 
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte,int retryCount) {
-        super(vertx,t,errorMethodHandler,context,headers,async,byteSupplier,encoder,errorHandler,errorHandlerByte,retryCount);
+    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int retryCount) {
+        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
     }
 
     @Override
     public void execute() {
 
-         // TODO add sync impl.
+        // TODO add sync impl.
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier -> {
-                            int retry = retryCount;
+
+
+                    this.vertx.executeBlocking(handler ->{
+
+
+
+
+                    },false,value->{});
+
+
+
+
+                            int retry = retryCount > 0 ? retryCount : 0;
                             byte[] result = new byte[0];
                             while (retry >= 0) {
                                 try {

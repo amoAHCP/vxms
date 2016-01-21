@@ -71,9 +71,9 @@ public class LocalWebSocketRegistry implements WebSocketRegistry {
         endpointHolder.
                 getAll().
                 stream().
-                filter(endpoint -> filter.apply(endpoint)).
+                filter(filter::apply).
                 filter(endpoint -> endpoint.getUrl().equals(currentEndpoint.getUrl())).
-                forEach(sameEndpoint -> executeOnMatch.accept(sameEndpoint));
+                forEach(executeOnMatch::accept);
     }
 
 

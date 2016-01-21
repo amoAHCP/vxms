@@ -398,6 +398,35 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     }
 
+
+    @Test
+    public void endpointNine_exception() throws InterruptedException {
+        HttpClientOptions options = new HttpClientOptions();
+        options.setDefaultPort(PORT);
+        HttpClient client = vertx.
+                createHttpClient(options);
+
+        HttpClientRequest request = client.get("/wsService/endpointNine_exception?val=123&tmp=456", new Handler<HttpClientResponse>() {
+            public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(body -> {
+                    System.out.println("Got a response endpointFourErrorReturnRetryTest: " + body.toString());
+
+                   // assertEquals(body.toString(), "123456");
+
+                });
+                String contentType = resp.getHeader("Content-Type");
+                //assertEquals(contentType, "application/json");
+                String key = resp.getHeader("key");
+                //assertEquals(key, "val");
+                testComplete();
+
+            }
+        });
+        request.end();
+        await();
+
+    }
+
     public HttpClient getClient() {
         return client;
     }
@@ -578,6 +607,16 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             }).putHeader("key", "val").contentType("application/json").execute();
         }
 
+        @Path("/endpointNine_exception")
+        @GET
+        public void rsEndpointNine_exception(RestHandler handler) {
+            String productType = handler.request().param("val");
+            String product = handler.request().param("tmp");
+            System.out.println("wsEndpointTwo: " + handler);
+            handler.response().stringResponse(() -> {
+                throw new NullPointerException("test");
+            }).putHeader("key", "val").contentType("application/json").execute();
+        }
 
     }
 

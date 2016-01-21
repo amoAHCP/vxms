@@ -29,7 +29,10 @@ public class RESTExecutionHandler {
             result = errorFunction.apply(e);
         }
         if (errorHandler == null && errorFunction == null) {
+            // TODO call errorMethodHandler
             handler.setStatusCode(500).end(new EndpointExecutionException(e).getMessage());
+            e.printStackTrace();
+
         }
         return result;
     }
