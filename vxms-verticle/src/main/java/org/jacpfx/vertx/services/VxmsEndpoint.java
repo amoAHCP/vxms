@@ -10,12 +10,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import org.jacpfx.common.Operation;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
 import org.jacpfx.common.util.Serializer;
+import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.util.ConfigurationUtil;
 import org.jacpfx.vertx.services.util.ReflectionUtil;
@@ -30,6 +32,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,19 +100,22 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
                              SessionHandler sessionHandler = SessionHandler.create(store);
                              */
-                            router.get(sName+path.value()).handler(routingContext -> {
+                            Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
+
+                            router.get(sName + path.value()).handler(routingContext -> {
                                 try {
                                     final Object[] parameters = ReflectionUtil.invokeRESTParameters(
                                             routingContext,
                                             restMethod,
                                             vertx,
                                             null,
-                                            throwable -> throwable.getStackTrace());
+                                            throwable -> handleRestError(service, onErrorMethod, routingContext, throwable));
                                     ReflectionUtil.genericMethodInvocation(
                                             restMethod,
                                             () -> parameters, service);
                                 } catch (Throwable throwable) {
-                                    throwable.printStackTrace();
+                                    handleRestError(service, onErrorMethod, routingContext, throwable);
+
                                 }
                             });
                         });
@@ -118,6 +124,34 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
             server.requestHandler(router::accept).listen();
         }
+    }
+
+    private void handleRestError(Object service, Optional<Method> onErrorMethod, RoutingContext routingContext, Throwable throwable) {
+        if (onErrorMethod.isPresent()) {
+            try {
+                ReflectionUtil.genericMethodInvocation(onErrorMethod.get(), () -> ReflectionUtil.invokeRESTParameters(routingContext, onErrorMethod.get(), vertx, throwable, null), service);
+            } catch (Throwable throwable1) {
+                routingContext.response().setStatusCode(500).end(throwable.getMessage());
+                throwable1.printStackTrace();
+            }
+        } else {
+            routingContext.response().setStatusCode(500).end(throwable.getMessage());
+            throwable.printStackTrace();
+        }
+    }
+
+    private static List<Method> getRESTMethods(Object service, String sName) {
+        final String methodName = sName;
+        final Method[] declaredMethods = service.getClass().getDeclaredMethods();
+        return Stream.of(declaredMethods).
+                filter(method -> filterRESTMethods(method, methodName)).collect(Collectors.toList());
+    }
+
+    private static boolean filterRESTMethods(final Method method, final String methodName) {
+        if (method.isAnnotationPresent(Path.class) && method.getAnnotation(Path.class).value().equalsIgnoreCase(methodName))
+            return true;
+        return method.isAnnotationPresent(OnRestError.class) && method.getAnnotation(OnRestError.class).value().equalsIgnoreCase(methodName);
+
     }
 
 
