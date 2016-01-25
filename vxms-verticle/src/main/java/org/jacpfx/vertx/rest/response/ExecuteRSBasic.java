@@ -66,7 +66,7 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString,errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
@@ -92,7 +92,7 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerByte, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerByte, errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
@@ -116,7 +116,7 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }

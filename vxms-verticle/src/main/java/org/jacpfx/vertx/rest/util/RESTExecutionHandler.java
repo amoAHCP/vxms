@@ -2,7 +2,6 @@ package org.jacpfx.vertx.rest.util;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
-import org.jacpfx.common.exceptions.EndpointExecutionException;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,7 +20,7 @@ public class RESTExecutionHandler {
     }
 
 
-    public static  <T> T handleError(HttpServerResponse handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Throwable e) {
+    public static  <T> T handleError(HttpServerResponse handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction,Consumer<Throwable> errorMethodHandler, Throwable e) {
         if (errorHandler != null) {
             errorHandler.accept(e);
         }
@@ -29,9 +28,7 @@ public class RESTExecutionHandler {
             result = errorFunction.apply(e);
         }
         if (errorHandler == null && errorFunction == null) {
-            // TODO call errorMethodHandler
-            handler.setStatusCode(500).end(new EndpointExecutionException(e).getMessage());
-            e.printStackTrace();
+            errorMethodHandler.accept(e);
 
         }
         return result;

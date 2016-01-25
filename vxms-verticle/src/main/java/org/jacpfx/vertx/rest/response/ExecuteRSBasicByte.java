@@ -58,7 +58,7 @@ public class ExecuteRSBasicByte {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerByte, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerByte, errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }

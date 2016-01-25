@@ -54,7 +54,7 @@ public class ExecuteRSBasicString {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString,errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }

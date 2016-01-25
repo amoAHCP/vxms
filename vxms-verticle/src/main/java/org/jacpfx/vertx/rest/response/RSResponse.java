@@ -30,7 +30,6 @@ public class RSResponse {
     }
 
 
-
     public RSAsyncResponse async() {
         return new RSAsyncResponse(vertx, t, errorMethodHandler, context, headers, true);
     }
@@ -42,7 +41,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSBasicByteResponse(vertx,t,errorMethodHandler,context,headers,async,byteSupplier,null, null, null,  0);
+        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, null, null, null, 0);
     }
 
     /**
@@ -52,7 +51,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSBasicStringResponse(vertx,t,errorMethodHandler,context,headers,async,stringSupplier,null, null, null, 0);
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, null, null, null, 0);
     }
 
     /**
@@ -62,6 +61,17 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(vertx,t,errorMethodHandler,context,headers,async,objectSupplier,encoder, null, null,  0);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, null, null, 0);
+    }
+
+
+    /**
+     * Ends the response. If no data has been written to the response body,
+     * the actual response won't get written until this method gets called.
+     * <p>
+     * Once the response has ended, it cannot be used any more.
+     */
+    public void end(){
+        context.response().end();
     }
 }

@@ -34,4 +34,5 @@ public class RestHandler {
     public RSResponse response() {
         return new RSResponse(vertx,t,errorMethodHandler,context, new HashMap<>(), false);
     }
+
 }

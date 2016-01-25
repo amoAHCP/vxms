@@ -50,7 +50,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject{
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
