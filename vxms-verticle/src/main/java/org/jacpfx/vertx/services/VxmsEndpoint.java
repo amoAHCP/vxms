@@ -83,46 +83,70 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 WebSocketInitializer.registerWebSocketHandler(server, vertx, webSocketRegistry, getConfig(), service);
             });
             Router router = Router.router(vertx);
-            descriptor.getOperationsByType(Type.REST_GET).findFirst().ifPresent(operation -> {
-                Stream.of(this.getClass().getDeclaredMethods()).
-                        filter(m -> m.isAnnotationPresent(Path.class)).
-                        forEach(restMethod -> {
-                            Path path = restMethod.getAnnotation(Path.class);
-                            final String sName = ConfigurationUtil.serviceName(getConfig(), service.getClass());
-                            // final boolean isRegEx = path.value().contains(REGEX_CHECK);
-                            // TODO add annotation wit config class to allow individual configuration of BodyHandler, CookieHandler, CORSHandler and session
-                            router.route().handler(BodyHandler.create());
-                            router.route().handler(CookieHandler.create());
-                            // TODO add session handling
-                            /**
-                             * // Create a clustered session store using defaults
-                             SessionStore store = ClusteredSessionStore.create(vertx);
+            Stream.of(this.getClass().getDeclaredMethods()).
+                    filter(m -> m.isAnnotationPresent(Path.class)).
+                    forEach(restMethod -> {
+                        Path path = restMethod.getAnnotation(Path.class);
+                        final String sName = ConfigurationUtil.serviceName(getConfig(), service.getClass());
+                        // final boolean isRegEx = path.value().contains(REGEX_CHECK);
+                        // TODO add annotation wit config class to allow individual configuration of BodyHandler, CookieHandler, CORSHandler and session
+                        router.route().handler(BodyHandler.create());
+                        router.route().handler(CookieHandler.create());
+                        // TODO add session handling
+                        /**
+                         * // Create a clustered session store using defaults
+                         SessionStore store = ClusteredSessionStore.create(vertx);
 
-                             SessionHandler sessionHandler = SessionHandler.create(store);
-                             */
-                            Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
+                         SessionHandler sessionHandler = SessionHandler.create(store);
+                         */
 
+                        Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
+                        Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class)?restMethod.getAnnotation(GET.class):null);
+                        Optional<POST> post = Optional.ofNullable(restMethod.isAnnotationPresent(POST.class)?restMethod.getAnnotation(POST.class):null);
+                        Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class)?restMethod.getAnnotation(OPTIONS.class):null);
+                        Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class)?restMethod.getAnnotation(PUT.class):null);
+                        Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class)?restMethod.getAnnotation(DELETE.class):null);
+                        get.ifPresent(g-> {
                             router.get(sName + path.value()).handler(routingContext -> {
-                                try {
-                                    final Object[] parameters = ReflectionUtil.invokeRESTParameters(
-                                            routingContext,
-                                            restMethod,
-                                            vertx,
-                                            null,
-                                            throwable -> handleRestError(service, onErrorMethod, routingContext, throwable));
-                                    ReflectionUtil.genericMethodInvocation(
-                                            restMethod,
-                                            () -> parameters, service);
-                                } catch (Throwable throwable) {
-                                    handleRestError(service, onErrorMethod, routingContext, throwable);
-
-                                }
-                            });
+                                handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
+                            }) ;
                         });
-            });
+                        post.ifPresent(g-> router.post(sName + path.value()).handler(routingContext -> {
+                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
+                        }));
+                        options.ifPresent(g-> router.options(sName + path.value()).handler(routingContext -> {
+                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
+                        }));
+                        put.ifPresent(g-> router.put(sName + path.value()).handler(routingContext -> {
+                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
+                        }));
+                        delete.ifPresent(g-> router.delete(sName + path.value()).handler(routingContext -> {
+                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
+                        }));
+                        if(!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()){
+                            // TODO check for Config provider or fallback
+                        }
 
+                    });
 
             server.requestHandler(router::accept).listen();
+        }
+    }
+
+    private void handleRESTRoutingContext(Object service, Method restMethod, Optional<Method> onErrorMethod, RoutingContext routingContext) {
+        try {
+            final Object[] parameters = ReflectionUtil.invokeRESTParameters(
+                    routingContext,
+                    restMethod,
+                    vertx,
+                    null,
+                    throwable -> handleRestError(service, onErrorMethod, routingContext, throwable));
+            ReflectionUtil.genericMethodInvocation(
+                    restMethod,
+                    () -> parameters, service);
+        } catch (Throwable throwable) {
+            handleRestError(service, onErrorMethod, routingContext, throwable);
+
         }
     }
 
@@ -131,11 +155,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             try {
                 ReflectionUtil.genericMethodInvocation(onErrorMethod.get(), () -> ReflectionUtil.invokeRESTParameters(routingContext, onErrorMethod.get(), vertx, throwable, null), service);
             } catch (Throwable throwable1) {
-                routingContext.response().setStatusCode(500).end(throwable.getMessage());
+                routingContext.fail(throwable1);
                 throwable1.printStackTrace();
             }
         } else {
-            routingContext.response().setStatusCode(500).end(throwable.getMessage());
+            routingContext.fail(throwable);
             throwable.printStackTrace();
         }
     }

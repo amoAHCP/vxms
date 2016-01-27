@@ -16,8 +16,8 @@ import java.util.function.Function;
 public class ExecuteRSStringResponse extends ExecuteRSString {
 
 
-    public ExecuteRSStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+    public ExecuteRSStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
 
@@ -28,16 +28,16 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the response chain
      */
     public ExecuteRSString onErrorResponse(Function<Throwable, String> errorHandlerString) {
-        return new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
 
     public ExecuteRSStringResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
     public ExecuteRSStringResponse retry(int retryCount) {
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -47,7 +47,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the response chain
      */
     public ExecuteRSStringResponse timeout(long timeout) {
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -57,18 +57,19 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the response chain
      */
     public ExecuteRSStringResponse delay(long delay) {
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
     public ExecuteRSString contentType(String contentType) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        return new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
     public ExecuteRSStringResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headerMap, async, stringSupplier, encoder, errorHandler, errorHandlerString, retryCount, timeout, delay);
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headerMap, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
+
 }

@@ -1,5 +1,6 @@
 package org.jacpfx.vertx.rest.response;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
@@ -28,9 +29,10 @@ public class ExecuteRSBasicObject {
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
     protected final Function<Throwable, Serializable> errorHandlerObject;
+    protected final int httpStatusCode;
     protected final int retryCount;
 
-    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async,  ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int retryCount) {
+    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async,  ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -41,7 +43,14 @@ public class ExecuteRSBasicObject {
         this.encoder = encoder;
         this.errorHandler = errorHandler;
         this.errorHandlerObject = errorHandlerObject;
+        this.httpStatusCode = httpStatusCode;
         this.retryCount = retryCount;
+    }
+
+
+    public void execute(HttpResponseStatus status) {
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
+        lastStep.execute();
     }
 
 

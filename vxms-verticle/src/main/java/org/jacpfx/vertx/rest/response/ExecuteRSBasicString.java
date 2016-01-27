@@ -1,6 +1,8 @@
 package org.jacpfx.vertx.rest.response;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
@@ -25,9 +27,11 @@ public class ExecuteRSBasicString {
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
     protected final Function<Throwable, String> errorHandlerString;
+    protected final int httpStatusCode;
     protected final int retryCount;
 
-    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async,  ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int retryCount) {
+
+    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -39,6 +43,12 @@ public class ExecuteRSBasicString {
         this.errorHandler = errorHandler;
         this.errorHandlerString = errorHandlerString;
         this.retryCount = retryCount;
+        this.httpStatusCode = httpStatusCode;
+    }
+
+    public void execute(HttpResponseStatus status) {
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
+        lastStep.execute();
     }
 
     public void execute() {
@@ -54,7 +64,7 @@ public class ExecuteRSBasicString {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString,errorMethodHandler, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString, errorMethodHandler, e);
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
@@ -62,10 +72,11 @@ public class ExecuteRSBasicString {
                             }
                             if (!context.response().ended()) {
                                 updateResponseHaders();
+                                HttpServerResponse response = getHttpServerResponse();
                                 if (result != null) {
-                                    context.response().end(result);
+                                    response.end(result);
                                 } else {
-                                    context.response().end();
+                                    response.end();
                                 }
                             }
 
@@ -73,6 +84,14 @@ public class ExecuteRSBasicString {
                 );
 
 
+    }
+
+    private HttpServerResponse getHttpServerResponse() {
+        HttpServerResponse response = context.response();
+        if (httpStatusCode != 0) {
+            response = response.setStatusCode(httpStatusCode);
+        }
+        return response;
     }
 
     protected void updateResponseHaders() {

@@ -35,7 +35,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "localhost";
-    public static final int PORT = 9090;
+    public static final int PORT = 9999;
 
     protected int getNumNodes() {
         return 1;

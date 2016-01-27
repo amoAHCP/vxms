@@ -1,5 +1,6 @@
 package org.jacpfx.vertx.rest.response;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -18,14 +19,22 @@ import java.util.function.Function;
  * Created by Andy Moncsek on 12.01.16.
  */
 public class ExecuteRSByte extends ExecuteRSBasicByte {
-    protected final long delay;
     protected final long timeout;
+    protected final long delay;
 
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int retryCount,long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
-        this.delay = delay;
+
+    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         this.timeout = timeout;
+        this.delay = delay;
     }
+
+    @Override
+    public void execute(HttpResponseStatus status) {
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        lastStep.execute();
+    }
+
 
     @Override
     public void execute() {

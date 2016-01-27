@@ -1,5 +1,6 @@
 package org.jacpfx.vertx.rest.response;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
@@ -35,33 +36,33 @@ public class RSResponse {
     }
 
     /**
-     * Retunrs a byte array to the target type
+     * Returns a byte array to the target type
      *
      * @param byteSupplier supplier which returns the response value as byte array
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, null, null, null, 0);
+        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, null, null, null, 0, 0);
     }
 
     /**
-     * Retunrs a String to the target type
+     * Returns a String to the target type
      *
      * @param stringSupplier supplier which returns the response value as String
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, null, null, null, 0);
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, null, null, null, 0, 0);
     }
 
     /**
-     * Retunrs a Serializable to the target type
+     * Returns a Serializable to the target type
      *
      * @param objectSupplier supplier which returns the response value as Serializable
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, null, null, 0);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, null, null, 0, 0);
     }
 
 
@@ -71,7 +72,24 @@ public class RSResponse {
      * <p>
      * Once the response has ended, it cannot be used any more.
      */
-    public void end(){
+    public void end() {
         context.response().end();
+    }
+
+    /**
+     * Ends the response. If no data has been written to the response body,
+     * the actual response won't get written until this method gets called.
+     * <p>
+     * Once the response has ended, it cannot be used any more.
+     *
+     * @param status, the HTTP Status code
+     */
+    public void end(HttpResponseStatus status) {
+        if (status != null) {
+            context.response().setStatusCode(status.code()).end();
+        } else {
+            context.response().end();
+        }
+
     }
 }
