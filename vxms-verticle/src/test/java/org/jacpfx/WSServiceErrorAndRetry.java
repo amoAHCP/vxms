@@ -141,23 +141,22 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         await();
     }
 
-        @Test
-        public void stringUncatchedError() throws InterruptedException {
-            final AtomicInteger counter = new AtomicInteger(0);
-            getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/stringUncatchedError", ws -> {
+    @Test
+    public void stringUncatchedError() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/stringUncatchedError", ws -> {
 
-                ws.handler((data) -> {
-                    handleInSimpleStringTests(ws, data);
-                });
-
-                ws.writeFrame(new WebSocketFrameImpl("xhello"));
+            ws.handler((data) -> {
+                handleInSimpleStringTests(ws, data);
             });
 
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
 
-            await();
 
-        }
+        await();
 
+    }
 
 
     @Test
@@ -178,7 +177,6 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     }
 
 
-
     @Test
     public void objectUnCatchedObjectError() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
@@ -195,8 +193,6 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         await();
 
     }
-
-
 
 
     @Test
@@ -269,6 +265,23 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     }
 
     @Test
+    public void catchedTimeoutErrorException() throws InterruptedException {
+        final AtomicInteger counter = new AtomicInteger(0);
+        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/catchedTimeoutErrorException", ws -> {
+
+            ws.handler((data) -> {
+                handleInSimpleTests(ws, data);
+            });
+
+            ws.writeFrame(new WebSocketFrameImpl("xhello"));
+        });
+
+
+        await();
+
+    }
+
+    @Test
     public void uncatchedMethodError() throws InterruptedException {
         final AtomicInteger counter = new AtomicInteger(0);
         getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/uncatchedMethodError", ws -> {
@@ -319,9 +332,6 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         await();
 
     }
-
-
-
 
 
     @Test
@@ -522,7 +532,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     onErrorResponse((t) -> {
                         t.printStackTrace();
                         return new Payload<String>(reply.payload().getString().get());
-                    },new ExampleByteEncoder()).
+                    }, new ExampleByteEncoder()).
                     execute();
         }
 
@@ -544,7 +554,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     retry(3).
                     onErrorResponse((t) -> {
                         throw new NullPointerException("test");
-                    },new ExampleByteEncoder()).
+                    }, new ExampleByteEncoder()).
                     execute();
         }
 
@@ -728,11 +738,12 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     async().
                     reply().
                     objectResponse(() -> {
+                                Thread.sleep(1500);
                                 System.out.println("EXCEPTION");
                                 throw new NullPointerException("test");
                             }, new ExampleByteEncoder()
                     ).
-                    timeout(2000).
+                    timeout(500).
                     retry(3).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
@@ -753,6 +764,35 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     execute();
+        }
+
+        @OnWebSocketMessage("/catchedTimeoutErrorException")
+        public void wsEndpointCatchedTimeoutErrorException(WebSocketHandler reply) {
+            reply.
+                    response().
+                    async().
+                    reply().
+                    objectResponse(() -> {
+                                System.out.println("SLEEP");
+                                Thread.sleep(1500);
+                                System.out.println("EXCEPTION");
+                                throw new NullPointerException("test");
+                            }, new ExampleByteEncoder()
+                    ).
+                    timeout(1000).
+                    onError(error -> {
+                        System.out.println("ERROR: ");
+                        error.printStackTrace();
+                    }).
+                    retry(3).
+                    onErrorResponse(error -> {
+
+                                System.out.println("return payload after failover");
+                                return new Payload<String>(reply.payload().getString().get());
+                            }, new ExampleByteEncoder()
+                    ).
+                    execute();
+            System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
 
 
@@ -794,21 +834,21 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     retry(3).
-                    onError((t) ->   {
-                               if(count.get()<=1){
-                                   reply.
-                                           response().
-                                           reply().
-                                           objectResponse(() -> {
+                    onError((t) -> {
+                                if (count.get() <= 1) {
+                                    reply.
+                                            response().
+                                            reply().
+                                            objectResponse(() -> {
 
-                                                       System.out.println("fallback");
-                                                       t.printStackTrace();
-                                                       return new Payload<String>(reply.payload().getString().get());
-                                                   }, new ExampleByteEncoder()
-                                           ).execute();
-                               }
-                    }
-                            ).
+                                                        System.out.println("fallback");
+                                                        t.printStackTrace();
+                                                        return new Payload<String>(reply.payload().getString().get());
+                                                    }, new ExampleByteEncoder()
+                                            ).execute();
+                                }
+                            }
+                    ).
                     execute();
         }
 
@@ -830,8 +870,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     ).
                     retry(3).
                     onError((t) -> {
-                        System.out.println("error: "+count.get());
-                        if(count.get()<=1){
+                        System.out.println("error: " + count.get());
+                        if (count.get() <= 1) {
                             reply.
                                     response().
                                     reply().
@@ -847,7 +887,6 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     }).
                     execute();
         }
-
 
 
         @OnWebSocketMessage("/catchedByteError")
@@ -943,7 +982,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
 
         @OnWebSocketError("/exceptionTests01---")
-        public void wsEndpointExceptionTests01Error(WebSocketHandler reply,Throwable t) {
+        public void wsEndpointExceptionTests01Error(WebSocketHandler reply, Throwable t) {
             t.printStackTrace();
             System.out.println("----failover");
         }
@@ -957,17 +996,14 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
 
 
         @OnWebSocketError("/exceptionTests02---")
-        public void wsEndpointExceptionTests02Error(WebSocketHandler reply,Throwable t) {
+        public void wsEndpointExceptionTests02Error(WebSocketHandler reply, Throwable t) {
             t.printStackTrace();
             System.out.println("----failover");
-            reply.response().reply().stringResponse(()->"").execute();
+            reply.response().reply().stringResponse(() -> "").execute();
         }
 
 
     }
-
-
-
 
 
     private void handleInSimpleTests(WebSocket ws, Buffer data) {
@@ -989,7 +1025,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     private void handleInSimpleStringTests(WebSocket ws, Buffer data) {
         System.out.println("client data simpleRetry:");
         assertNotNull(data.getBytes());
-        String payload = data.getString(0,data.length());
+        String payload = data.getString(0, data.length());
         assertTrue(payload.equals("xhello"));
         System.out.println(payload);
         ws.close();

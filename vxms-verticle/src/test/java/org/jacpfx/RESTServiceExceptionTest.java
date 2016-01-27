@@ -13,7 +13,9 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
+import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleByteEncoder;
+import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
@@ -23,6 +25,7 @@ import org.junit.Test;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Andy Moncsek on 23.04.15.
@@ -184,6 +187,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         await();
 
     }
+
     @Test
     public void exceptionInAsyncStringResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
@@ -309,6 +313,83 @@ public class RESTServiceExceptionTest extends VertxTestBase {
 
     }
 
+
+    @Test
+    public void catchedAsyncStringErrorDelay() throws InterruptedException {
+        HttpClientOptions options = new HttpClientOptions();
+        options.setDefaultPort(PORT);
+        HttpClient client = vertx.
+                createHttpClient(options);
+
+        HttpClientRequest request = client.get("/wsService/catchedAsyncStringErrorDelay?val=123&tmp=456", new Handler<HttpClientResponse>() {
+            public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(body -> {
+                    String val = body.getString(0, body.length());
+                    System.out.println("--------catchedAsyncStringErrorDelay: " + val);
+                    //assertEquals(key, "val");
+                    testComplete();
+                });
+
+
+            }
+        });
+        request.end();
+
+        await();
+
+    }
+
+    @Test
+    public void catchedAsyncByteErrorDelay() throws InterruptedException {
+        HttpClientOptions options = new HttpClientOptions();
+        options.setDefaultPort(PORT);
+        HttpClient client = vertx.
+                createHttpClient(options);
+
+        HttpClientRequest request = client.get("/wsService/catchedAsyncByteErrorDelay?val=123&tmp=456", new Handler<HttpClientResponse>() {
+            public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(body -> {
+                    String val = body.getString(0, body.length());
+                    System.out.println("--------catchedAsyncByteErrorDelay: " + val);
+                    //assertEquals(key, "val");
+                    testComplete();
+                });
+
+
+            }
+        });
+        request.end();
+
+        await();
+
+    }
+
+    @Test
+    public void catchedAsyncObjectErrorDelay() throws InterruptedException {
+        HttpClientOptions options = new HttpClientOptions();
+        options.setDefaultPort(PORT);
+        HttpClient client = vertx.
+                createHttpClient(options);
+
+        HttpClientRequest request = client.get("/wsService/catchedAsyncObjectErrorDelay?val=123&tmp=456", new Handler<HttpClientResponse>() {
+            public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(body -> {
+                    String val = body.getString(0, body.length());
+                    System.out.println("--------catchedAsyncByteErrorDelay: " + val);
+                    //assertEquals(key, "val");
+                    testComplete();
+                });
+
+
+            }
+        });
+        request.end();
+
+        await();
+
+    }
+
+
     public HttpClient getClient() {
         return client;
     }
@@ -374,7 +455,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
             handler.response().objectResponse(() -> {
                 throw new NullPointerException("Test");
                 //return "";
-            },new ExampleByteEncoder()).execute();
+            }, new ExampleByteEncoder()).execute();
         }
 
         @Path("/exceptionInByteResponse")
@@ -396,6 +477,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
                 //return "";
             }).execute();
         }
+
         @OnRestError("/exceptionInStringResponseWithErrorHandler")
         public void rsexceptionInStringResponseWithErrorHandlerError(RestHandler handler, Throwable t) {
             System.out.println("+++++++rsexceptionInStringResponseWithErrorHandlerError: " + handler);
@@ -408,17 +490,103 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         @GET
         public void rsexceptionAsyncInStringResponseWithErrorHandler(RestHandler handler) {
             System.out.println("exceptionInStringResponseWithErrorHandler: " + handler);
-            handler.response().stringResponse(() -> {
+            handler.response().async().stringResponse(() -> {
                 throw new NullPointerException("Test");
                 //return "";
             }).execute();
         }
+
         @OnRestError("/exceptionInAsyncStringResponseWithErrorHandler")
         public void exceptionInAsyncStringResponseWithErrorHandlerError(RestHandler handler, Throwable t) {
             System.out.println("+++++++rsexceptionInAsyncStringResponseWithErrorHandler: " + handler);
             t.printStackTrace();
             System.out.println("----------------------------------");
             throw new NullPointerException("test...1234");
+        }
+
+        @Path("/catchedAsyncStringErrorDelay")
+        @GET
+        public void rscatchedAsyncStringErrorDelay(RestHandler reply) {
+            long startTime = System.currentTimeMillis();
+            AtomicInteger count = new AtomicInteger(4);
+            reply.
+                    response().
+                    async().
+                    stringResponse(() -> {
+                        long estimatedTime = System.currentTimeMillis() - startTime;
+                        System.out.println("time: " + estimatedTime);
+                        if (count.decrementAndGet() >= 0) {
+                            System.out.println("throw");
+                            throw new NullPointerException("test");
+                        }
+
+                        return null;
+                    }).
+                    retry(3).
+                    delay(1000).
+                    onErrorResponse((t) -> {
+                        System.out.print("the stack trace --> ");
+                        t.printStackTrace();
+                        return "hello world";
+                    }).
+                    execute();
+        }
+
+        @Path("/catchedAsyncByteErrorDelay")
+        @GET
+        public void rscatchedAsyncByteErrorDelay(RestHandler reply) {
+            long startTime = System.currentTimeMillis();
+            AtomicInteger count = new AtomicInteger(4);
+            reply.
+                    response().
+                    async().
+                    byteResponse(() -> {
+                        long estimatedTime = System.currentTimeMillis() - startTime;
+                        System.out.println("time: " + estimatedTime);
+                        if (count.decrementAndGet() >= 0) {
+                            System.out.println("throw");
+                            throw new NullPointerException("test");
+                        }
+
+                        return null;
+                    }).
+                    retry(3).
+                    delay(1000).
+                    onErrorResponse((t) -> {
+                        System.out.print("the stack trace --> ");
+                        t.printStackTrace();
+                        return "hello world".getBytes();
+                    }).
+                    execute();
+        }
+
+
+        @Path("/catchedAsyncObjectErrorDelay")
+        @GET
+        public void rscatchedAsyncObjectErrorDelay(RestHandler reply) {
+            long startTime = System.currentTimeMillis();
+            AtomicInteger count = new AtomicInteger(4);
+            reply.
+                    response().
+                    async().
+                    objectResponse(() -> {
+                        long estimatedTime = System.currentTimeMillis() - startTime;
+                        System.out.println("time: " + estimatedTime);
+                        if (count.decrementAndGet() >= 0) {
+                            System.out.println("throw");
+                            throw new NullPointerException("test");
+                        }
+
+                        return null;
+                    }, new ExampleStringEncoder()).
+                    retry(3).
+                    delay(1000).
+                    onErrorResponse((t) -> {
+                        System.out.print("the stack trace --> ");
+                        t.printStackTrace();
+                        return new Payload<String>("hello world");
+                    }, new ExampleStringEncoder()).
+                    execute();
         }
 
     }

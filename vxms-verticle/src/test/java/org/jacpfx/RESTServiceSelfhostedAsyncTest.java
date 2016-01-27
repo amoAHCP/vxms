@@ -13,6 +13,8 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
+import org.jacpfx.entity.Payload;
+import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
@@ -148,6 +150,31 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                 return "test";
             }).execute();
         }
+
+        @Path("/asyncByteResponse")
+        @GET
+        public void rsAsyncByteResponse(RestHandler reply) throws InterruptedException {
+            System.out.println("asyncStringResponse: " + reply);
+            reply.response().async().byteResponse(() -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return "test".getBytes();
+            }).execute();
+        }
+
+        @Path("/asyncObjectResponse")
+        @GET
+        public void rsAsyncObjectResponse(RestHandler reply) throws InterruptedException {
+            System.out.println("asyncStringResponse: " + reply);
+            reply.response().async().objectResponse(() -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return new Payload<String>("test");
+            }, new ExampleStringEncoder()).execute();
+        }
+
 
         @Path("/asyncStringResponseParameter/:help")
         @GET

@@ -16,8 +16,8 @@ import java.util.function.Function;
 public class ExecuteRSByteResponse extends ExecuteRSByte {
 
 
-    public ExecuteRSByteResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int retryCount) {
-        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+    public ExecuteRSByteResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
     /**
@@ -27,21 +27,21 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @return the response chain
      */
     public ExecuteRSByte onErrorResponse(Function<Throwable, byte[]> errorHandlerByte) {
-        return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
     public ExecuteRSByte contentType(String contentType) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
     public ExecuteRSByteResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
     public ExecuteRSByteResponse retry(int retryCount) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
     /**
@@ -51,7 +51,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @return the response chain
      */
     public ExecuteRSByteResponse timeout(long timeout) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
     /**
@@ -61,13 +61,13 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @return the response chain
      */
     public ExecuteRSByteResponse delay(long delay) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 
 
     public ExecuteRSByteResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headerMap, async, byteSupplier, encoder, errorHandler, errorHandlerByte, retryCount, timeout, delay);
     }
 }

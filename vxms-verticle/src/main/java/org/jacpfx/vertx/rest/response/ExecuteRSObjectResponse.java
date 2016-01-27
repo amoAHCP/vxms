@@ -17,8 +17,8 @@ import java.util.function.Function;
 public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
 
-    public ExecuteRSObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int retryCount) {
-        super(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+    public ExecuteRSObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
 
@@ -29,15 +29,15 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObject onErrorResponse(Function<Throwable, Serializable> errorHandlerObject, Encoder encoder) {
-        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
     public ExecuteRSObjectResponse retry(int retryCount) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
     /**
@@ -47,7 +47,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObjectResponse timeout(long timeout) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
     /**
@@ -57,18 +57,18 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObjectResponse delay(long delay) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
     public ExecuteRSObject contentType(String contentType) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 
     public ExecuteRSObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, retryCount, timeout, delay);
     }
 }
