@@ -437,6 +437,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
     public void simpleMutilpeReplyToreplytoAllBut() throws InterruptedException {
         ExecutorService s = Executors.newFixedThreadPool(10);
         final CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch initLatch = new CountDownLatch(1);
         getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/replytoAllBut", ws -> {
 
             ws.handler((data) -> {
@@ -446,7 +447,11 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 ws.close();
 
             });
-
+            try {
+                initLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             ws.writeFrame(new WebSocketFrameImpl("1"));
         });
 
@@ -465,7 +470,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
         });
 
-
+        initLatch.countDown();
         latch.await();
     }
 
@@ -634,7 +639,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                     toAllBut(reply.endpoint()). // reply to other connected sessions
                     stringResponse(() -> reply.payload().getString().get()).
                     execute();
-            System.out.println("replytoAllBut: " + name + "   :::" + this);
+            System.out.println("replytoAllBut: " + reply.endpoint() + "   :::" + this);
         }
 
         @OnWebSocketOpen("/getObjectAndReplyObject")
