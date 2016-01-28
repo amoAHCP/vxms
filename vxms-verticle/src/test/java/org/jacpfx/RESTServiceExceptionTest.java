@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
+
 public class RESTServiceExceptionTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
@@ -84,6 +85,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
 
         awaitLatch(latch2);
 
+
     }
 
     @Test
@@ -107,7 +109,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
 
         request.end();
-        await();
+       await();
        // request.end();
     }
 

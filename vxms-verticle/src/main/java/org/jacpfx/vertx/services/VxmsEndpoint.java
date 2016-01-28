@@ -60,15 +60,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         // register info (keepAlive) handler
         vertx.eventBus().consumer(ConfigurationUtil.serviceName(getConfig(), this.getClass()) + "-info", this::info);
 
-        initSelfHostedService();
+        initSelfHostedService(startFuture);
 
         long endTime = System.currentTimeMillis();
         log.info("start time: " + (endTime - startTime) + "ms");
-        startFuture.complete();
+
 
     }
 
-    private void initSelfHostedService() {
+    private void initSelfHostedService(final Future<Void> startFuture) {
         if (port > 0) {
             updateConfigurationToSelfhosted();
 
@@ -131,7 +131,13 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
                     });
 
-            server.requestHandler(router::accept).listen();
+            server.requestHandler(router::accept).listen(status -> {
+                if (status.succeeded()) {
+                    startFuture.complete();
+                    return;
+                }
+                startFuture.fail(status.cause());
+            });
         }
     }
 
