@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -103,7 +104,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -121,7 +122,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -138,7 +139,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -154,7 +155,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -172,7 +173,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -190,7 +191,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -208,7 +209,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -225,7 +226,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -242,7 +243,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -260,7 +261,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -277,7 +278,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -294,7 +295,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -311,7 +312,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -329,7 +330,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -347,7 +348,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -371,7 +372,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -396,7 +397,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -423,7 +424,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -450,7 +451,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 

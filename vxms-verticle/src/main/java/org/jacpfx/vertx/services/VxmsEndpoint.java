@@ -90,6 +90,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                         final String sName = ConfigurationUtil.serviceName(getConfig(), service.getClass());
                         // final boolean isRegEx = path.value().contains(REGEX_CHECK);
                         // TODO add annotation wit config class to allow individual configuration of BodyHandler, CookieHandler, CORSHandler and session
+
                         router.route().handler(BodyHandler.create());
                         router.route().handler(CookieHandler.create());
                         // TODO add session handling
@@ -106,25 +107,26 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                         Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class)?restMethod.getAnnotation(OPTIONS.class):null);
                         Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class)?restMethod.getAnnotation(PUT.class):null);
                         Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class)?restMethod.getAnnotation(DELETE.class):null);
-                        get.ifPresent(g-> {
-                            router.get(sName + path.value()).handler(routingContext -> {
-                                handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
-                            }) ;
-                        });
-                        post.ifPresent(g-> router.post(sName + path.value()).handler(routingContext -> {
-                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
-                        }));
-                        options.ifPresent(g-> router.options(sName + path.value()).handler(routingContext -> {
-                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
-                        }));
-                        put.ifPresent(g-> router.put(sName + path.value()).handler(routingContext -> {
-                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
-                        }));
-                        delete.ifPresent(g-> router.delete(sName + path.value()).handler(routingContext -> {
-                            handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext);
-                        }));
+
+                        get.ifPresent(g->
+                                router.get(sName + path.value()).handler(BodyHandler.create()).handler(routingContext ->
+                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
+                        post.ifPresent(g->
+                                router.post(sName + path.value()).handler(routingContext ->
+                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
+                        options.ifPresent(g->
+                                router.options(sName + path.value()).handler(routingContext ->
+                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
+                        put.ifPresent(g->
+                                router.put(sName + path.value()).handler(routingContext ->
+                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
+                        delete.ifPresent(g->
+                                router.delete(sName + path.value()).handler(routingContext ->
+                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
                         if(!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()){
                             // TODO check for Config provider or fallback
+                            router.route(sName + path.value()).handler(routingContext ->
+                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
                         }
 
                     });

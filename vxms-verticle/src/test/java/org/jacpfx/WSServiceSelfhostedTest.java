@@ -115,7 +115,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -137,7 +137,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -257,7 +257,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -287,7 +287,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -323,7 +323,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -354,7 +354,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -385,7 +385,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -409,7 +409,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -429,7 +429,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         });
 
 
-        await();
+        await(10000, TimeUnit.MILLISECONDS);
     }
 
 

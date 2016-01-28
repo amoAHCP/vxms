@@ -14,11 +14,10 @@ import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import java.util.concurrent.CountDownLatch;
@@ -113,20 +112,152 @@ public class RESTJerseyClientTests extends VertxTestBase {
     }
 
     @Test
-
-    public void stringPOSTResponse() throws InterruptedException, ExecutionException {
+    public void stringPOST() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTResponse");
-       target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello",MediaType.APPLICATION_JSON_TYPE)).get();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOST");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
+            @Override
+            public void completed(String response) {
+
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        }).get();
+
+        latch.await();
+        testComplete();
+
+    }
 
 
+    @Ignore // TODO add autoclose after method execution... be aware of async processes in background
+    @Test
+    public void stringPOSTNoEnd() throws InterruptedException, ExecutionException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTNoEnd");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
+            @Override
+            public void completed(String response) {
+
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        }).get();
+
+        latch.await();
         testComplete();
 
     }
 
     @Test
+    public void stringPOSTResponse() throws InterruptedException, ExecutionException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTResponse");
+       target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
+           @Override
+           public void completed(String response) {
+               System.out.println("Response entity '" + response + "' received.");
+               Assert.assertEquals(response,"hello");
+               latch.countDown();
+           }
 
+           @Override
+           public void failed(Throwable throwable) {
+
+           }
+       }).get();
+
+        latch.await();
+        testComplete();
+
+    }
+
+    @Test
+    public void stringOPTIONSResponse() throws InterruptedException, ExecutionException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringOPTIONSResponse");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().options( new InvocationCallback<String>() {
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response,"hello");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        }).get();
+
+        latch.await();
+        testComplete();
+
+    }
+
+    @Test
+    public void stringPUTResponse() throws InterruptedException, ExecutionException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPUTResponse");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().put(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response,"hello");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        }).get();
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+
+    @Test
+    public void stringDELETEResponse() throws InterruptedException, ExecutionException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringDELETEResponse");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().delete( new InvocationCallback<String>() {
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response,"hello");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        }).get();
+
+        latch.await();
+        testComplete();
+
+    }
+
+    @Test
     public void stringGETResponseWithParameter() throws InterruptedException {
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -153,6 +284,32 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
     }
 
+    @Test
+    public void stringPOSTResponseWithParameter() throws InterruptedException, ExecutionException {
+
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTResponseWithParameter/123");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response,"hello:123");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        }).get();
+
+        latch.await();
+        testComplete();
+
+
+    }
+
 
     public HttpClient getClient() {
         return client;
@@ -171,9 +328,57 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
         @Path("/stringPOSTResponse")
         @POST
-        public void rsstringPOSTResponse(RestHandler reply) {
-            System.out.println("stringPOSTResponse: " + reply);
-            reply.response().stringResponse(() -> "test").execute();
+        public void rsstringPOSTResponse(RestHandler handler) {
+
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringPOSTResponse: " + val);
+            handler.response().stringResponse(() -> val).execute();
+        }
+
+        @Path("/stringOPTIONSResponse")
+        @OPTIONS
+        public void rsstringOPTIONSResponse(RestHandler handler) {
+
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringOPTIONSResponse: " + val);
+            handler.response().stringResponse(() -> "hello").execute();
+        }
+
+        @Path("/stringPUTResponse")
+        @PUT
+        public void rsstringPUTResponse(RestHandler handler) {
+
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringPUTResponse: " + val);
+            handler.response().stringResponse(() -> val).execute();
+        }
+
+        @Path("/stringDELETEResponse")
+        @DELETE
+        public void rsstringDELETEResponse(RestHandler handler) {
+
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringDELETEResponse: " + val);
+            handler.response().stringResponse(() -> "hello").execute();
+        }
+
+
+
+        @Path("/stringPOST")
+        @POST
+        public void rsstringPOST(RestHandler handler) {
+
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringPOST: " + val);
+            handler.response().end();
+        }
+
+        @Path("/stringPOSTNoEnd")
+        @POST
+        public void rsstringPOSTNoEnd(RestHandler handler) {
+
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringPOSTNoEnd: " + val);
         }
 
         @Path("/stringGETResponseWithParameter/:help")
@@ -182,6 +387,14 @@ public class RESTJerseyClientTests extends VertxTestBase {
             String productType = handler.request().param("help");
             System.out.println("wsEndpointTwo: " + handler);
             handler.response().stringResponse(() -> productType).execute();
+        }
+        @Path("/stringPOSTResponseWithParameter/:help")
+        @POST
+        public void rsstringPOSTResponseWithParameter(RestHandler handler) {
+            String productType = handler.request().param("help");
+            String val = handler.request().body().getString(0,handler.request().body().length());
+            System.out.println("stringPOSTResponse: " + val+":"+productType);
+            handler.response().stringResponse(() -> val+":"+productType).execute();
         }
 
     }
