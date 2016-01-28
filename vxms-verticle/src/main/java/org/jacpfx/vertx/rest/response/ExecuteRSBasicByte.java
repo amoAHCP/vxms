@@ -30,7 +30,7 @@ public class ExecuteRSBasicByte {
     protected final int httpStatusCode;
     protected final int retryCount;
 
-    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte,int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -51,7 +51,6 @@ public class ExecuteRSBasicByte {
     }
 
 
-
     public void execute() {
 
 
@@ -59,6 +58,7 @@ public class ExecuteRSBasicByte {
                 ifPresent(supplier -> {
                             int retry = retryCount;
                             byte[] result = new byte[0];
+                            boolean errorHandling = false;
                             while (retry >= 0) {
                                 try {
                                     result = supplier.get();
@@ -68,11 +68,13 @@ public class ExecuteRSBasicByte {
                                     retry--;
                                     if (retry < 0) {
                                         result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerByte, errorMethodHandler, e);
+                                        errorHandling = true;
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
                                 }
                             }
+                            if (errorHandling && result == null) return;
                             if (!context.response().ended()) {
                                 updateResponseHaders();
                                 context.response().end(Buffer.buffer(result));

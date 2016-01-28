@@ -57,6 +57,7 @@ public class ExecuteRSBasicString {
                 ifPresent(supplier -> {
                             int retry = retryCount;
                             String result = null;
+                            boolean errorHandling = false;
                             while (retry >= 0) {
                                 try {
                                     result = supplier.get();
@@ -65,11 +66,13 @@ public class ExecuteRSBasicString {
                                     retry--;
                                     if (retry < 0) {
                                         result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString, errorMethodHandler, e);
+                                        errorHandling = true;
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
                                 }
                             }
+                            if (errorHandling && result == null) return;
                             if (!context.response().ended()) {
                                 updateResponseHaders();
                                 HttpServerResponse response = getHttpServerResponse();

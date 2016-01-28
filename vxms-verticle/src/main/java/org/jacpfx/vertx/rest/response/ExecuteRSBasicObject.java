@@ -32,7 +32,7 @@ public class ExecuteRSBasicObject {
     protected final int httpStatusCode;
     protected final int retryCount;
 
-    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async,  ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -59,6 +59,7 @@ public class ExecuteRSBasicObject {
                 ifPresent(supplier -> {
                             int retry = retryCount;
                             Serializable result = "";
+                            boolean errorHandling = false;
                             while (retry >= 0) {
                                 try {
                                     result = supplier.get();
@@ -66,12 +67,14 @@ public class ExecuteRSBasicObject {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject,errorMethodHandler, e);
+                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, errorMethodHandler, e);
+                                        errorHandling = true;
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
                                     }
                                 }
                             }
+                            if (errorHandling && result == null) return;
                             if (!context.response().ended()) {
                                 updateResponseHaders();
                                 WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
