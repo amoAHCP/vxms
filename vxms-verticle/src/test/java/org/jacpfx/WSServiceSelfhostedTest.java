@@ -25,7 +25,6 @@ import org.jacpfx.vertx.websocket.annotation.OnWebSocketOpen;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -89,8 +88,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
         });
 
-        client = getVertx().
-                createHttpClient(new HttpClientOptions());
+
+
         awaitLatch(latch2);
 
     }
@@ -101,7 +100,8 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
     public void simpleConnectAndWrite() throws InterruptedException {
 
 
-        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/simpleConnectAndWrite", ws -> {
+        final HttpClient client = getClient();
+        client.websocket(PORT, HOST, SERVICE_REST_GET + "/simpleConnectAndWrite", ws -> {
             long startTime = System.currentTimeMillis();
             ws.handler((data) -> {
                 System.out.println("client data simpleConnectAndWrite:" + new String(data.getBytes()));
@@ -124,7 +124,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
 
         await(10000, TimeUnit.MILLISECONDS);
-
+        client.close();
     }
 
     @Test
@@ -595,7 +595,8 @@ testComplete();
     }
 
     public HttpClient getClient() {
-        return client;
+        return  getVertx().
+                createHttpClient(new HttpClientOptions());
     }
 
 
