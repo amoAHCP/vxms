@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import org.jacpfx.beans.HelloWorldBean;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.configuration.SpringConfig;
+import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.jacpfx.vertx.spring.SpringVerticle;
@@ -20,6 +21,7 @@ import javax.ws.rs.Path;
 @ServiceEndpoint(value = "/", port = 9090)
 @SpringVerticle(springConfig = SpringConfig.class)
 public class SimpleSpringREST extends VxmsEndpoint {
+
     @Inject
     HelloWorldBean bean;
 
@@ -33,7 +35,23 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @Path("helloGET/:name")
     @GET
     public void simpleRESTHelloWithParameter(RestHandler handler) {
-        handler.response().async().stringResponse(() -> bean.sayHallo(handler.request().param("name"))).execute();
+        handler.response().async().stringResponse(() -> {
+            final String name = handler.request().param("name");
+            return bean.sayHallo(name);
+        }).execute();
+    }
+
+
+    @Path("simpleExceptionHandling/:name")
+    @GET
+    public void simpleExceptionHandling(RestHandler handler) {
+        handler.response().async().stringResponse(() -> bean.seyHelloWithException()).execute();
+    }
+
+    @OnRestError("simpleExceptionHandling/:name")
+    public void simpleExceptionHandlingOnError(Throwable t, RestHandler handler) {
+        System.out.println("ERROR");
+        handler.response().stringResponse(() -> bean.sayHallo(handler.request().param("name")+" ::"+t.getMessage())).execute();
     }
 
     public static void main(String[] args) {

@@ -79,6 +79,7 @@ public class RESTExecutionHandler {
         }
         if (errorHandler == null && errorFunction == null) {
             errorMethodHandler.accept(e);
+            return null;
 
         }
         return result;

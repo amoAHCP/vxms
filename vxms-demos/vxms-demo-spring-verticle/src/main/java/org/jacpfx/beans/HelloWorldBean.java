@@ -15,4 +15,8 @@ public class HelloWorldBean {
         System.out.println("got name: "+name);
         return "hello world "+name;
     }
+
+    public String seyHelloWithException() {
+        throw new NullPointerException("stupid exception");
+    }
 }
