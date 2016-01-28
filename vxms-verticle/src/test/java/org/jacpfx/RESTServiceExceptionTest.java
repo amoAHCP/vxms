@@ -25,6 +25,7 @@ import org.junit.Test;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -81,8 +82,6 @@ public class RESTServiceExceptionTest extends VertxTestBase {
 
         });
 
-        client = getVertx().
-                createHttpClient(new HttpClientOptions());
         awaitLatch(latch2);
 
     }
@@ -106,10 +105,10 @@ public class RESTServiceExceptionTest extends VertxTestBase {
 
             }
         });
+
         request.end();
-
         await();
-
+       // request.end();
     }
 
 
@@ -149,7 +148,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
             public void handle(HttpClientResponse resp) {
                 resp.bodyHandler(body -> {
                     String val = body.getString(0, body.length());
-                    System.out.println("--------exceptionInMethodBody: " + val);
+                    System.out.println("--------exceptionInMethodBody: " + val+" status:  "+resp.statusCode());
                     //assertEquals(key, "val");
                     testComplete();
                 });
@@ -159,7 +158,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -184,7 +183,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -209,7 +208,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -234,7 +233,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -259,7 +258,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -284,7 +283,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -309,7 +308,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -335,7 +334,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -360,7 +359,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -385,7 +384,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await();
+        await(5000, TimeUnit.MILLISECONDS);
 
     }
 

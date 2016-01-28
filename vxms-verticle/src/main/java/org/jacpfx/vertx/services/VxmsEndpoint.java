@@ -109,7 +109,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                         Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class)?restMethod.getAnnotation(DELETE.class):null);
 
                         get.ifPresent(g->
-                                router.get(sName + path.value()).handler(BodyHandler.create()).handler(routingContext ->
+                                router.get(sName + path.value()).handler(routingContext ->
                                         handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
                         post.ifPresent(g->
                                 router.post(sName + path.value()).handler(routingContext ->
