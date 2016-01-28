@@ -133,6 +133,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
             server.requestHandler(router::accept).listen(status -> {
                 if (status.succeeded()) {
+                    log("started on PORT: "+port+" host: "+host);
                     startFuture.complete();
                     return;
                 }

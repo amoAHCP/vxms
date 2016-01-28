@@ -48,7 +48,8 @@ public class ConfigurationUtil {
 
     public static String getHostName() {
         try {
-            return InetAddress.getLocalHost().getHostName();
+            InetAddress.getLocalHost().getHostName();
+            return "0.0.0.0";
         } catch (UnknownHostException e) {
             e.printStackTrace();
             return "127.0.0.1";
