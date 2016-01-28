@@ -364,8 +364,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                 assertTrue(payload.equals("xhello"));
                 System.out.println(payload);
 
+                ws.closeHandler((x) -> testComplete());
                 ws.close();
-                testComplete();
             });
 
             ws.writeFrame(new WebSocketFrameImpl("xhello"));
@@ -389,8 +389,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                 assertTrue(payload.equals("xhello"));
                 System.out.println(payload);
 
+                ws.closeHandler((x) -> testComplete());
                 ws.close();
-                testComplete();
             });
 
             ws.writeFrame(new WebSocketFrameImpl("xhello"));
@@ -414,7 +414,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                 System.out.println(payload);
 
                 ws.close();
-                testComplete();
+
             });
             ws.closeHandler(handler -> {
                 System.out.println("CLOSED");
@@ -441,7 +441,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                 System.out.println(payload);
 
                 ws.close();
-                testComplete();
+
             });
             ws.closeHandler(handler -> {
                 System.out.println("CLOSED");
@@ -1019,8 +1019,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        ws.closeHandler((x) -> testComplete());
         ws.close();
-        testComplete();
     }
 
     private void handleInSimpleStringTests(WebSocket ws, Buffer data) {
@@ -1029,7 +1029,8 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         String payload = data.getString(0, data.length());
         assertTrue(payload.equals("xhello"));
         System.out.println(payload);
+        ws.closeHandler((x) -> testComplete());
         ws.close();
-        testComplete();
+
     }
 }

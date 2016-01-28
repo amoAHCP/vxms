@@ -25,6 +25,7 @@ import org.jacpfx.vertx.websocket.annotation.OnWebSocketOpen;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -105,10 +106,17 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             ws.handler((data) -> {
                 System.out.println("client data simpleConnectAndWrite:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
-                ws.close();
+
                 long endTime = System.currentTimeMillis();
                 System.out.println("Total execution time simpleConnectAndWrite: " + (endTime - startTime) + "ms");
-                testComplete();
+                ws.closeHandler((x) ->{
+                            System.out.println("close simpleConnectAndWrite");
+                            testComplete();
+                        }
+                );
+
+                ws.close();
+
             });
 
             ws.writeFrame(new WebSocketFrameImpl("xhello"));
@@ -127,17 +135,24 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             ws.handler((data) -> {
                 System.out.println("client data simpleConnectAndAsyncWrite:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
-                ws.close();
+
                 long endTime = System.currentTimeMillis();
                 System.out.println("Total execution time simpleConnectAndAsyncWrite: " + (endTime - startTime) + "ms");
-                testComplete();
+                ws.closeHandler((x) ->{
+                            System.out.println("close simpleConnectAndAsyncWrite");
+                            testComplete();
+                        }
+                );
+
+                ws.close();
             });
 
             ws.writeFrame(new WebSocketFrameImpl("xhello"));
         });
 
-
-        await(10000, TimeUnit.MILLISECONDS);
+        System.out.println("await");
+        await();
+        System.out.println("finish");
 
     }
 
@@ -167,11 +182,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         s.submit(r);
 
         latchMain.await();
+        testComplete();
 
 
     }
 
     @Test
+    //@Ignore
     public void simpleReplyToOnTwoThreads() throws InterruptedException {
         ExecutorService s = Executors.newFixedThreadPool(2);
         CountDownLatch latchMain = new CountDownLatch(2);
@@ -197,6 +214,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         s.submit(r);
 
         latchMain.await();
+        testComplete();
 
 
     }
@@ -235,7 +253,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
         latchMain.await();
 
-
+testComplete();
     }
 
     @Test
@@ -247,8 +265,14 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 System.out.println("client data simpleMutilpeReply:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
                 if (counter.incrementAndGet() == MAX_RESPONSE_ELEMENTS) {
+                    ws.closeHandler((x) ->{
+                                System.out.println("close simpleMutilpeReply");
+                                testComplete();
+                            }
+                    );
+
                     ws.close();
-                    testComplete();
+
                 }
 
             });
@@ -278,8 +302,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                ws.closeHandler((x) ->{
+                            System.out.println("close simpleByteReply");
+                            testComplete();
+                        }
+                );
+
                 ws.close();
-                testComplete();
 
             });
 
@@ -310,8 +339,16 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                System.out.println("close and compleate");
+               //
+                ws.closeHandler((x) ->{
+                            System.out.println("close");
+                            testComplete();
+                }
+                );
+
                 ws.close();
-                testComplete();
+
 
             });
             Payload<String> p = new Payload<String>("xhello");
@@ -345,8 +382,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                ws.closeHandler((x) ->{
+                            System.out.println("close simpleObjectReply");
+                            testComplete();
+                        }
+                );
+
                 ws.close();
-                testComplete();
 
             });
 
@@ -376,8 +418,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                ws.closeHandler((x) ->{
+                            System.out.println("close simpleObjectReplyWithTimeout");
+                            testComplete();
+                        }
+                );
+
                 ws.close();
-                testComplete();
 
             });
 
@@ -399,8 +446,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
                 System.out.println("client data simpleMutilpeReplyToAll:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
                 if (counter.incrementAndGet() == MAX_RESPONSE_ELEMENTS) {
+                    ws.closeHandler((x) ->{
+                                System.out.println("close simpleMutilpeReplyToAll");
+                                testComplete();
+                            }
+                    );
+
                     ws.close();
-                    testComplete();
                 }
 
             });
@@ -420,8 +472,13 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             ws.handler((data) -> {
                 System.out.println("client data simpleMutilpeReplyToAll_1:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
+                ws.closeHandler((x) ->{
+                            System.out.println("close simpleMutilpeReplyToAll_1");
+                            testComplete();
+                        }
+                );
+
                 ws.close();
-                testComplete();
 
             });
 
@@ -440,37 +497,53 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
         final CountDownLatch initLatch = new CountDownLatch(1);
         getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/replytoAllBut", ws -> {
 
-            ws.handler((data) -> {
-                System.out.println("client data simpleMutilpeReplyToreplytoAllBut 1:" + new String(data.getBytes()));
-                assertNotNull(data.getString(0, data.length()));
-                if (new String(data.getBytes()).equals("2")) latch.countDown();
-                ws.close();
+
+
+
+            getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/replytoAllBut", ws2 -> {
+
+                ws.handler((data) -> {
+                    System.out.println("client data simpleMutilpeReplyToreplytoAllBut 1:" + new String(data.getBytes()));
+                    assertNotNull(data.getString(0, data.length()));
+                    assertTrue(new String(data.getBytes()).equals("2"));
+                    System.out.println("close ws: "+ new String(data.getBytes()));
+                    ws.closeHandler((x) ->{
+                                System.out.println("close simpleMutilpeReplyToreplytoAllBut");
+                        latch.countDown();
+                            }
+                    );
+
+                    ws.close();
+
+                });
+
+                ws2.handler((data) -> {
+                    System.out.println("client simpleMutilpeReplyToreplytoAllBut 1.1:" + new String(data.getBytes()));
+                    assertNotNull(data.getString(0, data.length()));
+
+                    assertTrue(new String(data.getBytes()).equals("1"));
+                    System.out.println("close ws2: "+ new String(data.getBytes()));
+                    ws2.closeHandler((x) ->{
+                                System.out.println("close simpleMutilpeReplyToreplytoAllBut 2");
+                                latch.countDown();
+                            }
+                    );
+
+                    ws2.close();
+
+
+                });
+
+                ws2.writeFrame(new WebSocketFrameImpl("2"));
+                ws.writeFrame(new WebSocketFrameImpl("1"));
 
             });
-            try {
-                initLatch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ws.writeFrame(new WebSocketFrameImpl("1"));
-        });
 
-        getClient().websocket(PORT, HOST, SERVICE_REST_GET + "/replytoAllBut", ws -> {
-
-            ws.handler((data) -> {
-                System.out.println("client simpleMutilpeReplyToreplytoAllBut 1.1:" + new String(data.getBytes()));
-                assertNotNull(data.getString(0, data.length()));
-                if (new String(data.getBytes()).equals("1")) latch.countDown();
-                ws.close();
-
-
-            });
-
-            ws.writeFrame(new WebSocketFrameImpl("2"));
 
         });
 
-        initLatch.countDown();
+
+
         latch.await();
     }
 
@@ -483,7 +556,12 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             ws.handler((data) -> {
                 System.out.println("client data simpleMutilpeReplyToAllThreaded:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
-                latch.countDown();
+                ws.closeHandler((x) ->{
+                            System.out.println("close datasimpleMutilpeReplyToAllThreaded");
+                            latch.countDown();
+                        }
+                );
+
                 ws.close();
 
             });
@@ -496,7 +574,12 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
             ws.handler((data) -> {
                 System.out.println("client datasimpleMutilpeReplyToAllThreaded 5.1:" + new String(data.getBytes()));
                 assertNotNull(data.getString(0, data.length()));
-                latch.countDown();
+                ws.closeHandler((x) ->{
+                            System.out.println("close datasimpleMutilpeReplyToAllThreaded");
+                            latch.countDown();
+                        }
+                );
+
                 ws.close();
 
 
@@ -508,6 +591,7 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
 
         latch.await();
+        testComplete();
     }
 
     public HttpClient getClient() {
@@ -632,14 +716,15 @@ public class WSServiceSelfhostedTest extends VertxTestBase {
 
         @OnWebSocketMessage("/replytoAllBut")
         public void wsEndpointReplyToAllBut(WebSocketHandler reply) {
-
+            System.out.println("replytoAllBut------: "+reply.payload().getString().get());
 
             reply.
                     response().
                     toAllBut(reply.endpoint()). // reply to other connected sessions
                     stringResponse(() -> reply.payload().getString().get()).
                     execute();
-            System.out.println("replytoAllBut: " + reply.endpoint() + "   :::" + this);
+            System.out.println("-------------EXECUTE-------------------------");
+            System.out.println("replytoAllBut: " + reply.endpoint() + "   :::" + reply.payload().getString().get());
         }
 
         @OnWebSocketOpen("/getObjectAndReplyObject")

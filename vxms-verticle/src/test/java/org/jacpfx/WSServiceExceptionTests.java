@@ -102,7 +102,7 @@ public class WSServiceExceptionTests extends VertxTestBase {
                 System.out.println(payload);
 
                 ws.close();
-                testComplete();
+
             });
             ws.closeHandler(handler -> {
                 System.out.println("CLOSED");
@@ -129,7 +129,7 @@ public class WSServiceExceptionTests extends VertxTestBase {
                 System.out.println(payload);
 
                 ws.close();
-                testComplete();
+
             });
             ws.closeHandler(handler -> {
                 System.out.println("CLOSED");
@@ -156,7 +156,7 @@ public class WSServiceExceptionTests extends VertxTestBase {
                 System.out.println(payload);
 
                 ws.close();
-                testComplete();
+
             });
             ws.closeHandler(handler -> {
                 System.out.println("CLOSED");
