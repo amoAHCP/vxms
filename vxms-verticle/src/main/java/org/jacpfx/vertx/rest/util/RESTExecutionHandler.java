@@ -5,7 +5,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.exceptions.EndpointExecutionException;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -18,7 +21,9 @@ public class RESTExecutionHandler {
 
     public static <T> void executeRetryAndCatchAsync(HttpServerResponse response, ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
         T result = null;
+        boolean errorHandling = false;
         while (retry >= 0) {
+            errorHandling = false;
             try {
                 if (timeout > 0L) {
                     final CompletableFuture<T> timeoutFuture = new CompletableFuture();
@@ -44,12 +49,14 @@ public class RESTExecutionHandler {
                 retry--;
                 if (retry < 0) {
                     result = RESTExecutionHandler.handleError(response, result, errorHandler, errorFunction, errorMethodHandler, e);
+                    errorHandling = true;
                 } else {
                     RESTExecutionHandler.handleError(errorHandler, e);
                     handleDelay(delay);
                 }
             }
         }
+        if(errorHandling && result==null) handler.fail(new EndpointExecutionException("error...")); // TODO define Error
         if (!handler.isComplete()) handler.complete(result);
     }
 
@@ -90,5 +97,17 @@ public class RESTExecutionHandler {
             errorHandler.accept(e);
         }
 
+    }
+
+
+    public static void updateResponseHaders(Map<String, String> headers, HttpServerResponse response) {
+        Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> response.putHeader(entry.getKey(), entry.getValue())));
+    }
+
+    public static HttpServerResponse getHttpServerResponse(int httpStatusCode,HttpServerResponse response) {
+        if (httpStatusCode != 0) {
+            response = response.setStatusCode(httpStatusCode);
+        }
+        return response;
     }
 }

@@ -43,14 +43,8 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                                         RESTExecutionHandler.executeRetryAndCatchAsync(context.response(), supplier, handler, errorHandler, errorHandlerString, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<String>>) value -> {
-                                    if (!context.response().ended()) {
-                                        updateResponseHaders();
-                                        if (value.result() != null) {
-                                            context.response().end(value.result());
-                                        } else {
-                                            context.response().end();
-                                        }
-                                    }
+                                    if (value.failed()) return;
+                                    repond(value.result());
                                 })
                 );
 

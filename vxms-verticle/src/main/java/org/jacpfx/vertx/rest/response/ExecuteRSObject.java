@@ -8,7 +8,6 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
-import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -47,15 +46,9 @@ public class ExecuteRSObject extends ExecuteRSBasicObject{
                         this.vertx.executeBlocking(handler ->
                                         RESTExecutionHandler.executeRetryAndCatchAsync(context.response(), supplier, handler, errorHandler, errorHandlerObject, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
-                                (Handler<AsyncResult<Serializable>>) result -> {
-                                    if (!context.response().ended()) {
-                                        updateResponseHaders();
-                                        if (result.result() != null) {
-                                            WebSocketExecutionUtil.encode(result.result(), encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
-                                        } else {
-                                            context.response().end();
-                                        }
-                                    }
+                                (Handler<AsyncResult<Serializable>>) value -> {
+                                    if (value.failed()) return;
+                                    repond(value.result());
                                 })
                 );
 

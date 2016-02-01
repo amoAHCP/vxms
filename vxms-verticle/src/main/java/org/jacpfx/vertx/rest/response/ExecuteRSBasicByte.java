@@ -3,6 +3,7 @@ package org.jacpfx.vertx.rest.response;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
@@ -52,8 +53,6 @@ public class ExecuteRSBasicByte {
 
 
     public void execute() {
-
-
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
@@ -62,7 +61,6 @@ public class ExecuteRSBasicByte {
                             while (retry >= 0) {
                                 try {
                                     result = supplier.get();
-
                                     retry = -1;
                                 } catch (Throwable e) {
                                     retry--;
@@ -75,17 +73,26 @@ public class ExecuteRSBasicByte {
                                 }
                             }
                             if (errorHandling && result == null) return;
-                            if (!context.response().ended()) {
-                                updateResponseHaders();
-                                context.response().end(Buffer.buffer(result));
-                            }
+                            repond(result);
                         }
                 );
 
 
     }
 
-    protected void updateResponseHaders() {
-        Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> context.response().putHeader(entry.getKey(), entry.getValue())));
+    protected void repond(byte[] result) {
+        if (!context.response().ended()) {
+            RESTExecutionHandler.updateResponseHaders(headers,context.response());
+            HttpServerResponse response = RESTExecutionHandler.getHttpServerResponse(httpStatusCode,context.response());
+            if (result != null) {
+                response.end(Buffer.buffer(result));
+            } else {
+                response.end();
+            }
+        }
     }
+
+
+
+
 }

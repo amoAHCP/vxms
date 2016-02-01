@@ -52,7 +52,6 @@ public class ExecuteRSBasicString {
     }
 
     public void execute() {
-
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
@@ -73,15 +72,7 @@ public class ExecuteRSBasicString {
                                 }
                             }
                             if (errorHandling && result == null) return;
-                            if (!context.response().ended()) {
-                                updateResponseHaders();
-                                HttpServerResponse response = getHttpServerResponse();
-                                if (result != null) {
-                                    response.end(result);
-                                } else {
-                                    response.end();
-                                }
-                            }
+                            repond(result);
 
                         }
                 );
@@ -89,16 +80,19 @@ public class ExecuteRSBasicString {
 
     }
 
-    private HttpServerResponse getHttpServerResponse() {
-        HttpServerResponse response = context.response();
-        if (httpStatusCode != 0) {
-            response = response.setStatusCode(httpStatusCode);
+    protected void repond(String result) {
+        if (!context.response().ended()) {
+            RESTExecutionHandler.updateResponseHaders(headers,context.response());
+            HttpServerResponse response = RESTExecutionHandler.getHttpServerResponse(httpStatusCode,context.response());
+            if (result != null) {
+                response.end(result);
+            } else {
+                response.end();
+            }
         }
-        return response;
     }
 
-    protected void updateResponseHaders() {
-        Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> context.response().putHeader(entry.getKey(), entry.getValue())));
-    }
+
+
 
 }

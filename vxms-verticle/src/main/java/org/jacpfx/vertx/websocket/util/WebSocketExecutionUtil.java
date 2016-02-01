@@ -99,6 +99,7 @@ public class WebSocketExecutionUtil {
                     }
                     if (errorHandler == null && errorFunction == null) {
                         errorMethodHandler.accept(e);
+                        return null;
                     }
                 } else {
                     if (errorHandler != null) {

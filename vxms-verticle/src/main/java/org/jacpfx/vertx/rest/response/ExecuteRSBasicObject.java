@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.response;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
@@ -75,16 +76,25 @@ public class ExecuteRSBasicObject {
                                 }
                             }
                             if (errorHandling && result == null) return;
-                            if (!context.response().ended()) {
-                                updateResponseHaders();
-                                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
-                            }
+                            repond(result);
 
                         }
                 );
     }
 
-    protected void updateResponseHaders() {
-        Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> context.response().putHeader(entry.getKey(), entry.getValue())));
+    protected void repond(Serializable result) {
+        if (!context.response().ended()) {
+            RESTExecutionHandler.updateResponseHaders(headers,context.response());
+            HttpServerResponse response = RESTExecutionHandler.getHttpServerResponse(httpStatusCode,context.response());
+            if (result != null) {
+                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
+            } else {
+                response.end();
+            }
+        }
     }
+
+
+
+
 }

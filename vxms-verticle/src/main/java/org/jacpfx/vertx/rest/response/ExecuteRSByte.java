@@ -4,7 +4,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
@@ -45,14 +44,8 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
                                         RESTExecutionHandler.executeRetryAndCatchAsync(context.response(), supplier, handler, errorHandler, errorHandlerByte, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<byte[]>>) value -> {
-                                    if (!context.response().ended()) {
-                                        updateResponseHaders();
-                                        if (value.result() != null) {
-                                            context.response().end(Buffer.buffer(value.result()));
-                                        } else {
-                                            context.response().end();
-                                        }
-                                    }
+                                    if (value.failed()) return;
+                                    repond(value.result());
                                 })
                 );
 

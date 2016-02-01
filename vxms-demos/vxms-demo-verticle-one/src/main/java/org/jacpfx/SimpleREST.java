@@ -2,6 +2,7 @@ package org.jacpfx;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.rest.response.RestHandler;
@@ -32,5 +33,7 @@ public class SimpleREST extends VxmsEndpoint {
     public static void main(String[] args) {
         DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("host","localhost"));
         Vertx.vertx().deployVerticle(SimpleREST.class.getName(),options);
+
+
     }
 }
