@@ -48,10 +48,10 @@ public class RESTExecutionHandler {
             } catch (Throwable e) {
                 retry--;
                 if (retry < 0) {
-                    result = RESTExecutionHandler.handleError(response, result, errorHandler, errorFunction, errorMethodHandler, e);
+                    result = handleError(result, errorHandler, errorFunction, errorMethodHandler, e);
                     errorHandling = true;
                 } else {
-                    RESTExecutionHandler.handleError(errorHandler, e);
+                    handleError(errorHandler, e);
                     handleDelay(delay);
                 }
             }
@@ -77,7 +77,7 @@ public class RESTExecutionHandler {
     }
 
 
-    public static  <T> T handleError(HttpServerResponse handler, T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction,Consumer<Throwable> errorMethodHandler, Throwable e) {
+    public static  <T> T handleError(T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction,Consumer<Throwable> errorMethodHandler, Throwable e) {
         if (errorHandler != null) {
             errorHandler.accept(e);
         }
@@ -104,10 +104,9 @@ public class RESTExecutionHandler {
         Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> response.putHeader(entry.getKey(), entry.getValue())));
     }
 
-    public static HttpServerResponse getHttpServerResponse(int httpStatusCode,HttpServerResponse response) {
+    public static void updateResponseStatusCode(int httpStatusCode, HttpServerResponse response) {
         if (httpStatusCode != 0) {
-            response = response.setStatusCode(httpStatusCode);
+            response.setStatusCode(httpStatusCode);
         }
-        return response;
     }
 }

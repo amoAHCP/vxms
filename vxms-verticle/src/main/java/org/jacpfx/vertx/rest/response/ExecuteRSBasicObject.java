@@ -68,7 +68,7 @@ public class ExecuteRSBasicObject {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerObject, errorMethodHandler, e);
+                                        result = RESTExecutionHandler.handleError(result, errorHandler, errorHandlerObject, errorMethodHandler, e);
                                         errorHandling = true;
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
@@ -83,9 +83,10 @@ public class ExecuteRSBasicObject {
     }
 
     protected void repond(Serializable result) {
-        if (!context.response().ended()) {
-            RESTExecutionHandler.updateResponseHaders(headers,context.response());
-            HttpServerResponse response = RESTExecutionHandler.getHttpServerResponse(httpStatusCode,context.response());
+        final HttpServerResponse response = context.response();
+        if (!response.ended()) {
+            RESTExecutionHandler.updateResponseHaders(headers, response);
+            RESTExecutionHandler.updateResponseStatusCode(httpStatusCode, response);
             if (result != null) {
                 WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
             } else {

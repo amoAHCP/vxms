@@ -64,7 +64,7 @@ public class ExecuteRSBasicString {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(context.response(), result, errorHandler, errorHandlerString, errorMethodHandler, e);
+                                        result = RESTExecutionHandler.handleError(result, errorHandler, errorHandlerString, errorMethodHandler, e);
                                         errorHandling = true;
                                     } else {
                                         RESTExecutionHandler.handleError(errorHandler, e);
@@ -81,9 +81,10 @@ public class ExecuteRSBasicString {
     }
 
     protected void repond(String result) {
-        if (!context.response().ended()) {
-            RESTExecutionHandler.updateResponseHaders(headers,context.response());
-            HttpServerResponse response = RESTExecutionHandler.getHttpServerResponse(httpStatusCode,context.response());
+        final HttpServerResponse response = context.response();
+        if (!response.ended()) {
+            RESTExecutionHandler.updateResponseHaders(headers, response);
+            RESTExecutionHandler.updateResponseStatusCode(httpStatusCode, response);
             if (result != null) {
                 response.end(result);
             } else {
