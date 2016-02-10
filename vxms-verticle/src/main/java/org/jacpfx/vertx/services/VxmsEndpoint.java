@@ -9,6 +9,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -102,38 +103,76 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                          */
 
                         Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
-                        Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class)?restMethod.getAnnotation(GET.class):null);
-                        Optional<POST> post = Optional.ofNullable(restMethod.isAnnotationPresent(POST.class)?restMethod.getAnnotation(POST.class):null);
-                        Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class)?restMethod.getAnnotation(OPTIONS.class):null);
-                        Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class)?restMethod.getAnnotation(PUT.class):null);
-                        Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class)?restMethod.getAnnotation(DELETE.class):null);
+                        Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
+                        Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class) ? restMethod.getAnnotation(GET.class) : null);
+                        Optional<POST> post = Optional.ofNullable(restMethod.isAnnotationPresent(POST.class) ? restMethod.getAnnotation(POST.class) : null);
+                        Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class) ? restMethod.getAnnotation(OPTIONS.class) : null);
+                        Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class) ? restMethod.getAnnotation(PUT.class) : null);
+                        Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class) ? restMethod.getAnnotation(DELETE.class) : null);
 
-                        get.ifPresent(g->
-                                router.get(sName + path.value()).handler(routingContext ->
-                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
-                        post.ifPresent(g->
-                                router.post(sName + path.value()).handler(routingContext ->
-                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
-                        options.ifPresent(g->
-                                router.options(sName + path.value()).handler(routingContext ->
-                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
-                        put.ifPresent(g->
-                                router.put(sName + path.value()).handler(routingContext ->
-                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
-                        delete.ifPresent(g->
-                                router.delete(sName + path.value()).handler(routingContext ->
-                                        handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext)));
-                        if(!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()){
-                            // TODO check for Config provider or fallback
-                            router.route(sName + path.value()).handler(routingContext ->
+                        get.ifPresent(g -> {
+                            final Route route = router.get(sName + path.value()).handler(routingContext ->
                                     handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                            consumes.ifPresent(cs -> {
+                                if (cs.value().length > 0) {
+                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                                }
+                            });
+                        });
+                        post.ifPresent(g -> {
+                            final Route route = router.post(sName + path.value()).handler(routingContext ->
+                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                            consumes.ifPresent(cs -> {
+                                if (cs.value().length > 0) {
+                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                                }
+                            });
+
+                        });
+                        options.ifPresent(g -> {
+                            final Route route = router.options(sName + path.value()).handler(routingContext ->
+                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                            consumes.ifPresent(cs -> {
+                                if (cs.value().length > 0) {
+                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                                }
+                            });
+                        });
+
+                        put.ifPresent(g -> {
+                            final Route route = router.put(sName + path.value()).handler(routingContext ->
+                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                            consumes.ifPresent(cs -> {
+                                if (cs.value().length > 0) {
+                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                                }
+                            });
+                        });
+                        delete.ifPresent(g -> {
+                            final Route route = router.delete(sName + path.value()).handler(routingContext ->
+                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                            consumes.ifPresent(cs -> {
+                                if (cs.value().length > 0) {
+                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                                }
+                            });
+                        });
+                        if (!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()) {
+                            // TODO check for Config provider or fallback
+                            final Route route = router.route(sName + path.value()).handler(routingContext ->
+                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                            consumes.ifPresent(cs -> {
+                                if (cs.value().length > 0) {
+                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                                }
+                            });
                         }
 
                     });
 
             server.requestHandler(router::accept).listen(status -> {
                 if (status.succeeded()) {
-                    log("started on PORT: "+port+" host: "+host);
+                    log("started on PORT: " + port + " host: " + host);
                     startFuture.complete();
                     return;
                 }
