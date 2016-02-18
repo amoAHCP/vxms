@@ -12,13 +12,14 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CookieHandler;
 import org.jacpfx.common.Operation;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
 import org.jacpfx.common.util.Serializer;
+import org.jacpfx.vertx.rest.annotation.EndpointConfig;
 import org.jacpfx.vertx.rest.annotation.OnRestError;
+import org.jacpfx.vertx.rest.configuration.DefaultEndpointConfiguration;
+import org.jacpfx.vertx.rest.configuration.EndpointConfiguration;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.util.ConfigurationUtil;
 import org.jacpfx.vertx.services.util.ReflectionUtil;
@@ -69,6 +70,21 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     }
 
+    private EndpointConfiguration getEndpointConfiguration() {
+        EndpointConfiguration endpointConfig = null;
+         if(getClass().isAnnotationPresent(EndpointConfig.class)) {
+             final EndpointConfig annotation = getClass().getAnnotation(EndpointConfig.class);
+             final Class<? extends EndpointConfiguration> epConfigClazz =  annotation.value();
+             try {
+                 endpointConfig = epConfigClazz.newInstance();
+             } catch (InstantiationException e) {
+                 e.printStackTrace();
+             } catch (IllegalAccessException e) {
+                 e.printStackTrace();
+             }
+         }
+        return endpointConfig==null?new DefaultEndpointConfiguration():endpointConfig;
+    }
     private void initSelfHostedService(final Future<Void> startFuture) {
         if (port > 0) {
             updateConfigurationToSelfhosted();
@@ -83,17 +99,46 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 webSocketRegistry = initWebSocketRegistryInstance();
                 WebSocketInitializer.registerWebSocketHandler(server, vertx, webSocketRegistry, getConfig(), service);
             });
+
+            // REST -----------------------------------------
             Router router = Router.router(vertx);
+
+            Optional.of(getEndpointConfiguration()).ifPresent(endpointConfig -> {
+
+                Optional.ofNullable(endpointConfig.corsHandler()).ifPresent(corsHandler -> router.route().handler(corsHandler));
+
+                Optional.ofNullable(endpointConfig.bodyHandler()).ifPresent(bodyHandler -> router.route().handler(bodyHandler));
+
+                Optional.ofNullable(endpointConfig.cookieHandler()).ifPresent(cookieHandler -> router.route().handler(cookieHandler));
+
+                Optional.ofNullable(endpointConfig.authHandler()).ifPresent(authHandler -> router.route().handler(authHandler));
+            });
+
+          /**  /// TODO remove CORS handling and move to defined config class
+            router.route().handler(CorsHandler.create("*").
+                    allowedMethod(io.vertx.core.http.HttpMethod.GET).
+                    allowedMethod(io.vertx.core.http.HttpMethod.POST).
+                    allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).
+                    allowedMethod(io.vertx.core.http.HttpMethod.PUT).
+                    allowedMethod(io.vertx.core.http.HttpMethod.DELETE).
+                    allowedHeader("Content-Type").
+                    allowedHeader("X-Requested-With"));
+
+
+            router.route().handler(BodyHandler.create());
+            router.route().handler(CookieHandler.create());
+
+           **/
+
+            // TODO extract/refactor this code !!!
             Stream.of(this.getClass().getDeclaredMethods()).
                     filter(m -> m.isAnnotationPresent(Path.class)).
                     forEach(restMethod -> {
                         Path path = restMethod.getAnnotation(Path.class);
                         final String sName = ConfigurationUtil.serviceName(getConfig(), service.getClass());
                         // final boolean isRegEx = path.value().contains(REGEX_CHECK);
-                        // TODO add annotation wit config class to allow individual configuration of BodyHandler, CookieHandler, CORSHandler and session
+                        // TODO add annotation with config class to allow individual configuration of BodyHandler, CookieHandler, CORSHandler and session
 
-                        router.route().handler(BodyHandler.create());
-                        router.route().handler(CookieHandler.create());
                         // TODO add session handling
                         /**
                          * // Create a clustered session store using defaults
@@ -102,6 +147,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                          SessionHandler sessionHandler = SessionHandler.create(store);
                          */
 
+                        // TODO currently the OnMethodError is not unique for POST/GET whatever... try to indicate for which operation the OnErrorMethod is!!
                         Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
                         Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
                         Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class) ? restMethod.getAnnotation(GET.class) : null);

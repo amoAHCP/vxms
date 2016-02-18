@@ -5,7 +5,7 @@ import io.vertx.ext.web.handler.*;
 /**
  * Created by Andy Moncsek on 27.01.16.
  */
-public class DefaultEndpointConfiguration {
+public class DefaultEndpointConfiguration implements EndpointConfiguration {
 
     // TODO Session handling needs a session store which mus be initilized by a vertx instance!!!
 
@@ -14,23 +14,28 @@ public class DefaultEndpointConfiguration {
    // }
 
 
-    public CorsHandler getCorsHandler(String uri) {
+    @Override
+    public CorsHandler corsHandler() {
         return null;
     }
 
-    public BodyHandler getBodyHandler(String uri) {
+    @Override
+    public BodyHandler bodyHandler() {
         return BodyHandler.create();
     }
 
-    public CookieHandler getCookieHandler(String uri) {
+    @Override
+    public CookieHandler cookieHandler() {
         return CookieHandler.create();
     }
 
-    public SessionHandler getSessionHandler(String uri) {
+    @Override
+    public SessionHandler sessionHandler() {
         return null;
     }
 
-    public AuthHandler getAuthHandler() {
+    @Override
+    public AuthHandler authHandler() {
         return null;
     }
 }

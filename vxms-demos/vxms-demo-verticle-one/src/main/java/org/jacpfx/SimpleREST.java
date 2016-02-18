@@ -2,7 +2,6 @@ package org.jacpfx;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.rest.response.RestHandler;
@@ -20,7 +19,7 @@ public class SimpleREST extends VxmsEndpoint {
     @Path("helloGET")
     @GET
     public void simpleRESTHello(RestHandler handler) {
-         handler.response().stringResponse(()->"hello World").execute();
+         handler.response().stringResponse(()->"held 111+").execute();
     }
 
 

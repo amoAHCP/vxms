@@ -19,7 +19,13 @@ public @interface ServiceEndpoint {
 
     /**
      *
-     * @return The Endpoint Poort
+     * @return The Endpoint Port
      */
     int port() default 8080;
+
+    /**
+     * The service name as identifier in distributed environments
+     * @return the service name
+     */
+    String name() default "";
 }

@@ -28,7 +28,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @Path("helloGET")
     @GET
     public void simpleRESTHello(RestHandler handler) {
-        handler.response().stringResponse(() -> bean.sayHallo()).execute();
+        handler.response().stringResponse(() -> bean.sayHallo()+"  ..... 1").execute();
     }
 
 
