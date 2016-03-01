@@ -200,7 +200,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         return client;
     }
 
-
+    // TODO extend test for POST, OPTIONAL,....
     @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
@@ -216,6 +216,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         }
 
         @OnRestError("/stringGETResponseSyncAsync")
+        @GET
         public void rsstringGETResponseSyncAsyncError(Throwable t, RestHandler handler) {
             System.out.println("ERROR stringGETResponseSyncAsync");
             handler.response().async().stringResponse(() -> t.getMessage()).execute();
@@ -235,6 +236,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         }
 
         @OnRestError("/stringGETResponseAsyncSync")
+        @GET
         public void rsstringGETResponseAsyncSyncError(Throwable t, RestHandler handler) {
             System.out.println("ERROR stringGETResponseAsyncSync");
             handler.response().stringResponse(() -> t.getMessage()).execute();
@@ -253,6 +255,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         }
 
         @OnRestError("/stringGETResponseAsyncAsync")
+        @GET
         public void rsstringGETResponseAsyncAsyncError(Throwable t, RestHandler handler) {
             System.out.println("ERROR stringGETResponseAsyncAsync: "+t.getMessage());
             handler.response().async().stringResponse(() -> t.getMessage()).execute();
@@ -272,6 +275,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         }
 
         @OnRestError("/stringGETResponseSyncSync")
+        @GET
         public void rsstringGETResponseSyncSyncError(Throwable t, RestHandler handler) {
             System.out.println("ERROR stringGETResponseSyncSync: "+t.getMessage());
             handler.response().stringResponse(() -> t.getMessage()).execute();

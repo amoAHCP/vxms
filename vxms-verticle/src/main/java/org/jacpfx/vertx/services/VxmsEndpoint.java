@@ -72,19 +72,20 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     private EndpointConfiguration getEndpointConfiguration() {
         EndpointConfiguration endpointConfig = null;
-         if(getClass().isAnnotationPresent(EndpointConfig.class)) {
-             final EndpointConfig annotation = getClass().getAnnotation(EndpointConfig.class);
-             final Class<? extends EndpointConfiguration> epConfigClazz =  annotation.value();
-             try {
-                 endpointConfig = epConfigClazz.newInstance();
-             } catch (InstantiationException e) {
-                 e.printStackTrace();
-             } catch (IllegalAccessException e) {
-                 e.printStackTrace();
-             }
-         }
-        return endpointConfig==null?new DefaultEndpointConfiguration():endpointConfig;
+        if (getClass().isAnnotationPresent(EndpointConfig.class)) {
+            final EndpointConfig annotation = getClass().getAnnotation(EndpointConfig.class);
+            final Class<? extends EndpointConfiguration> epConfigClazz = annotation.value();
+            try {
+                endpointConfig = epConfigClazz.newInstance();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return endpointConfig == null ? new DefaultEndpointConfiguration() : endpointConfig;
     }
+
     private void initSelfHostedService(final Future<Void> startFuture) {
         if (port > 0) {
             updateConfigurationToSelfhosted();
@@ -112,23 +113,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 Optional.ofNullable(endpointConfig.cookieHandler()).ifPresent(cookieHandler -> router.route().handler(cookieHandler));
 
                 Optional.ofNullable(endpointConfig.authHandler()).ifPresent(authHandler -> router.route().handler(authHandler));
+
+                Optional.ofNullable(endpointConfig.staticHandler()).ifPresent(staticHandler -> router.route().handler(staticHandler));
+
             });
 
-          /**  /// TODO remove CORS handling and move to defined config class
-            router.route().handler(CorsHandler.create("*").
-                    allowedMethod(io.vertx.core.http.HttpMethod.GET).
-                    allowedMethod(io.vertx.core.http.HttpMethod.POST).
-                    allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).
-                    allowedMethod(io.vertx.core.http.HttpMethod.PUT).
-                    allowedMethod(io.vertx.core.http.HttpMethod.DELETE).
-                    allowedHeader("Content-Type").
-                    allowedHeader("X-Requested-With"));
-
-
-            router.route().handler(BodyHandler.create());
-            router.route().handler(CookieHandler.create());
-
-           **/
 
             // TODO extract/refactor this code !!!
             Stream.of(this.getClass().getDeclaredMethods()).
@@ -148,17 +137,18 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                          */
 
                         // TODO currently the OnMethodError is not unique for POST/GET whatever... try to indicate for which operation the OnErrorMethod is!!
-                        Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
-                        Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
-                        Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class) ? restMethod.getAnnotation(GET.class) : null);
-                        Optional<POST> post = Optional.ofNullable(restMethod.isAnnotationPresent(POST.class) ? restMethod.getAnnotation(POST.class) : null);
-                        Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class) ? restMethod.getAnnotation(OPTIONS.class) : null);
-                        Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class) ? restMethod.getAnnotation(PUT.class) : null);
-                        Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class) ? restMethod.getAnnotation(DELETE.class) : null);
+                        final Stream<Method> errorMethodStream = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class));
+                        final Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
+                        final Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class) ? restMethod.getAnnotation(GET.class) : null);
+                        final Optional<POST> post = Optional.ofNullable(restMethod.isAnnotationPresent(POST.class) ? restMethod.getAnnotation(POST.class) : null);
+                        final Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class) ? restMethod.getAnnotation(OPTIONS.class) : null);
+                        final Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class) ? restMethod.getAnnotation(PUT.class) : null);
+                        final Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class) ? restMethod.getAnnotation(DELETE.class) : null);
 
                         get.ifPresent(g -> {
+                            final Optional<Method> errorMethod = errorMethodStream.filter(method ->method.isAnnotationPresent(GET.class)).findFirst();
                             final Route route = router.get(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
                             consumes.ifPresent(cs -> {
                                 if (cs.value().length > 0) {
                                     Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
@@ -166,8 +156,9 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                             });
                         });
                         post.ifPresent(g -> {
+                            final Optional<Method> errorMethod = errorMethodStream.filter(method ->method.isAnnotationPresent(POST.class)).findFirst();
                             final Route route = router.post(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
                             consumes.ifPresent(cs -> {
                                 if (cs.value().length > 0) {
                                     Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
@@ -176,8 +167,9 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
                         });
                         options.ifPresent(g -> {
+                            final Optional<Method> errorMethod = errorMethodStream.filter(method ->method.isAnnotationPresent(OPTIONS.class)).findFirst();
                             final Route route = router.options(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
                             consumes.ifPresent(cs -> {
                                 if (cs.value().length > 0) {
                                     Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
@@ -186,8 +178,9 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                         });
 
                         put.ifPresent(g -> {
+                            final Optional<Method> errorMethod = errorMethodStream.filter(method ->method.isAnnotationPresent(PUT.class)).findFirst();
                             final Route route = router.put(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
                             consumes.ifPresent(cs -> {
                                 if (cs.value().length > 0) {
                                     Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
@@ -195,8 +188,9 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                             });
                         });
                         delete.ifPresent(g -> {
+                            final Optional<Method> errorMethod = errorMethodStream.filter(method ->method.isAnnotationPresent(OPTIONS.class)).findFirst();
                             final Route route = router.delete(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
+                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
                             consumes.ifPresent(cs -> {
                                 if (cs.value().length > 0) {
                                     Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
@@ -205,6 +199,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                         });
                         if (!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()) {
                             // TODO check for Config provider or fallback
+                            final Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
                             final Route route = router.route(sName + path.value()).handler(routingContext ->
                                     handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
                             consumes.ifPresent(cs -> {
@@ -216,9 +211,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
                     });
 
+            Optional.of(getEndpointConfiguration()).ifPresent(endpointConfig -> {
+                endpointConfig.customRouteConfiguration(vertx, router);
+            });
+
             server.requestHandler(router::accept).listen(status -> {
                 if (status.succeeded()) {
                     log("started on PORT: " + port + " host: " + host);
+
+
                     startFuture.complete();
                     return;
                 }

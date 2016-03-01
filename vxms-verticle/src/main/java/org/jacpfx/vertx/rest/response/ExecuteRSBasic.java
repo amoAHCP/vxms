@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
+import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
@@ -66,9 +66,9 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(result, errorHandler, errorHandlerString,errorMethodHandler, e);
+                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerString,errorMethodHandler, e);
                                     } else {
-                                        RESTExecutionHandler.handleError(errorHandler, e);
+                                        RESTExecutionUtil.handleError(errorHandler, e);
                                     }
                                 }
                             }
@@ -92,9 +92,9 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(result, errorHandler, errorHandlerByte, errorMethodHandler, e);
+                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerByte, errorMethodHandler, e);
                                     } else {
-                                        RESTExecutionHandler.handleError(errorHandler, e);
+                                        RESTExecutionUtil.handleError(errorHandler, e);
                                     }
                                 }
                             }
@@ -116,15 +116,15 @@ public class ExecuteRSBasic {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(result, errorHandler, errorHandlerObject, errorMethodHandler, e);
+                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerObject, errorMethodHandler, e);
                                     } else {
-                                        RESTExecutionHandler.handleError(errorHandler, e);
+                                        RESTExecutionUtil.handleError(errorHandler, e);
                                     }
                                 }
                             }
                             if (!context.response().ended()) {
                                 updateResponseHaders();
-                                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
+                                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.response()));
                             }
 
                         }

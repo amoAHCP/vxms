@@ -13,6 +13,7 @@
 *.iml
 build
 target
+file-uploads
 out
 mod
 

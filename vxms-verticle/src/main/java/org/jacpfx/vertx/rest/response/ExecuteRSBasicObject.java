@@ -5,7 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
+import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
@@ -68,10 +68,10 @@ public class ExecuteRSBasicObject {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError(result, errorHandler, errorHandlerObject, errorMethodHandler, e);
+                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerObject, errorMethodHandler, e);
                                         errorHandling = true;
                                     } else {
-                                        RESTExecutionHandler.handleError(errorHandler, e);
+                                        RESTExecutionUtil.handleError(errorHandler, e);
                                     }
                                 }
                             }
@@ -85,10 +85,10 @@ public class ExecuteRSBasicObject {
     protected void repond(Serializable result) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            RESTExecutionHandler.updateResponseHaders(headers, response);
-            RESTExecutionHandler.updateResponseStatusCode(httpStatusCode, response);
+            RESTExecutionUtil.updateResponseHaders(headers, response);
+            RESTExecutionUtil.updateResponseStatusCode(httpStatusCode, response);
             if (result != null) {
-                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionHandler.sendObjectResult(value, context.response()));
+                WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.response()));
             } else {
                 response.end();
             }

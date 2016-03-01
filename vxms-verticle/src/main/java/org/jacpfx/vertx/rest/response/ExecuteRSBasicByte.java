@@ -6,7 +6,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.util.RESTExecutionHandler;
+import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.util.Map;
@@ -65,10 +65,10 @@ public class ExecuteRSBasicByte {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionHandler.handleError( result, errorHandler, errorHandlerByte, errorMethodHandler, e);
+                                        result = RESTExecutionUtil.handleError( result, errorHandler, errorHandlerByte, errorMethodHandler, e);
                                         errorHandling = true;
                                     } else {
-                                        RESTExecutionHandler.handleError(errorHandler, e);
+                                        RESTExecutionUtil.handleError(errorHandler, e);
                                     }
                                 }
                             }
@@ -83,8 +83,8 @@ public class ExecuteRSBasicByte {
     protected void repond(byte[] result) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            RESTExecutionHandler.updateResponseHaders(headers, response);
-            RESTExecutionHandler.updateResponseStatusCode(httpStatusCode, response);
+            RESTExecutionUtil.updateResponseHaders(headers, response);
+            RESTExecutionUtil.updateResponseStatusCode(httpStatusCode, response);
             if (result != null) {
                 response.end(Buffer.buffer(result));
             } else {

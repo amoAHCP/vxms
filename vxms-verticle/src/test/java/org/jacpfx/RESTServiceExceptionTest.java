@@ -422,6 +422,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         }
 
         @OnRestError("/exceptionInMethodBodyWithErrorHandler")
+        @GET
         public void rsexceptionInMethodBodyWithErrorHandlerError(RestHandler handler, Throwable t) {
             System.out.println("jgf4234354354: " + handler);
             t.printStackTrace();
