@@ -17,7 +17,7 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 19.01.16.
  */
-public class RESTExecutionHandler {
+public class RESTExecutionUtil {
 
     public static <T> void executeRetryAndCatchAsync(HttpServerResponse response, ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
         T result = null;
