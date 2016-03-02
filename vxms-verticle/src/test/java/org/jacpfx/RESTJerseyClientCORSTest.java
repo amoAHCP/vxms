@@ -12,6 +12,7 @@ import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.entity.RestrictedCorsEndpointConfig;
 import org.jacpfx.entity.RestrictedCorsEndpointConfig2;
+import org.jacpfx.entity.RestrictedCorsEndpointConfig3;
 import org.jacpfx.vertx.rest.annotation.EndpointConfig;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
@@ -38,6 +39,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     private static final String HOST = "localhost";
     public static final int PORT = 9998;
     public static final int PORT2 = 9999;
+    public static final int PORT3 = 9991;
 
     protected int getNumNodes() {
         return 1;
@@ -66,7 +68,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     public void startVerticles() throws InterruptedException {
 
 
-        CountDownLatch latch2 = new CountDownLatch(2);
+        CountDownLatch latch2 = new CountDownLatch(3);
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
@@ -96,6 +98,18 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
         });
 
+        getVertx().deployVerticle(new WsServiceThree(), options, asyncResult -> {
+            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+            System.out.println("start service: " + asyncResult.succeeded());
+            assertTrue(asyncResult.succeeded());
+            assertNotNull("deploymentID should not be null", asyncResult.result());
+            // If deployed correctly then start the tests!
+            //   latch2.countDown();
+
+            latch2.countDown();
+
+        });
+
         client = getVertx().
                 createHttpClient(new HttpClientOptions());
         awaitLatch(latch2);
@@ -105,7 +119,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
     @Test
 
-    public void stringGETResponseSyncAsync() throws InterruptedException {
+    public void corsFail() throws InterruptedException {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
@@ -131,7 +145,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
     @Test
 
-    public void stringGETResponseAsyncSync() throws InterruptedException {
+    public void corsOK() throws InterruptedException {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
@@ -157,6 +171,61 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     }
 
 
+    @Test
+
+    public void WsServiceThree() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT3).path("/wsService/stringGETResponseSyncAsync");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).header("Origin", "http://example.com").async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response, "test-123");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+    @Test
+    //@Ignore
+    public void WsServiceThree_1() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT3).path("/wsService/stringGETResponseSyncAsync2");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).header("Origin", "http://example1.com").async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                System.out.println(throwable.getMessage());
+                Assert.assertEquals("javax.ws.rs.ForbiddenException: HTTP 403 CORS Rejected - Invalid origin",throwable.getMessage());
+                latch.countDown();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+
 
 
     public HttpClient getClient() {
@@ -179,10 +248,9 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
             }).execute();
         }
 
-
-
-
     }
+
+
 
     @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT2)
     @EndpointConfig(RestrictedCorsEndpointConfig2.class)
@@ -199,8 +267,31 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
             }).execute();
         }
 
+    }
 
+    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT3)
+    @EndpointConfig(RestrictedCorsEndpointConfig3.class)
+    public class WsServiceThree extends VxmsEndpoint {
 
+        /////------------- sync async ----------------
+
+        @Path("/stringGETResponseSyncAsync")
+        @GET
+        public void rsstringGETResponseSyncAsync(RestHandler reply) {
+            System.out.println("stringResponse: " + reply);
+            reply.response().stringResponse(() -> {
+                return "test-123";
+            }).execute();
+        }
+
+        @Path("/stringGETResponseSyncAsync2")
+        @GET
+        public void rsstringGETResponseSyncAsync2(RestHandler reply) {
+            System.out.println("stringResponse xyz: " + reply);
+            reply.response().stringResponse(() -> {
+                return "test-123";
+            }).execute();
+        }
 
     }
 

@@ -38,6 +38,10 @@ public class RSRequest {
         return context.cookies();
     }
 
+    public Cookie cookie(String name) {
+        return context.getCookie(name);
+    }
+
     public Buffer body() {
         return context.getBody();
     }

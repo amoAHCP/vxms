@@ -1,18 +1,15 @@
 package org.jacpfx.entity;
 
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import org.jacpfx.vertx.rest.configuration.EndpointConfiguration;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
  */
-public class RestrictedCorsEndpointConfig2 implements EndpointConfiguration {
-
-
+public class RestrictedBodyHandlingEndpointConfig implements EndpointConfiguration {
     public void corsHandler(Router router) {
-        router.route().handler(CorsHandler.create("http://example.com").
+        router.route().handler(CorsHandler.create("*").
                 allowedMethod(io.vertx.core.http.HttpMethod.GET).
                 allowedMethod(io.vertx.core.http.HttpMethod.POST).
                 allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).
@@ -22,5 +19,7 @@ public class RestrictedCorsEndpointConfig2 implements EndpointConfiguration {
                 allowedHeader("X-Requested-With"));
     }
 
-    public BodyHandler bodyHandler() {return BodyHandler.create();}
+    public void bodyHandler(Router router) {
+
+    }
 }

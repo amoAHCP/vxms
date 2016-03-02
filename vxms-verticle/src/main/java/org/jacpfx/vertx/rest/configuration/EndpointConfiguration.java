@@ -2,26 +2,29 @@ package org.jacpfx.vertx.rest.configuration;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.*;
+import io.vertx.ext.web.handler.AuthHandler;
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CookieHandler;
+import io.vertx.ext.web.handler.SessionHandler;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
  */
 public interface EndpointConfiguration {
-    default CorsHandler corsHandler() {
-        return null;
+    default void corsHandler(Router router) {
+
     }
 
-    default BodyHandler bodyHandler() {
-        return BodyHandler.create();
+    default void bodyHandler(Router router) {
+        router.route().handler(BodyHandler.create());
     }
 
-    default CookieHandler cookieHandler() {
-        return CookieHandler.create();
+    default void cookieHandler(Router router) {
+        router.route().handler(CookieHandler.create());
     }
 
-    default StaticHandler staticHandler() {
-        return null;
+    default void staticHandler(Router router) {
+
     }
 
     default SessionHandler sessionHandler() {
