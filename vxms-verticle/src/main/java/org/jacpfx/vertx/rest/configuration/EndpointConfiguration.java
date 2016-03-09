@@ -5,7 +5,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.AuthHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
-import io.vertx.ext.web.handler.SessionHandler;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
@@ -27,8 +26,8 @@ public interface EndpointConfiguration {
 
     }
 
-    default SessionHandler sessionHandler() {
-        return null;
+    default void sessionHandler(Vertx vertx, Router router) {
+
     }
 
     default AuthHandler authHandler() {

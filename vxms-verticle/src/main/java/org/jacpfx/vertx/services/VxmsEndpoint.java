@@ -116,6 +116,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
                 Optional.ofNullable(endpointConfig.authHandler()).ifPresent(authHandler -> router.route().handler(authHandler));
 
+                endpointConfig.sessionHandler(vertx, router);
+
                 endpointConfig.customRouteConfiguration(vertx, router);
             });
 
