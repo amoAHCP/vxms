@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.handler;
+package org.jacpfx.vertx.websocket.util;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;

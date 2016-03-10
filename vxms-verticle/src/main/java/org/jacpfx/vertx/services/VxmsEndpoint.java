@@ -9,32 +9,25 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.Operation;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.vertx.rest.annotation.EndpointConfig;
-import org.jacpfx.vertx.rest.annotation.OnRestError;
-import org.jacpfx.vertx.rest.configuration.DefaultEndpointConfiguration;
-import org.jacpfx.vertx.rest.configuration.EndpointConfiguration;
 import org.jacpfx.vertx.rest.response.RestHandler;
+import org.jacpfx.vertx.rest.util.RESTInitializer;
 import org.jacpfx.vertx.services.util.ConfigurationUtil;
-import org.jacpfx.vertx.services.util.ReflectionUtil;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketMessage;
-import org.jacpfx.vertx.websocket.handler.WebSocketInitializer;
 import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.response.WebSocketHandler;
+import org.jacpfx.vertx.websocket.util.WebSocketInitializer;
 
 import javax.ws.rs.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,7 +37,6 @@ import java.util.stream.Stream;
  */
 public abstract class VxmsEndpoint extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(VxmsEndpoint.class);
-    public static final String REGEX_CHECK = "*";
     private String host;
     private ServiceInfo descriptor;
     private boolean clustered;
@@ -70,21 +62,6 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     }
 
-    private EndpointConfiguration getEndpointConfiguration() {
-        EndpointConfiguration endpointConfig = null;
-        if (getClass().isAnnotationPresent(EndpointConfig.class)) {
-            final EndpointConfig annotation = getClass().getAnnotation(EndpointConfig.class);
-            final Class<? extends EndpointConfiguration> epConfigClazz = annotation.value();
-            try {
-                endpointConfig = epConfigClazz.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return endpointConfig == null ? new DefaultEndpointConfiguration() : endpointConfig;
-    }
 
     private void initSelfHostedService(final Future<Void> startFuture) {
         if (port > 0) {
@@ -94,132 +71,14 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
             HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost(host)
                     .setPort(port));
-            // TODO check if Websocket is wanted
-            final Object service = this;
-            descriptor.getOperationsByType(Type.WEBSOCKET).findFirst().ifPresent(operation -> {
-                webSocketRegistry = initWebSocketRegistryInstance();
-                WebSocketInitializer.registerWebSocketHandler(server, vertx, webSocketRegistry, getConfig(), service);
-            });
-
-            // REST -----------------------------------------
             Router router = Router.router(vertx);
 
-            Optional.of(getEndpointConfiguration()).ifPresent(endpointConfig -> {
-
-                endpointConfig.corsHandler(router);
-
-                endpointConfig.bodyHandler(router);
-
-                endpointConfig.cookieHandler(router);
-
-                endpointConfig.staticHandler(router);
-
-                Optional.ofNullable(endpointConfig.authHandler()).ifPresent(authHandler -> router.route().handler(authHandler));
-
-                endpointConfig.sessionHandler(vertx, router);
-
-                endpointConfig.customRouteConfiguration(vertx, router);
-            });
-
-
-            // TODO extract/refactor this code !!!
-            Stream.of(this.getClass().getDeclaredMethods()).
-                    filter(m -> m.isAnnotationPresent(Path.class)).
-                    forEach(restMethod -> {
-                        Path path = restMethod.getAnnotation(Path.class);
-                        final String sName = ConfigurationUtil.serviceName(getConfig(), service.getClass());
-                        // final boolean isRegEx = path.value().contains(REGEX_CHECK);
-                        // TODO add annotation with config class to allow individual configuration of BodyHandler, CookieHandler, CORSHandler and session
-
-                        // TODO add session handling
-                        /**
-                         * // Create a clustered session store using defaults
-                         SessionStore store = ClusteredSessionStore.create(vertx);
-
-                         SessionHandler sessionHandler = SessionHandler.create(store);
-                         */
-
-                        // TODO currently the OnMethodError is not unique for POST/GET whatever... try to indicate for which operation the OnErrorMethod is!!
-                        final Stream<Method> errorMethodStream = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class));
-                        final Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
-                        final Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class) ? restMethod.getAnnotation(GET.class) : null);
-                        final Optional<POST> post = Optional.ofNullable(restMethod.isAnnotationPresent(POST.class) ? restMethod.getAnnotation(POST.class) : null);
-                        final Optional<OPTIONS> options = Optional.ofNullable(restMethod.isAnnotationPresent(OPTIONS.class) ? restMethod.getAnnotation(OPTIONS.class) : null);
-                        final Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class) ? restMethod.getAnnotation(PUT.class) : null);
-                        final Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class) ? restMethod.getAnnotation(DELETE.class) : null);
-
-                        get.ifPresent(g -> {
-                            final Optional<Method> errorMethod = errorMethodStream.filter(method -> method.isAnnotationPresent(GET.class)).findFirst();
-                            final Route route = router.get(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
-                            consumes.ifPresent(cs -> {
-                                if (cs.value().length > 0) {
-                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
-                                }
-                            });
-                        });
-                        post.ifPresent(g -> {
-                            final Optional<Method> errorMethod = errorMethodStream.filter(method -> method.isAnnotationPresent(POST.class)).findFirst();
-                            final Route route = router.post(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
-                            consumes.ifPresent(cs -> {
-                                if (cs.value().length > 0) {
-                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
-                                }
-                            });
-
-                        });
-                        options.ifPresent(g -> {
-                            final Optional<Method> errorMethod = errorMethodStream.filter(method -> method.isAnnotationPresent(OPTIONS.class)).findFirst();
-                            final Route route = router.options(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
-                            consumes.ifPresent(cs -> {
-                                if (cs.value().length > 0) {
-                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
-                                }
-                            });
-                        });
-
-                        put.ifPresent(g -> {
-                            final Optional<Method> errorMethod = errorMethodStream.filter(method -> method.isAnnotationPresent(PUT.class)).findFirst();
-                            final Route route = router.put(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
-                            consumes.ifPresent(cs -> {
-                                if (cs.value().length > 0) {
-                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
-                                }
-                            });
-                        });
-                        delete.ifPresent(g -> {
-                            final Optional<Method> errorMethod = errorMethodStream.filter(method -> method.isAnnotationPresent(OPTIONS.class)).findFirst();
-                            final Route route = router.delete(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, errorMethod, routingContext));
-                            consumes.ifPresent(cs -> {
-                                if (cs.value().length > 0) {
-                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
-                                }
-                            });
-                        });
-                        if (!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()) {
-                            // TODO check for Config provider or fallback
-                            final Optional<Method> onErrorMethod = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class)).findFirst();
-                            final Route route = router.route(sName + path.value()).handler(routingContext ->
-                                    handleRESTRoutingContext(service, restMethod, onErrorMethod, routingContext));
-                            consumes.ifPresent(cs -> {
-                                if (cs.value().length > 0) {
-                                    Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
-                                }
-                            });
-                        }
-
-                    });
-
+            initWebSocket(server);
+            initRest(router);
 
             server.requestHandler(router::accept).listen(status -> {
                 if (status.succeeded()) {
                     log("started on PORT: " + port + " host: " + host);
-
-
                     startFuture.complete();
                     return;
                 }
@@ -228,49 +87,16 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         }
     }
 
-    private void handleRESTRoutingContext(Object service, Method restMethod, Optional<Method> onErrorMethod, RoutingContext routingContext) {
-        try {
-            final Object[] parameters = ReflectionUtil.invokeRESTParameters(
-                    routingContext,
-                    restMethod,
-                    vertx,
-                    null,
-                    throwable -> handleRestError(service, onErrorMethod, routingContext, throwable));
-            ReflectionUtil.genericMethodInvocation(
-                    restMethod,
-                    () -> parameters, service);
-        } catch (Throwable throwable) {
-            handleRestError(service, onErrorMethod, routingContext, throwable);
-
-        }
+    private void initRest(Router router) {
+        RESTInitializer.initRESTHandler(vertx,router,getConfig(),this);
     }
 
-    private void handleRestError(Object service, Optional<Method> onErrorMethod, RoutingContext routingContext, Throwable throwable) {
-        if (onErrorMethod.isPresent()) {
-            try {
-                ReflectionUtil.genericMethodInvocation(onErrorMethod.get(), () -> ReflectionUtil.invokeRESTParameters(routingContext, onErrorMethod.get(), vertx, throwable, null), service);
-            } catch (Throwable throwable1) {
-                routingContext.fail(throwable1);
-                throwable1.printStackTrace();
-            }
-        } else {
-            routingContext.fail(throwable);
-            throwable.printStackTrace();
-        }
-    }
-
-    private static List<Method> getRESTMethods(Object service, String sName) {
-        final String methodName = sName;
-        final Method[] declaredMethods = service.getClass().getDeclaredMethods();
-        return Stream.of(declaredMethods).
-                filter(method -> filterRESTMethods(method, methodName)).collect(Collectors.toList());
-    }
-
-    private static boolean filterRESTMethods(final Method method, final String methodName) {
-        if (method.isAnnotationPresent(Path.class) && method.getAnnotation(Path.class).value().equalsIgnoreCase(methodName))
-            return true;
-        return method.isAnnotationPresent(OnRestError.class) && method.getAnnotation(OnRestError.class).value().equalsIgnoreCase(methodName);
-
+    private void initWebSocket(HttpServer server) {
+        final Object service = this;
+        descriptor.getOperationsByType(Type.WEBSOCKET).findFirst().ifPresent(operation -> {
+            webSocketRegistry = initWebSocketRegistryInstance();
+            WebSocketInitializer.registerWebSocketHandler(server, vertx, webSocketRegistry, getConfig(), service);
+        });
     }
 
 
