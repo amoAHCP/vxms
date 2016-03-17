@@ -4,7 +4,7 @@
 
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-demo-verticle-one</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${vxms.version}</version>
     <packaging>jar</packaging>
 
     <name>vxms-demo-verticle-one</name>
@@ -12,7 +12,17 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <vxms.version>1.0-SNAPSHOT</vxms.version>
+        <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
+        <main.verticle>org.jacpfx.SimpleREST</main.verticle>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -24,22 +34,21 @@
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${vxms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-verticle</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${vxms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx.vertx.spring</groupId>
             <artifactId>vertx-spring-ext</artifactId>
-            <version>2.0.2</version>
+            <version>${vertx-spring-ext.version}</version>
         </dependency>
     </dependencies>
     <build>
         <plugins>
-            <!-- Other plugins required by the build -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -65,7 +74,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>org.jacpfx.SimpleREST</Main-Verticle>
+                                        <Main-Verticle>${main.verticle}</Main-Verticle>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

@@ -19,7 +19,7 @@ import java.util.function.Function;
  */
 public class RESTExecutionUtil {
 
-    public static <T> void executeRetryAndCatchAsync(HttpServerResponse response, ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
+    public static <T> void executeRetryAndCatchAsync(ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
         T result = null;
         boolean errorHandling = false;
         while (retry >= 0) {

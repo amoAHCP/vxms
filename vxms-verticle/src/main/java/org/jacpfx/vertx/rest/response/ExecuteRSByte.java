@@ -41,7 +41,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(context.response(), supplier, handler, errorHandler, errorHandlerByte, errorMethodHandler, vertx, retryCount, timeout, delay),
+                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, errorHandlerByte, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<byte[]>>) value -> {
                                     if (value.failed()) return;

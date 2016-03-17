@@ -40,11 +40,10 @@ public class ExecuteRSObject extends ExecuteRSBasicObject{
 
     @Override
     public void execute() {
-        // TODO implement async
         Optional.ofNullable(objectSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(context.response(), supplier, handler, errorHandler, errorHandlerObject, errorMethodHandler, vertx, retryCount, timeout, delay),
+                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, errorHandlerObject, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<Serializable>>) value -> {
                                     if (value.failed()) return;

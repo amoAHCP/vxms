@@ -40,7 +40,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(context.response(), supplier, handler, errorHandler, errorHandlerString, errorMethodHandler, vertx, retryCount, timeout, delay),
+                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, errorHandlerString, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<String>>) value -> {
                                     if (value.failed()) return;
@@ -51,9 +51,5 @@ public class ExecuteRSString extends ExecuteRSBasicString {
 
     }
 
-
-    protected void updateResponseHaders() {
-        Optional.ofNullable(headers).ifPresent(h -> h.entrySet().stream().forEach(entry -> context.response().putHeader(entry.getKey(), entry.getValue())));
-    }
 
 }

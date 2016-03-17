@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.vertx.rest.eventbus.EventBusRequest;
 
 import java.util.HashMap;
 import java.util.function.Consumer;
@@ -33,6 +34,10 @@ public class RestHandler {
 
     public RSResponse response() {
         return new RSResponse(vertx,t,errorMethodHandler,context, new HashMap<>(), false);
+    }
+
+    public EventBusRequest eventBusRequest() {
+        return new EventBusRequest(vertx, t, errorMethodHandler, context);
     }
 
 }

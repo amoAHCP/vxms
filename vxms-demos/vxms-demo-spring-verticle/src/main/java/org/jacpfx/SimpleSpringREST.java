@@ -49,6 +49,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     }
 
     @OnRestError("simpleExceptionHandling/:name")
+    @GET
     public void simpleExceptionHandlingOnError(Throwable t, RestHandler handler) {
         System.out.println("ERROR");
         handler.response().stringResponse(() -> bean.sayHallo(handler.request().param("name")+" ::"+t.getMessage())).execute();

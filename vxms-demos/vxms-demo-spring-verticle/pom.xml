@@ -4,7 +4,7 @@
 
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-demo-spring-verticle</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${vxms.version}</version>
     <packaging>jar</packaging>
 
     <name>vxms-demo-spring-verticle</name>
@@ -12,7 +12,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <vxms.version>1.0-SNAPSHOT</vxms.version>
+        <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
+        <spring.version>4.2.1.RELEASE</spring.version>
+        <main.verticle>java-spring:org.jacpfx.SimpleSpringREST</main.verticle>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -24,22 +35,22 @@
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${vxms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-verticle</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${vxms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx.vertx.spring</groupId>
             <artifactId>vertx-spring-ext</artifactId>
-            <version>2.0.2</version>
+            <version>${vertx-spring-ext.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.2.1.RELEASE</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -75,7 +86,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>java-spring:org.jacpfx.SimpleSpringREST</Main-Verticle>
+                                        <Main-Verticle>${main.verticle}</Main-Verticle>
                                     </manifestEntries>
                                 </transformer>
                                 <transformer
