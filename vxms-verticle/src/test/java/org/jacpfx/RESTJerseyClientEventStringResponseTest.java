@@ -26,6 +26,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Andy Moncsek on 23.04.15.
@@ -65,7 +66,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
     public void startVerticles() throws InterruptedException {
 
 
-        CountDownLatch latch2 = new CountDownLatch(2);
+        CountDownLatch latch2 = new CountDownLatch(3);
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
@@ -85,6 +86,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
 
         });
         getVertx().deployVerticle(new TestVerticle(), options, asyncResult -> {
+            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+            System.out.println("start service: " + asyncResult.succeeded());
+            assertTrue(asyncResult.succeeded());
+            assertNotNull("deploymentID should not be null", asyncResult.result());
+            // If deployed correctly then start the tests!
+            //   latch2.countDown();
+
+            latch2.countDown();
+
+        });
+        getVertx().deployVerticle(new TestErrorVerticle(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
             assertTrue(asyncResult.succeeded());
@@ -162,6 +174,33 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
 
     }
 
+    @Test
+
+    public void complexSyncResponseTest() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexSyncResponse");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response, "hello1");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
 
 
     @Test
@@ -170,13 +209,69 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexResponse");
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexErrorResponse");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "hello");
+                Assert.assertEquals(response, "java.lang.NullPointerException: test exception");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+    @Test
+
+    public void complexSyncErrorResponseTest() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexSyncErrorResponse");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response, "test exception");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+    @Test
+
+    public void simpleSyncNoConnectionErrorResponseTest() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponse");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response, "no connection");
                 latch.countDown();
             }
 
@@ -193,17 +288,43 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
 
     @Test
 
-    public void onErrorResponseTest() throws InterruptedException {
+    public void simpleSyncNoConnectionRetryErrorResponseTest() throws InterruptedException {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexErrorResponse");
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleSyncNoConnectionRetryErrorResponse");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "java.lang.NullPointerException: test exception");
+                Assert.assertEquals(response, "hello1");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+    @Test
+
+    public void onErrorResponseTest() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/onErrorResponse");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response, "failed");
                 latch.countDown();
             }
 
@@ -255,6 +376,20 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                     execute();
         }
 
+        @Path("/complexSyncResponse")
+        @GET
+        public void complexSyncResponse(RestHandler reply) {
+            System.out.println("CALL");
+            reply.
+                    eventBusRequest().
+                    send("hello","welt").
+                    mapToStringResponseSync(handler ->
+                            handler.
+                                    result().
+                                    body().toString()+"1").
+                    execute();
+        }
+
 
 
         @Path("/complexErrorResponse")
@@ -264,6 +399,34 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                     send("hello","welt").
                     mapToStringResponse(handler -> {throw new NullPointerException("test exception");}).
                     onErrorResponse(error->error.getMessage()).
+                    execute();
+        }
+
+        @Path("/complexSyncErrorResponse")
+        @GET
+        public void complexSyncErrorResponse(RestHandler reply) {
+            reply.eventBusRequest().
+                    send("hello","welt").
+                    mapToStringResponseSync(handler -> {throw new NullPointerException("test exception");}).
+                    onErrorResponse(error->error.getMessage()).
+                    execute();
+        }
+
+        @Path("/simpleSyncNoConnectionErrorResponse")
+        @GET
+        public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
+            reply.eventBusRequest().
+                    send("hello1","welt").onErrorResult(handler ->"no connection").
+                    mapToStringResponseSync(handler -> handler.result().body().toString()).
+                    execute();
+        }
+
+        @Path("/simpleSyncNoConnectionRetryErrorResponse")
+        @GET
+        public void simpleSyncNoConnectionRetryErrorResponse(RestHandler reply) {
+            reply.eventBusRequest().
+                    send("error","1").
+                    mapToStringResponseSync(handler -> handler.result().body().toString()+"1").retry(3).
                     execute();
         }
 
@@ -295,6 +458,25 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             vertx.eventBus().consumer("hello",handler -> {
                 System.out.println("request::"+handler.body().toString());
                handler.reply("hello");
+            });
+            startFuture.complete();
+        }
+    }
+
+    public class TestErrorVerticle extends AbstractVerticle{
+        private  AtomicLong counter = new AtomicLong(0L);
+        public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+            System.out.println("start");
+            vertx.eventBus().consumer("error",handler -> {
+                System.out.println("request::"+handler.body().toString());
+                if(counter.incrementAndGet()%3==0){
+                    System.out.println("reply::"+handler.body().toString());
+                    handler.reply("hello");
+                }  else{
+                    System.out.println("fail::"+handler.body().toString());
+                    handler.fail(500,"my error");
+                }
+
             });
             startFuture.complete();
         }

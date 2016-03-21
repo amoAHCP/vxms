@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
@@ -22,23 +23,23 @@ public class ExecuteRSBasicString {
     protected final Consumer<Throwable> errorMethodHandler;
     protected final RoutingContext context;
     protected final Map<String, String> headers;
-    protected final boolean async;
     protected final ThrowableSupplier<String> stringSupplier;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
     protected final Function<Throwable, String> errorHandlerString;
     protected final int httpStatusCode;
     protected final int retryCount;
+    protected final ExecuteEventBusCall excecuteEventBusAndReply;
 
 
-    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.headers = headers;
-        this.async = async;
         this.stringSupplier = stringSupplier;
+        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
         this.encoder = encoder;
         this.errorHandler = errorHandler;
         this.errorHandlerString = errorHandlerString;
@@ -47,11 +48,20 @@ public class ExecuteRSBasicString {
     }
 
     public void execute(HttpResponseStatus status) {
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
         lastStep.execute();
     }
 
     public void execute() {
+        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction-> {
+            try {
+                evFunction.execute(vertx,t,errorMethodHandler,context,headers,excecuteEventBusAndReply,encoder,errorHandler,errorHandlerString,httpStatusCode,retryCount);
+            }  catch (Exception e){
+                System.out.println("EXCEPTION ::::::");
+                e.printStackTrace();
+            }
+
+        });
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
@@ -92,8 +102,6 @@ public class ExecuteRSBasicString {
             }
         }
     }
-
-
 
 
 }

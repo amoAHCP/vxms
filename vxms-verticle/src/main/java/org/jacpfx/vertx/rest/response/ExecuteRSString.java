@@ -22,8 +22,8 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
     protected final long timeout;
 
-    public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+    public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers,  stringSupplier, null, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
         this.delay = delay;
         this.timeout = timeout;
     }
@@ -31,7 +31,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, encoder, errorHandler, errorHandlerString, status.code(), retryCount, delay, timeout);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, encoder, errorHandler, errorHandlerString, status.code(), retryCount, delay, timeout);
         lastStep.execute();
     }
 

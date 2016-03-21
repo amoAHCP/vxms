@@ -52,7 +52,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, async, stringSupplier, null, null, null, 0, 0);
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0);
     }
 
     /**
