@@ -42,7 +42,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, null, null, null, 0, 0);
+        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, null, null, null, null, 0, 0);
     }
 
     /**

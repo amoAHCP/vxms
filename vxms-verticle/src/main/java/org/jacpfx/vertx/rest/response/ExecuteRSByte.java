@@ -23,7 +23,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
 
 
     public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier,null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         this.timeout = timeout;
         this.delay = delay;
     }

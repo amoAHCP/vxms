@@ -227,7 +227,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         @Path("/simpleResponse")
         @GET
         public void simpleResponse(RestHandler reply) {
-            reply.eventBusRequest().send("hello", "welt").executeAndRespond();
+            reply.eventBusRequest().sendAndRespondRequest("hello", "welt");
         }
 
         @Path("/complexResponse")
@@ -276,7 +276,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
             reply.eventBusRequest().async().send("hello1", "welt").onErrorResult(handler -> {
                 System.err.println("::: " + handler.cause().getMessage());
                 return "failed";
-            }).executeAndRespond();
+            }).mapToStringResponse(handler -> handler.result().body().toString()).execute();
         }
 
     }

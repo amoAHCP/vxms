@@ -5,7 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusCall;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
@@ -29,10 +29,10 @@ public class ExecuteRSBasicString {
     protected final Function<Throwable, String> errorHandlerString;
     protected final int httpStatusCode;
     protected final int retryCount;
-    protected final ExecuteEventBusCall excecuteEventBusAndReply;
+    protected final ExecuteEventBusStringCall excecuteEventBusAndReply;
 
 
-    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -62,6 +62,7 @@ public class ExecuteRSBasicString {
             }
 
         });
+
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;

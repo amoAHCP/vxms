@@ -3,10 +3,8 @@ package org.jacpfx.vertx.rest.eventbus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.response.ExecuteRSStringResponse;
@@ -42,36 +40,6 @@ public class EventBusAsyncResponse {
     }
 
 
-    public void executeAndRespond() {
-        vertx.eventBus().send(id, message, options != null ? options : new DeliveryOptions(), event -> {
-            if (event.failed()) {
-                Optional.ofNullable(errorFunction).ifPresent(function -> {
-                    final HttpServerResponse response = context.response();
-                    final Object errorResult = function.apply(event);
-                    respond(response, errorResult);
-                });
-
-            } else {
-                final HttpServerResponse response = context.response();
-                Object resp = event.result().body();
-                respond(response, resp);
-            }
-        });
-    }
-
-    protected void respond(HttpServerResponse response, Object resp) {
-        if (resp instanceof String) {
-            response.end((String) resp);
-        } else if (resp instanceof byte[]) {
-
-            response.end(Buffer.buffer((byte[]) resp));
-        } else {
-            // WebSocketExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.response()));
-        }
-    }
-
-
-
 
 
     public ExecuteRSStringResponse mapToStringResponse(Function<AsyncResult<Message<Object>>, String> stringFunction) {
@@ -83,7 +51,9 @@ public class EventBusAsyncResponse {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, null, stringSupplier, null, null, null, 0, 0, 0, 0);
     }
 
-    protected <T, R> void sendMessage(Function<AsyncResult<Message<T>>, R> stringFunction, CompletableFuture<R> cf, Vertx vertx, DeliveryOptions options, Function<AsyncResult<Message<T>>, ?> errorFunction, String id, Object message) {
+    protected <T, R> void sendMessage(Function<AsyncResult<Message<T>>, R> stringFunction, CompletableFuture<R> cf,
+                                      Vertx vertx, DeliveryOptions options, Function<AsyncResult<Message<T>>, ?> errorFunction,
+                                      String id, Object message) {
         vertx.eventBus().send(id, message, options, (Handler<AsyncResult<Message<T>>>) event -> {
             if (event.failed()) {
                 final Optional<? extends Function<AsyncResult<Message<T>>, ?>> ef = Optional.ofNullable(errorFunction);

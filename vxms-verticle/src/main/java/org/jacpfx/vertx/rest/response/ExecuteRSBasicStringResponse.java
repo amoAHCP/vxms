@@ -3,7 +3,7 @@ package org.jacpfx.vertx.rest.response;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusCall;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
-    public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
         super(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
     }
 

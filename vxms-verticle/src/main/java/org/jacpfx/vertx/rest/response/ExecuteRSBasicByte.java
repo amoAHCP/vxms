@@ -6,6 +6,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
@@ -30,8 +31,9 @@ public class ExecuteRSBasicByte {
     protected final Function<Throwable, byte[]> errorHandlerByte;
     protected final int httpStatusCode;
     protected final int retryCount;
+    protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
 
-    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCall excecuteEventBusAndReply ,Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -44,10 +46,11 @@ public class ExecuteRSBasicByte {
         this.errorHandlerByte = errorHandlerByte;
         this.retryCount = retryCount;
         this.httpStatusCode = httpStatusCode;
+        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
     }
 
     public void execute(HttpResponseStatus status) {
-        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
+        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier,excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
         lastStep.execute();
     }
 
