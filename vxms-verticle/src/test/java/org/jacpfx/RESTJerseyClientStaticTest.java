@@ -133,7 +133,7 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
 
 
 
-    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     @EndpointConfig(StaticContentEndpointConfig.class)
     public class WsServiceTwo extends VxmsEndpoint {
 

@@ -28,15 +28,18 @@ public class RESTInitializer {
 
 
     public static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
-        initEndoitConfiguration(vertx, router, service);
+        final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(service);
+        initEndoitConfiguration(endpointConfiguration,vertx, router, service);
 
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
                 forEach(restMethod -> initRestMethod(vertx, router, config, service, restMethod));
+
+        postEndoitConfiguration(endpointConfiguration,vertx, router, service);
     }
 
-    protected static void initEndoitConfiguration(Vertx vertx, Router router, Object service) {
-        Optional.of(getEndpointConfiguration(service)).ifPresent(endpointConfig -> {
+    protected static void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router, Object service) {
+        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
 
             endpointConfig.corsHandler(router);
 
@@ -44,13 +47,19 @@ public class RESTInitializer {
 
             endpointConfig.cookieHandler(router);
 
-            endpointConfig.staticHandler(router);
-
             // TODO implement auth --> Optional.ofNullable(endpointConfig.authHandler()).ifPresent(authHandler -> router.route().handler(authHandler));
 
             endpointConfig.sessionHandler(vertx, router);
 
             endpointConfig.customRouteConfiguration(vertx, router);
+        });
+    }
+
+    protected static void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router, Object service) {
+        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
+
+            endpointConfig.staticHandler(router);
+
         });
     }
 

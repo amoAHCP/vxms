@@ -600,7 +600,7 @@ testComplete();
     }
 
 
-    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
         @OnWebSocketMessage("/wsEndpintOne")
         public void wsEndpointOne(WebSocketHandler reply) {

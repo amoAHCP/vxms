@@ -127,7 +127,7 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
     }
 
 
-    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     @EndpointConfig(RestrictedBodyHandlingEndpointConfig.class)
     public class WsServiceOne extends VxmsEndpoint {
 

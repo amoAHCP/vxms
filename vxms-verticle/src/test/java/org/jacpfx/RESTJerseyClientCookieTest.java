@@ -137,7 +137,7 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
 
 
 
-    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT2)
+    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT2)
     public class WsServiceTwo extends VxmsEndpoint {
 
         /////------------- sync async ----------------

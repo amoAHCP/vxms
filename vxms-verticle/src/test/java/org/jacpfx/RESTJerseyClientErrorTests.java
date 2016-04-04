@@ -201,7 +201,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     }
 
     // TODO extend test for POST, OPTIONAL,....
-    @ServiceEndpoint(value = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
         /////------------- sync async ----------------

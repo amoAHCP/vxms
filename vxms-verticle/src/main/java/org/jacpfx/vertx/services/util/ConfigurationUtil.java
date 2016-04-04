@@ -19,7 +19,7 @@ public class ConfigurationUtil {
 
             final String host = config.getString("host-prefix", HOST_PREFIX);
             final org.jacpfx.common.ServiceEndpoint path = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
-            return host.length() > 1 ? "/".concat(host).concat("-").concat(path.value()) : path.value();
+            return host.length() > 1 ? "/".concat(host).concat("-").concat(path.name()) : path.name();
         } else {
             // TODO define Exception !!!
         }
