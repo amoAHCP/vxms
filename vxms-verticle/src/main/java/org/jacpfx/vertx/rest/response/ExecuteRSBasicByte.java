@@ -56,6 +56,17 @@ public class ExecuteRSBasicByte {
 
 
     public void execute() {
+
+        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction-> {
+            try {
+                evFunction.execute(vertx,t,errorMethodHandler,context,headers,encoder,errorHandler,errorHandlerByte,httpStatusCode,retryCount);
+            }  catch (Exception e){
+                System.out.println("EXCEPTION ::::::");
+                e.printStackTrace();
+            }
+
+        });
+
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;

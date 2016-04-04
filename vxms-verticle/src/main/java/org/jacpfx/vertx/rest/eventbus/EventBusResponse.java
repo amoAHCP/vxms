@@ -42,6 +42,7 @@ public class EventBusResponse {
         this.errorFunction = errorFunction;
     }
 
+    // TODO define ThrowableFunction
     public ExecuteRSBasicByteResponse mapToByteResponse(Function<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
         return mapToByteResponse(byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
@@ -59,7 +60,7 @@ public class EventBusResponse {
                                                            Function<Throwable, byte[]> _errorHandlerByte, int _httpStatusCode, int _retryCount) {
 
         ExecuteEventBusByteCall excecuteEventBusAndReply = (vertx, t, errorMethodHandler,
-                                                            context, headers, _excecuteEventBusAndReply,
+                                                            context, headers,
                                                             encoder, errorHandler, errorHandlerByte,
                                                             httpStatusCode, retryCount) ->
                 vertx.
@@ -82,7 +83,7 @@ public class EventBusResponse {
                                                                Function<Throwable, String> _errorHandlerString, int _httpStatusCode, int _retryCount) {
 
         final ExecuteEventBusStringCall excecuteEventBusAndReply = (vertx, t, errorMethodHandler,
-                                                                    context, headers, _excecuteEventBusAndReply,
+                                                                    context, headers,
                                                                     encoder, errorHandler, errorHandlerString,
                                                                     httpStatusCode, retryCount) ->
                 vertx.
@@ -98,10 +99,9 @@ public class EventBusResponse {
         return new ExecuteRSBasicStringResponse(_vertx, _t, _errorMethodHandler, _context, _headers, _stringSupplier, excecuteEventBusAndReply, _encoder, _errorHandler, _errorHandlerString, _httpStatusCode, _retryCount);
     }
 
-    private void createStringSupplierAndExecute(Function<AsyncResult<Message<Object>>, String> stringFunction,
-                                                Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler,
-                                                RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                                                Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
+    private void createStringSupplierAndExecute(Function<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
+                                                Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                                Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
         final ThrowableSupplier<String> stringSupplier = createStringSupplier(stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, event);
 
 
@@ -112,10 +112,9 @@ public class EventBusResponse {
         }
     }
 
-    private void createByteSupplierAndExecute(Function<AsyncResult<Message<Object>>, byte[]> byteFunction,
-                                              Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler,
-                                              RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                                              Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
+    private void createByteSupplierAndExecute(Function<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+                                              Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                              Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
         final ThrowableSupplier<byte[]> byteSupplier = createByteSupplier(byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, event);
 
 
@@ -126,10 +125,9 @@ public class EventBusResponse {
         }
     }
 
-    private ThrowableSupplier<byte[]> createByteSupplier(Function<AsyncResult<Message<Object>>, byte[]> byteFunction,
-                                                         Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler,
-                                                         RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                                                         Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
+    private ThrowableSupplier<byte[]> createByteSupplier(Function<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+                                                         Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                                         Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
         return () -> {
             byte[] resp = null;
             if (event.failed()) {

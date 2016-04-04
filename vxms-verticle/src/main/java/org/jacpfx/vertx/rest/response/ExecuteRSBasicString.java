@@ -55,7 +55,7 @@ public class ExecuteRSBasicString {
     public void execute() {
         Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction-> {
             try {
-                evFunction.execute(vertx,t,errorMethodHandler,context,headers,excecuteEventBusAndReply,encoder,errorHandler,errorHandlerString,httpStatusCode,retryCount);
+                evFunction.execute(vertx,t,errorMethodHandler,context,headers,encoder,errorHandler,errorHandlerString,httpStatusCode,retryCount);
             }  catch (Exception e){
                 System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
