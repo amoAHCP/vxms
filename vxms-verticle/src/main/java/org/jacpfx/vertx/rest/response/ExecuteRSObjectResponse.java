@@ -60,11 +60,6 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
-    public ExecuteRSObject contentType(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
-        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
-    }
 
     public ExecuteRSObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);

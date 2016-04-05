@@ -9,6 +9,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -22,15 +23,42 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     protected final long delay;
 
 
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, async, byteSupplier,null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,  ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers,byteSupplier, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         this.timeout = timeout;
         this.delay = delay;
     }
 
     @Override
     public void execute(HttpResponseStatus status) {
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        lastStep.execute();
+    }
+
+    @Override
+    /**
+     * Execute the reply chain with given http status code and content-type
+     *
+     * @param status,     the http status code
+     * @param contentType , the html content-type
+     */
+    public void execute(HttpResponseStatus status, String contentType) {
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        lastStep.execute();
+    }
+
+    @Override
+    /**
+     * Executes the reply chain whith given html content-type
+     *
+     * @param contentType, the html content-type
+     */
+    public void execute(String contentType) {
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 

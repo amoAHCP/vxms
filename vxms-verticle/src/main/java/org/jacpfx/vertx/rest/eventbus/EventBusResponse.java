@@ -9,6 +9,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicByteResponse;
+import org.jacpfx.vertx.rest.response.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicStringResponse;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
@@ -48,6 +49,11 @@ public class EventBusResponse {
         return mapToByteResponse(byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
     }
 
+    public ExecuteRSBasicObjectResponse mapToObjectResponse(Function<AsyncResult<Message<Object>>, Object> objectFunction,Encoder encoder) {
+
+        return null;//mapToByteResponse(byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
+    }
+
     public ExecuteRSBasicStringResponse mapToStringResponse(Function<AsyncResult<Message<Object>>, String> stringFunction) {
 
         return mapToStringResponse(stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
@@ -67,14 +73,14 @@ public class EventBusResponse {
                         eventBus().
                         send(id, message, options != null ? options : new DeliveryOptions(),
                                 event ->
-                                        createByteSupplierAndExecute(byteFunction,
+                                        createByteSupplierAndExecute(errorFunction, byteFunction,
                                                 vertx, t, errorMethodHandler,
                                                 context, headers, encoder,
                                                 errorHandler, errorHandlerByte, httpStatusCode,
                                                 retryCount, event));
 
 
-        return new ExecuteRSBasicByteResponse(_vertx, _t, _errorMethodHandler, _context, _headers, false, _byteSupplier, excecuteEventBusAndReply, _encoder, _errorHandler, _errorHandlerByte, _httpStatusCode, _retryCount);
+        return new ExecuteRSBasicByteResponse(_vertx, _t, _errorMethodHandler, _context, _headers, _byteSupplier, excecuteEventBusAndReply, _encoder, _errorHandler, _errorHandlerByte, _httpStatusCode, _retryCount);
     }
 
     protected ExecuteRSBasicStringResponse mapToStringResponse(Function<AsyncResult<Message<Object>>, String> stringFunction,
@@ -90,7 +96,7 @@ public class EventBusResponse {
                         eventBus().
                         send(id, message, options != null ? options : new DeliveryOptions(),
                                 event ->
-                                        createStringSupplierAndExecute(stringFunction,
+                                        createStringSupplierAndExecute(errorFunction, stringFunction,
                                                 vertx, t, errorMethodHandler,
                                                 context, headers, encoder,
                                                 errorHandler, errorHandlerString, httpStatusCode,
@@ -99,12 +105,10 @@ public class EventBusResponse {
         return new ExecuteRSBasicStringResponse(_vertx, _t, _errorMethodHandler, _context, _headers, _stringSupplier, excecuteEventBusAndReply, _encoder, _errorHandler, _errorHandlerString, _httpStatusCode, _retryCount);
     }
 
-    private void createStringSupplierAndExecute(Function<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
+    private void createStringSupplierAndExecute(Function<AsyncResult<Message<Object>>, ?> errorFunction, Function<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
                                                 Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                                 Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
-        final ThrowableSupplier<String> stringSupplier = createStringSupplier(stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, event);
-
-
+        final ThrowableSupplier<String> stringSupplier = createStringSupplier(errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, event);
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
             new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount).execute();
         } else if (event.failed() && retryCount > 0) {
@@ -112,20 +116,20 @@ public class EventBusResponse {
         }
     }
 
-    private void createByteSupplierAndExecute(Function<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+    private void createByteSupplierAndExecute(Function<AsyncResult<Message<Object>>, ?> errorFunction, Function<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
                                               Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                               Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
-        final ThrowableSupplier<byte[]> byteSupplier = createByteSupplier(byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, event);
+        final ThrowableSupplier<byte[]> byteSupplier = createByteSupplier(errorFunction, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, event);
 
 
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
-            new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, false, byteSupplier, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount).execute();
+            new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount).execute();
         } else if (event.failed() && retryCount > 0) {
             mapToByteResponse(byteFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount - 1).execute();
         }
     }
 
-    private ThrowableSupplier<byte[]> createByteSupplier(Function<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+    private ThrowableSupplier<byte[]> createByteSupplier(Function<AsyncResult<Message<Object>>, ?> errorFunction, Function<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
                                                          Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                                          Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
         return () -> {
@@ -134,7 +138,7 @@ public class EventBusResponse {
                 if (retryCount > 0) {
                     retryByteSupplier(byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
                 } else {
-                    resp = (byte[]) executeErrorFunction(event);
+                    resp = (byte[]) executeErrorFunction(event, errorFunction);
                 }
             } else {
                 resp = byteFunction.apply(event);
@@ -144,7 +148,7 @@ public class EventBusResponse {
         };
     }
 
-    private ThrowableSupplier<String> createStringSupplier(Function<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
+    private ThrowableSupplier<String> createStringSupplier(Function<AsyncResult<Message<Object>>, ?> errorFunction, Function<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
                                                            Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                                            Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, AsyncResult<Message<Object>> event) {
         return () -> {
@@ -153,7 +157,7 @@ public class EventBusResponse {
                 if (retryCount > 0) {
                     retryStringSupplier(stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
                 } else {
-                    resp = (String) executeErrorFunction(event);
+                    resp = (String) executeErrorFunction(event, errorFunction);
                 }
             } else {
                 resp = stringFunction.apply(event);
@@ -163,12 +167,12 @@ public class EventBusResponse {
         };
     }
 
-    private Object executeErrorFunction(AsyncResult<Message<Object>> event) throws Throwable {
+    private Object executeErrorFunction(AsyncResult<Message<Object>> event, Function<AsyncResult<Message<Object>>, ?> errorFunction) throws Throwable {
         Object resp;
         final Optional<? extends Function<AsyncResult<Message<Object>>, ?>> ef = Optional.ofNullable(errorFunction);
         if (!ef.isPresent()) throw event.cause();
-        final Function<AsyncResult<Message<Object>>, ?> errorFunction = ef.get();
-        resp = errorFunction.apply(event);
+        final Function<AsyncResult<Message<Object>>, ?> localErrorFunction = ef.get();
+        resp = localErrorFunction.apply(event);
         return resp;
     }
 

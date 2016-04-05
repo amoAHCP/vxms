@@ -590,7 +590,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             handler.response().stringResponse(() -> {
 
                 return productType + product;
-            }).contentType("application/json").execute();
+            }).execute("application/json");
         }
 
         @Path("/endpointEight_put_header")
@@ -604,7 +604,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             handler.response().stringResponse(() -> {
 
                 return productType + product;
-            }).putHeader("key", "val").contentType("application/json").execute();
+            }).putHeader("key", "val").execute("application/json");
         }
 
         @Path("/endpointNine_exception")
@@ -615,7 +615,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointTwo: " + handler);
             handler.response().stringResponse(() -> {
                 throw new NullPointerException("test");
-            }).putHeader("key", "val").contentType("application/json").execute();
+            }).putHeader("key", "val").execute("application/json");
         }
 
     }

@@ -36,6 +36,11 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
+    /**
+     * retry operation on error
+     * @param retryCount
+     * @return the response chain
+     */
     public ExecuteRSStringResponse retry(int retryCount) {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers,  stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
@@ -60,11 +65,6 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
     }
 
-    public ExecuteRSString contentType(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
-        return new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap,  stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
-    }
 
     public ExecuteRSStringResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);

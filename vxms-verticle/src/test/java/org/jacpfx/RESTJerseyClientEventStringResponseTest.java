@@ -15,6 +15,7 @@ import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.GET;
@@ -200,6 +201,33 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
     }
 
     @Test
+    @Ignore
+    public void simpleSyncNoConnectionErrorTest() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleSyncNoConnectionError");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response, "no connection");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+    @Test
 
     public void simpleSyncNoConnectionRetryErrorResponseTest() throws InterruptedException {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
@@ -296,6 +324,15 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             reply.eventBusRequest().
                     send("hello1", "welt").onErrorResult(handler -> "no connection").
                     mapToStringResponse(handler -> handler.result().body().toString()).
+                    execute();
+        }
+
+        @Path("/simpleSyncNoConnectionError")
+        @GET
+        public void simpleSyncNoConnectionError(RestHandler reply) {
+            reply.eventBusRequest().
+                    send("hello1", "welt").
+                    mapToStringResponse(handler -> handler.result().body().toString()).//onError(error-> System.out.println("ERROR:"+error.getMessage()+"type: "+error.getClass())).
                     execute();
         }
 

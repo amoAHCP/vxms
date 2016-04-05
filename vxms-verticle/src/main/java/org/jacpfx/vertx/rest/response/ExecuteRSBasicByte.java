@@ -10,6 +10,7 @@ import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -24,7 +25,6 @@ public class ExecuteRSBasicByte {
     protected final Consumer<Throwable> errorMethodHandler;
     protected final RoutingContext context;
     protected final Map<String, String> headers;
-    protected final boolean async;
     protected final ThrowableSupplier<byte[]> byteSupplier;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
@@ -33,13 +33,12 @@ public class ExecuteRSBasicByte {
     protected final int retryCount;
     protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
 
-    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCall excecuteEventBusAndReply ,Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.headers = headers;
-        this.async = async;
         this.byteSupplier = byteSupplier;
         this.encoder = encoder;
         this.errorHandler = errorHandler;
@@ -49,18 +48,50 @@ public class ExecuteRSBasicByte {
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
     }
 
+    /**
+     * Execute the reply chain with given http status code
+     *
+     * @param status, the http status code
+     */
     public void execute(HttpResponseStatus status) {
-        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, async, byteSupplier,excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
+        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
         lastStep.execute();
     }
 
+    /**
+     * Execute the reply chain with given http status code and content-type
+     *
+     * @param status,     the http status code
+     * @param contentType , the html content-type
+     */
+    public void execute(HttpResponseStatus status, String contentType) {
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
+        lastStep.execute();
+    }
 
+    /**
+     * Executes the reply chain whith given html content-type
+     *
+     * @param contentType, the html content-type
+     */
+    public void execute(String contentType) {
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap,  byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+        lastStep.execute();
+    }
+
+    /**
+     * Execute the reply chain
+     */
     public void execute() {
 
-        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction-> {
+        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx,t,errorMethodHandler,context,headers,encoder,errorHandler,errorHandlerByte,httpStatusCode,retryCount);
-            }  catch (Exception e){
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+            } catch (Exception e) {
                 System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
             }
@@ -79,7 +110,7 @@ public class ExecuteRSBasicByte {
                                 } catch (Throwable e) {
                                     retry--;
                                     if (retry < 0) {
-                                        result = RESTExecutionUtil.handleError( result, errorHandler, errorHandlerByte, errorMethodHandler, e);
+                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerByte, errorMethodHandler, e);
                                         errorHandling = true;
                                     } else {
                                         RESTExecutionUtil.handleError(errorHandler, e);

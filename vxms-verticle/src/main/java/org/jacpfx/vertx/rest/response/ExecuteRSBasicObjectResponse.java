@@ -40,12 +40,6 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
     }
 
-    public ExecuteRSBasicObject contentType(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
-        return new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
-    }
-
     public ExecuteRSBasicObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);

@@ -9,6 +9,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,6 +33,36 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, encoder, errorHandler, errorHandlerString, status.code(), retryCount, delay, timeout);
+        lastStep.execute();
+    }
+
+    @Override
+    /**
+     * Execute the reply chain with given http status code and content-type
+     *
+     * @param status,     the http status code
+     * @param contentType , the html content-type
+     */
+    public void execute(HttpResponseStatus status, String contentType) {
+        Objects.requireNonNull(status);
+        Objects.requireNonNull(contentType);
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, encoder, errorHandler, errorHandlerString, status.code(), retryCount, delay, timeout);
+        lastStep.execute();
+    }
+
+    @Override
+    /**
+     * Executes the reply chain whith given html content-type
+     *
+     * @param contentType, the html content-type
+     */
+    public void execute(String contentType) {
+        Objects.requireNonNull(contentType);
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, delay, timeout);
         lastStep.execute();
     }
 

@@ -10,7 +10,9 @@ import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -49,12 +51,49 @@ public class ExecuteRSBasicObject {
     }
 
 
+    /**
+     * Execute the reply chain with given http status code
+     *
+     * @param status, the http status code
+     */
     public void execute(HttpResponseStatus status) {
+        Objects.requireNonNull(status);
         final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
         lastStep.execute();
     }
 
 
+    /**
+     * Execute the reply chain with given http status code and content-type
+     *
+     * @param status,     the http status code
+     * @param contentType , the html content-type
+     */
+    public void execute(HttpResponseStatus status, String contentType) {
+        Objects.requireNonNull(status);
+        Objects.requireNonNull(contentType);
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
+        lastStep.execute();
+    }
+
+    /**
+     * Executes the reply chain whith given html content-type
+     *
+     * @param contentType, the html content-type
+     */
+    public void execute(String contentType) {
+        Objects.requireNonNull(contentType);
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+        lastStep.execute();
+    }
+
+    /**
+     * Execute the reply chain
+     */
     public void execute() {
         Optional.ofNullable(objectSupplier).
                 ifPresent(supplier -> {
@@ -94,8 +133,6 @@ public class ExecuteRSBasicObject {
             }
         }
     }
-
-
 
 
 }

@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
+public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "localhost";

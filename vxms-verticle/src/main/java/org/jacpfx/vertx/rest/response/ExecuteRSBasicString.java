@@ -9,7 +9,9 @@ import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,16 +49,53 @@ public class ExecuteRSBasicString {
         this.httpStatusCode = httpStatusCode;
     }
 
+    /**
+     * Execute the reply chain with given http status code
+     *
+     * @param status, the http status code
+     */
     public void execute(HttpResponseStatus status) {
+        Objects.requireNonNull(status);
         final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
         lastStep.execute();
     }
 
+    /**
+     * Execute the reply chain with given http status code and content-type
+     *
+     * @param status,     the http status code
+     * @param contentType , the html content-type
+     */
+    public void execute(HttpResponseStatus status, String contentType) {
+        Objects.requireNonNull(status);
+        Objects.requireNonNull(contentType);
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
+        lastStep.execute();
+    }
+
+    /**
+     * Executes the reply chain whith given html content-type
+     *
+     * @param contentType, the html content-type
+     */
+    public void execute(String contentType) {
+        Objects.requireNonNull(contentType);
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+        lastStep.execute();
+    }
+
+    /**
+     * Execute the reply chain
+     */
     public void execute() {
-        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction-> {
+        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx,t,errorMethodHandler,context,headers,encoder,errorHandler,errorHandlerString,httpStatusCode,retryCount);
-            }  catch (Exception e){
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+            } catch (Exception e) {
                 System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
             }
