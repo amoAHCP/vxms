@@ -13,6 +13,7 @@ import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.entity.Payload;
+import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
+public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "localhost";
@@ -308,17 +309,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
             reply.
                     eventBusRequest().
                     send("hello", "welt").
-                    mapToByteResponse(handler -> {
-                        try {
-                            Payload<String> p = new Payload<>(handler.
-                                    result().
-                                    body().toString());
-                            return Serializer.serialize(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
-                    }).
+                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
                     execute();
         }
 
@@ -328,18 +319,10 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         public void complexByteErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToByteResponse(handler -> {
+                    mapToObjectResponse(handler -> {
                         throw new NullPointerException("test exception");
-                    }).
-                    onErrorResponse(error -> {
-                        try {
-                            Payload<String> p = new Payload<>(error.getMessage());
-                            return Serializer.serialize(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
-                    }).
+                    },new ExampleByteEncoder()).
+                    onErrorResponse(error -> new Payload<>(error.getMessage()),new ExampleByteEncoder()).
                     execute();
         }
 
@@ -348,16 +331,8 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    onErrorResult(handler -> {
-                        try {
-                            Payload<String> p = new Payload<>("no connection");
-                            return Serializer.serialize(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
-                    }).
-                    mapToByteResponse(handler -> (byte[]) handler.result().body()).
+                    onErrorResult(handler -> new Payload<>("no connection")).
+                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
                     execute();
         }
 
@@ -366,15 +341,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("error", "1").
-                    mapToByteResponse(handler -> {
-                        try {
-                            Payload<String> p = new Payload<>(handler.result().body().toString() + "1");
-                            return Serializer.serialize(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
-                    }).
+                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString() + "1"),new ExampleByteEncoder()).
                     retry(3).
                     execute();
         }
@@ -385,17 +352,11 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToByteResponse(handler -> {
+                    mapToObjectResponse(handler -> {
                         System.out.println("retry: " + count.get());
                         if (count.incrementAndGet() < 3) throw new NullPointerException("test");
-                        try {
-                            Payload<String> p = new Payload<>(handler.result().body().toString() + "1");
-                            return Serializer.serialize(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
-                    }).
+                        return new Payload<>(handler.result().body().toString() + "1");
+                    },new ExampleByteEncoder()).
                     retry(3).
                     execute();
         }

@@ -13,17 +13,17 @@ import javax.ws.rs.Path;
 /**
  * Created by Andy Moncsek on 25.01.16.
  */
-@ServiceEndpoint(value = "/", port = 9090)
+@ServiceEndpoint(port = 9090)
 public class SimpleREST extends VxmsEndpoint {
 
-    @Path("helloGET")
+    @Path("/helloGET")
     @GET
     public void simpleRESTHello(RestHandler handler) {
          handler.response().stringResponse(()->"held 111+").execute();
     }
 
 
-    @Path("helloGET/:name")
+    @Path("/helloGET/:name")
     @GET
     public void simpleRESTHelloWithParameter(RestHandler handler) {
         handler.response().stringResponse(()->"hello World "+handler.request().param("name")).execute();

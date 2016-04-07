@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
@@ -27,27 +28,27 @@ public class ExecuteRSBasicObject {
     protected final Consumer<Throwable> errorMethodHandler;
     protected final RoutingContext context;
     protected final Map<String, String> headers;
-    protected final boolean async;
     protected final ThrowableSupplier<Serializable> objectSupplier;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
     protected final Function<Throwable, Serializable> errorHandlerObject;
     protected final int httpStatusCode;
     protected final int retryCount;
+    protected final ExecuteEventBusObjectCall excecuteEventBusAndReply;
 
-    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.headers = headers;
-        this.async = async;
         this.objectSupplier = objectSupplier;
         this.encoder = encoder;
         this.errorHandler = errorHandler;
         this.errorHandlerObject = errorHandlerObject;
         this.httpStatusCode = httpStatusCode;
         this.retryCount = retryCount;
+        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
     }
 
 
@@ -58,7 +59,7 @@ public class ExecuteRSBasicObject {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
         lastStep.execute();
     }
 
@@ -74,7 +75,7 @@ public class ExecuteRSBasicObject {
         Objects.requireNonNull(contentType);
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
         lastStep.execute();
     }
 
@@ -87,7 +88,7 @@ public class ExecuteRSBasicObject {
         Objects.requireNonNull(contentType);
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
         lastStep.execute();
     }
 
@@ -95,6 +96,15 @@ public class ExecuteRSBasicObject {
      * Execute the reply chain
      */
     public void execute() {
+        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+            try {
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION ::::::");
+                e.printStackTrace();
+            }
+
+        });
         Optional.ofNullable(objectSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;

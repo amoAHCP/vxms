@@ -18,21 +18,21 @@ import javax.ws.rs.Path;
 /**
  * Created by Andy Moncsek on 25.01.16.
  */
-@ServiceEndpoint(value = "/", port = 9090)
+@ServiceEndpoint(port = 9090)
 @SpringVerticle(springConfig = SpringConfig.class)
 public class SimpleSpringREST extends VxmsEndpoint {
 
     @Inject
     HelloWorldBean bean;
 
-    @Path("helloGET")
+    @Path("/helloGET")
     @GET
     public void simpleRESTHello(RestHandler handler) {
         handler.response().stringResponse(() -> bean.sayHallo()+"  ..... 1").execute();
     }
 
 
-    @Path("helloGET/:name")
+    @Path("/helloGET/:name")
     @GET
     public void simpleRESTHelloWithParameter(RestHandler handler) {
         handler.response().async().stringResponse(() -> {
@@ -42,13 +42,13 @@ public class SimpleSpringREST extends VxmsEndpoint {
     }
 
 
-    @Path("simpleExceptionHandling/:name")
+    @Path("/simpleExceptionHandling/:name")
     @GET
     public void simpleExceptionHandling(RestHandler handler) {
         handler.response().async().stringResponse(() -> bean.seyHelloWithException()).execute();
     }
 
-    @OnRestError("simpleExceptionHandling/:name")
+    @OnRestError("/simpleExceptionHandling/:name")
     @GET
     public void simpleExceptionHandlingOnError(Throwable t, RestHandler handler) {
         System.out.println("ERROR");

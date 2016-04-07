@@ -3,6 +3,7 @@ package org.jacpfx.vertx.rest.response;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.io.Serializable;
@@ -17,8 +18,8 @@ import java.util.function.Function;
 public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
 
-    public ExecuteRSObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+    public ExecuteRSObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
 
@@ -29,15 +30,15 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObject onErrorResponse(Function<Throwable, Serializable> errorHandlerObject, Encoder encoder) {
-        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
     public ExecuteRSObjectResponse retry(int retryCount) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -47,7 +48,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObjectResponse timeout(long timeout) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -57,13 +58,13 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObjectResponse delay(long delay) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 
 
     public ExecuteRSObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headerMap, async, objectSupplier, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
     }
 }

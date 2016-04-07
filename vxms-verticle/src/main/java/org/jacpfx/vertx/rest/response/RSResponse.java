@@ -19,20 +19,18 @@ public class RSResponse {
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
     private final Map<String, String> headers;
-    private final boolean async;
 
-    public RSResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, boolean async) {
+    public RSResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.headers = headers;
-        this.async = async;
     }
 
 
     public RSAsyncResponse async() {
-        return new RSAsyncResponse(vertx, t, errorMethodHandler, context, headers, true);
+        return new RSAsyncResponse(vertx, t, errorMethodHandler, context, headers);
     }
 
     /**
@@ -62,7 +60,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, async, objectSupplier, encoder, null, null, 0, 0);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers,  objectSupplier, null, encoder, null, null, 0, 0);
     }
 
 

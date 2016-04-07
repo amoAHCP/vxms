@@ -13,7 +13,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vxms.version>1.0-SNAPSHOT</vxms.version>
-        <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
         <main.verticle>org.jacpfx.SimpleREST</main.verticle>
     </properties>
 
@@ -40,11 +39,6 @@
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-verticle</artifactId>
             <version>${vxms.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jacpfx.vertx.spring</groupId>
-            <artifactId>vertx-spring-ext</artifactId>
-            <version>${vertx-spring-ext.version}</version>
         </dependency>
     </dependencies>
     <build>
