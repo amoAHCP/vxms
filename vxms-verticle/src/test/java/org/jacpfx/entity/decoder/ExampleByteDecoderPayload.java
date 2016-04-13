@@ -15,9 +15,7 @@ public class ExampleByteDecoderPayload implements Decoder.ByteDecoder<Payload<St
     public Optional<Payload<String>> decode(byte[] input) {
         try {
             return Optional.ofNullable((Payload<String>)Serializer.deserialize(input));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return Optional.empty();

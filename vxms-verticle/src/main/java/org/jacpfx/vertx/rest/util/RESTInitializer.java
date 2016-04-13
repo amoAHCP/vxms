@@ -56,11 +56,7 @@ public class RESTInitializer {
     }
 
     protected static void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router, Object service) {
-        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
-
-            endpointConfig.staticHandler(router);
-
-        });
+        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
     }
 
     protected static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
@@ -128,7 +124,7 @@ public class RESTInitializer {
                 handleRESTRoutingContext(vertx, service, restMethod, errorMethod, routingContext));
         consumes.ifPresent(cs -> {
             if (cs.value().length > 0) {
-                Stream.of(cs.value()).forEach(mime -> route.consumes(mime));
+                Stream.of(cs.value()).forEach(route::consumes);
             }
         });
     }
@@ -141,9 +137,7 @@ public class RESTInitializer {
             final Class<? extends EndpointConfiguration> epConfigClazz = annotation.value();
             try {
                 endpointConfig = epConfigClazz.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }

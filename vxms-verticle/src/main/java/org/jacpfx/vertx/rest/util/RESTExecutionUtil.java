@@ -26,7 +26,7 @@ public class RESTExecutionUtil {
             errorHandling = false;
             try {
                 if (timeout > 0L) {
-                    final CompletableFuture<T> timeoutFuture = new CompletableFuture();
+                    final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
                     vertx.executeBlocking((innerHandler) -> {
                         T temp = null;
                         try {

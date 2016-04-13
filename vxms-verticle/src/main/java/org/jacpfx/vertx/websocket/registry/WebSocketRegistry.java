@@ -39,9 +39,7 @@ public interface WebSocketRegistry {
     default Object deserialize(byte[] payload) {
         try {
             return Serializer.deserialize(payload);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;

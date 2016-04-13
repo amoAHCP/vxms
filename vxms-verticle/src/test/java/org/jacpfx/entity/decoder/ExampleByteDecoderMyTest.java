@@ -16,9 +16,7 @@ public class ExampleByteDecoderMyTest implements Decoder.ByteDecoder<MyTestObjec
         try {
             MyTestObject result = (MyTestObject)Serializer.deserialize(input);
             return Optional.ofNullable(result);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return Optional.empty();

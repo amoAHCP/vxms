@@ -49,10 +49,10 @@ public class EventBusAsyncResponse {
     }
 
 
-    public ExecuteRSStringResponse mapToStringResponse(String _id, Object _message, DeliveryOptions _options, Function<AsyncResult<Message<Object>>, ?> _errorFunction,
-                                                       ThrowableFunction<AsyncResult<Message<Object>>, String> _stringFunction, Vertx _vertx, Throwable _t, Consumer<Throwable> _errorMethodHandler,
-                                                       RoutingContext _context, Map<String, String> _headers, ThrowableSupplier<String> _stringSupplier, Encoder _encoder, Consumer<Throwable> _errorHandler,
-                                                       Function<Throwable, String> _errorHandlerString, int _httpStatusCode, int _retryCount, long _timeout, long _delay) {
+    private ExecuteRSStringResponse mapToStringResponse(String _id, Object _message, DeliveryOptions _options, Function<AsyncResult<Message<Object>>, ?> _errorFunction,
+                                                        ThrowableFunction<AsyncResult<Message<Object>>, String> _stringFunction, Vertx _vertx, Throwable _t, Consumer<Throwable> _errorMethodHandler,
+                                                        RoutingContext _context, Map<String, String> _headers, ThrowableSupplier<String> _stringSupplier, Encoder _encoder, Consumer<Throwable> _errorHandler,
+                                                        Function<Throwable, String> _errorHandlerString, int _httpStatusCode, int _retryCount, long _timeout, long _delay) {
 
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_options).orElse(new DeliveryOptions());
         final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply = (vertx, t, errorMethodHandler,

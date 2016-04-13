@@ -14,10 +14,10 @@ import java.util.function.Consumer;
  */
 public class EventBusRequest {
 
-    protected final Vertx vertx;
-    protected final Throwable t;
-    protected final Consumer<Throwable> errorMethodHandler;
-    protected final RoutingContext context;
+    private final Vertx vertx;
+    private final Throwable t;
+    private final Consumer<Throwable> errorMethodHandler;
+    private final RoutingContext context;
 
     public EventBusRequest(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context) {
         this.vertx = vertx;

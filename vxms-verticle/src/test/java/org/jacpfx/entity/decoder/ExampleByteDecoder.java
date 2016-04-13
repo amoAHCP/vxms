@@ -10,6 +10,6 @@ import java.util.Optional;
 public class ExampleByteDecoder implements Decoder.ByteDecoder<String> {
     @Override
     public Optional<String> decode(byte[] input) {
-        return Optional.ofNullable(new String(input));
+        return Optional.of(new String(input));
     }
 }
