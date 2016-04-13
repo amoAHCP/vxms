@@ -3,6 +3,9 @@ package org.jacpfx.vertx.rest.response;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.response.async.ExecuteRSByteResponse;
+import org.jacpfx.vertx.rest.response.async.ExecuteRSObjectResponse;
+import org.jacpfx.vertx.rest.response.async.ExecuteRSStringResponse;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.io.Serializable;

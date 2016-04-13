@@ -8,7 +8,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
-import org.jacpfx.vertx.rest.response.ExecuteRSBasicObjectResponse;
+import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.io.Serializable;

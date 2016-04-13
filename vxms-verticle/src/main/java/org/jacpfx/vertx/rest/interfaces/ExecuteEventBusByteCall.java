@@ -11,7 +11,10 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 21.03.16.
  */
+@FunctionalInterface
 public interface ExecuteEventBusByteCall {
 
-    void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount);
+    void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                 Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                 Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount);
 }

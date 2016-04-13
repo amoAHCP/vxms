@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.response;
+package org.jacpfx.vertx.rest.response.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;

@@ -4,6 +4,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
+import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
+import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.io.Serializable;

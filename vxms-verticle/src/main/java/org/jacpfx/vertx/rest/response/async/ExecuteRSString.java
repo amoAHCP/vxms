@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.response;
+package org.jacpfx.vertx.rest.response.async;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
+import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 

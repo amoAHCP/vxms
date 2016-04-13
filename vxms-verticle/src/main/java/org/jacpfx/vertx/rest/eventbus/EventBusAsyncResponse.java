@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
-import org.jacpfx.vertx.rest.response.ExecuteRSStringResponse;
+import org.jacpfx.vertx.rest.response.async.ExecuteRSStringResponse;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.util.Map;
