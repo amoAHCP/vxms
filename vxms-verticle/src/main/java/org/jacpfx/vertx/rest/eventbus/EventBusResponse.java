@@ -9,7 +9,9 @@ import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicStringResponse;
-import org.jacpfx.vertx.rest.util.EventbusExecutionUtil;
+import org.jacpfx.vertx.rest.util.EventbusByteExecutionUtil;
+import org.jacpfx.vertx.rest.util.EventbusObjectExecutionUtil;
+import org.jacpfx.vertx.rest.util.EventbusStringExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.io.Serializable;
@@ -41,20 +43,20 @@ public class EventBusResponse {
         this.errorFunction = errorFunction;
     }
 
-    // TODO define ThrowableFunction
+
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
+        return EventbusByteExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
     }
 
     public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusExecutionUtil.mapToObjectResponse(id,message,options,errorFunction,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0);
+        return EventbusObjectExecutionUtil.mapToObjectResponse(id,message,options,errorFunction,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0);
     }
 
     public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
 
-        return EventbusExecutionUtil.mapToStringResponse(id,message,options,errorFunction,stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
+        return EventbusStringExecutionUtil.mapToStringResponse(id,message,options,errorFunction,stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
     }
 
 
