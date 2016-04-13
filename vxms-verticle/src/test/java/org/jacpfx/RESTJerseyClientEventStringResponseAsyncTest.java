@@ -171,7 +171,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "java.lang.NullPointerException: test exception");
+                Assert.assertEquals(response, "test exception");
                 latch.countDown();
             }
 

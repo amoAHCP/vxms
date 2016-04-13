@@ -45,7 +45,7 @@ public class RSAsyncResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, 0, 0, 0, 0);
+        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0, 0);
     }
 
     /**

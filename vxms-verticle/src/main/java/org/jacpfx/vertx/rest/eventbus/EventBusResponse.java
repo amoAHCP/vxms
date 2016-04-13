@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.rest.response.ExecuteRSBasicStringResponse;
@@ -41,20 +42,22 @@ public class EventBusResponse {
     }
 
     // TODO define ThrowableFunction
-    public ExecuteRSBasicByteResponse mapToByteResponse(Function<AsyncResult<Message<Object>>, byte[]> byteFunction) {
+    public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
         return EventbusExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
     }
 
-    public ExecuteRSBasicObjectResponse mapToObjectResponse(Function<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
+    public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
         return EventbusExecutionUtil.mapToObjectResponse(id,message,options,errorFunction,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0);
     }
 
-    public ExecuteRSBasicStringResponse mapToStringResponse(Function<AsyncResult<Message<Object>>, String> stringFunction) {
+    public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
 
         return EventbusExecutionUtil.mapToStringResponse(id,message,options,errorFunction,stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
     }
+
+
 
 
 
