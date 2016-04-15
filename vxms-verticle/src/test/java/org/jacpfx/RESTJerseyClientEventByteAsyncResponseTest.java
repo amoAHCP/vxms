@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
+public class RESTJerseyClientEventByteAsyncResponseTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "localhost";
@@ -307,6 +307,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
             System.out.println("CALL");
             reply.
                     eventBusRequest().
+                    async().
                     send("hello", "welt").
                     mapToByteResponse(handler -> {
                         Payload<String> p = new Payload<>(handler.
@@ -322,6 +323,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         @GET
         public void complexByteErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
+                    async().
                     send("hello", "welt").
                     mapToByteResponse(handler -> {
                         throw new NullPointerException("test exception");
@@ -342,6 +344,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         @GET
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
+                    async().
                     send("hello1", "welt").
                     onErrorResult(handler -> {
                         try {
@@ -360,6 +363,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         @GET
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
+                    async().
                     send("error", "1").
                     mapToByteResponse(handler -> {
                         Payload<String> p = new Payload<>(handler.result().body().toString() + "1");
@@ -374,6 +378,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionExceptionRetryErrorResponse(RestHandler reply) {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
+                    async().
                     send("hello", "welt").
                     mapToByteResponse(handler -> {
                         System.out.println("retry: " + count.get());

@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCallAsync;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByte;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
@@ -22,17 +23,18 @@ import java.util.function.Function;
 public class ExecuteRSByte extends ExecuteRSBasicByte {
     protected final long timeout;
     protected final long delay;
+    protected final ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply;
 
-
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,  ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
+    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,  ThrowableSupplier<byte[]> byteSupplier,ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
         super(vertx, t, errorMethodHandler, context, headers,byteSupplier, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         this.timeout = timeout;
         this.delay = delay;
+        this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
     }
 
     @Override
     public void execute(HttpResponseStatus status) {
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -46,7 +48,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier,excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -59,14 +61,22 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(String contentType) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put("content-type", contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 
 
     @Override
     public void execute() {
+        Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
+            try {
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount,timeout,delay);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION ::::::");
+                e.printStackTrace();
+            }
 
+        });
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->

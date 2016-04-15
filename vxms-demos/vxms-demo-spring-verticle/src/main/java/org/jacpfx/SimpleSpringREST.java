@@ -51,12 +51,12 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @OnRestError("/simpleExceptionHandling/:name")
     @GET
     public void simpleExceptionHandlingOnError(Throwable t, RestHandler handler) {
-        System.out.println("ERROR");
+        //System.out.println("ERROR");
         handler.response().stringResponse(() -> bean.sayHallo(handler.request().param("name")+" ::"+t.getMessage())).execute();
     }
 
     public static void main(String[] args) {
-        DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("host", "localhost"));
+        DeploymentOptions options = new DeploymentOptions().setInstances(1000).setConfig(new JsonObject().put("host", "localhost"));
         Vertx.vertx().deployVerticle("java-spring:" + SimpleSpringREST.class.getName(), options);
     }
 }

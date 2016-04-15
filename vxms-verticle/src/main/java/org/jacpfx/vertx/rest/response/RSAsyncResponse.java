@@ -38,7 +38,7 @@ public class RSAsyncResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, 0, 0, 0, 0);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0, 0, 0);
     }
 
     /**
@@ -58,6 +58,6 @@ public class RSAsyncResponse {
      * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
      */
     public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier,null, encoder, null, null, 0, 0, 0, 0);
+        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, null, null, 0, 0, 0, 0);
     }
 }

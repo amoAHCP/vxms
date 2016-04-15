@@ -29,16 +29,17 @@ public class RESTInitializer {
 
     public static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
         final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(service);
-        initEndoitConfiguration(endpointConfiguration,vertx, router, service);
+
+        initEndoitConfiguration(endpointConfiguration,vertx, router);
 
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
                 forEach(restMethod -> initRestMethod(vertx, router, config, service, restMethod));
 
-        postEndoitConfiguration(endpointConfiguration,vertx, router, service);
+        postEndoitConfiguration(endpointConfiguration, router);
     }
 
-    protected static void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router, Object service) {
+    protected static void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router) {
         Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
 
             endpointConfig.corsHandler(router);
@@ -55,12 +56,12 @@ public class RESTInitializer {
         });
     }
 
-    protected static void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router, Object service) {
+    protected static void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Router router) {
         Optional.of(endpointConfiguration).ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
     }
 
     protected static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
-        Path path = restMethod.getAnnotation(Path.class);
+        final Path path = restMethod.getAnnotation(Path.class);
         final String sName = ConfigurationUtil.serviceName(config, service.getClass());
 
         final Stream<Method> errorMethodStream = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class));

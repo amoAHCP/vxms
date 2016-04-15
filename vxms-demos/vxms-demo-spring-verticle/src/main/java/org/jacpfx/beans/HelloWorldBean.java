@@ -12,7 +12,7 @@ public class HelloWorldBean {
     }
 
     public String sayHallo(String name){
-        System.out.println("got name: "+name);
+       // System.out.println("got name: "+name);
         return "hello world "+name;
     }
 
