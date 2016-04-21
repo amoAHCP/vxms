@@ -62,8 +62,13 @@ public class EventbusObjectExecutionUtil {
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
             new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount).execute();
         } else if (event.failed() && retryCount > 0) {
-            mapToObjectResponse(id, message, options, errorFunction, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount - 1).execute();
+            retryObjectOperation(id, message, options, errorFunction, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
         }
+    }
+
+    private static void retryObjectOperation(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction, ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
+        mapToObjectResponse(id, message, options, errorFunction, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount - 1).
+                execute();
     }
 
     private static ThrowableSupplier<Serializable> createObjectSupplier(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction,
@@ -75,7 +80,7 @@ public class EventbusObjectExecutionUtil {
             Serializable resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryObjectSupplier(id, message, options, errorFunction, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+                    retryObjectOperation(id, message, options, errorFunction, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
                 } else {
                     resp = (Serializable) executeErrorFunction(event, errorFunction);
                 }
@@ -86,18 +91,6 @@ public class EventbusObjectExecutionUtil {
             return resp;
         };
     }
-
-    private static void retryObjectSupplier(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction,
-                                            ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
-                                            Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-                                            Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
-        final int rcNew = retryCount - 1;
-        mapToObjectResponse(id, message, options, errorFunction, objectFunction, vertx, t, errorMethodHandler,
-                context, headers, null,
-                encoder, errorHandler, errorHandlerObject,
-                httpStatusCode, rcNew).execute();
-    }
-
 
 
 

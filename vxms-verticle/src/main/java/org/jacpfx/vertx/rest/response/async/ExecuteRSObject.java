@@ -6,7 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObject;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
@@ -25,12 +25,13 @@ import java.util.function.Function;
 public class ExecuteRSObject extends ExecuteRSBasicObject {
     protected final long delay;
     protected final long timeout;
+    protected final ExecuteEventBusObjectCallAsync excecuteEventBusAndReply;
 
-
-    public ExecuteRSObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+    public ExecuteRSObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
         this.delay = delay;
         this.timeout = timeout;
+        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
     }
 
     @Override
@@ -73,6 +74,16 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
 
     @Override
     public void execute() {
+        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+            try {
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount,timeout,delay);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION ::::::");
+                e.printStackTrace();
+            }
+
+        });
+
         Optional.ofNullable(objectSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->

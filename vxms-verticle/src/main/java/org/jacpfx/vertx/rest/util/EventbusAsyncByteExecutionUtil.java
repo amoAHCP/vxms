@@ -86,7 +86,7 @@ public class EventbusAsyncByteExecutionUtil {
             byte[] resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryByteSupplier(id, message, options, errorFunction, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount,timeout,delay);
+                    retryByteOperation(id, message, options, errorFunction, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount,timeout,delay);
                 } else {
                     resp = (byte[]) executeErrorFunction(event, errorFunction);
                 }
@@ -98,16 +98,7 @@ public class EventbusAsyncByteExecutionUtil {
         };
     }
 
-    private static void retryByteSupplier(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
-                                          Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
-                                          Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount,long timeout, long delay) {
-        final int rcNew = retryCount - 1;
-        mapToByteResponse(id, message, options, errorFunction, byteFunction, vertx, t, errorMethodHandler,
-                context, headers, null,
-                encoder, errorHandler, errorHandlerByte,
-                httpStatusCode, rcNew,timeout,delay).
-                execute();
-    }
+
     private static Object executeErrorFunction(AsyncResult<Message<Object>> event, Function<AsyncResult<Message<Object>>, ?> errorFunction) throws Throwable {
         Object resp;
         final Optional<? extends Function<AsyncResult<Message<Object>>, ?>> ef = Optional.ofNullable(errorFunction);

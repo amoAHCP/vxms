@@ -76,7 +76,7 @@ public class EventbusByteExecutionUtil {
             byte[] resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryByteSupplier(id, message, options, errorFunction, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+                    retryByteOperation(id, message, options, errorFunction, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
                 } else {
                     resp = (byte[]) executeErrorFunction(event, errorFunction);
                 }
@@ -88,15 +88,7 @@ public class EventbusByteExecutionUtil {
         };
     }
 
-    private static void retryByteSupplier(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
-                                          Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
-                                          Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount) {
-        final int rcNew = retryCount - 1;
-        mapToByteResponse(id, message, options, errorFunction, byteFunction, vertx, t, errorMethodHandler,
-                context, headers, null,
-                encoder, errorHandler, errorHandlerByte,
-                httpStatusCode, rcNew).execute();
-    }
+
     private static Object executeErrorFunction(AsyncResult<Message<Object>> event, Function<AsyncResult<Message<Object>>, ?> errorFunction) throws Throwable {
         Object resp;
         final Optional<? extends Function<AsyncResult<Message<Object>>, ?>> ef = Optional.ofNullable(errorFunction);

@@ -25,7 +25,9 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     protected final long delay;
     protected final ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply;
 
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,  ThrowableSupplier<byte[]> byteSupplier,ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
+    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+                         ThrowableSupplier<byte[]> byteSupplier,ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
+                         Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
         super(vertx, t, errorMethodHandler, context, headers,byteSupplier, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         this.timeout = timeout;
         this.delay = delay;

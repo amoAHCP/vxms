@@ -83,7 +83,7 @@ public class EventbusStringExecutionUtil {
             String resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryStringSupplier(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+                    retryStringOperation(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
                 } else {
                     resp = (String) executeErrorFunction(event, errorFunction);
                 }
@@ -96,15 +96,6 @@ public class EventbusStringExecutionUtil {
     }
 
 
-    private static void retryStringSupplier(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction, ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
-                                            Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
-                                            Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
-        final int rcNew = retryCount - 1;
-        mapToStringResponse(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler,
-                context, headers, null,
-                encoder, errorHandler, errorHandlerString,
-                httpStatusCode, rcNew).execute();
-    }
 
 
     private static Object executeErrorFunction(AsyncResult<Message<Object>> event, Function<AsyncResult<Message<Object>>, ?> errorFunction) throws Throwable {

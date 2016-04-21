@@ -7,10 +7,14 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.vertx.rest.response.async.ExecuteRSByteResponse;
+import org.jacpfx.vertx.rest.response.async.ExecuteRSObjectResponse;
 import org.jacpfx.vertx.rest.response.async.ExecuteRSStringResponse;
 import org.jacpfx.vertx.rest.util.EventbusAsyncByteExecutionUtil;
+import org.jacpfx.vertx.rest.util.EventbusAsyncObjectExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusAsyncStringExecutionUtil;
+import org.jacpfx.vertx.websocket.encoder.Encoder;
 
+import java.io.Serializable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -47,6 +51,11 @@ public class EventBusAsyncResponse {
     public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
         return EventbusAsyncByteExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0,0);
+    }
+
+    public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
+
+        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(id,message,options,errorFunction,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0,0,0);
     }
 
 

@@ -65,8 +65,13 @@ public class EventbusAsyncStringExecutionUtil {
             new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier,null,
                     encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount,timeout,delay).execute();
         } else if (event.failed() && retryCount > 0) {
-            mapToStringResponse(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount - 1,timeout,delay).execute();
+            retryStringOperation(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
         }
+    }
+
+    private static void retryStringOperation(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction, ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, long timeout, long delay) {
+        mapToStringResponse(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount - 1,timeout,delay).
+                execute();
     }
 
 
@@ -77,7 +82,7 @@ public class EventbusAsyncStringExecutionUtil {
             String resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryStringSupplier(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount,timeout,delay);
+                    retryStringOperation(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount,timeout,delay);
                 } else {
                     resp = (String) executeErrorFunction(event, errorFunction);
                 }
@@ -89,15 +94,6 @@ public class EventbusAsyncStringExecutionUtil {
         };
     }
 
-    private static void retryStringSupplier(String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction, ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
-                                      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
-                                      Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount,long timeout, long delay) {
-        final int rcNew = retryCount - 1;
-        mapToStringResponse(id, message, options, errorFunction, stringFunction, vertx, t, errorMethodHandler,
-                context, headers, null,
-                encoder, errorHandler, errorHandlerString,
-                httpStatusCode, rcNew,timeout,delay).execute();
-    }
 
 
     private static Object executeErrorFunction(AsyncResult<Message<Object>> event, Function<AsyncResult<Message<Object>>, ?> errorFunction) throws Throwable {
