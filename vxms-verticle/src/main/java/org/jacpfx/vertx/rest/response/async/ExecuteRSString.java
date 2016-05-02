@@ -65,7 +65,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        Map<String, String> headerMap = updateContentType(contentType);
+        final Map<String, String> headerMap = updateContentType(contentType);
         final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
@@ -76,7 +76,6 @@ public class ExecuteRSString extends ExecuteRSBasicString {
             try {
                 evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount,timeout,delay);
             } catch (Exception e) {
-                System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
             }
 

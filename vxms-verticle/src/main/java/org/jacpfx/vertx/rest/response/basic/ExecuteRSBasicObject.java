@@ -73,8 +73,7 @@ public class ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, status.code(), retryCount);
         lastStep.execute();
     }
@@ -86,10 +85,15 @@ public class ExecuteRSBasicObject {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
         lastStep.execute();
+    }
+
+    protected Map<String, String> updateContentMap(String contentType) {
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        return headerMap;
     }
 
     /**

@@ -48,8 +48,6 @@ public class RESTInitializer {
 
             endpointConfig.cookieHandler(router);
 
-            // TODO implement auth --> Optional.ofNullable(endpointConfig.authHandler()).ifPresent(authHandler -> router.route().handler(authHandler));
-
             endpointConfig.sessionHandler(vertx, router);
 
             endpointConfig.customRouteConfiguration(vertx, router);

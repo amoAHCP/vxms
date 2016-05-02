@@ -12,7 +12,6 @@ import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -51,8 +50,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSObject lastStep = new ExecuteRSObject(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, status.code(), retryCount, delay, timeout);
         lastStep.execute();
     }
@@ -65,8 +63,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     @Override
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSObject lastStep = new ExecuteRSObject(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, delay, timeout);
         lastStep.execute();
     }

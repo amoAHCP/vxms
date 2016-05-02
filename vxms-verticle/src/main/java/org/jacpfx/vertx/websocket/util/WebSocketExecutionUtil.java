@@ -32,18 +32,11 @@ public class WebSocketExecutionUtil {
             try {
                 if (timeout > 0L) {
                     final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
-                    vertx.executeBlocking((innerHandler) -> {
-                        T temp = null;
+                    vertx.
+                            executeBlocking((innerHandler) ->
+                                    executeAndCompleate(supplier, timeoutFuture), false, (val) -> {
 
-                        try {
-                            temp = supplier.get();
-                        } catch (Throwable throwable) {
-                            timeoutFuture.obtrudeException(throwable);
-                        }
-                        timeoutFuture.complete(temp);
-                    }, false, (val) -> {
-
-                    });
+                            });
                     result = timeoutFuture.get(timeout, TimeUnit.MILLISECONDS);
                     retry = -1;
                 } else {
@@ -67,9 +60,19 @@ public class WebSocketExecutionUtil {
         return result;
     }
 
+    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier, CompletableFuture<T> timeoutFuture) {
+        T temp = null;
+        try {
+            temp = supplier.get();
+        } catch (Throwable throwable) {
+            timeoutFuture.obtrudeException(throwable);
+        }
+        timeoutFuture.complete(temp);
+    }
+
     private static void handleDelay(long delay) {
         try {
-            if(delay>0L)Thread.sleep(delay);
+            if (delay > 0L) Thread.sleep(delay);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
@@ -127,9 +130,9 @@ public class WebSocketExecutionUtil {
         return Optional.empty();
     }
 
-    public static  void sendText(CommType commType, Vertx vertx, WebSocketRegistry registry, WebSocketEndpoint[] endpoint, String value) {
+    public static void sendText(CommType commType, Vertx vertx, WebSocketRegistry registry, WebSocketEndpoint[] endpoint, String value) {
         final WebSocketEndpoint currentEndpoint = endpoint[0];
-        if(currentEndpoint==null) return; // TODO define Exception!!!!
+        if (currentEndpoint == null) return; // TODO define Exception!!!!
         switch (commType) {
 
             case ALL:
@@ -149,9 +152,9 @@ public class WebSocketExecutionUtil {
         }
     }
 
-    public static  void sendBinary(CommType commType, Vertx vertx,WebSocketRegistry registry,WebSocketEndpoint[] endpoint, byte[] value) {
+    public static void sendBinary(CommType commType, Vertx vertx, WebSocketRegistry registry, WebSocketEndpoint[] endpoint, byte[] value) {
         final WebSocketEndpoint currentEndpoint = endpoint[0];
-        if(currentEndpoint==null) return; // TODO define Exception!!!!
+        if (currentEndpoint == null) return; // TODO define Exception!!!!
         switch (commType) {
 
             case ALL:

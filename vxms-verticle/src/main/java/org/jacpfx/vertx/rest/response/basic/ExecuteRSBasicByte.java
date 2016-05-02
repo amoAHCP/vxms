@@ -12,6 +12,7 @@ import org.jacpfx.vertx.websocket.encoder.Encoder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -54,6 +55,7 @@ public class ExecuteRSBasicByte {
      * @param status, the http status code
      */
     public void execute(HttpResponseStatus status) {
+        Objects.requireNonNull(status);
         final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
         lastStep.execute();
     }
@@ -65,8 +67,9 @@ public class ExecuteRSBasicByte {
      * @param contentType , the html content-type
      */
     public void execute(HttpResponseStatus status, String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        Objects.requireNonNull(status);
+        Objects.requireNonNull(contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount);
         lastStep.execute();
     }
@@ -77,11 +80,18 @@ public class ExecuteRSBasicByte {
      * @param contentType, the html content-type
      */
     public void execute(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        Objects.requireNonNull(contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap,  byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         lastStep.execute();
     }
+
+    protected Map<String, String> updateContentMap(String contentType) {
+        Map<String, String> headerMap = new HashMap<>(headers);
+        headerMap.put("content-type", contentType);
+        return headerMap;
+    }
+
 
     /**
      * Execute the reply chain
@@ -92,7 +102,6 @@ public class ExecuteRSBasicByte {
             try {
                 evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
             } catch (Exception e) {
-                System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
             }
 

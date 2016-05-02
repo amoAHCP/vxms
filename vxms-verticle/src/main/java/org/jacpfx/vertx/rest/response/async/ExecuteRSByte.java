@@ -11,8 +11,8 @@ import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByte;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.websocket.encoder.Encoder;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,6 +36,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
 
     @Override
     public void execute(HttpResponseStatus status) {
+        Objects.requireNonNull(status);
         final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
@@ -48,8 +49,9 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
      * @param contentType , the html content-type
      */
     public void execute(HttpResponseStatus status, String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        Objects.requireNonNull(status);
+        Objects.requireNonNull(contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier,excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
@@ -61,8 +63,8 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
      * @param contentType, the html content-type
      */
     public void execute(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
+        Objects.requireNonNull(contentType);
+        final Map<String, String> headerMap = updateContentMap(contentType);
         final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
@@ -74,7 +76,6 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
             try {
                 evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount,timeout,delay);
             } catch (Exception e) {
-                System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
             }
 

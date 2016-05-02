@@ -27,15 +27,7 @@ public class RESTExecutionUtil {
             try {
                 if (timeout > 0L) {
                     final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
-                    vertx.executeBlocking((innerHandler) -> {
-                        T temp = null;
-                        try {
-                            temp = supplier.get();
-                        } catch (Throwable throwable) {
-                            timeoutFuture.obtrudeException(throwable);
-                        }
-                        timeoutFuture.complete(temp);
-                    }, false, (val) -> {
+                    vertx.executeBlocking((innerHandler) -> executeAndCompleate(supplier, timeoutFuture), false, (val) -> {
 
                     });
                     result = timeoutFuture.get(timeout, TimeUnit.MILLISECONDS);
@@ -58,6 +50,16 @@ public class RESTExecutionUtil {
         }
         if(errorHandling && result==null) handler.fail(new EndpointExecutionException("error...")); // TODO define Error
         if (!handler.isComplete()) handler.complete(result);
+    }
+
+    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier, CompletableFuture<T> timeoutFuture) {
+        T temp = null;
+        try {
+            temp = supplier.get();
+        } catch (Throwable throwable) {
+            timeoutFuture.obtrudeException(throwable);
+        }
+        timeoutFuture.complete(temp);
     }
 
     private static void handleDelay(long delay) {
