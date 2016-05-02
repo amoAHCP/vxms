@@ -16,14 +16,12 @@ public class WSResponseAsync {
     protected final Vertx vertx;
     protected final WebSocketRegistry registry;
     protected final Consumer<Throwable> errorMethodHandler;
-    protected final boolean async;
 
-    protected WSResponseAsync(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler, boolean async) {
+    protected WSResponseAsync(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.registry = registry;
         this.errorMethodHandler = errorMethodHandler;
-        this.async = async;
     }
 
 

@@ -16,14 +16,12 @@ public class WSResponse {
     protected final Vertx vertx;
     protected final WebSocketRegistry registry;
     protected final Consumer<Throwable> errorMethodHandler;
-    protected final boolean async;
 
-    protected WSResponse(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler, boolean async) {
+    protected WSResponse(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.registry = registry;
         this.errorMethodHandler = errorMethodHandler;
-        this.async = async;
     }
 
     /**
@@ -32,7 +30,7 @@ public class WSResponse {
      * @return @see{org.jacpfx.vertx.websocket.response.TargetTypeAsync}
      */
     public WSResponseAsync async() {
-        return new WSResponseAsync(endpoint, vertx, registry, errorMethodHandler, true);
+        return new WSResponseAsync(endpoint, vertx, registry, errorMethodHandler);
     }
 
     /**

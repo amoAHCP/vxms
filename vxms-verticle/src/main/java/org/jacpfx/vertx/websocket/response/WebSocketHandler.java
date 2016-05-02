@@ -51,8 +51,13 @@ public class WebSocketHandler {
      * @return the target type of your response
      */
     public WSResponse response() {
-        return new WSResponse(endpoint, vertx, registry, errorMethodHandler, false);
+        return new WSResponse(endpoint, vertx, registry, errorMethodHandler);
     }
+
+    public WSEventBusRequest eventBusRequest() {
+        return null;//new WSEventBusRequest(vertx, t, errorMethodHandler, context);
+    }
+
 
 
 }
