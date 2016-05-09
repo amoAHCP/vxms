@@ -10,19 +10,16 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 02.05.16.
  */
 public class WSEventBusRequest {
-    private final WebSocketEndpoint endpoint;
-    private final Vertx vertx;
-    private final WebSocketRegistry registry;
-    private final Consumer<Throwable> errorMethodHandler;
-    private final byte[] value;
+    protected final WebSocketEndpoint endpoint;
+    protected final Vertx vertx;
+    protected final WebSocketRegistry registry;
+    protected final Consumer<Throwable> errorMethodHandler;
 
 
-    public WSEventBusRequest(WebSocketRegistry registry, WebSocketEndpoint endpoint, byte[] value, Vertx vertx, Consumer<Throwable> errorMethodHandler) {
+    public WSEventBusRequest(WebSocketEndpoint endpoint, Vertx vertx, WebSocketRegistry registry, Consumer<Throwable> errorMethodHandler) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.registry = registry;
-        this.value = value;
         this.errorMethodHandler = errorMethodHandler;
     }
-
 }

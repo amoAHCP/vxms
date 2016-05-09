@@ -54,10 +54,11 @@ public class WebSocketHandler {
         return new WSResponse(endpoint, vertx, registry, errorMethodHandler);
     }
 
+    // TODO implement chain: send(), consume()
     public WSEventBusRequest eventBusRequest() {
-        return null;//new WSEventBusRequest(vertx, t, errorMethodHandler, context);
-    }
+        return new WSEventBusRequest(endpoint, vertx, registry, errorMethodHandler);
 
+    }
 
 
 }

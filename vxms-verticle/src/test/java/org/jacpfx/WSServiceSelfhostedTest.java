@@ -678,15 +678,7 @@ testComplete();
             reply.
                     response().
                     reply().
-                    byteResponse(() -> {
-                        try {
-                            Payload<String> p = new Payload<String>(reply.payload().getString().get());
-                            return Serializer.serialize(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
-                    }).
+                    byteResponse(() -> Serializer.serialize(new Payload<>(reply.payload().getString().get()))).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
@@ -697,7 +689,7 @@ testComplete();
             reply.
                     response().
                     reply().
-                    objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
+                    objectResponse(() -> new Payload<>(reply.payload().getString().get()), new ExampleByteEncoder()).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
         }
@@ -709,7 +701,7 @@ testComplete();
                     response().
                     async().
                     reply().
-                    objectResponse(() -> new Payload<String>(reply.payload().getString().get()), new ExampleByteEncoder()).
+                    objectResponse(() -> new Payload<>(reply.payload().getString().get()), new ExampleByteEncoder()).
                     timeout(2000).
                     execute();
             System.out.println("binaryReply-1: " + name + "   :::" + this);
@@ -768,11 +760,7 @@ testComplete();
 
         private void replyAsyncTwo(String name, WebSocketHandler reply) {
             reply.response().async().reply().stringResponse(() -> {
-                try {
-                    TimeUnit.MILLISECONDS.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                TimeUnit.MILLISECONDS.sleep(1000);
                 return name + Thread.currentThread();
             }).execute();
         }
@@ -783,11 +771,7 @@ testComplete();
                     async().
                     toAll().
                     stringResponse(() -> {
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        TimeUnit.MILLISECONDS.sleep(1000);
                         return name + Thread.currentThread();
                     }).execute();
         }
