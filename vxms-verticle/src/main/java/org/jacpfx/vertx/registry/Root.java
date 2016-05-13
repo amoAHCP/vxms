@@ -1,9 +1,11 @@
 package org.jacpfx.vertx.registry;
 
+import java.io.Serializable;
+
 /**
  * Created by Andy Moncsek on 04.05.16.
  */
-public class Root {
+public class Root implements Serializable{
     private final String action;
     private final Node node;
     private final Node prevNode;

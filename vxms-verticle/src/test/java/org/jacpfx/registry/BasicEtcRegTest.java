@@ -76,7 +76,7 @@ public class BasicEtcRegTest extends VertxTestBase {
 
     @Test
 
-    public void findService() throws InterruptedException {
+    public void getKeys() throws InterruptedException {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
@@ -110,7 +110,7 @@ public class BasicEtcRegTest extends VertxTestBase {
 
     @Test
 
-    public void findService2() throws InterruptedException {
+    public void findService() throws InterruptedException {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
@@ -120,16 +120,16 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
-                nodeName("findService2");
+                nodeName("findService");
 
 
         reg.connect(result -> {
             if (result.succeeded()) {
-                reg.findService(service -> {
-                    System.out.println("found: " + service);
-                    assertEquals("/myService", service.getKey());
+                reg.findService("/myService",service -> {
+                    System.out.println("found: " + service.succeeded()+" node: "+service.getNode());
+                    assertEquals("/myService", service.getNode().getKey());
                     testComplete();
-                }, "/myService");
+                });
             } else {
                 assertTrue("connection failed", true);
                 testComplete();
@@ -137,11 +137,41 @@ public class BasicEtcRegTest extends VertxTestBase {
         });
 
 
-        /**  reg.disconnect(res -> {
-         System.out.println(":::"+res.statusCode());
-         testComplete();
+        //  reg.disconnect(Future.factory.future());
+        await();
+    }
 
-         }); **/
+    @Test
+
+    public void findNodes() throws InterruptedException {
+        EtcdRegistration reg = EtcdRegistration.
+                buildRegistration().
+                vertx(vertx).
+                etcdHost("127.0.0.1").
+                etcdPort(4001).
+                ttl(60).
+                serviceName("myService").
+                serviceHost("localhost").
+                servicePort(8080).
+                nodeName("findService");
+
+
+
+
+        reg.connect(result -> {
+            if (result.succeeded()) {
+
+
+                reg.findNode("/myService", node -> {
+                    System.out.println(" found node : "+node.getNode());
+                    testComplete();
+                });
+            } else {
+                assertTrue("connection failed", true);
+                testComplete();
+            }
+        });
+
 
         //  reg.disconnect(Future.factory.future());
         await();
@@ -150,11 +180,11 @@ public class BasicEtcRegTest extends VertxTestBase {
     private org.jacpfx.vertx.registry.Node findNode(org.jacpfx.vertx.registry.Node node, String value) {
         System.out.println("find: " + node.getKey() + "  value:" + value);
         if (node.getKey() != null && node.getKey().equals(value)) return node;
-        if (node.isDir()) return node.getNodes().stream().filter(n1 -> {
+        if (node.isDir() && node.getNodes()!=null) return node.getNodes().stream().filter(n1 -> {
             org.jacpfx.vertx.registry.Node n2 = n1.isDir() ? findNode(n1, value) : n1;
             return n2.getKey().equals(value);
         }).findFirst().orElse(new org.jacpfx.vertx.registry.Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
-        return null;
+        return new org.jacpfx.vertx.registry.Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
     }
 
 
@@ -165,3 +195,4 @@ public class BasicEtcRegTest extends VertxTestBase {
 
 
 }
+

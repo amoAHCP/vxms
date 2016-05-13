@@ -1,11 +1,12 @@
 package org.jacpfx.vertx.registry;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by Andy Moncsek on 04.05.16.
  */
-public class Node {
+public class Node implements Serializable{
     private final boolean dir;
     private final String key;
     private final String value;
