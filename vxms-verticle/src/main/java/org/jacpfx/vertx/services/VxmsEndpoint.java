@@ -69,8 +69,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
             clustered = getConfig().getBoolean("clustered", false);
 
-            HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost(host)
-                    .setPort(port));
+            HttpServer server = vertx.
+                    createHttpServer(new HttpServerOptions().setHost(host).setPort(port));
             Router router = Router.router(vertx);
 
             initWebSocket(server);
@@ -80,7 +80,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 if (status.succeeded()) {
                     log("started on PORT: " + port + " host: " + host);
                     postConstruct(startFuture);
-                    if(!startFuture.isComplete())startFuture.complete();
+                    log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): " + startFuture.failed());
                     return;
                 }
                 startFuture.fail(status.cause());
@@ -89,7 +89,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
     public void postConstruct(final Future<Void> startFuture) {
-
+        startFuture.complete();
     }
 
     private void initRest(Router router) {

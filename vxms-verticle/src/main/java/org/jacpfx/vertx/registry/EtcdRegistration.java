@@ -15,14 +15,10 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -40,8 +36,10 @@ public class EtcdRegistration {
     private static final String MAP_KEY = "cache";
     private final Vertx vertx;
     private final int ttl;
+    private final String domainname;
     private final String servicename;
-    private final String hostAndPort;
+    private final String host;
+    private final int port;
     private HttpClient httpClient;
     private final String nodename;
     private final SharedData data;
@@ -49,12 +47,14 @@ public class EtcdRegistration {
 
     public static final String ETCD_BASE_PATH = "/v2/keys/";
 
-    private EtcdRegistration(Vertx vertx, String etcdHost, int etcdPort, int ttl, String servicename, String nodename, String hostAndPort) {
+    private EtcdRegistration(Vertx vertx, String etcdHost, int etcdPort, int ttl, String domainname, String servicename, String nodename, String host, int port) {
         this.vertx = vertx;
         this.ttl = ttl;
         this.nodename = nodename;
-        this.servicename = servicename;
-        this.hostAndPort = hostAndPort;
+        this.domainname = domainname;
+        this.servicename = servicename.startsWith("/")?servicename:"/"+servicename;
+        this.host = host;
+        this.port = port;
         data = vertx.sharedData();
         try {
             httpClient = vertx.createHttpClient(new HttpClientOptions()
@@ -68,68 +68,14 @@ public class EtcdRegistration {
 
     }
 
-    public void findNode(String serviceName, Consumer<NodeResponse> consumer) {
-        retrieveKeysFromCache(root -> {
-            final Node serviceNode = findNode(root.getNode(), serviceName);
-            if (serviceNode.getKey().equals(serviceName)) {
-                final Optional<Node> first = serviceNode.getNodes().stream().findAny();
-                if (!first.isPresent()) {
-                    consumer.accept(new NodeResponse(serviceNode, false, new NodeNotFoundException("no active node found")));
-                }
-                first.ifPresent(node -> handleServiceNode(serviceName, consumer, node));
-            } else {
-                findNodeFromEtcd(serviceName, consumer);
-            }
-        });
-    }
 
-    private void handleServiceNode(String serviceName, Consumer<NodeResponse> consumer, Node node) {
-        LocalDateTime dateTime = LocalDateTime.parse(node.getExpiration(), formatter);
-        ZonedDateTime nowUTC = ZonedDateTime.now(ZoneOffset.UTC);
-        // check if expire date is still valid
-        if (dateTime.compareTo(nowUTC.toLocalDateTime()) >= 0) {
-            consumer.accept(new NodeResponse(node, true, null));
-        } else {
-            findNodeFromEtcd(serviceName, consumer);
-        }
-    }
 
-    private void findNodeFromEtcd(String serviceName, Consumer<NodeResponse> consumer) {
-        retrieveKeys(root -> {
-            putRootToCache(vertx, root);
-            final Node serviceNode = findNode(root.getNode(), serviceName);
-            if (serviceNode.getKey().equals(serviceName)) {
-                final Optional<Node> first = serviceNode.getNodes().stream().findFirst();
-                if (!first.isPresent()) {
-                    consumer.accept(new NodeResponse(serviceNode, false, new NodeNotFoundException("no active node found")));
-                }
-
-                first.ifPresent(node -> consumer.accept(new NodeResponse(node, true, null)));
-            } else {
-                consumer.accept(new NodeResponse(serviceNode, false, new NodeNotFoundException("service not found")));
-            }
-        });
-    }
-
-    public void findService(String serviceName, Consumer<NodeResponse> consumer) {
-        retrieveKeys(root -> {
-            Node node = findNode(root.getNode(), serviceName);
-            if (node == null || node.getKey().isEmpty()) {
-                consumer.accept(new NodeResponse(node, false, new NodeNotFoundException("no node found")));
-            } else {
-                consumer.accept(new NodeResponse(node, true, null));
-            }
-
-        });
-    }
 
     public void retrieveKeys(Consumer<Root> consumer) {
-        httpClient.getNow(ETCD_BASE_PATH + "?recursive=true", handler -> {
+        httpClient.getNow(ETCD_BASE_PATH + domainname + "/?recursive=true", handler -> {
             handler.bodyHandler(body -> {
                 try {
-                    System.out.println(new String(body.getBytes()) + " \n\n\n");
-                    Root root = Json.decodeValue(new String(body.getBytes()), Root.class);
-                    consumer.accept(root);
+                    consumer.accept(Json.decodeValue(new String(body.getBytes()), Root.class));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -139,117 +85,99 @@ public class EtcdRegistration {
 
     }
 
-    public void retrieveKeysFromCache(Consumer<Root> consumer) {
-        final LocalMap<String, String> cache = data.getLocalMap(MAP_KEY);
-        final String local = cache.get(CACHE_KEY);
-        if (local != null) {
-            consumer.accept(Json.decodeValue(local, Root.class));
-        }
-    }
-
-    private Node findNode(Node node, String key) {
-        if (node.getKey() != null && node.getKey().equals(key)) return node;
-        if (node.isDir() && node.getNodes() != null) return node.getNodes().stream().filter(n1 -> {
-            final Node n2 = n1.isDir() ? findNode(n1, key) : n1;
-            return n2.getKey().equals(key);
-        }).findFirst().orElse(new Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
-        return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
-    }
 
 
-    public void connect(AsyncResultHandler<Void> asyncResultHandler) {
-        connectToEtcd(vertx, httpClient, servicename, nodename, ttl, hostAndPort, asyncResultHandler);
+
+    public void connect(AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+        connectToEtcd(vertx, httpClient, domainname, servicename, nodename, ttl, host, port, asyncResultHandler);
     }
 
     public void disconnect(Handler<HttpClientResponse> responseHandler) {
-        deleteInstanceNode(httpClient, servicename, nodename, responseHandler);
+        deleteInstanceNode(httpClient, domainname, servicename, nodename, responseHandler,null);
     }
 
-    private void connectToEtcd(Vertx vertx, HttpClient httpClient, String servicename, String nodename, int ttl, String hostAndPort, AsyncResultHandler<Void> asyncResultHandler) {
+    private void connectToEtcd(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
 
         createServiceNode(httpClient, servicename,
                 pathCreated -> {
                     //403 means the directory already existed
                     if (SUCCESS_CODES.contains(pathCreated.statusCode()))
-                        createInstanceNode(httpClient, servicename, nodename, "value=" + hostAndPort + "&ttl=" + ttl,
+                        createInstanceNode(httpClient, domainname, servicename, nodename, "value=" + Json.encode(new NodeMetadata(servicename, host, port, "http", false)) + "&ttl=" + ttl,
                                 nodeCreated -> {
                                     if (SUCCESS_CODES.contains(nodeCreated.statusCode()) || 403 == nodeCreated.statusCode()) {
 
                                         retrieveKeys(root -> {
-                                            putRootToCache(vertx, root);
-                                            startNodeRefresh(vertx, httpClient, servicename, nodename, ttl, hostAndPort, asyncResultHandler);
+                                            putRootToCache(root);
+                                            startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port, asyncResultHandler);
                                         });
 
 
                                     } else {
                                         LOG.error("Unable to create node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage());
-                                        asyncResultHandler.handle(Future.factory.completedFuture("Unable to create node node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage(), true));
+                                        asyncResultHandler.handle(Future.factory.failureFuture(("Unable to create node node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage())));
                                     }
 
-                                });
+                                },asyncResultHandler);
                     else {
                         LOG.error("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage());
-                        asyncResultHandler.handle(Future.factory.completedFuture("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage(), true));
+                        asyncResultHandler.handle(Future.factory.failureFuture("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage()));
                     }
-                });
+                },asyncResultHandler);
     }
 
-    private void putRootToCache(Vertx vertx, Root root) {
-        SharedData data = vertx.sharedData();
+    private void putRootToCache(Root root) {
         final LocalMap<String, String> cache = data.getLocalMap(MAP_KEY);
         cache.put(CACHE_KEY, Json.encode(root));
     }
 
-    private void startNodeRefresh(Vertx vertx, HttpClient httpClient, String servicename, String nodename, int ttl, String hostAndPort, AsyncResultHandler<Void> asyncResultHandler) {
+    private void startNodeRefresh(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         LOG.info("Succeeded registering");
         // ttl in s setPeriodic in ms
         vertx.setPeriodic((ttl * 1000) - 900,
-                refresh -> createInstanceNode(httpClient, servicename, nodename, "value=" + hostAndPort + "&ttl=" + ttl, refreshed -> {
+                refresh -> createInstanceNode(httpClient, domainname, servicename, nodename, "value=" + Json.encode(new NodeMetadata(servicename, host, port, "http", false)) + "&ttl=" + ttl, refreshed -> {
                     if (refreshed.statusCode() != 200) {
                         LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage());
                     } else {
-                        retrieveKeys(root -> putRootToCache(vertx, root));
+                        retrieveKeys(root -> putRootToCache(root));
                     }
-                }));
-        asyncResultHandler.handle(Future.factory.completedFuture(null));
+                },null));
+        asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient,vertx.sharedData(),domainname)));
     }
 
 
-    private void createServiceNode(HttpClient client, String serviceName, Handler<HttpClientResponse> responseHandler) {
-        try {
-            client
-                    .put(ETCD_BASE_PATH + serviceName)
-                    .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .handler(responseHandler)
-                    .exceptionHandler(error -> {
-                        error.printStackTrace();
-                        responseHandler.handle(new HttpClientResponseError(500));
-                    })
-                    .end("dir=true");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private static void createInstanceNode(HttpClient client, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler) {
+    private void createServiceNode(HttpClient client, String serviceName, Handler<HttpClientResponse> responseHandler,AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         client
-                .put(ETCD_BASE_PATH + serviceName + "/" + name)
+                .put(ETCD_BASE_PATH + domainname + serviceName)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
                 .exceptionHandler(error -> {
                     error.printStackTrace();
+                    if(asyncResultHandler!=null)asyncResultHandler.handle(Future.factory.failedFuture(error));
+                    responseHandler.handle(new HttpClientResponseError(500));
+                })
+                .end("dir=true");
+    }
+
+    private static void createInstanceNode(HttpClient client, String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler,AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+        client
+                .put(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
+                .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
+                .handler(responseHandler)
+                .exceptionHandler(error -> {
+                    error.printStackTrace();
+                    if(asyncResultHandler!=null)asyncResultHandler.handle(Future.factory.failedFuture(error));
                     responseHandler.handle(new HttpClientResponseError(500));
                 })
                 .end(data);
     }
 
-    private static void deleteInstanceNode(HttpClient client, String serviceName, String name, Handler<HttpClientResponse> responseHandler) {
+    private static void deleteInstanceNode(HttpClient client, String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler,AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         client
-                .delete(ETCD_BASE_PATH + serviceName + "/" + name)
+                .delete(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .handler(responseHandler)
                 .exceptionHandler(error -> {
                     error.printStackTrace();
+                    if(asyncResultHandler!=null)asyncResultHandler.handle(Future.factory.failedFuture(error));
                     responseHandler.handle(new HttpClientResponseError(500));
                 })
                 .end();
@@ -269,7 +197,11 @@ public class EtcdRegistration {
     }
 
     public interface TtlBuilder {
-        ServiceNameBuilder ttl(int ttl);
+        DomainNameBuilder ttl(int ttl);
+    }
+
+    public interface DomainNameBuilder {
+        ServiceNameBuilder domainName(String domainName);
     }
 
     public interface ServiceNameBuilder {
@@ -289,6 +221,6 @@ public class EtcdRegistration {
     }
 
     public static VertxBuilder buildRegistration() {
-        return vertx -> etcdHost -> etcdPort -> ttl -> servicename -> serviceHost -> servicePort -> nodename -> new EtcdRegistration(vertx, etcdHost, etcdPort, ttl, servicename, nodename, serviceHost + ":" + servicePort);
+        return vertx -> etcdHost -> etcdPort -> ttl -> domainname -> servicename -> serviceHost -> servicePort -> nodename -> new EtcdRegistration(vertx, etcdHost, etcdPort, ttl, domainname, servicename, nodename, serviceHost , servicePort);
     }
 }

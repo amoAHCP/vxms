@@ -104,8 +104,9 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                 resp.bodyHandler(body -> {
                     System.out.println("Got a response: " + body.toString());
                     Assert.assertEquals(body.toString(), "test");
+                    testComplete();
                 });
-                testComplete();
+
             }
         });
         request.end();
@@ -126,8 +127,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                 resp.bodyHandler(body -> {
                     System.out.println("Got a response: " + body.toString());
                     Assert.assertEquals(body.toString(), "123");
+                    testComplete();
                 });
-                testComplete();
             }
         });
         request.end();

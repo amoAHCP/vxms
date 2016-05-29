@@ -4,6 +4,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpFrame;
+import io.vertx.core.http.HttpVersion;
 import io.vertx.core.net.NetSocket;
 
 import java.util.List;
@@ -41,6 +43,11 @@ public class HttpClientResponseError implements HttpClientResponse {
 
     @Override
     public HttpClientResponse endHandler(Handler<Void> handler) {
+        return null;
+    }
+
+    @Override
+    public HttpVersion version() {
         return null;
     }
 
@@ -86,6 +93,11 @@ public class HttpClientResponseError implements HttpClientResponse {
 
     @Override
     public HttpClientResponse bodyHandler(Handler<Buffer> handler) {
+        return null;
+    }
+
+    @Override
+    public HttpClientResponse unknownFrameHandler(Handler<HttpFrame> handler) {
         return null;
     }
 
