@@ -97,7 +97,7 @@ public class HttpClientResponseError implements HttpClientResponse {
     }
 
     @Override
-    public HttpClientResponse unknownFrameHandler(Handler<HttpFrame> handler) {
+    public HttpClientResponse customFrameHandler(Handler<HttpFrame> handler) {
         return null;
     }
 
