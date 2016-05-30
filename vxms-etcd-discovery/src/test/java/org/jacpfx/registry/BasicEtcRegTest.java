@@ -1,6 +1,7 @@
 package org.jacpfx.registry;
 
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -9,19 +10,16 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.ext.web.Router;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.registry.DiscoveryClient;
 import org.jacpfx.vertx.registry.EtcdRegistration;
-import org.jacpfx.vertx.rest.response.RestHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
@@ -451,8 +449,48 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
     @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
-    public class WsServiceOne extends VxmsEndpoint {
+    public class WsServiceOne extends AbstractVerticle {
          DiscoveryClient client;
+        public void start(Future<Void> startFuture) throws Exception {
+
+            Router router = Router.router(vertx);
+            // define some REST API
+
+            router.get(SERVICE_REST_GET+"/endpointOne").handler(handler -> {
+                handler.request().response().end("test");
+            });
+
+            router.get(SERVICE_REST_GET+"/endpointTwo/:help").handler(handler -> {
+                String productType = handler.request().getParam("help");
+                handler.request().response().end(productType);
+            });
+
+            router.get(SERVICE_REST_GET+"/endpointThree/:help").handler(handler -> {
+
+                client.findNode(SERVICE2_REST_GET, node -> {
+                    if(node.succeeded()) {
+                        HttpClientOptions options = new HttpClientOptions();
+                        HttpClient client = vertx.
+                                createHttpClient(options);
+
+                        HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointTwo/"+handler.request().getParam("help"), resp -> {
+                            resp.bodyHandler(body -> {
+                                System.out.println("Got a response: " + body.toString());
+                                handler.request().response().end(new String(body.getBytes()));
+                            });
+
+                        });
+                        request.end();
+                    }else {
+                        String productType = handler.request().getParam("help");
+                        handler.request().response().end(productType);
+                    }
+                });
+            });
+            vertx.createHttpServer().requestHandler(router::accept).listen(PORT,HOST);
+            postConstruct(startFuture);
+        }
+
         public void postConstruct(final Future<Void> startFuture) {
             EtcdRegistration reg = EtcdRegistration.
                     buildRegistration().
@@ -471,51 +509,26 @@ public class BasicEtcRegTest extends VertxTestBase {
             });
         }
 
-        @Path("/endpointOne")
-        @GET
-        public void rsEndpointOne(RestHandler reply) {
-            System.out.println("wsEndpointOne: " + reply);
-            reply.response().stringResponse(() -> "test").execute();
-        }
 
-        @Path("/endpointTwo/:help")
-        @GET
-        public void rsEndpointTwo(RestHandler handler) {
-            System.out.println("wsEndpointTwo: " + handler);
-            String productType = handler.request().param("help");
-            System.out.println("wsEndpointTwo: " + handler);
-            handler.response().stringResponse(() -> productType).execute();
-        }
-
-        @Path("/endpointThree/:help")
-        @GET
-        public void rsEndpointThree(RestHandler handler) {
-            System.out.println("wsEndpointTwo: " + handler);
-
-            client.findNode(SERVICE2_REST_GET, node -> {
-                if(node.succeeded()) {
-                    HttpClientOptions options = new HttpClientOptions();
-                    HttpClient client = vertx.
-                            createHttpClient(options);
-
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointTwo/"+handler.request().param("help"), resp -> {
-                        resp.bodyHandler(body -> {
-                            System.out.println("Got a response: " + body.toString());
-                            handler.response().stringResponse(() -> new String(body.getBytes())).execute();
-                        });
-
-                    });
-                    request.end();
-                }else {
-                    String productType = handler.request().param("help");
-                    System.out.println("wsEndpointTwo: " + handler);
-                    handler.response().stringResponse(() -> productType).execute();
-                }
-            });
-        }
     }
-    @ServiceEndpoint(name = SERVICE2_REST_GET, port = PORT2)
-    public class WsServiceTwo extends VxmsEndpoint {
+    public class WsServiceTwo extends AbstractVerticle {
+
+        public void start(Future<Void> startFuture) throws Exception {
+
+            Router router = Router.router(vertx);
+            // define some REST API
+
+            router.get(SERVICE2_REST_GET+"/endpointOne").handler(handler -> {
+                handler.request().response().end("test");
+            });
+
+            router.get(SERVICE2_REST_GET+"/endpointTwo/:help").handler(handler -> {
+                String productType = "WsServiceTwo:"+handler.request().getParam("help");
+                handler.request().response().end(productType);
+            });
+            vertx.createHttpServer().requestHandler(router::accept).listen(PORT2,HOST);
+            postConstruct(startFuture);
+        }
 
         public void postConstruct(final Future<Void> startFuture) {
             EtcdRegistration reg = EtcdRegistration.
@@ -534,20 +547,8 @@ public class BasicEtcRegTest extends VertxTestBase {
             });
         }
 
-        @Path("/endpointOne")
-        @GET
-        public void rsEndpointOne(RestHandler reply) {
-            System.out.println("wsEndpointOne: " + reply);
-            reply.response().stringResponse(() -> "test").execute();
-        }
 
-        @Path("/endpointTwo/:help")
-        @GET
-        public void rsEndpointTwo(RestHandler handler) {
-            String productType = "WsServiceTwo:"+handler.request().param("help");
-            System.out.println("wsEndpointTwo: " + handler);
-            handler.response().stringResponse(() -> productType).execute();
-        }
+
     }
 
 

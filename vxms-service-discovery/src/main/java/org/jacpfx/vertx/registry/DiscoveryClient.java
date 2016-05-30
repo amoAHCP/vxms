@@ -1,5 +1,6 @@
 package org.jacpfx.vertx.registry;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.Json;
 import io.vertx.core.shareddata.LocalMap;
@@ -13,8 +14,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static org.jacpfx.vertx.registry.EtcdRegistration.ETCD_BASE_PATH;
-
 /**
  * Created by Andy Moncsek on 29.05.16.
  */
@@ -23,13 +22,30 @@ public class DiscoveryClient {
     private static final String MAP_KEY = "cache";
     private final HttpClient httpClient;
     private final SharedData data;
+    private final Vertx vertx;
     private final String domainname;
+    private final String basBath;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
-    public DiscoveryClient(HttpClient httpClient, SharedData data, String domainname) {
+    public DiscoveryClient(HttpClient httpClient, Vertx vertx, String domainname, String basBath) {
         this.httpClient = httpClient;
-        this.data = data;
+        this.vertx = vertx;
+        this.data = vertx.sharedData();
         this.domainname = domainname;
+        this.basBath = basBath;
+    }
+
+    /**
+     * find service by name
+     * @param serviceName
+     * @return DCServiceName
+     */
+    public DCServiceName find(String serviceName) {
+         return new DCServiceName(this,serviceName);
+    }
+
+    protected Vertx getVertx() {
+        return vertx;
     }
 
     public void findNode(String serviceName, Consumer<NodeResponse> consumer) {
@@ -97,16 +113,14 @@ public class DiscoveryClient {
 
 
     public void retrieveKeys(Consumer<Root> consumer) {
-        httpClient.getNow(ETCD_BASE_PATH + domainname + "/?recursive=true", handler -> {
-            handler.bodyHandler(body -> {
-                try {
-                    consumer.accept(Json.decodeValue(new String(body.getBytes()), Root.class));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        httpClient.getNow(basBath + domainname + "/?recursive=true", handler -> handler.bodyHandler(body -> {
+            try {
+                consumer.accept(Json.decodeValue(new String(body.getBytes()), Root.class));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            });
-        });
+        }));
 
     }
 

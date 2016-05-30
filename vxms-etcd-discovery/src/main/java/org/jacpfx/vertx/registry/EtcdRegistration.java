@@ -70,7 +70,7 @@ public class EtcdRegistration {
 
 
 
-
+     // TODO add error handling!!!
     public void retrieveKeys(Consumer<Root> consumer) {
         httpClient.getNow(ETCD_BASE_PATH + domainname + "/?recursive=true", handler -> {
             handler.bodyHandler(body -> {
@@ -109,6 +109,7 @@ public class EtcdRegistration {
                                         retrieveKeys(root -> {
                                             putRootToCache(root);
                                             startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port, asyncResultHandler);
+                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient,vertx,domainname,ETCD_BASE_PATH)));
                                         });
 
 
@@ -141,7 +142,6 @@ public class EtcdRegistration {
                         retrieveKeys(root -> putRootToCache(root));
                     }
                 },null));
-        asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient,vertx.sharedData(),domainname)));
     }
 
 

@@ -9,10 +9,10 @@
         <relativePath>../</relativePath>
     </parent>
 
-    <artifactId>vxms-verticle</artifactId>
+    <artifactId>vxms-service-discovery</artifactId>
     <packaging>jar</packaging>
 
-    <name>vxms-verticle</name>
+    <name>vxms-service-discovery</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -25,12 +25,6 @@
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-common</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-etcd-discovery</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
