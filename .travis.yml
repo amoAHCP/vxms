@@ -11,7 +11,7 @@ branches:
 #before_script: mvn versions:set -DnewVersion=1.0.1
 
 script:
-  - scripts/run_etcd.sh
+ # - scripts/run_etcd.sh
   - mvn -q clean install
 
 # after_success: mvn versions:set -DnewVersion=1.0.2-SNAPSHOT
