@@ -5,6 +5,7 @@ import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
@@ -15,6 +16,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 
+import java.net.URI;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +45,7 @@ public class EtcdRegistration {
     private HttpClient httpClient;
     private final String nodename;
     private final SharedData data;
+    private final URI fetchAll;
 
 
     public static final String ETCD_BASE_PATH = "/v2/keys/";
@@ -55,6 +58,8 @@ public class EtcdRegistration {
         this.servicename = servicename.startsWith("/")?servicename:"/"+servicename;
         this.host = host;
         this.port = port;
+        // TODO check http(s)
+        this.fetchAll = URI.create("http://"+etcdHost+":"+etcdPort+ETCD_BASE_PATH+ domainname + "/?recursive=true");
         data = vertx.sharedData();
         try {
             httpClient = vertx.createHttpClient(new HttpClientOptions()
@@ -70,21 +75,24 @@ public class EtcdRegistration {
 
 
 
-     // TODO add error handling!!!
     public void retrieveKeys(Consumer<Root> consumer) {
-        httpClient.getNow(ETCD_BASE_PATH + domainname + "/?recursive=true", handler -> {
-            handler.bodyHandler(body -> {
-                try {
-                    consumer.accept(Json.decodeValue(new String(body.getBytes()), Root.class));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        httpClient.getAbs(fetchAll.toString(), handler -> handler.
+                exceptionHandler(error -> consumer.accept(new Root())).
+                bodyHandler(body -> consumer.accept(decodeRoot(body)))
+        ).end();
 
-            });
-        });
 
     }
 
+    protected Root decodeRoot(Buffer body) {
+        try {
+            return Json.decodeValue(new String(body.getBytes()), Root.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new Root();
+    }
 
 
 
@@ -108,8 +116,8 @@ public class EtcdRegistration {
 
                                         retrieveKeys(root -> {
                                             putRootToCache(root);
-                                            startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port, asyncResultHandler);
-                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient,vertx,domainname,ETCD_BASE_PATH)));
+                                            startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port);
+                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient,vertx,domainname, fetchAll)));
                                         });
 
 
@@ -131,7 +139,7 @@ public class EtcdRegistration {
         cache.put(CACHE_KEY, Json.encode(root));
     }
 
-    private void startNodeRefresh(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+    private void startNodeRefresh(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port) {
         LOG.info("Succeeded registering");
         // ttl in s setPeriodic in ms
         vertx.setPeriodic((ttl * 1000) - 900,
@@ -139,7 +147,7 @@ public class EtcdRegistration {
                     if (refreshed.statusCode() != 200) {
                         LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage());
                     } else {
-                        retrieveKeys(root -> putRootToCache(root));
+                        retrieveKeys(this::putRootToCache);
                     }
                 },null));
     }

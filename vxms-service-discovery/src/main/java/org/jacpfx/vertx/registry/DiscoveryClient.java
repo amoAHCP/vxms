@@ -1,11 +1,13 @@
 package org.jacpfx.vertx.registry;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.Json;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -24,24 +26,25 @@ public class DiscoveryClient {
     private final SharedData data;
     private final Vertx vertx;
     private final String domainname;
-    private final String basBath;
+    private final URI fetchAll;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
-    public DiscoveryClient(HttpClient httpClient, Vertx vertx, String domainname, String basBath) {
+    public DiscoveryClient(HttpClient httpClient, Vertx vertx, String domainname, URI fetchAll) {
         this.httpClient = httpClient;
         this.vertx = vertx;
         this.data = vertx.sharedData();
         this.domainname = domainname;
-        this.basBath = basBath;
+        this.fetchAll = fetchAll;
     }
 
     /**
      * find service by name
+     *
      * @param serviceName
      * @return DCServiceName
      */
     public DCServiceName find(String serviceName) {
-         return new DCServiceName(this,serviceName);
+        return new DCServiceName(this, serviceName);
     }
 
     protected Vertx getVertx() {
@@ -111,17 +114,23 @@ public class DiscoveryClient {
     }
 
 
-
     public void retrieveKeys(Consumer<Root> consumer) {
-        httpClient.getNow(basBath + domainname + "/?recursive=true", handler -> handler.bodyHandler(body -> {
-            try {
-                consumer.accept(Json.decodeValue(new String(body.getBytes()), Root.class));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        httpClient.getAbs(fetchAll.toString(), handler -> handler.
+                exceptionHandler(error -> consumer.accept(new Root())).
+                bodyHandler(body -> consumer.accept(decodeRoot(body)))
+        ).end();
 
-        }));
 
+    }
+
+    protected Root decodeRoot(Buffer body) {
+        try {
+            return Json.decodeValue(new String(body.getBytes()), Root.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new Root();
     }
 
     public void retrieveKeysFromCache(Consumer<Root> consumer) {
