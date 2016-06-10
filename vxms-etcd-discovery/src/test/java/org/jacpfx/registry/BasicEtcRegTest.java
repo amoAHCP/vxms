@@ -13,6 +13,7 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Router;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
+import mousio.etcd4j.EtcdClient;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.registry.DiscoveryClient;
 import org.jacpfx.vertx.registry.EtcdRegistration;
@@ -20,6 +21,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
@@ -95,6 +98,18 @@ public class BasicEtcRegTest extends VertxTestBase {
                 createHttpClient(new HttpClientOptions());
         awaitLatch(latch2);
 
+    }
+
+
+    public void etcdClientTest() {
+        try(EtcdClient etcd = new EtcdClient(
+                URI.create("http://123.45.67.89:8001"),
+                URI.create("http://123.45.67.90:8001"))){
+            // Logs etcd version
+            System.out.println(etcd.getVersion());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -274,6 +289,59 @@ public class BasicEtcRegTest extends VertxTestBase {
         await();
     }
 
+    @Test
+
+    public void findServiceNodeAndDisconnect() throws InterruptedException {
+        EtcdRegistration reg = EtcdRegistration.
+                buildRegistration().
+                vertx(vertx).
+                etcdHost("127.0.0.1").
+                etcdPort(4001).
+                ttl(60).
+                domainName("deletIt").
+                serviceName("myService").
+                serviceHost("localhost").
+                servicePort(8080).
+                nodeName("instance");
+
+
+
+
+        reg.connect(result -> {
+            if (result.succeeded()) {
+                final DiscoveryClient client = result.result();
+
+                client.findNode("/myService", node -> {
+                    System.out.println(" found node : "+node.getServiceNode());
+                    System.out.println(" found URI : "+node.getServiceNode().getUri().toString());
+                    reg.disconnect(handler -> {
+                        System.out.println("status code: "+handler.statusCode());
+                        if(handler.statusCode() == 200) {
+
+                            client.findNode("/myService", node2 -> {
+                                if(!node2.succeeded()) {
+                                    testComplete();
+                                } else {
+                                    System.out.println(node2.toString());
+                                }
+                            });
+
+                        }
+                    });
+
+                });
+            } else {
+                assertTrue("connection failed", true);
+                testComplete();
+            }
+        });
+
+
+        //  reg.disconnect(Future.factory.future());
+        await();
+    }
+
+
 
     @Test
 
@@ -430,6 +498,102 @@ public class BasicEtcRegTest extends VertxTestBase {
         //  reg.disconnect(Future.factory.future());
         await();
     }
+
+    @Test
+
+    public void findServiceNodeWithBuilder() throws InterruptedException {
+        EtcdRegistration reg = EtcdRegistration.
+                buildRegistration().
+                vertx(vertx).
+                etcdHost("127.0.0.1").
+                etcdPort(4001).
+                ttl(60).
+                domainName("petShop").
+                serviceName("myService").
+                serviceHost("localhost").
+                servicePort(8080).
+                nodeName("instance");
+
+
+
+
+        reg.connect(result -> {
+            if (result.succeeded()) {
+                final DiscoveryClient client = result.result();
+                client.find("/myService").onSuccess(val->{
+                    System.out.println(" found node : "+val.getServiceNode());
+                    System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+                    testComplete();
+
+                }).onFailure(node->{}).retry(2).execute();
+
+            } else {
+                assertTrue("connection failed", true);
+                testComplete();
+            }
+        });
+
+
+        //  reg.disconnect(Future.factory.future());
+        await();
+    }
+
+    @Test
+
+    public void findServiceNodeWithBuilderError() throws InterruptedException {
+        EtcdRegistration reg = EtcdRegistration.
+                buildRegistration().
+                vertx(vertx).
+                etcdHost("127.0.0.1").
+                etcdPort(4001).
+                ttl(60).
+                domainName("petShop").
+                serviceName("myService").
+                serviceHost("localhost").
+                servicePort(8080).
+                nodeName("instance");
+
+
+
+
+        reg.connect(result -> {
+            if (result.succeeded()) {
+                final DiscoveryClient client = result.result();
+                client.find("/myServicexsd").onSuccess(val->{
+                    System.out.println(" found node : "+val.getServiceNode());
+                    System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+                    testComplete();
+
+                }).onFailure(node->{
+                    System.out.println("error: "+node.getThrowable().getMessage());
+                    testComplete();
+
+                }).retry(2).execute();
+
+            } else {
+                assertTrue("connection failed", true);
+                testComplete();
+            }
+        });
+
+
+        //  reg.disconnect(Future.factory.future());
+        await();
+    }
+
+    @Test
+    public void testContext() {
+        System.out.println("Current: "+Thread.currentThread());
+        vertx.executeBlocking(handler -> {
+            System.out.println("Current in executeBlocking: "+Thread.currentThread());
+            vertx.getOrCreateContext().runOnContext(hanlder -> {
+                System.out.println("Current in runOnContext: "+Thread.currentThread());
+            });
+        },result-> {
+
+        });
+    }
+
 
 
     private org.jacpfx.vertx.registry.Node findNode(org.jacpfx.vertx.registry.Node node, String value) {

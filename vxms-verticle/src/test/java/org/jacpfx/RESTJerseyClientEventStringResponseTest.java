@@ -332,7 +332,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         public void simpleSyncNoConnectionError(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    mapToStringResponse(handler -> handler.result().body().toString()).//onError(error-> System.out.println("ERROR:"+error.getMessage()+"type: "+error.getClass())).
+                    mapToStringResponse(handler -> handler.result().body().toString()).//onFailure(error-> System.out.println("ERROR:"+error.getMessage()+"type: "+error.getClass())).
                     execute();
         }
 

@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -55,11 +56,11 @@ public class EtcdRegistration {
         this.ttl = ttl;
         this.nodename = nodename;
         this.domainname = domainname;
-        this.servicename = servicename.startsWith("/")?servicename:"/"+servicename;
+        this.servicename = servicename.startsWith("/") ? servicename : "/" + servicename;
         this.host = host;
         this.port = port;
         // TODO check http(s)
-        this.fetchAll = URI.create("http://"+etcdHost+":"+etcdPort+ETCD_BASE_PATH+ domainname + "/?recursive=true");
+        this.fetchAll = URI.create("http://" + etcdHost + ":" + etcdPort + ETCD_BASE_PATH + domainname + "/?recursive=true");
         data = vertx.sharedData();
         try {
             httpClient = vertx.createHttpClient(new HttpClientOptions()
@@ -74,10 +75,9 @@ public class EtcdRegistration {
     }
 
 
-
     public void retrieveKeys(Consumer<Root> consumer) {
         httpClient.getAbs(fetchAll.toString(), handler -> handler.
-                exceptionHandler(error -> consumer.accept(new Root())).
+                exceptionHandler(error -> {error.printStackTrace();consumer.accept(new Root());}).
                 bodyHandler(body -> consumer.accept(decodeRoot(body)))
         ).end();
 
@@ -95,13 +95,12 @@ public class EtcdRegistration {
     }
 
 
-
     public void connect(AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         connectToEtcd(vertx, httpClient, domainname, servicename, nodename, ttl, host, port, asyncResultHandler);
     }
 
     public void disconnect(Handler<HttpClientResponse> responseHandler) {
-        deleteInstanceNode(httpClient, domainname, servicename, nodename, responseHandler,null);
+        deleteInstanceNode(httpClient, domainname, servicename, nodename, responseHandler, null);
     }
 
     private void connectToEtcd(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
@@ -117,7 +116,7 @@ public class EtcdRegistration {
                                         retrieveKeys(root -> {
                                             putRootToCache(root);
                                             startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port);
-                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient,vertx,domainname, fetchAll)));
+                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient, vertx, domainname, fetchAll)));
                                         });
 
 
@@ -126,12 +125,12 @@ public class EtcdRegistration {
                                         asyncResultHandler.handle(Future.factory.failureFuture(("Unable to create node node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage())));
                                     }
 
-                                },asyncResultHandler);
+                                }, asyncResultHandler);
                     else {
                         LOG.error("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage());
                         asyncResultHandler.handle(Future.factory.failureFuture("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage()));
                     }
-                },asyncResultHandler);
+                }, asyncResultHandler);
     }
 
     private void putRootToCache(Root root) {
@@ -143,49 +142,57 @@ public class EtcdRegistration {
         LOG.info("Succeeded registering");
         // ttl in s setPeriodic in ms
         vertx.setPeriodic((ttl * 1000) - 900,
+                // TODO check if http(s)
                 refresh -> createInstanceNode(httpClient, domainname, servicename, nodename, "value=" + Json.encode(new NodeMetadata(servicename, host, port, "http", false)) + "&ttl=" + ttl, refreshed -> {
                     if (refreshed.statusCode() != 200) {
                         LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage());
                     } else {
                         retrieveKeys(this::putRootToCache);
                     }
-                },null));
+                }, null));
     }
 
 
-    private void createServiceNode(HttpClient client, String serviceName, Handler<HttpClientResponse> responseHandler,AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+    private void createServiceNode(HttpClient client, String serviceName, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         client
                 .put(ETCD_BASE_PATH + domainname + serviceName)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
                 .exceptionHandler(error -> {
                     error.printStackTrace();
-                    if(asyncResultHandler!=null)asyncResultHandler.handle(Future.factory.failedFuture(error));
+                    if (asyncResultHandler != null) asyncResultHandler.handle(Future.factory.failedFuture(error));
                     responseHandler.handle(new HttpClientResponseError(500));
                 })
                 .end("dir=true");
     }
 
-    private static void createInstanceNode(HttpClient client, String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler,AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+    private static void createInstanceNode(HttpClient client, String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         client
                 .put(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
                 .exceptionHandler(error -> {
                     error.printStackTrace();
-                    if(asyncResultHandler!=null)asyncResultHandler.handle(Future.factory.failedFuture(error));
+                    if (asyncResultHandler != null) asyncResultHandler.handle(Future.factory.failedFuture(error));
                     responseHandler.handle(new HttpClientResponseError(500));
                 })
                 .end(data);
     }
 
-    private static void deleteInstanceNode(HttpClient client, String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler,AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+    private void deleteInstanceNode(HttpClient client, String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         client
                 .delete(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
-                .handler(responseHandler)
+                .handler(handler ->
+                        retrieveKeys(root ->
+                                Optional.ofNullable(root.getNode()).ifPresent(node -> {
+                                    // TODO check why this is called twice, while second one is crap
+                                    // idea: i register here a handler, at the same time an other handler is registered and this one will be executed twice?
+                                    putRootToCache(root);
+                                    responseHandler.handle(handler);
+                                })))
                 .exceptionHandler(error -> {
                     error.printStackTrace();
-                    if(asyncResultHandler!=null)asyncResultHandler.handle(Future.factory.failedFuture(error));
+                    if (asyncResultHandler != null) asyncResultHandler.handle(Future.factory.failedFuture(error));
                     responseHandler.handle(new HttpClientResponseError(500));
                 })
                 .end();
@@ -229,6 +236,6 @@ public class EtcdRegistration {
     }
 
     public static VertxBuilder buildRegistration() {
-        return vertx -> etcdHost -> etcdPort -> ttl -> domainname -> servicename -> serviceHost -> servicePort -> nodename -> new EtcdRegistration(vertx, etcdHost, etcdPort, ttl, domainname, servicename, nodename, serviceHost , servicePort);
+        return vertx -> etcdHost -> etcdPort -> ttl -> domainname -> servicename -> serviceHost -> servicePort -> nodename -> new EtcdRegistration(vertx, etcdHost, etcdPort, ttl, domainname, servicename, nodename, serviceHost, servicePort);
     }
 }
