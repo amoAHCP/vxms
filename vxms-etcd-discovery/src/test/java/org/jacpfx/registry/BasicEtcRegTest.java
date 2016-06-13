@@ -19,6 +19,7 @@ import org.jacpfx.vertx.registry.DiscoveryClient;
 import org.jacpfx.vertx.registry.EtcdRegistration;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -592,6 +593,14 @@ public class BasicEtcRegTest extends VertxTestBase {
         },result-> {
 
         });
+    }
+
+
+    @Test
+    @Ignore
+    // TODO implement test
+    public void testRetryAndFailure() {
+
     }
 
 
