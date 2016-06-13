@@ -90,40 +90,43 @@ public class ExecuteRSBasicString {
      * Execute the reply chain
      */
     public void execute() {
-        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
-            try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
-            } catch (Exception e) {
-                System.out.println("EXCEPTION ::::::");
-                e.printStackTrace();
-            }
+        vertx.runOnContext(action -> {
+            Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+                try {
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+                } catch (Exception e) {
+                    System.out.println("EXCEPTION ::::::");
+                    e.printStackTrace();
+                }
 
-        });
+            });
 
-        Optional.ofNullable(stringSupplier).
-                ifPresent(supplier -> {
-                            int retry = retryCount;
-                            String result = null;
-                            boolean errorHandling = false;
-                            while (retry >= 0) {
-                                try {
-                                    result = supplier.get();
-                                    retry = -1;
-                                } catch (Throwable e) {
-                                    retry--;
-                                    if (retry < 0) {
-                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerString, errorMethodHandler, e);
-                                        errorHandling = true;
-                                    } else {
-                                        RESTExecutionUtil.handleError(errorHandler, e);
+            Optional.ofNullable(stringSupplier).
+                    ifPresent(supplier -> {
+                                int retry = retryCount;
+                                String result = null;
+                                boolean errorHandling = false;
+                                while (retry >= 0) {
+                                    try {
+                                        result = supplier.get();
+                                        retry = -1;
+                                    } catch (Throwable e) {
+                                        retry--;
+                                        if (retry < 0) {
+                                            result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerString, errorMethodHandler, e);
+                                            errorHandling = true;
+                                        } else {
+                                            RESTExecutionUtil.handleError(errorHandler, e);
+                                        }
                                     }
                                 }
-                            }
-                            if (errorHandling && result == null) return;
-                            repond(result);
+                                if (errorHandling && result == null) return;
+                                repond(result);
 
-                        }
-                );
+                            }
+                    );
+
+        });
 
 
     }

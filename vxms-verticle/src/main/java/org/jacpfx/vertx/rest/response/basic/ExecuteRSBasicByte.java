@@ -82,7 +82,7 @@ public class ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap,  byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
         lastStep.execute();
     }
 
@@ -97,40 +97,40 @@ public class ExecuteRSBasicByte {
      * Execute the reply chain
      */
     public void execute() {
+        vertx.runOnContext(action -> {
+            Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+                try {
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-        Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
-            try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            });
 
-        });
-
-        Optional.ofNullable(byteSupplier).
-                ifPresent(supplier -> {
-                            int retry = retryCount;
-                            byte[] result = new byte[0];
-                            boolean errorHandling = false;
-                            while (retry >= 0) {
-                                try {
-                                    result = supplier.get();
-                                    retry = -1;
-                                } catch (Throwable e) {
-                                    retry--;
-                                    if (retry < 0) {
-                                        result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerByte, errorMethodHandler, e);
-                                        errorHandling = true;
-                                    } else {
-                                        RESTExecutionUtil.handleError(errorHandler, e);
+            Optional.ofNullable(byteSupplier).
+                    ifPresent(supplier -> {
+                                int retry = retryCount;
+                                byte[] result = new byte[0];
+                                boolean errorHandling = false;
+                                while (retry >= 0) {
+                                    try {
+                                        result = supplier.get();
+                                        retry = -1;
+                                    } catch (Throwable e) {
+                                        retry--;
+                                        if (retry < 0) {
+                                            result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerByte, errorMethodHandler, e);
+                                            errorHandling = true;
+                                        } else {
+                                            RESTExecutionUtil.handleError(errorHandler, e);
+                                        }
                                     }
                                 }
+                                if (errorHandling && result == null) return;
+                                repond(result);
                             }
-                            if (errorHandling && result == null) return;
-                            repond(result);
-                        }
-                );
-
+                    );
+        });
 
     }
 
