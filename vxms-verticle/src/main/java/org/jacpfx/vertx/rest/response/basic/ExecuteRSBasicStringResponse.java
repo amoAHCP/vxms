@@ -17,33 +17,33 @@ import java.util.function.Function;
 public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
-    public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
-        super(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+    public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount) {
+        super(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
 
     /**
      * defines an action for errors in byte responses, you can handle the error and return an alternate response value
      *
-     * @param errorHandlerString the handler (function) to execute on error
+     * @param onFailureRespond the handler (function) to execute on error
      * @return the response chain
      */
-    public ExecuteRSBasicString onErrorResponse(Function<Throwable, String> errorHandlerString) {
-        return new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+    public ExecuteRSBasicString onFailureRespond(Function<Throwable, String> onFailureRespond) {
+        return new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
 
     public ExecuteRSBasicStringResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
     public ExecuteRSBasicStringResponse retry(int retryCount) {
-        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
     public ExecuteRSBasicStringResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 }

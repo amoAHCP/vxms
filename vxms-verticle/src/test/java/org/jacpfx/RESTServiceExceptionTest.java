@@ -526,7 +526,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
                     }).
                     retry(3).
                     delay(1000).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         System.out.print("the stack trace --> ");
                         t.printStackTrace();
                         return "hello world";
@@ -554,7 +554,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
                     }).
                     retry(3).
                     delay(1000).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         System.out.print("the stack trace --> ");
                         t.printStackTrace();
                         return "hello world".getBytes();
@@ -583,7 +583,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
                     }, new ExampleStringEncoder()).
                     retry(3).
                     delay(1000).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         System.out.print("the stack trace --> ");
                         t.printStackTrace();
                         return new Payload<String>("hello world");

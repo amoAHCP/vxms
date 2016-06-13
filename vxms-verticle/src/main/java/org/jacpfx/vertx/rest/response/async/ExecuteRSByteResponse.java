@@ -19,27 +19,27 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
 
     public ExecuteRSByteResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
                                  Map<String, String> headers, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply,
-                                 Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+                                 Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
      * defines an action for errors in byte responses, you can handle the error and return an alternate response value
      *
-     * @param errorHandlerByte the handler (function) to execute on error
+     * @param onFailureRespond the handler (function) to execute on error
      * @return the response chain
      */
-    public ExecuteRSByte onErrorResponse(Function<Throwable, byte[]> errorHandlerByte) {
-        return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+    public ExecuteRSByte onFailureRespond(Function<Throwable, byte[]> onFailureRespond) {
+        return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
 
     public ExecuteRSByteResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     public ExecuteRSByteResponse retry(int retryCount) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -49,7 +49,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @return the response chain
      */
     public ExecuteRSByteResponse timeout(long timeout) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -59,13 +59,13 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @return the response chain
      */
     public ExecuteRSByteResponse delay(long delay) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
 
     public ExecuteRSByteResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 }

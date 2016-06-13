@@ -18,32 +18,32 @@ import java.util.function.Function;
 public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
 
 
-    public ExecuteRSBasicObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount) {
-        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+    public ExecuteRSBasicObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount) {
+        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
 
     /**
      * defines an action for errors in byte responses, you can handle the error and return an alternate response value
      *
-     * @param errorHandlerObject the handler (function) to execute on error
+     * @param onFailureRespond the handler (function) to execute on error
      * @return the response chain
      */
-    public ExecuteRSBasicObject onErrorResponse(Function<Throwable, Serializable> errorHandlerObject, Encoder encoder) {
-        return new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+    public ExecuteRSBasicObject onFailureRespond(Function<Throwable, Serializable> onFailureRespond, Encoder encoder) {
+        return new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
     public ExecuteRSBasicObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
     public ExecuteRSBasicObjectResponse retry(int retryCount) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
     public ExecuteRSBasicObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 }

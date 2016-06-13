@@ -27,8 +27,8 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
 
     public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                          ThrowableSupplier<byte[]> byteSupplier,ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
-                         Consumer<Throwable> errorHandler, Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers,byteSupplier, null, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount);
+                         Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers,byteSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
         this.timeout = timeout;
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
@@ -37,7 +37,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -52,7 +52,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier,excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerByte, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier,excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -65,7 +65,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -74,7 +74,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerByte, httpStatusCode, retryCount,timeout,delay);
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout,delay);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -83,7 +83,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, errorHandlerByte, errorMethodHandler, vertx, retryCount, timeout, delay),
+                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<byte[]>>) value -> {
                                     if (value.failed()) return;

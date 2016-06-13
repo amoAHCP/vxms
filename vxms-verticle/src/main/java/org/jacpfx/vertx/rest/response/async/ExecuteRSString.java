@@ -26,8 +26,8 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
 
     public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
-                           Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers,  stringSupplier, null, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+                           Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers,  stringSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
         this.delay = delay;
         this.timeout = timeout;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
@@ -36,7 +36,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -51,7 +51,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -66,7 +66,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -74,7 +74,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount,timeout,delay);
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout,delay);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -83,7 +83,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier ->
                         this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, errorHandlerString, errorMethodHandler, vertx, retryCount, timeout, delay),
+                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retryCount, timeout, delay),
                                 false,
                                 (Handler<AsyncResult<String>>) value -> {
                                     if (value.failed()) return;

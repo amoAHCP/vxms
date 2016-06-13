@@ -314,7 +314,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                     mapToStringResponse(handler -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onErrorResponse(error -> error.getMessage()).
+                    onFailureRespond(error -> error.getMessage()).
                     execute();
         }
 

@@ -503,7 +503,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                     }).
                     onError(error -> System.out.println("retry: " + count.get() + "   " + error.getStackTrace())).
                     retry(3).
-                    onErrorResponse(error -> product + productType).
+                    onFailureRespond(error -> product + productType).
                     execute();
         }
 
@@ -533,7 +533,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                         return new Payload<>("hallo");
                     }
                     , new ExampleStringEncoder()
-            ).retry(3).onErrorResponse(error -> pp, new ExampleStringEncoder()).execute();
+            ).retry(3).onFailureRespond(error -> pp, new ExampleStringEncoder()).execute();
         }
 
         @Path("/endpointSix")
@@ -570,7 +570,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                     throw new NullPointerException("test");
                 }
                 return Serializer.serialize(pp);
-            }).retry(3).onErrorResponse(error -> {
+            }).retry(3).onFailureRespond(error -> {
                 try {
                     return Serializer.serialize(pp);
                 } catch (IOException e) {

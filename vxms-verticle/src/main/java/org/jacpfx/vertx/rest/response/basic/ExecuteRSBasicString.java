@@ -28,13 +28,13 @@ public class ExecuteRSBasicString {
     protected final ThrowableSupplier<String> stringSupplier;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
-    protected final Function<Throwable, String> errorHandlerString;
+    protected final Function<Throwable, String> onFailureRespond;
     protected final int httpStatusCode;
     protected final int retryCount;
     protected final ExecuteEventBusStringCall excecuteEventBusAndReply;
 
 
-    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> errorHandlerString, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -44,7 +44,7 @@ public class ExecuteRSBasicString {
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
         this.encoder = encoder;
         this.errorHandler = errorHandler;
-        this.errorHandlerString = errorHandlerString;
+        this.onFailureRespond = onFailureRespond;
         this.retryCount = retryCount;
         this.httpStatusCode = httpStatusCode;
     }
@@ -56,7 +56,7 @@ public class ExecuteRSBasicString {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount);
         lastStep.execute();
     }
 
@@ -70,7 +70,7 @@ public class ExecuteRSBasicString {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, status.code(), retryCount);
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount);
         lastStep.execute();
     }
 
@@ -82,7 +82,7 @@ public class ExecuteRSBasicString {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
         lastStep.execute();
     }
 
@@ -91,9 +91,10 @@ public class ExecuteRSBasicString {
      */
     public void execute() {
         vertx.runOnContext(action -> {
+            // excecuteEventBusAndReply & stringSupplier never non null at the same time
             Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerString, httpStatusCode, retryCount);
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
                 } catch (Exception e) {
                     System.out.println("EXCEPTION ::::::");
                     e.printStackTrace();
@@ -113,7 +114,7 @@ public class ExecuteRSBasicString {
                                     } catch (Throwable e) {
                                         retry--;
                                         if (retry < 0) {
-                                            result = RESTExecutionUtil.handleError(result, errorHandler, errorHandlerString, errorMethodHandler, e);
+                                            result = RESTExecutionUtil.handleError(result, errorHandler, onFailureRespond, errorMethodHandler, e);
                                             errorHandling = true;
                                         } else {
                                             RESTExecutionUtil.handleError(errorHandler, e);

@@ -326,7 +326,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                     mapToByteResponse(handler -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onErrorResponse(error -> {
+                    onFailureRespond(error -> {
                         try {
                             Payload<String> p = new Payload<>(error.getMessage());
                             return Serializer.serialize(p);

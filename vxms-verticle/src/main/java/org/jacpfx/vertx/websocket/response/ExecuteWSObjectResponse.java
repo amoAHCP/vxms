@@ -49,7 +49,7 @@ public class ExecuteWSObjectResponse extends ExecuteWSObject {
      * @param timeout time to wait in ms
      * @return the response chain
      */
-    // TODO move timeout ot  ExecuteWSObject ... so onErrorResponse will be affected too
+    // TODO move timeout ot  ExecuteWSObject ... so onFailureRespond will be affected too
     public ExecuteWSObjectResponse timeout(long timeout) {
         return new ExecuteWSObjectResponse(endpoint, vertx, commType, objectSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerObject, registry, retryCount, timeout, delay);
     }

@@ -322,7 +322,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                     mapToObjectResponse(handler -> {
                         throw new NullPointerException("test exception");
                     },new ExampleByteEncoder()).
-                    onErrorResponse(error -> new Payload<>(error.getMessage()),new ExampleByteEncoder()).
+                    onFailureRespond(error -> new Payload<>(error.getMessage()),new ExampleByteEncoder()).
                     execute();
         }
 

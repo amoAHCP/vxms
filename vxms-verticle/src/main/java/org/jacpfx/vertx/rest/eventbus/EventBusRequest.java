@@ -7,6 +7,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -40,10 +41,8 @@ public class EventBusRequest {
             final HttpServerResponse response = context.response();
             if (event.failed()) {
                 response.setStatusCode(HttpResponseStatus.SERVICE_UNAVAILABLE.code()).end();
-            } else {
-                Object resp = event.result().body();
-                respond(response, resp);
             }
+            Optional.ofNullable(event.result()).ifPresent(result -> Optional.ofNullable(result.body()).ifPresent(resp -> respond(response, resp)));
         });
     }
 

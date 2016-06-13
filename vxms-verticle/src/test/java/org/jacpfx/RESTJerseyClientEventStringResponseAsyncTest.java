@@ -193,7 +193,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/onErrorResponse");
+        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/onFailureRespond");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -252,7 +252,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
                     mapToStringResponse(handler -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onErrorResponse(error -> error.getMessage()).
+                    onFailureRespond(error -> error.getMessage()).
                     execute();
         }
 
@@ -266,11 +266,11 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
                         throw new NullPointerException("test exception");
                     }).
                     retry(3).
-                    onErrorResponse(error -> error.getMessage()).
+                    onFailureRespond(error -> error.getMessage()).
                     execute();
         }
 
-        @Path("/onErrorResponse")
+        @Path("/onFailureRespond")
         @GET
         public void onErrorResponse(RestHandler reply) {
             reply.eventBusRequest().async().send("hello1", "welt").onErrorResult(handler -> {

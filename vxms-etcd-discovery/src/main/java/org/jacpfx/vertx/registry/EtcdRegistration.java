@@ -17,7 +17,6 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 
 import java.net.URI;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +33,6 @@ public class EtcdRegistration {
     private static final List<Integer> SUCCESS_CODES = Collections.unmodifiableList(Arrays.asList(200, 201, 403));
     private static final String CONTENT_TYPE = HttpHeaders.CONTENT_TYPE.toString();
     private static final String APPLICATION_X_WWW_FORM_URLENCODED = HttpHeaders.APPLICATION_X_WWW_FORM_URLENCODED.toString();
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
     private static final String CACHE_KEY = "local";
     private static final String MAP_KEY = "cache";
     private final Vertx vertx;
