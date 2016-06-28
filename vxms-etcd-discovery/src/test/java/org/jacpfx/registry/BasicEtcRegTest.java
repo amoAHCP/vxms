@@ -1,10 +1,7 @@
 package org.jacpfx.registry;
 
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
@@ -15,6 +12,8 @@ import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import mousio.etcd4j.EtcdClient;
 import org.jacpfx.common.ServiceEndpoint;
+import org.jacpfx.vertx.etcd.client.DiscoveryClientBuilder;
+import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
 import org.jacpfx.vertx.registry.DiscoveryClient;
 import org.jacpfx.vertx.registry.EtcdRegistration;
 import org.junit.Assert;
@@ -236,7 +235,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         reg.connect(result -> {
             if (result.succeeded()) {
 
-                final DiscoveryClient client = result.result();
+                final DiscoveryClient client= result.result();
                 client.findNode("/myService", node -> {
                     System.out.println(" found node : "+node.getNode());
                     testComplete();
@@ -417,7 +416,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         reg.connect(result -> {
             if (result.succeeded()) {
 
-                final DiscoveryClient discoveryClient = result.result();
+                final DiscoveryClient discoveryClient  = result.result();
                 discoveryClient.findNode(SERVICE_REST_GET, node -> {
                     assertTrue("did not find node",node.succeeded());
                     System.out.println(" found node : "+node.getServiceNode());
@@ -469,7 +468,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         reg.connect(result -> {
             if (result.succeeded()) {
 
-                final DiscoveryClient discoveryClient = result.result();
+                final DiscoveryClient discoveryClient  = result.result();
                 discoveryClient.findNode(SERVICE_REST_GET, node -> {
                     assertTrue("did not find node",node.succeeded());
                     System.out.println(" found node : "+node.getServiceNode());
@@ -583,6 +582,29 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
     @Test
+    public void findServiceWitchDiscoveryClient() throws InterruptedException {
+        DiscoveryClientBuilder builder = new DiscoveryClientBuilder();
+        WsServiceOne service = new WsServiceOne();
+        service.init(vertx,vertx.getOrCreateContext());
+        final DiscoveryClientEtcd client = builder.getClient(service);
+        client.find("/wsService").onSuccess(val->{
+            System.out.println(" found node : "+val.getServiceNode());
+            System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+            testComplete();
+
+        }).onError(error->{
+            System.out.println("error: "+error.getThrowable().getMessage());
+        }).onFailure(node->{
+            System.out.println("not found");
+            testComplete();
+        }).retry(2).execute();
+
+
+        //  reg.disconnect(Future.factory.future());
+        await();
+    }
+
+    @Test
     public void testContext() {
         System.out.println("Current: "+Thread.currentThread());
         vertx.executeBlocking(handler -> {
@@ -621,6 +643,7 @@ public class BasicEtcRegTest extends VertxTestBase {
                 createHttpClient(new HttpClientOptions());
     }
 
+    @org.jacpfx.vertx.etcd.client.EtcdClient(domain = "testdomain")  // this annotation does nothing on an AbstractVerticle but is needed vor client init test
     @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends AbstractVerticle {
          DiscoveryClient client;
@@ -722,8 +745,9 @@ public class BasicEtcRegTest extends VertxTestBase {
 
 
 
-    }
 
+
+    }
 
 }
 

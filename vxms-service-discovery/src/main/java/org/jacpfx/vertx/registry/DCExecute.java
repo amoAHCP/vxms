@@ -1,5 +1,7 @@
 package org.jacpfx.vertx.registry;
 
+import io.vertx.core.Vertx;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -7,6 +9,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 30.05.16.
  */
 public class DCExecute {
+    protected final Vertx vertx;
     protected final DiscoveryClient client;
     protected final String serviceName;
     protected final Consumer<NodeResponse> consumer;
@@ -16,7 +19,8 @@ public class DCExecute {
     protected final long delay;
 
 
-    public DCExecute(DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure,Consumer<NodeResponse> onError, int amount, long delay) {
+    public DCExecute(Vertx vertx,DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure,Consumer<NodeResponse> onError, int amount, long delay) {
+        this.vertx = vertx;
         this.client = client;
         this.serviceName = serviceName;
         this.consumer = consumer;
@@ -39,7 +43,7 @@ public class DCExecute {
      * @return
      */
     public DCOnFailure onError(Consumer<NodeResponse> onError) {
-        return new DCOnFailure(client, serviceName, consumer, onFailure,onError);
+        return new DCOnFailure(vertx, client, serviceName, consumer, onFailure,onError);
     }
 
     /**
@@ -48,11 +52,11 @@ public class DCExecute {
      * @return
      */
     public DCOnFailure onFailure(Consumer<NodeResponse> onFailure) {
-        return new DCOnFailure(client, serviceName, consumer, onFailure,onError);
+        return new DCOnFailure(vertx, client, serviceName, consumer, onFailure,onError);
     }
 
     protected void findAndHandle(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {
-        client.getVertx().runOnContext(handler ->
+        vertx.runOnContext(handler ->
                 client.findNode(name, response -> {
                     if (response.succeeded()) {
                         consumer.accept(response);
@@ -79,7 +83,7 @@ public class DCExecute {
     }
 
     private void retryAndDelay(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {
-        client.getVertx().executeBlocking(blocking -> {
+        vertx.executeBlocking(blocking -> {
             sleep(delay);
             blocking.complete();
         }, result -> findAndHandle(client, name, consumer, onFailure, amount - 1, delay));

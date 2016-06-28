@@ -15,6 +15,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
+import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -110,11 +111,10 @@ public class EtcdRegistration {
                         createInstanceNode(httpClient, domainname, servicename, nodename, "value=" + Json.encode(new NodeMetadata(servicename, host, port, "http", false)) + "&ttl=" + ttl,
                                 nodeCreated -> {
                                     if (SUCCESS_CODES.contains(nodeCreated.statusCode()) || 403 == nodeCreated.statusCode()) {
-
                                         retrieveKeys(root -> {
                                             putRootToCache(root);
                                             startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port);
-                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClient(httpClient, vertx, domainname, fetchAll)));
+                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClientEtcd(httpClient, vertx, domainname, fetchAll)));
                                         });
 
 

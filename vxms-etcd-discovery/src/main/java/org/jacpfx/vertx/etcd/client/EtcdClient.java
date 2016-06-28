@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.registry;
+package org.jacpfx.vertx.etcd.client;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

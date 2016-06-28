@@ -56,8 +56,8 @@ public class ExecuteRSBasicString {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount);
-        lastStep.execute();
+        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier,
+                excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount).execute();
     }
 
     /**
@@ -69,9 +69,9 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount);
-        lastStep.execute();
+        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, updateContentType(contentType),
+                stringSupplier, excecuteEventBusAndReply, encoder, errorHandler,
+                onFailureRespond, status.code(), retryCount).execute();
     }
 
     /**
@@ -81,9 +81,9 @@ public class ExecuteRSBasicString {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSBasicString lastStep = new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
-        lastStep.execute();
+        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context,
+                updateContentType(contentType), stringSupplier, excecuteEventBusAndReply,
+                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount).execute();
     }
 
     /**

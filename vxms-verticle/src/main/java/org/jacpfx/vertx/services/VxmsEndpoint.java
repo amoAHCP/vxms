@@ -10,26 +10,20 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
-import org.jacpfx.common.Operation;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.vertx.rest.response.RestHandler;
+import org.jacpfx.vertx.etcd.client.EtcdClient;
+import org.jacpfx.vertx.registry.EtcdRegistration;
 import org.jacpfx.vertx.rest.util.RESTInitializer;
 import org.jacpfx.vertx.services.util.ConfigurationUtil;
-import org.jacpfx.vertx.websocket.annotation.OnWebSocketMessage;
+import org.jacpfx.vertx.services.util.MetadataUtil;
 import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
-import org.jacpfx.vertx.websocket.response.WebSocketHandler;
 import org.jacpfx.vertx.websocket.util.WebSocketInitializer;
 
-import javax.ws.rs.*;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Extend a service verticle to provide pluggable sevices for vet.x microservice project
@@ -42,6 +36,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     private boolean clustered;
     private int port = 0;
     private WebSocketRegistry webSocketRegistry;
+    private Consumer<Future<Void>> onStop;
 
     @Override
     public final void start(final Future<Void> startFuture) {
@@ -50,7 +45,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         host = ConfigurationUtil.getEndpointHost(getConfig(), this.getClass());
         // collect all service operations in service for descriptor
 
-        descriptor = createInfoObject(port);
+        descriptor = MetadataUtil.createInfoObject(port, getConfig(), this.getClass());
         // register info (keepAlive) handler
         vertx.eventBus().consumer(ConfigurationUtil.serviceName(getConfig(), this.getClass()) + "-info", this::info);
 
@@ -79,12 +74,64 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             server.requestHandler(router::accept).listen(status -> {
                 if (status.succeeded()) {
                     log("started on PORT: " + port + " host: " + host);
-                    postConstruct(startFuture);
+                    if (checkForEtcdExtension()) {
+                        handleEtcdRegistration(startFuture);
+                    } else {
+                        postConstruct(startFuture);
+                    }
                     log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): " + startFuture.failed());
-                    return;
+                } else {
+                    startFuture.fail(status.cause());
                 }
-                startFuture.fail(status.cause());
+
             });
+        }
+    }
+
+    private void handleEtcdRegistration(Future<Void> startFuture) {
+        final EtcdRegistration etcdRegistration = createEtcdRegistrationHandler();
+        this.onStop = (stopFuture) -> etcdRegistration.disconnect(handler -> {});
+        etcdRegistration.connect(connection -> {
+            if (connection.failed()) {
+                startFuture.fail(connection.cause());
+            } else {
+                postConstruct(startFuture);
+            }
+        });
+    }
+
+    private EtcdRegistration createEtcdRegistrationHandler() {
+        final EtcdClient client = getClass().getAnnotation(EtcdClient.class);
+        final int etcdPort = getConfig().getInteger("port", client.port());
+        final int ttl = getConfig().getInteger("ttl", client.ttl());
+        final String domain = getConfig().getString("domain", client.domain());
+        final String etcdHost = getConfig().getString("host", client.host());
+        final String serviceName = ConfigurationUtil.serviceName(getConfig(), this.getClass());
+        return EtcdRegistration.
+                buildRegistration().
+                vertx(vertx).
+                etcdHost(etcdHost).
+                etcdPort(etcdPort).
+                ttl(ttl).
+                domainName(domain).
+                serviceName(serviceName).
+                serviceHost(host).
+                servicePort(port).
+                nodeName(this.deploymentID());
+    }
+
+    public void stop(Future<Void> stopFuture) throws Exception {
+        Optional.ofNullable(onStop).ifPresent(stop -> stop.accept(stopFuture));
+        if (!stopFuture.isComplete()) stopFuture.complete();
+    }
+
+    private boolean checkForEtcdExtension() {
+        try {
+            Class.forName("org.jacpfx.vertx.etcd.client.EtcdClient");
+            return getClass().isAnnotationPresent(EtcdClient.class);
+        } catch (ClassNotFoundException e) {
+            //my class isn't there!
+            return false;
         }
     }
 
@@ -93,7 +140,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
     private void initRest(Router router) {
-        RESTInitializer.initRESTHandler(vertx,router,getConfig(),this);
+        RESTInitializer.initRESTHandler(vertx, router, getConfig(), this);
     }
 
     private void initWebSocket(HttpServer server) {
@@ -119,126 +166,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
 
-    private void logDebug(String message) {
-        log.debug(message);
-    }
-
     private void log(final String value) {
         log.info(value);
-    }
-
-
-    private ServiceInfo createInfoObject(Integer port) {
-        final List<Operation> operations = getDeclaredOperations();
-        return new ServiceInfo(ConfigurationUtil.serviceName(getConfig(), this.getClass()), null, ConfigurationUtil.getHostName(), null, null, port, operations.toArray(new Operation[operations.size()]));
-    }
-
-    private List<Operation> getDeclaredOperations() {
-        final List<Operation> allWebSocketOperationsInService = getAllWebSocketOperationsInService(this.getClass().getDeclaredMethods());
-        final List<Operation> allRESTOperationsInService = getAllRESTOperationsInService(this.getClass().getDeclaredMethods());
-        return Stream.
-                concat(allWebSocketOperationsInService.stream(), allRESTOperationsInService.stream()).
-                collect(Collectors.toList());
-    }
-
-
-    /**
-     * Scans all method in ServiceVerticle, checks method signature, registers each path and create for each method a operation objects for service information.
-     *
-     * @param allMethods methods in serviceVerticle
-     * @return a list of all operation in service
-     */
-    private List<Operation> getAllWebSocketOperationsInService(final Method[] allMethods) {
-        return Stream.of(allMethods).
-                filter(m -> m.isAnnotationPresent(OnWebSocketMessage.class)).
-                map(this::mapWebSocketMethod).collect(Collectors.toList());
-    }
-
-    /**
-     * Scans all method in ServiceVerticle, checks method signature, registers each path and create for each method a operation objects for service information.
-     *
-     * @param allMethods methods in serviceVerticle
-     * @return a list of all operation in service
-     */
-    private List<Operation> getAllRESTOperationsInService(final Method[] allMethods) {
-        return Stream.of(allMethods).
-                filter(m -> m.isAnnotationPresent(Path.class)).
-                map(this::mapRESTtMethod).collect(Collectors.toList());
-    }
-
-    private Operation mapWebSocketMethod(Method method) {
-        final OnWebSocketMessage path = method.getDeclaredAnnotation(OnWebSocketMessage.class);
-        // TODO remove Produces and Consumes?
-        final Produces produces = method.getDeclaredAnnotation(Produces.class);
-        final Consumes consumes = method.getDeclaredAnnotation(Consumes.class);
-        if (path == null)
-            throw new MissingResourceException("missing OperationType ", this.getClass().getName(), "");
-        final String[] mimeTypes = produces != null ? produces.value() : null;
-        final String[] consumeTypes = consumes != null ? consumes.value() : null;
-        final String url = ConfigurationUtil.serviceName(getConfig(), this.getClass()).concat(path.value());
-        final List<String> parameters = new ArrayList<>();
-
-        parameters.addAll(getWSParameter(method));
-
-        // TODO add service description (description about service itself)!!!
-        return new Operation(path.value(), null, url, Type.WEBSOCKET.name(), mimeTypes, consumeTypes, parameters.toArray(new String[parameters.size()]));
-    }
-
-    private Operation mapRESTtMethod(Method method) {
-        final Path path = method.getDeclaredAnnotation(Path.class);
-        // TODO implement POST,... create array of Operations for each annotation
-        final Produces produces = method.getDeclaredAnnotation(Produces.class);
-        final Consumes consumes = method.getDeclaredAnnotation(Consumes.class);
-        final GET get = method.getDeclaredAnnotation(GET.class);
-        final POST post = method.getDeclaredAnnotation(POST.class);
-        final PUT put = method.getDeclaredAnnotation(PUT.class);
-        final DELETE delete = method.getDeclaredAnnotation(DELETE.class);
-        if (path == null)
-            throw new MissingResourceException("missing OperationType ", this.getClass().getName(), "");
-        final String[] mimeTypes = produces != null ? produces.value() : null;
-        final String[] consumeTypes = consumes != null ? consumes.value() : null;
-        final String url = ConfigurationUtil.serviceName(getConfig(), this.getClass()).concat(path.value());
-        final List<String> parameters = new ArrayList<>();
-
-        parameters.addAll(getRESTParameter(method));
-
-        // TODO add service description (description about service itself)!!!
-        return new Operation(path.value(), null, url, Type.REST_GET.name(), mimeTypes, consumeTypes, parameters.toArray(new String[parameters.size()]));
-    }
-
-
-    /**
-     * Retrieving a list (note only one parameter is allowed) of all possible ws method paramaters
-     *
-     * @param method
-     * @return a List of all available parameters on method
-     */
-    private List<String> getWSParameter(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        final List<String> classes = Stream.of(parameterTypes).
-                filter(component -> !component.equals(WebSocketHandler.class)).
-                map(Class::getName).
-                collect(Collectors.toList());
-        if (classes.size() > 1)
-            throw new IllegalArgumentException("only one parameter is allowed -- the message body -- and/or the WSHandler");
-        return classes;
-    }
-
-    /**
-     * Retrieving a list (note only one parameter is allowed) of all possible ws method paramaters
-     *
-     * @param method
-     * @return a List of all available parameters on method
-     */
-    private List<String> getRESTParameter(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        final List<String> classes = Stream.of(parameterTypes).
-                filter(component -> !component.equals(RestHandler.class)).
-                map(Class::getName).
-                collect(Collectors.toList());
-        if (classes.size() > 1)
-            throw new IllegalArgumentException("only one parameter is allowed -- the message body -- and/or the WSHandler");
-        return classes;
     }
 
 
@@ -253,7 +182,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
 
-    public ServiceInfo getServiceDescriptor() {
+    private ServiceInfo getServiceDescriptor() {
         return this.descriptor;
     }
 

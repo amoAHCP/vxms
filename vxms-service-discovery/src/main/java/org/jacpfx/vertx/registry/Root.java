@@ -14,16 +14,16 @@ public class Root implements Serializable{
     private final int errorCode;
     private final String message;
     private final String cause;
-    private final int errorIndex;
+    private final int index;
 
-    public Root(String action, Node node, Node prevNode, int errorCode, String message, String cause, int errorIndex) {
+    public Root(String action, Node node, Node prevNode, int errorCode, String message, String cause, int index) {
         this.action = action;
         this.node = node;
         this.prevNode = prevNode;
         this.errorCode = errorCode;
         this.message = message;
         this.cause = cause;
-        this.errorIndex = errorIndex;
+        this.index = index;
     }
 
     public Root() {
@@ -46,8 +46,8 @@ public class Root implements Serializable{
         return cause;
     }
 
-    public int getErrorIndex() {
-        return errorIndex;
+    public int getIndex() {
+        return index;
     }
 
     public String getAction() {

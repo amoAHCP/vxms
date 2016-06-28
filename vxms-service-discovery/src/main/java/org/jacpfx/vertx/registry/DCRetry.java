@@ -1,5 +1,7 @@
 package org.jacpfx.vertx.registry;
 
+import io.vertx.core.Vertx;
+
 import java.util.function.Consumer;
 
 /**
@@ -9,13 +11,13 @@ public class DCRetry extends DCExecute{
 
 
 
-    public DCRetry(DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure,Consumer<NodeResponse> onError, int amount) {
-        super(client,serviceName,consumer,onFailure,onError,amount,0);
+    public DCRetry(Vertx vertx, DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, Consumer<NodeResponse> onError, int amount) {
+        super(vertx,client,serviceName,consumer,onFailure,onError,amount,0);
     }
 
 
     public DCExecute delay(long ms){
-        return new DCExecute(client,serviceName,consumer,onFailure,onError,amount,ms);
+        return new DCExecute(vertx,client,serviceName,consumer,onFailure,onError,amount,ms);
     }
 
 
