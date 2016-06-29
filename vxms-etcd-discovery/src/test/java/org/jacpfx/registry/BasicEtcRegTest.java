@@ -587,21 +587,24 @@ public class BasicEtcRegTest extends VertxTestBase {
         WsServiceOne service = new WsServiceOne();
         service.init(vertx,vertx.getOrCreateContext());
         final DiscoveryClientEtcd client = builder.getClient(service);
-        client.find("/wsService").onSuccess(val->{
-            System.out.println(" found node : "+val.getServiceNode());
-            System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
-            testComplete();
+        if(client.isConnected()) {
+            client.find("/wsService").onSuccess(val->{
+                System.out.println(" found node : "+val.getServiceNode());
+                System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+                testComplete();
 
-        }).onError(error->{
-            System.out.println("error: "+error.getThrowable().getMessage());
-        }).onFailure(node->{
-            System.out.println("not found");
-            testComplete();
-        }).retry(2).execute();
+            }).onError(error->{
+                System.out.println("error: "+error.getThrowable().getMessage());
+            }).onFailure(node->{
+                System.out.println("not found");
+                testComplete();
+            }).retry(2).execute();
 
+            System.out.println("await");
+            //  reg.disconnect(Future.factory.future());
+            await();
+        }
 
-        //  reg.disconnect(Future.factory.future());
-        await();
     }
 
     @Test
@@ -701,7 +704,7 @@ public class BasicEtcRegTest extends VertxTestBase {
                     nodeName(this.toString());
             reg.connect(result -> {
                 client = result.result();
-                startFuture.complete();
+                if(!startFuture.isComplete())startFuture.complete();
             });
         }
 
@@ -739,7 +742,7 @@ public class BasicEtcRegTest extends VertxTestBase {
                     servicePort(PORT2).
                     nodeName(this.toString());
             reg.connect(result -> {
-                startFuture.complete();
+                if(!startFuture.isComplete())startFuture.complete();
             });
         }
 

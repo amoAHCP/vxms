@@ -38,4 +38,6 @@ public interface DiscoveryClient {
         if(!loader.iterator().hasNext()) return null;
         return (DiscoveryClient) loader.iterator().next().getClient(vertx,config);
     }
+
+    boolean isConnected();
 }

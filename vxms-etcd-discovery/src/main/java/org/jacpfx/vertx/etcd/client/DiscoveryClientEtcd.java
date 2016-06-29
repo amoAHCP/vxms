@@ -129,13 +129,22 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
 
+    @Override
+    public boolean isConnected() {
+        try {
+            httpClient.getAbs(fetchAll.toString()).end();
+            return true;
+        } catch (Exception e){
+            return false;
+        }
+
+    }
+
     private void retrieveKeys(Consumer<Root> consumer) {
         httpClient.getAbs(fetchAll.toString(), handler -> handler.
                 exceptionHandler(error -> consumer.accept(new Root())).
                 bodyHandler(body -> consumer.accept(decodeRoot(body)))
         ).end();
-
-
     }
 
     private Root decodeRoot(Buffer body) {
