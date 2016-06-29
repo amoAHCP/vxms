@@ -96,21 +96,24 @@ public class EtcdRegistrationTest extends VertxTestBase
         EtcdAwareService service = new EtcdAwareService();
         service.init(vertx,vertx.getOrCreateContext());
         final DiscoveryClient client = DiscoveryClient.createClient(service);
-        client.find(SERVICE_REST_GET).onSuccess(val->{
-            System.out.println(" found node : "+val.getServiceNode());
-            System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
-            testComplete();
+        if(client.isConnected()){
+            client.find(SERVICE_REST_GET).onSuccess(val->{
+                System.out.println(" found node : "+val.getServiceNode());
+                System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+                testComplete();
 
-        }).onError(error->{
-            System.out.println("error: "+error.getThrowable().getMessage());
-        }).onFailure(node->{
-            System.out.println("not found");
-            testComplete();
-        }).retry(2).execute();
+            }).onError(error->{
+                System.out.println("error: "+error.getThrowable().getMessage());
+            }).onFailure(node->{
+                System.out.println("not found");
+                testComplete();
+            }).retry(2).execute();
 
 
-        //  reg.disconnect(Future.factory.future());
-        await();
+            //  reg.disconnect(Future.factory.future());
+            await();
+        }
+
     }
 
     @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
