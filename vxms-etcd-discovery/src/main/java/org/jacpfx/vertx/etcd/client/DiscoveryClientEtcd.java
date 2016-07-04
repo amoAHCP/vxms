@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -39,11 +40,11 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         this.fetchAll = fetchAll;
     }
 
-    public DiscoveryClientEtcd(Vertx vertx, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort){
+    public DiscoveryClientEtcd(Vertx vertx, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort) {
         this(vertx.createHttpClient(new HttpClientOptions()
                 .setDefaultHost(discoveryServerHost)
                 .setDefaultPort(discoveryServerPort)
-        ),vertx,domainname,fetchAll);
+        ), vertx, domainname, fetchAll);
 
     }
 
@@ -55,9 +56,8 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
      */
     @Override
     public DCServiceName find(String serviceName) {
-        return new DCServiceName(vertx,this, serviceName);
+        return new DCServiceName(vertx, this, serviceName);
     }
-
 
 
     @Override
@@ -66,7 +66,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         retrieveKeysFromCache(root -> {
             final String key = "/" + domainname + service;
             final Node serviceNode = findNode(root.getNode(), key);
-            if (serviceNode.getNodes()!=null & serviceNode.getKey().equals(key)) {
+            if (serviceNode.getNodes() != null & serviceNode.getKey().equals(key)) {
                 final Optional<Node> first = serviceNode.getNodes().stream().findAny();
                 if (!first.isPresent()) {
                     consumer.accept(new NodeResponse(serviceNode, Collections.emptyList(), domainname, false, new NodeNotFoundException("no active node found")));
@@ -75,8 +75,9 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             } else {
                 findNodeFromEtcd(service, consumer);
             }
-        },() -> findNodeFromEtcd(service, consumer));
+        }, () -> findNodeFromEtcd(service, consumer));
     }
+
     @Override
     public void findService(String serviceName, Consumer<NodeResponse> consumer) {
         final String service = serviceName.startsWith("/") ? serviceName : "/" + serviceName;
@@ -115,7 +116,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             putRootToCache(root);
             final String key = "/" + domainname + service;
             final Node serviceNode = findNode(root.getNode(), key);
-            if (serviceNode.getNodes()!=null && serviceNode.getKey().equals(key)) {
+            if (serviceNode.getNodes() != null && serviceNode.getKey().equals(key)) {
                 final Optional<Node> first = serviceNode.getNodes().stream().findFirst();
                 if (!first.isPresent()) {
                     consumer.accept(new NodeResponse(serviceNode, Collections.emptyList(), domainname, false, new NodeNotFoundException("no active node found")));
@@ -132,9 +133,18 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     @Override
     public boolean isConnected() {
         try {
-            httpClient.getAbs(fetchAll.toString()).end();
-            return true;
-        } catch (Exception e){
+            CompletableFuture<Boolean> statusConnected = new CompletableFuture<>();
+            try {
+                httpClient.get(fetchAll.toString()).
+                        exceptionHandler(ex -> statusConnected.complete(false)).
+                        handler(handler -> statusConnected.complete(true)).end();
+            } catch (Exception s) {
+                s.printStackTrace();
+                statusConnected.complete(false);
+            }
+
+            return statusConnected.get();
+        } catch (Exception e) {
             return false;
         }
 
@@ -168,7 +178,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
     private Node findNode(Node node, String key) {
-        if(node == null)  return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
+        if (node == null) return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
         if (node.getKey() != null && node.getKey().equals(key)) return node;
         if (node.isDir() && node.getNodes() != null) return node.getNodes().stream().filter(n1 -> {
             final Node n2 = n1.isDir() ? findNode(n1, key) : n1;

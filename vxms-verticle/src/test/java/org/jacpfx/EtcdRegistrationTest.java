@@ -66,8 +66,10 @@ public class EtcdRegistrationTest extends VertxTestBase
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
             if(asyncResult.failed()) {
+                System.out.println("failed; "+asyncResult.cause().getMessage());
                 assertTrue(asyncResult.cause().getMessage().toString().contains("Connection refused:"));
             } else {
+                System.out.println("start service true: " + asyncResult.succeeded());
                 assertTrue(asyncResult.succeeded());
                 assertNotNull("deploymentID should not be null", asyncResult.result());
             }
@@ -75,13 +77,14 @@ public class EtcdRegistrationTest extends VertxTestBase
 
             // If deployed correctly then start the tests!
             //   latch2.countDown();
-
+            System.out.println("countdown ");
             latch2.countDown();
 
         });
-
+        System.out.println("create client ");
         client = getVertx().
                 createHttpClient(new HttpClientOptions());
+        System.out.println("await ");
         awaitLatch(latch2);
 
     }
@@ -112,6 +115,8 @@ public class EtcdRegistrationTest extends VertxTestBase
 
             //  reg.disconnect(Future.factory.future());
             await();
+        } else {
+            testComplete();
         }
 
     }
@@ -122,9 +127,9 @@ public class EtcdRegistrationTest extends VertxTestBase
     {
 
         public void postConstruct(final Future<Void> startFuture) {
-
             startFuture.complete();
         }
+
         @Path("/simpleRESTEndpoint")
         @GET
         public void simpleRESTEndpoint(RestHandler reply) {

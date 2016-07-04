@@ -2,6 +2,7 @@ package org.jacpfx.vertx.services;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
@@ -22,7 +23,6 @@ import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.util.WebSocketInitializer;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -90,10 +90,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     private void handleEtcdRegistration(Future<Void> startFuture) {
         final EtcdRegistration etcdRegistration = createEtcdRegistrationHandler();
-        this.onStop = (stopFuture) -> etcdRegistration.disconnect(handler -> {});
+        this.onStop = (stopFuture) -> etcdRegistration.disconnect(handler -> {
+        });
         etcdRegistration.connect(connection -> {
             if (connection.failed()) {
-                startFuture.fail(connection.cause());
+                if (!startFuture.isComplete()) startFuture.fail(connection.cause());
             } else {
                 postConstruct(startFuture);
             }
@@ -109,7 +110,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         final String serviceName = ConfigurationUtil.serviceName(getConfig(), this.getClass());
         return EtcdRegistration.
                 buildRegistration().
-                vertx(vertx).
+                vertx(Vertx.vertx()).
                 etcdHost(etcdHost).
                 etcdPort(etcdPort).
                 ttl(ttl).
@@ -121,7 +122,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
     public void stop(Future<Void> stopFuture) throws Exception {
-        Optional.ofNullable(onStop).ifPresent(stop -> stop.accept(stopFuture));
+        // TODO vertx is closed when stop is called.... nor unregister is possible!!!
+        // Optional.ofNullable(onStop).ifPresent(stop -> stop.accept(stopFuture));
         if (!stopFuture.isComplete()) stopFuture.complete();
     }
 
