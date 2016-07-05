@@ -31,12 +31,12 @@ public class DiscoveryClientBuilder  implements DiscoveryClientSpi<DiscoveryClie
         Objects.nonNull(config);
         String host = config.getString("etcd-host",null);
         String domain = config.getString("domain",null);
-        Integer port = config.getInteger("etcd-port",null);
+        String port = config.getString("etcd-port",null);
         Objects.nonNull(host);
         Objects.nonNull(domain);
         Objects.nonNull(port);
         final URI fetchAll = URI.create("http://" + host + ":" + port + ETCD_BASE_PATH + domain + "/?recursive=true");
-        return new DiscoveryClientEtcd(vertx,domain,fetchAll,host,port);
+        return new DiscoveryClientEtcd(vertx,domain,fetchAll,host,Integer.valueOf(port));
 
     }
 }
