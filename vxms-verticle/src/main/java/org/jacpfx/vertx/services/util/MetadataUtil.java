@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,7 +75,7 @@ public class MetadataUtil {
             throw new MissingResourceException("missing OperationType ", classToAnalyse.getName(), "");
         final String[] mimeTypes = produces != null ? produces.value() : null;
         final String[] consumeTypes = consumes != null ? consumes.value() : null;
-        final String url = ConfigurationUtil.serviceName(config, classToAnalyse).concat(path.value());
+        final String url = Optional.ofNullable(ConfigurationUtil.serviceName(config, classToAnalyse)).orElse("").concat(path.value());
         final List<String> parameters = new ArrayList<>();
 
         parameters.addAll(getWSParameter(method));
@@ -96,7 +97,7 @@ public class MetadataUtil {
             throw new MissingResourceException("missing OperationType ", classToAnalyse.getName(), "");
         final String[] mimeTypes = produces != null ? produces.value() : null;
         final String[] consumeTypes = consumes != null ? consumes.value() : null;
-        final String url = ConfigurationUtil.serviceName(config, classToAnalyse).concat(path.value());
+        final String url = Optional.ofNullable(ConfigurationUtil.serviceName(config, classToAnalyse)).orElse("").concat(path.value());
         final List<String> parameters = new ArrayList<>();
 
         parameters.addAll(getRESTParameter(method));

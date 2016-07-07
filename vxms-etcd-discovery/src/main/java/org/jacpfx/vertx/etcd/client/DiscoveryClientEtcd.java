@@ -51,8 +51,8 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     /**
      * find service by name
      *
-     * @param serviceName
-     * @return DCServiceName
+     * @param serviceName, the name of the service to find
+     * @return DCServiceName the builder to execute the search process
      */
     @Override
     public DCServiceName find(String serviceName) {

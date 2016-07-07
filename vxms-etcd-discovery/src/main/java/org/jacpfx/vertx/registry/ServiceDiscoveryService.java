@@ -18,15 +18,13 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
     public void registerService(Runnable onSuccess, Consumer<Throwable> onFail, AbstractVerticle verticleInstance) {
         etcdRegistration = createEtcdRegistrationHandler(verticleInstance);
         final Optional<EtcdRegistration> etcdRegistrationOpt = Optional.ofNullable(this.etcdRegistration);
-        etcdRegistrationOpt.ifPresent(reg -> {
-           reg.connect(connection -> {
-               if (connection.failed()) {
-                   onFail.accept(connection.cause());
-               } else {
-                   onSuccess.run();
-               }
-           });
-        });
+        etcdRegistrationOpt.ifPresent(reg -> reg.connect(connection -> {
+            if (connection.failed()) {
+                onFail.accept(connection.cause());
+            } else {
+                onSuccess.run();
+            }
+        }));
        if(!etcdRegistrationOpt.isPresent()) onSuccess.run();
     }
 
@@ -68,10 +66,8 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
     }
 
     public void disconnect() {
-        Optional.ofNullable(this.etcdRegistration).ifPresent(reg -> {
-            reg.disconnect(handler -> {
+        Optional.ofNullable(this.etcdRegistration).ifPresent(reg -> reg.disconnect(handler -> {
 
-            });
-        });
+        }));
     }
 }

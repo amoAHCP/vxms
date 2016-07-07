@@ -92,9 +92,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     private void handleServiceRegistration(final Future<Void> startFuture) {
         final AbstractVerticle current = this;
         Optional.ofNullable(serviceDiscovery).ifPresent(sDicovery -> {
-            sDicovery.registerService(()-> {
-                postConstruct(startFuture);
-            },ex -> {
+            sDicovery.registerService(()-> postConstruct(startFuture), ex -> {
                 if(!startFuture.isComplete())startFuture.fail(ex);
             },current);
             this.onStop = (stopFuture) -> sDicovery.disconnect();
