@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonObject;
 import org.jacpfx.common.Operation;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
+import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketMessage;
 import org.jacpfx.vertx.websocket.response.WebSocketHandler;

@@ -2,7 +2,6 @@ package org.jacpfx.vertx.services;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
@@ -11,18 +10,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
+import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
+import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.vertx.etcd.client.EtcdClient;
-import org.jacpfx.vertx.registry.EtcdRegistration;
 import org.jacpfx.vertx.rest.util.RESTInitializer;
-import org.jacpfx.vertx.services.util.ConfigurationUtil;
 import org.jacpfx.vertx.services.util.MetadataUtil;
 import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.util.WebSocketInitializer;
 
+import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 /**
@@ -37,6 +37,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     private int port = 0;
     private WebSocketRegistry webSocketRegistry;
     private Consumer<Future<Void>> onStop;
+    private ServiceDiscoverySpi serviceDiscovery;
 
     @Override
     public final void start(final Future<Void> startFuture) {
@@ -74,8 +75,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             server.requestHandler(router::accept).listen(status -> {
                 if (status.succeeded()) {
                     log("started on PORT: " + port + " host: " + host);
-                    if (checkForEtcdExtension()) {
-                        handleEtcdRegistration(startFuture);
+                    if (checkForServiceDiscoverySPI()) {
+                        handleServiceRegistration(startFuture);
                     } else {
                         postConstruct(startFuture);
                     }
@@ -88,38 +89,20 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         }
     }
 
-    private void handleEtcdRegistration(Future<Void> startFuture) {
-        final EtcdRegistration etcdRegistration = createEtcdRegistrationHandler();
-        this.onStop = (stopFuture) -> etcdRegistration.disconnect(handler -> {
-        });
-        etcdRegistration.connect(connection -> {
-            if (connection.failed()) {
-                if (!startFuture.isComplete()) startFuture.fail(connection.cause());
-            } else {
+    private void handleServiceRegistration(final Future<Void> startFuture) {
+        final AbstractVerticle current = this;
+        Optional.ofNullable(serviceDiscovery).ifPresent(sDicovery -> {
+            sDicovery.registerService(()-> {
                 postConstruct(startFuture);
-            }
+            },ex -> {
+                if(!startFuture.isComplete())startFuture.fail(ex);
+            },current);
+            this.onStop = (stopFuture) -> sDicovery.disconnect();
         });
+
     }
 
-    private EtcdRegistration createEtcdRegistrationHandler() {
-        final EtcdClient client = getClass().getAnnotation(EtcdClient.class);
-        final int etcdPort = getConfig().getInteger("port", client.port());
-        final int ttl = getConfig().getInteger("ttl", client.ttl());
-        final String domain = getConfig().getString("domain", client.domain());
-        final String etcdHost = getConfig().getString("host", client.host());
-        final String serviceName = ConfigurationUtil.serviceName(getConfig(), this.getClass());
-        return EtcdRegistration.
-                buildRegistration().
-                vertx(Vertx.vertx()).
-                etcdHost(etcdHost).
-                etcdPort(etcdPort).
-                ttl(ttl).
-                domainName(domain).
-                serviceName(serviceName).
-                serviceHost(host).
-                servicePort(port).
-                nodeName(this.deploymentID());
-    }
+
 
     public void stop(Future<Void> stopFuture) throws Exception {
         // TODO vertx is closed when stop is called.... nor unregister is possible!!!
@@ -127,14 +110,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         if (!stopFuture.isComplete()) stopFuture.complete();
     }
 
-    private boolean checkForEtcdExtension() {
-        try {
-            Class.forName("org.jacpfx.vertx.etcd.client.EtcdClient");
-            return getClass().isAnnotationPresent(EtcdClient.class);
-        } catch (ClassNotFoundException e) {
-            //my class isn't there!
-            return false;
-        }
+    private boolean checkForServiceDiscoverySPI() {
+        ServiceLoader<ServiceDiscoverySpi> loader = ServiceLoader.load(ServiceDiscoverySpi.class);
+        if(!loader.iterator().hasNext()) return false;
+        serviceDiscovery = loader.iterator().next();
+        return true;
     }
 
     public void postConstruct(final Future<Void> startFuture) {

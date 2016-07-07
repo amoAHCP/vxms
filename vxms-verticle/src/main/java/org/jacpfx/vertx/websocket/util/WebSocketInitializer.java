@@ -7,7 +7,7 @@ import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.jacpfx.vertx.services.util.ConfigurationUtil;
+import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.vertx.services.util.ReflectionUtil;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketClose;
 import org.jacpfx.vertx.websocket.annotation.OnWebSocketError;

@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.services.util;
+package org.jacpfx.common.util;
 
 import io.vertx.core.json.JsonObject;
 import org.jacpfx.common.ServiceEndpoint;
@@ -40,10 +40,8 @@ public class ConfigurationUtil {
     public static String getEndpointHost(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             return config.getString("host", HOST);
-        } else {
-            // TODO define Exception !!!
         }
-        return "";
+        return config.getString("host", HOST);
     }
 
     public static String getHostName() {

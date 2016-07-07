@@ -74,6 +74,7 @@ public class EtcdRegistration {
     }
 
 
+
     public void retrieveKeys(Consumer<Root> consumer) {
         httpClient.getAbs(fetchAll.toString(), handler -> handler.
                 exceptionHandler(error -> {error.printStackTrace();consumer.accept(new Root());}).

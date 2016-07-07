@@ -9,7 +9,7 @@ import org.jacpfx.vertx.rest.annotation.EndpointConfig;
 import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.configuration.DefaultEndpointConfiguration;
 import org.jacpfx.vertx.rest.configuration.EndpointConfiguration;
-import org.jacpfx.vertx.services.util.ConfigurationUtil;
+import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.vertx.services.util.ReflectionUtil;
 
 import javax.ws.rs.*;
