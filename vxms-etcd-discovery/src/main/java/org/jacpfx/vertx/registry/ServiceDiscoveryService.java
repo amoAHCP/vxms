@@ -37,16 +37,16 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         String serviceName;
         if(verticleInstance.getClass().isAnnotationPresent(EtcdClient.class)) {
             final EtcdClient client = verticleInstance.getClass().getAnnotation(EtcdClient.class);
-            etcdPort = verticleInstance.config().getInteger("port", client.port());
+            etcdPort = verticleInstance.config().getInteger("etcdport", client.port());
             ttl = verticleInstance.config().getInteger("ttl", client.ttl());
             domain = verticleInstance.config().getString("domain", client.domain());
-            etcdHost = verticleInstance.config().getString("host", client.host());
+            etcdHost = verticleInstance.config().getString("etcdhost", client.host());
             serviceName = ConfigurationUtil.serviceName(verticleInstance.config(), verticleInstance.getClass());
         } else {
-            etcdPort = verticleInstance.config().getInteger("port",0);
+            etcdPort = verticleInstance.config().getInteger("etcdport",0);
             ttl = verticleInstance.config().getInteger("ttl",0);
             domain = verticleInstance.config().getString("domain",null);
-            etcdHost = verticleInstance.config().getString("host",null);
+            etcdHost = verticleInstance.config().getString("etcdhost",null);
             serviceName = ConfigurationUtil.serviceName(verticleInstance.config(), verticleInstance.getClass());
         }
 

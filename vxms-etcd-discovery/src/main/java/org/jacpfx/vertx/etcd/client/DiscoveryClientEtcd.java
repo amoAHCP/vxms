@@ -55,8 +55,8 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
      * @return DCServiceName the builder to execute the search process
      */
     @Override
-    public DCServiceName find(String serviceName) {
-        return new DCServiceName(vertx, this, serviceName);
+    public OnSuccessDiscovery find(String serviceName) {
+        return new OnSuccessDiscovery(vertx, this, serviceName);
     }
 
 
@@ -178,13 +178,13 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
     private Node findNode(Node node, String key) {
-        if (node == null) return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
+        if (node == null) return Node.emptyNode();
         if (node.getKey() != null && node.getKey().equals(key)) return node;
         if (node.isDir() && node.getNodes() != null) return node.getNodes().stream().filter(n1 -> {
             final Node n2 = n1.isDir() ? findNode(n1, key) : n1;
             return n2.getKey().equals(key);
-        }).findFirst().orElse(new Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
-        return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
+        }).findFirst().orElse(Node.emptyNode());
+        return  Node.emptyNode();
     }
 
     private void putRootToCache(Root root) {

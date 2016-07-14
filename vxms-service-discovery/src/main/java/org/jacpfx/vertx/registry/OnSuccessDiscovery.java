@@ -7,21 +7,21 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 30.05.16.
  */
-public class DCServiceName {
+public class OnSuccessDiscovery {
 
     private final DiscoveryClient client;
     private final String serviceName;
     private final Vertx vertx;
 
-    public DCServiceName(Vertx vertx,DiscoveryClient client, String serviceName) {
+    public OnSuccessDiscovery(Vertx vertx, DiscoveryClient client, String serviceName) {
         this.vertx = vertx;
         this.client = client;
         this.serviceName = serviceName;
     }
 
 
-    public DCExecute onSuccess(Consumer<NodeResponse> consumer){
-         return new DCExecute(vertx,client,serviceName,consumer,null,null,0,0);
+    public ExecuteDiscovery onSuccess(Consumer<NodeResponse> consumer){
+         return new ExecuteDiscovery(vertx,client,serviceName,consumer,null,null,0,0);
     }
 
 

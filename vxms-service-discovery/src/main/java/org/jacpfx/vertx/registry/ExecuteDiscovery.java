@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 30.05.16.
  */
-public class DCExecute {
+public class ExecuteDiscovery {
     protected final Vertx vertx;
     protected final DiscoveryClient client;
     protected final String serviceName;
@@ -19,7 +19,7 @@ public class DCExecute {
     protected final long delay;
 
 
-    public DCExecute(Vertx vertx,DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure,Consumer<NodeResponse> onError, int amount, long delay) {
+    public ExecuteDiscovery(Vertx vertx, DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, Consumer<NodeResponse> onError, int amount, long delay) {
         this.vertx = vertx;
         this.client = client;
         this.serviceName = serviceName;
@@ -42,8 +42,8 @@ public class DCExecute {
      * @param onError
      * @return
      */
-    public DCOnFailure onError(Consumer<NodeResponse> onError) {
-        return new DCOnFailure(vertx, client, serviceName, consumer, onFailure,onError);
+    public RetryDiscovery onError(Consumer<NodeResponse> onError) {
+        return new RetryDiscovery(vertx, client, serviceName, consumer, onFailure,onError);
     }
 
     /**
@@ -51,8 +51,8 @@ public class DCExecute {
      * @param onFailure
      * @return
      */
-    public DCOnFailure onFailure(Consumer<NodeResponse> onFailure) {
-        return new DCOnFailure(vertx, client, serviceName, consumer, onFailure,onError);
+    public RetryDiscovery onFailure(Consumer<NodeResponse> onFailure) {
+        return new RetryDiscovery(vertx, client, serviceName, consumer, onFailure,onError);
     }
 
     protected void findAndHandle(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {

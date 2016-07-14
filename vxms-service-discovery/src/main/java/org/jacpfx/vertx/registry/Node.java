@@ -1,12 +1,13 @@
 package org.jacpfx.vertx.registry;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Andy Moncsek on 04.05.16.
  */
-public class Node implements Serializable{
+public class Node implements Serializable {
     private final boolean dir;
     private final String key;
     private final String value;
@@ -27,9 +28,55 @@ public class Node implements Serializable{
         this.nodes = nodes;
     }
 
-    public Node() {
-        this(false,null,null,null,0,0,0,null);
+    public interface Nodes {
+        Node nodes(List<Node> nodes);
     }
+
+    public interface CreateIndex {
+        Nodes createIndex(int createdIndex);
+    }
+
+    public interface ModifyIndex {
+        CreateIndex modifiedIndex(int modifiedIndex);
+    }
+
+    public interface TTL {
+        ModifyIndex ttl(int ttl);
+    }
+
+    public interface Expiration {
+        TTL expiration(String expiration);
+    }
+
+    public interface Value {
+        Expiration value(String value);
+    }
+
+    public interface Key {
+        Value key(String Key);
+    }
+
+    public interface Dir {
+        Key dir(boolean dir);
+    }
+
+    public static Dir create() {
+        return dirVal ->
+                keyVal ->
+                        valueVal ->
+                                expirationVal ->
+                                        ttlVal ->
+                                                modifiedIndexVal ->
+                                                        createdIndexVal ->
+                                                                nodesVal ->
+                                                                        new Node(dirVal, keyVal, valueVal, expirationVal, ttlVal, modifiedIndexVal, createdIndexVal, nodesVal);
+    }
+
+
+    public static Node emptyNode() {
+        return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
+    }
+
 
     public boolean isDir() {
         return dir;

@@ -19,7 +19,7 @@ public interface DiscoveryClient {
      * @param serviceName
      * @return DCServiceName
      */
-    DCServiceName find(String serviceName);
+    OnSuccessDiscovery find(String serviceName);
 
 
     void findNode(String serviceName, Consumer<NodeResponse> consumer);
