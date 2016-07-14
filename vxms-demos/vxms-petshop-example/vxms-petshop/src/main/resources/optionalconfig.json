@@ -1,0 +1,6 @@
+{
+  "port": 9090,
+  "etcdhost": "localhost",
+  "etcdport": 4001,
+  "ttl":60
+}
