@@ -28,6 +28,10 @@ public class Node implements Serializable {
         this.nodes = nodes;
     }
 
+    public Node() {
+       this(false, "", "", "", 0, 0, 0, Collections.emptyList());
+    }
+
     public interface Nodes {
         Node nodes(List<Node> nodes);
     }
