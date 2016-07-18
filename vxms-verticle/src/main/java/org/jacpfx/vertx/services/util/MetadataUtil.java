@@ -22,6 +22,7 @@ import java.util.stream.Stream;
  * Created by Andy Moncsek on 15.06.16.
  * This Util class creates a Service info descriptor of the class to analyze with all its REST and WebSocket methods
  */
+@Deprecated
 public class MetadataUtil {
 
     public static ServiceInfo createInfoObject(Integer port, JsonObject config, Class<?> classToAnalyse) {

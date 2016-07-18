@@ -1,6 +1,8 @@
 package org.jacpfx.common.util;
 
 import io.vertx.core.json.JsonObject;
+import org.jacpfx.common.CustomServerOptions;
+import org.jacpfx.common.DefaultServerOptions;
 import org.jacpfx.common.ServiceEndpoint;
 
 import java.net.InetAddress;
@@ -39,11 +41,26 @@ public class ConfigurationUtil {
 
     public static String getEndpointHost(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
-            return config.getString("host", HOST);
+            org.jacpfx.common.ServiceEndpoint selfHosted = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
+            return config.getString("host", selfHosted.host());
         }
         return config.getString("host", HOST);
     }
 
+    public static CustomServerOptions getEndpointOptions(Class clazz) {
+        if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
+            org.jacpfx.common.ServiceEndpoint selfHosted = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
+            try {
+                return selfHosted.options().newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return new DefaultServerOptions();
+    }
+
+    // TODO should not be used
+    @Deprecated
     public static String getHostName() {
         try {
             InetAddress.getLocalHost().getHostName();
