@@ -27,7 +27,7 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         }));
        if(!etcdRegistrationOpt.isPresent()) onSuccess.run();
     }
-
+    // TODO add HttpClientOptions see:DiscoveryClientBuilder
     private EtcdRegistration createEtcdRegistrationHandler(AbstractVerticle verticleInstance) {
         if(verticleInstance==null || verticleInstance.config()==null) return null;
         int etcdPort;

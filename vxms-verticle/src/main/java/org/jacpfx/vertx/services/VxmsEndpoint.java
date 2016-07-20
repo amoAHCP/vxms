@@ -64,6 +64,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         endpointConfig = ConfigurationUtil.getEndpointOptions(this.getClass());
         final HttpServerOptions options = endpointConfig.getOptions(this.getConfig());
         secure = options.isSsl();
+        getConfig().put("secure",secure);
         // collect all service operations in service for descriptor
 
         descriptor = MetadataUtil.createInfoObject(port, getConfig(), this.getClass());
@@ -83,7 +84,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         server.requestHandler(router::accept).listen(status -> {
             if (status.succeeded()) {
                 log("started on PORT: " + port + " host: " + host);
-                if (checkForServiceDiscoverySPI()) {
+                serviceDiscovery = getServiceDiscoverySPI();
+                if (serviceDiscovery!=null) {
                     handleServiceRegistration(startFuture);
                 } else {
                     postConstruct(router, startFuture);
@@ -113,12 +115,12 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         if (!stopFuture.isComplete()) stopFuture.complete();
     }
 
-    private boolean checkForServiceDiscoverySPI() {
+    private ServiceDiscoverySpi getServiceDiscoverySPI() {
         ServiceLoader<ServiceDiscoverySpi> loader = ServiceLoader.load(ServiceDiscoverySpi.class);
-        if (!loader.iterator().hasNext()) return false;
-        serviceDiscovery = loader.iterator().next();
-        return true;
+        if (!loader.iterator().hasNext()) return null;
+        return loader.iterator().next();
     }
+
 
     /**
      * Overwrite this method to handle your own initialisation after all vxms init is done

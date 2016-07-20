@@ -213,7 +213,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
     @Test
     public void testEtcdDiscoveryClientRequestChain() {
-        final DiscoveryClient client = DiscoveryClient.createClient(vertx,new JsonObject().put("etcd-host","127.0.0.1").put("etcd-port","4001").put("domain","etcdAwareTest"));
+        final DiscoveryClient client = DiscoveryClient.createClient(vertx,new HttpClientOptions(), new JsonObject().put("etcd-host","127.0.0.1").put("etcd-port","4001").put("etcd-domain","etcdAwareTest"));
         if (client.isConnected()) {
             client.find(SERVICE_REST_GET_2).onSuccess(val -> {
                 HttpClientOptions options = new HttpClientOptions();

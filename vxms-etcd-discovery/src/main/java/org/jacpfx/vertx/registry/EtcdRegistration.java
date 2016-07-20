@@ -50,6 +50,7 @@ public class EtcdRegistration {
 
     public static final String ETCD_BASE_PATH = "/v2/keys/";
 
+    // TODO add HttpClientOptions see:DiscoveryClientBuilder
     private EtcdRegistration(Vertx vertx, String etcdHost, int etcdPort, int ttl, String domainname, String servicename, String nodename, String host, int port) {
         this.vertx = vertx;
         this.ttl = ttl;

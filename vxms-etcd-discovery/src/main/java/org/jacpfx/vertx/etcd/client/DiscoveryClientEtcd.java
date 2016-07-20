@@ -48,6 +48,13 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
 
     }
 
+    public DiscoveryClientEtcd(Vertx vertx, HttpClientOptions options, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort) {
+        this(vertx.createHttpClient(options
+                .setDefaultHost(discoveryServerHost)
+                .setDefaultPort(discoveryServerPort)
+        ), vertx, domainname, fetchAll);
+
+    }
     /**
      * find service by name
      *

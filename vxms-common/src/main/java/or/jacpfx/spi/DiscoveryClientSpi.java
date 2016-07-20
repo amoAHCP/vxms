@@ -2,6 +2,7 @@ package or.jacpfx.spi;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -10,5 +11,5 @@ import io.vertx.core.json.JsonObject;
 public interface DiscoveryClientSpi<T> {
 
     T getClient(AbstractVerticle verticleInstance);
-    T getClient(Vertx vertx,  JsonObject config);
+    T getClient(Vertx vertx, HttpClientOptions clientOptions, JsonObject config);
 }

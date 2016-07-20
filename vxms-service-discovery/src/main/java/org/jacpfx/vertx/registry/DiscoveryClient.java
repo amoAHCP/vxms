@@ -2,6 +2,7 @@ package org.jacpfx.vertx.registry;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import or.jacpfx.spi.DiscoveryClientSpi;
 
@@ -33,10 +34,10 @@ public interface DiscoveryClient {
         return (DiscoveryClient) loader.iterator().next().getClient(verticle);
     }
 
-    static DiscoveryClient createClient(Vertx vertx,JsonObject config) {
+    static DiscoveryClient createClient(Vertx vertx, HttpClientOptions clientOptions, JsonObject config) {
         ServiceLoader<DiscoveryClientSpi> loader = ServiceLoader.load(DiscoveryClientSpi.class);
         if(!loader.iterator().hasNext()) return null;
-        return (DiscoveryClient) loader.iterator().next().getClient(vertx,config);
+        return (DiscoveryClient) loader.iterator().next().getClient(vertx,clientOptions,config);
     }
 
     boolean isConnected();

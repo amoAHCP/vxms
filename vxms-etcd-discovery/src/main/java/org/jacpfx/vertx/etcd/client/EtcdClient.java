@@ -24,4 +24,11 @@ public @interface EtcdClient {
      * @return  ttl sec. value
      */
     int ttl() default 30;
+
+
+    /**
+     * Define custom http client options
+     * @return  the server options
+     */
+    Class<? extends CustomConnectionOptions> options() default DefaultConnectionOptions.class;
 }
