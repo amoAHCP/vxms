@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.configuration;
+package org.jacpfx.common.configuration;
 
 /**
  * Created by Andy Moncsek on 27.01.16.

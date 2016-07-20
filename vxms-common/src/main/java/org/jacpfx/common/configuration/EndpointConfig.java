@@ -1,6 +1,4 @@
-package org.jacpfx.vertx.rest.annotation;
-
-import org.jacpfx.vertx.rest.configuration.EndpointConfiguration;
+package org.jacpfx.common.configuration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

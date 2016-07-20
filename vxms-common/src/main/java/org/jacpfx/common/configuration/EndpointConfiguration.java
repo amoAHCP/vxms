@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.configuration;
+package org.jacpfx.common.configuration;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;

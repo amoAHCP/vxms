@@ -5,11 +5,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.vertx.rest.annotation.EndpointConfig;
-import org.jacpfx.vertx.rest.annotation.OnRestError;
-import org.jacpfx.vertx.rest.configuration.DefaultEndpointConfiguration;
-import org.jacpfx.vertx.rest.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
+import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.services.util.ReflectionUtil;
 
 import javax.ws.rs.*;
@@ -28,35 +25,15 @@ public class RESTInitializer {
 
 
     public static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
-        final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(service);
 
-        initEndoitConfiguration(endpointConfiguration,vertx, router);
 
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
                 forEach(restMethod -> initRestMethod(vertx, router, config, service, restMethod));
 
-        postEndoitConfiguration(endpointConfiguration, router);
     }
 
-    protected static void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router) {
-        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
 
-            endpointConfig.corsHandler(router);
-
-            endpointConfig.bodyHandler(router);
-
-            endpointConfig.cookieHandler(router);
-
-            endpointConfig.sessionHandler(vertx, router);
-
-            endpointConfig.customRouteConfiguration(vertx, router);
-        });
-    }
-
-    protected static void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Router router) {
-        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
-    }
 
     protected static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
         final Path path = restMethod.getAnnotation(Path.class);
@@ -128,20 +105,6 @@ public class RESTInitializer {
         });
     }
 
-
-    private static EndpointConfiguration getEndpointConfiguration(Object service) {
-        EndpointConfiguration endpointConfig = null;
-        if (service.getClass().isAnnotationPresent(EndpointConfig.class)) {
-            final EndpointConfig annotation = service.getClass().getAnnotation(EndpointConfig.class);
-            final Class<? extends EndpointConfiguration> epConfigClazz = annotation.value();
-            try {
-                endpointConfig = epConfigClazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return endpointConfig == null ? new DefaultEndpointConfiguration() : endpointConfig;
-    }
 
     private static List<Method> getRESTMethods(Object service, String sName) {
         final String methodName = sName;

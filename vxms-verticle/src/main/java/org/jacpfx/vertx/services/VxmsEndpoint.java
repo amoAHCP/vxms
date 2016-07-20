@@ -2,6 +2,7 @@ package org.jacpfx.vertx.services;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
@@ -14,6 +15,9 @@ import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.ServiceInfo;
 import org.jacpfx.common.Type;
+import org.jacpfx.common.configuration.DefaultEndpointConfiguration;
+import org.jacpfx.common.configuration.EndpointConfig;
+import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.vertx.rest.util.RESTInitializer;
@@ -74,12 +78,19 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
         HttpServer server = vertx.
                 createHttpServer(options.setHost(host).setPort(port));
+
+
         Router router = Router.router(vertx);
+        final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(this);
+
+        initEndoitConfiguration(endpointConfiguration,vertx, router);
 
         // TODO move to SPI
         initWebSocket(server);
         // TODO move to SPI
         initRest(router);
+
+        postEndoitConfiguration(endpointConfiguration, router);
 
         server.requestHandler(router::accept).listen(status -> {
             if (status.succeeded()) {
@@ -144,6 +155,40 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     private void initRest(Router router) {
         RESTInitializer.initRESTHandler(vertx, router, getConfig(), this);
     }
+
+    private  void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router) {
+        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
+
+            endpointConfig.corsHandler(router);
+
+            endpointConfig.bodyHandler(router);
+
+            endpointConfig.cookieHandler(router);
+
+            endpointConfig.sessionHandler(vertx, router);
+
+            endpointConfig.customRouteConfiguration(vertx, router);
+        });
+    }
+
+    private  void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Router router) {
+        Optional.of(endpointConfiguration).ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
+    }
+
+    private  EndpointConfiguration getEndpointConfiguration(Object service) {
+        EndpointConfiguration endpointConfig = null;
+        if (service.getClass().isAnnotationPresent(EndpointConfig.class)) {
+            final EndpointConfig annotation = service.getClass().getAnnotation(EndpointConfig.class);
+            final Class<? extends EndpointConfiguration> epConfigClazz = annotation.value();
+            try {
+                endpointConfig = epConfigClazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return endpointConfig == null ? new DefaultEndpointConfiguration() : endpointConfig;
+    }
+
 
     private void initWebSocket(HttpServer server) {
         final Object service = this;
