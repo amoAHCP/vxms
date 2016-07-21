@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +23,10 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
     /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
      *
      * @param onFailureRespond the handler (function) to execute on error
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSBasicString onFailureRespond(Function<Throwable, String> onFailureRespond) {
         return new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);

@@ -1,6 +1,6 @@
 package org.jacpfx.entity.decoder;
 
-import org.jacpfx.vertx.websocket.decoder.Decoder;
+import org.jacpfx.common.decoder.Decoder;
 
 import java.util.Optional;
 

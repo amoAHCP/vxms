@@ -2,7 +2,7 @@ package org.jacpfx.entity.encoder;
 
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.entity.Payload;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.io.IOException;
 

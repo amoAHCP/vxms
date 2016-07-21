@@ -184,7 +184,7 @@ public class EtcdRegistrationTest extends VertxTestBase
                     if(resp.statusCode()==200) {
                         resp.bodyHandler(body -> {
 
-                            System.out.println("Got a response: " + body.toString());
+                            System.out.println("Got a createResponse: " + body.toString());
                             assertTrue("test-123".equals(body.toString()));
                             testComplete();
                         });
@@ -223,7 +223,7 @@ public class EtcdRegistrationTest extends VertxTestBase
                 HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/hello", resp -> {
                     if(resp.statusCode()==200) {
                         resp.bodyHandler(body -> {
-                            System.out.println("Got a response: " + body.toString());
+                            System.out.println("Got a createResponse: " + body.toString());
                             assertTrue("test-123hello".equals(body.toString()));
                             testComplete();
                         });
@@ -295,7 +295,7 @@ public class EtcdRegistrationTest extends VertxTestBase
                         getAbs(node.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/"+reply.request().param("value"), resp -> {
                     if(resp.statusCode()==200) {
                         resp.bodyHandler(body -> {
-                            System.out.println("Got a response in EtcdAwareServiceA: " + body.toString());
+                            System.out.println("Got a createResponse in EtcdAwareServiceA: " + body.toString());
                             reply.response().stringResponse(()->body.toString()).execute();
                         });
                     } else {

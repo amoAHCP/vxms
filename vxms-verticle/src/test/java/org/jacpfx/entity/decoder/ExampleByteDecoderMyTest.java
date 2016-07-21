@@ -2,7 +2,7 @@ package org.jacpfx.entity.decoder;
 
 import org.jacpfx.entity.MyTestObject;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.vertx.websocket.decoder.Decoder;
+import org.jacpfx.common.decoder.Decoder;
 
 import java.io.IOException;
 import java.util.Optional;

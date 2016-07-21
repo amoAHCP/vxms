@@ -2,7 +2,7 @@ package org.jacpfx.vertx.websocket.response;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.util.CommType;
@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 18.12.15.
- * This class defines several error methods for the response methods and executes the async response chain.
+ * This class defines several error methods for the createResponse methods and executes the async createResponse chain.
  */
 public class ExecuteWSStringResponse extends ExecuteWSString {
 

@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCallAsync;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,10 +24,10 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
     }
 
     /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
      *
      * @param onFailureRespond the handler (function) to execute on error
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSByte onFailureRespond(Function<Throwable, byte[]> onFailureRespond) {
         return new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
@@ -46,17 +46,17 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * Defines how long a method can be executed before aborted.
      *
      * @param timeout time to wait in ms
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSByteResponse timeout(long timeout) {
         return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers,  byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
-     * Defines the delay (in ms) between the response retries.
+     * Defines the delay (in ms) between the createResponse retries.
      *
      * @param delay
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSByteResponse delay(long delay) {
         return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);

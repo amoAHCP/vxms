@@ -6,7 +6,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.response.async.ExecuteRSByteResponse;
 import org.jacpfx.vertx.rest.response.async.ExecuteRSObjectResponse;
 import org.jacpfx.vertx.rest.response.async.ExecuteRSStringResponse;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -34,8 +34,8 @@ public class RSAsyncResponse {
     /**
      * Retunrs a byte array to the target type
      *
-     * @param byteSupplier supplier which returns the response value as byte array
-     * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
+     * @param byteSupplier supplier which returns the createResponse value as byte array
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
         return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0, 0, 0);
@@ -44,8 +44,8 @@ public class RSAsyncResponse {
     /**
      * Retunrs a String to the target type
      *
-     * @param stringSupplier supplier which returns the response value as String
-     * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
+     * @param stringSupplier supplier which returns the createResponse value as String
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0, 0);
@@ -54,8 +54,8 @@ public class RSAsyncResponse {
     /**
      * Retunrs a Serializable to the target type
      *
-     * @param objectSupplier supplier which returns the response value as Serializable
-     * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
+     * @param objectSupplier supplier which returns the createResponse value as Serializable
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
         return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, null, null, 0, 0, 0, 0);

@@ -9,7 +9,7 @@ import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCallAsync;
 import org.jacpfx.vertx.rest.response.async.ExecuteRSByteResponse;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.decoder;
+package org.jacpfx.common.decoder;
 
 import java.util.Optional;
 

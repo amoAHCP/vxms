@@ -2,7 +2,7 @@ package org.jacpfx.vertx.rest.interfaces;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;
 import java.util.function.Consumer;

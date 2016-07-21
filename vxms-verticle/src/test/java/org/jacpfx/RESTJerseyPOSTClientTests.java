@@ -111,7 +111,7 @@ public class RESTJerseyPOSTClientTests extends VertxTestBase {
         WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/simpleFilePOSTupload");
         final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
 
-        //Use response object to verify upload success
+        //Use createResponse object to verify upload success
         final String entity = response.readEntity(String.class);
         System.out.println(entity);
         assertTrue(entity.equals("barworlddfgdfg"));

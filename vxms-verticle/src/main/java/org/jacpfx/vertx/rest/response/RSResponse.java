@@ -7,7 +7,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -39,8 +39,8 @@ public class RSResponse {
     /**
      * Returns a byte array to the target type
      *
-     * @param byteSupplier supplier which returns the response value as byte array
-     * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
+     * @param byteSupplier supplier which returns the createResponse value as byte array
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
         return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0);
@@ -49,8 +49,8 @@ public class RSResponse {
     /**
      * Returns a String to the target type
      *
-     * @param stringSupplier supplier which returns the response value as String
-     * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
+     * @param stringSupplier supplier which returns the createResponse value as String
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
         return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0);
@@ -59,8 +59,8 @@ public class RSResponse {
     /**
      * Returns a Serializable to the target type
      *
-     * @param objectSupplier supplier which returns the response value as Serializable
-     * @return @see{org.jacpfx.vertx.rest.response.ExecuteRSBasicResponse}
+     * @param objectSupplier supplier which returns the createResponse value as Serializable
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
         return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers,  objectSupplier, null, encoder, null, null, 0, 0);
@@ -68,20 +68,20 @@ public class RSResponse {
 
 
     /**
-     * Ends the response. If no data has been written to the response body,
-     * the actual response won't get written until this method gets called.
+     * Ends the createResponse. If no data has been written to the createResponse body,
+     * the actual createResponse won't get written until this method gets called.
      * <p>
-     * Once the response has ended, it cannot be used any more.
+     * Once the createResponse has ended, it cannot be used any more.
      */
     public void end() {
         context.response().end();
     }
 
     /**
-     * Ends the response. If no data has been written to the response body,
-     * the actual response won't get written until this method gets called.
+     * Ends the createResponse. If no data has been written to the createResponse body,
+     * the actual createResponse won't get written until this method gets called.
      * <p>
-     * Once the response has ended, it cannot be used any more.
+     * Once the createResponse has ended, it cannot be used any more.
      *
      * @param status, the HTTP Status code
      */

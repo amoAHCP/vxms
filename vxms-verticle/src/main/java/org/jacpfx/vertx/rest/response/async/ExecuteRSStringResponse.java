@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +23,10 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
 
 
     /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
      *
      * @param onFailureRespond the handler (function) to execute on error
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSString onFailureRespond(Function<Throwable, String> onFailureRespond) {
         return new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
@@ -40,7 +40,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
     /**
      * retry operation on error
      * @param retryCount
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSStringResponse retry(int retryCount) {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers,  stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
@@ -50,17 +50,17 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * Defines how long a method can be executed before aborted.
      *
      * @param timeout time to wait in ms
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSStringResponse timeout(long timeout) {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers,  stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
-     * Defines the delay (in ms) between the response retries (on error).
+     * Defines the delay (in ms) between the createResponse retries (on error).
      *
      * @param delay
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSStringResponse delay(long delay) {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);

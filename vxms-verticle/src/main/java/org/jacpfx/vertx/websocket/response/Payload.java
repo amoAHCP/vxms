@@ -1,6 +1,6 @@
 package org.jacpfx.vertx.websocket.response;
 
-import org.jacpfx.vertx.websocket.decoder.Decoder;
+import org.jacpfx.common.decoder.Decoder;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class Payload {
     /**
      * returns an Optional with the typed Object payload
      *
-     * @param decoder the decoder {@see org.jacpfx.vertx.websocket.decoder.Decoder}
+     * @param decoder the decoder {@see org.jacpfx.common.decoder.Decoder}
      * @param <T>     the type of the expected payload
      * @return the Optional with the expected payload
      */

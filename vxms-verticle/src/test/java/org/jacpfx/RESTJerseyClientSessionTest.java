@@ -108,7 +108,7 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-               // Assert.assertEquals(response, "xyz");
+               // Assert.assertEquals(createResponse, "xyz");
                 latch.countDown();
             }
 

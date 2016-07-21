@@ -5,9 +5,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.vertx.rest.util.ResponseUtil;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
 import java.io.Serializable;
@@ -113,24 +114,11 @@ public class ExecuteRSBasicObject {
             Optional.ofNullable(objectSupplier).
                     ifPresent(supplier -> {
                                 int retry = retryCount;
-                                Serializable result = "";
-                                boolean errorHandling = false;
-                                while (retry >= 0) {
-                                    try {
-                                        result = supplier.get();
-                                        retry = -1;
-                                    } catch (Throwable e) {
-                                        retry--;
-                                        if (retry < 0) {
-                                            result = RESTExecutionUtil.handleError(result, errorHandler, onFailureRespond, errorMethodHandler, e);
-                                            errorHandling = true;
-                                        } else {
-                                            RESTExecutionUtil.handleError(errorHandler, e);
-                                        }
-                                    }
-                                }
-                                if (errorHandling && result == null) return;
-                                repond(result);
+                                Serializable result = null;
+                                Optional.
+                                        ofNullable(ResponseUtil.
+                                                createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler)).
+                                        ifPresent(res -> repond(res));
 
                             }
                     );

@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +22,10 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
     }
 
     /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate response value
+     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
      *
      * @param onFailureRespond the handler (function) to execute on error
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSBasicByte onFailureRespond(Function<Throwable, byte[]> onFailureRespond) {
         return new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteSupplier,excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
@@ -34,7 +34,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
     /**
      * This is an intermediate error method, the error will be passed along the chain (onFailureRespond or simply an error)
      * @param errorHandler , a consumer that holds the error
-     * @return the response chain
+     * @return the createResponse chain
      */
     public ExecuteRSBasicByteResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier,excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);

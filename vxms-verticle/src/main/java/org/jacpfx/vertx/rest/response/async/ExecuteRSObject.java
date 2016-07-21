@@ -9,7 +9,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObject;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
 import java.util.Map;

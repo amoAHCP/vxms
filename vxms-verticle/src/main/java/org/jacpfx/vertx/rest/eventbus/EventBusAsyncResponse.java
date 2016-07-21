@@ -12,7 +12,7 @@ import org.jacpfx.vertx.rest.response.async.ExecuteRSStringResponse;
 import org.jacpfx.vertx.rest.util.EventbusAsyncByteExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusAsyncObjectExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusAsyncStringExecutionUtil;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
 import java.util.function.Consumer;

@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.encoder;
+package org.jacpfx.common.encoder;
 
 /**
  * Created by Andy Moncsek on 17.11.15.

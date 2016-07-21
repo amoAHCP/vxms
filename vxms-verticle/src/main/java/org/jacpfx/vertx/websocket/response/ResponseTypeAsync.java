@@ -2,7 +2,7 @@ package org.jacpfx.vertx.websocket.response;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.websocket.encoder.Encoder;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.util.CommType;
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 17.12.15.
- * Defines the type of the (async) response. This can be a byte, string or object response.
+ * Defines the type of the (async) createResponse. This can be a byte, string or object createResponse.
  */
 public class ResponseTypeAsync{
     protected final WebSocketEndpoint[] endpoint;
