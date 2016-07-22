@@ -6,10 +6,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
-import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
 
     public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
                            Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers,  stringSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+        super(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
         this.delay = delay;
         this.timeout = timeout;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
@@ -56,7 +56,6 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
 
-
     @Override
     /**
      * Executes the reply chain whith given html content-type
@@ -74,21 +73,27 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout,delay);
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         });
         Optional.ofNullable(stringSupplier).
-                ifPresent(supplier ->
-                        this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retryCount, timeout, delay),
-                                false,
-                                (Handler<AsyncResult<String>>) value -> {
-                                    if (value.failed()) return;
-                                    repond(value.result());
-                                })
+                ifPresent(supplier -> {
+                            int retry = retryCount;
+                            this.vertx.executeBlocking(handler ->
+                                            RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
+                                    false,
+                                    (Handler<AsyncResult<String>>) value -> {
+                                        if (!value.failed()) {
+                                            repond(value.result());
+                                        } else {
+                                            checkAndCloseResponse(retry);
+                                        }
+                                    });
+                        }
+
                 );
 
 

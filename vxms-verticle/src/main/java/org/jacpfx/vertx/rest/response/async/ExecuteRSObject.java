@@ -6,10 +6,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObject;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
-import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -73,7 +73,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     public void execute() {
         Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout,delay);
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
             } catch (Exception e) {
                 System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
@@ -82,14 +82,20 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
         });
 
         Optional.ofNullable(objectSupplier).
-                ifPresent(supplier ->
-                        this.vertx.executeBlocking(handler ->
-                                        RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retryCount, timeout, delay),
-                                false,
-                                (Handler<AsyncResult<Serializable>>) value -> {
-                                    if (value.failed()) return;
-                                    repond(value.result());
-                                })
+                ifPresent(supplier -> {
+                            int retry = retryCount;
+                            this.vertx.executeBlocking(handler ->
+                                            RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
+                                    false,
+                                    (Handler<AsyncResult<Serializable>>) value -> {
+                                        if (!value.failed()) {
+                                            repond(value.result());
+                                        } else {
+                                            checkAndCloseResponse(retry);
+                                        }
+                                    });
+                        }
+
                 );
 
     }
