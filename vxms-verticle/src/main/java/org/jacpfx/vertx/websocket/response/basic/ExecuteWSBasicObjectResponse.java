@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.response;
+package org.jacpfx.vertx.websocket.response.basic;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ThrowableSupplier;
@@ -19,7 +19,7 @@ public class ExecuteWSBasicObjectResponse extends ExecuteWSBasicObject{
 
 
 
-    protected ExecuteWSBasicObjectResponse(WebSocketEndpoint[] endpoint, Vertx vertx, CommType commType, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Consumer<Throwable> errorMethodHandler, Function<Throwable, Serializable> errorHandlerObject, WebSocketRegistry registry, int retryCount) {
+    public ExecuteWSBasicObjectResponse(WebSocketEndpoint[] endpoint, Vertx vertx, CommType commType, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Consumer<Throwable> errorMethodHandler, Function<Throwable, Serializable> errorHandlerObject, WebSocketRegistry registry, int retryCount) {
         super(endpoint,vertx,commType,objectSupplier,encoder,errorHandler,errorMethodHandler,errorHandlerObject,registry,retryCount);
     }
 

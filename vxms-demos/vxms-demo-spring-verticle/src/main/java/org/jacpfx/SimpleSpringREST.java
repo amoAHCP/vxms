@@ -35,7 +35,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @Path("/helloGET/:name")
     @GET
     public void simpleRESTHelloWithParameter(RestHandler handler) {
-        handler.response().async().stringResponse(() -> {
+        handler.response().blocking().stringResponse(() -> {
             final String name = handler.request().param("name");
             return bean.sayHallo(name);
         }).execute();
@@ -45,7 +45,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @Path("/simpleExceptionHandling/:name")
     @GET
     public void simpleExceptionHandling(RestHandler handler) {
-        handler.response().async().stringResponse(() -> bean.seyHelloWithException()).execute();
+        handler.response().blocking().stringResponse(() -> bean.seyHelloWithException()).execute();
     }
 
     @OnRestError("/simpleExceptionHandling/:name")

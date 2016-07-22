@@ -5,6 +5,9 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
+import org.jacpfx.vertx.websocket.response.basic.ExecuteWSBasicByteResponse;
+import org.jacpfx.vertx.websocket.response.basic.ExecuteWSBasicObjectResponse;
+import org.jacpfx.vertx.websocket.response.basic.ExecuteWSBasicStringResponse;
 import org.jacpfx.vertx.websocket.util.CommType;
 
 import java.io.Serializable;

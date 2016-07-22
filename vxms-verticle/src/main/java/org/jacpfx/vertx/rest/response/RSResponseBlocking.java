@@ -3,9 +3,9 @@ package org.jacpfx.vertx.rest.response;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.rest.response.async.ExecuteRSByteResponse;
-import org.jacpfx.vertx.rest.response.async.ExecuteRSObjectResponse;
-import org.jacpfx.vertx.rest.response.async.ExecuteRSStringResponse;
+import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
+import org.jacpfx.vertx.rest.response.blocking.ExecuteRSObjectResponse;
+import org.jacpfx.vertx.rest.response.blocking.ExecuteRSStringResponse;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
@@ -15,14 +15,14 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class RSAsyncResponse {
+public class RSResponseBlocking {
     private final Vertx vertx;
     private final Throwable t;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
     private final Map<String, String> headers;
 
-    public RSAsyncResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
+    public RSResponseBlocking(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;

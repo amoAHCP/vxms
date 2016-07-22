@@ -202,7 +202,7 @@ public class WSServiceExceptionTests extends VertxTestBase {
         @OnWebSocketMessage("/exceptionTestsAsync01")
         public void wsEndpointExceptionTestsAsync01(WebSocketHandler reply) {
             reply.
-                    response().async().
+                    response().blocking().
                     reply().
                     stringResponse(() -> {
                         System.out.println("Exception");

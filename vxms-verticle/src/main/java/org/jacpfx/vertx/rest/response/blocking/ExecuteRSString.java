@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.response.async;
+package org.jacpfx.vertx.rest.response.blocking;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
@@ -7,8 +7,8 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCallAsync;
-import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByte;
+import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
+import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 
 import java.util.Map;
@@ -20,24 +20,23 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSByte extends ExecuteRSBasicByte {
-    protected final long timeout;
+public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
-    protected final ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply;
+    protected final long timeout;
+    protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
 
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-                         ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
-                         Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
-        this.timeout = timeout;
+    public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
+                           Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
         this.delay = delay;
+        this.timeout = timeout;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
     }
 
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -51,10 +50,11 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final Map<String, String> headerMap = updateContentType(contentType);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
+
 
     @Override
     /**
@@ -64,11 +64,10 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        final Map<String, String> headerMap = updateContentType(contentType);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
-
 
     @Override
     public void execute() {
@@ -80,19 +79,18 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
             }
 
         });
-        Optional.ofNullable(byteSupplier).
+        Optional.ofNullable(stringSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
                             this.vertx.executeBlocking(handler ->
                                             RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
                                     false,
-                                    (Handler<AsyncResult<byte[]>>) value -> {
+                                    (Handler<AsyncResult<String>>) value -> {
                                         if (!value.failed()) {
                                             repond(value.result());
                                         } else {
                                             checkAndCloseResponse(retry);
                                         }
-
                                     });
                         }
 
@@ -100,6 +98,5 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
 
 
     }
-
 
 }

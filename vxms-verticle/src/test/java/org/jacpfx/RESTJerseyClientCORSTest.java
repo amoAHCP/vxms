@@ -237,7 +237,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     @EndpointConfig(RestrictedCorsEndpointConfig.class)
     public class WsServiceOne extends VxmsEndpoint {
 
-        /////------------- sync async ----------------
+        /////------------- sync blocking ----------------
 
         @Path("/stringGETResponseSyncAsync")
         @GET
@@ -256,7 +256,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     @EndpointConfig(RestrictedCorsEndpointConfig2.class)
     public class WsServiceTwo extends VxmsEndpoint {
 
-        /////------------- sync async ----------------
+        /////------------- sync blocking ----------------
 
         @Path("/stringGETResponseSyncAsync")
         @GET
@@ -273,7 +273,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     @EndpointConfig(RestrictedCorsEndpointConfig3.class)
     public class WsServiceThree extends VxmsEndpoint {
 
-        /////------------- sync async ----------------
+        /////------------- sync blocking ----------------
 
         @Path("/stringGETResponseSyncAsync")
         @GET

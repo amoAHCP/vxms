@@ -32,11 +32,11 @@ public class RSResponse {
     }
 
     /**
-     * Swicht to blocking mode
+     * Switch to blocking mode
      * @return @see{org.jacpfx.vertx.rest.response.RSAsyncResponse}
      */
-    public RSAsyncResponse async() {
-        return new RSAsyncResponse(vertx, t, errorMethodHandler, context, headers);
+    public RSResponseBlocking blocking() {
+        return new RSResponseBlocking(vertx, t, errorMethodHandler, context, headers);
     }
 
     /**

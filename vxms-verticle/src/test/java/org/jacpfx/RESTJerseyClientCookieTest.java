@@ -140,7 +140,7 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
     @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT2)
     public class WsServiceTwo extends VxmsEndpoint {
 
-        /////------------- sync async ----------------
+        /////------------- sync blocking ----------------
 
         @Path("/stringGETResponseSyncAsync")
         @GET

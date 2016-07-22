@@ -444,7 +444,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         @GET
         public void rsexceptionInAsyncStringResponse(RestHandler handler) {
             System.out.println("exceptionInAsyncStringResponse: " + handler);
-            handler.response().async().stringResponse(() -> {
+            handler.response().blocking().stringResponse(() -> {
                 throw new NullPointerException("Test");
                 //return "";
             }).execute();
@@ -492,7 +492,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         @GET
         public void rsexceptionAsyncInStringResponseWithErrorHandler(RestHandler handler) {
             System.out.println("exceptionInStringResponseWithErrorHandler: " + handler);
-            handler.response().async().stringResponse(() -> {
+            handler.response().blocking().stringResponse(() -> {
                 throw new NullPointerException("Test");
                 //return "";
             }).execute();
@@ -513,7 +513,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    async().
+                    blocking().
                     stringResponse(() -> {
                         long estimatedTime = System.currentTimeMillis() - startTime;
                         System.out.println("time: " + estimatedTime);
@@ -541,7 +541,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    async().
+                    blocking().
                     byteResponse(() -> {
                         long estimatedTime = System.currentTimeMillis() - startTime;
                         System.out.println("time: " + estimatedTime);
@@ -570,7 +570,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    async().
+                    blocking().
                     objectResponse(() -> {
                         long estimatedTime = System.currentTimeMillis() - startTime;
                         System.out.println("time: " + estimatedTime);

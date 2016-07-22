@@ -669,7 +669,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         public void wsEndpointUncatchedErrorAsync(WebSocketHandler reply) {
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
                                 System.out.println("throw");
@@ -686,7 +686,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("----failover");
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
 
@@ -701,7 +701,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         public void wsEndpointUncatchedTimeoutErrorAsync(WebSocketHandler reply) {
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
                                 System.out.println("TIMEOUT");
@@ -721,7 +721,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("----failover");
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
 
@@ -736,7 +736,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         public void wsEndpointUncatchedTimeoutErrorException(WebSocketHandler reply) {
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
                                 Thread.sleep(1500);
@@ -756,7 +756,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("----failover");
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
 
@@ -771,7 +771,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         public void wsEndpointCatchedTimeoutErrorException(WebSocketHandler reply) {
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
                                 System.out.println("SLEEP");
@@ -808,7 +808,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             System.out.println("----failover");
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
 
@@ -858,7 +858,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> {
                                 if (count.decrementAndGet() >= 0) {
@@ -946,7 +946,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     stringResponse(() -> {
                         long estimatedTime = System.currentTimeMillis() - startTime;

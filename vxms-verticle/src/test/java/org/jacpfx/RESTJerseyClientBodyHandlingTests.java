@@ -136,7 +136,7 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
         @Path("/simpleFilePOSTupload")
         @POST
         public void rsstringPOSTResponse(RestHandler handler) {
-            handler.response().async().stringResponse(()-> {
+            handler.response().blocking().stringResponse(()-> {
                 Set<FileUpload> files = handler.request().fileUploads();
                 System.out.println("FILES: "+files+"   "+handler.request().param("foo"));
                if(files.isEmpty()) {

@@ -5,6 +5,9 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
+import org.jacpfx.vertx.websocket.response.blocking.ExecuteWSByteResponse;
+import org.jacpfx.vertx.websocket.response.blocking.ExecuteWSObjectResponse;
+import org.jacpfx.vertx.websocket.response.blocking.ExecuteWSStringResponse;
 import org.jacpfx.vertx.websocket.util.CommType;
 
 import java.io.Serializable;
@@ -12,16 +15,16 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 17.12.15.
- * Defines the type of the (async) createResponse. This can be a byte, string or object createResponse.
+ * Defines the type of the (blocking) createResponse. This can be a byte, string or object createResponse.
  */
-public class ResponseTypeAsync{
+public class ResponseTypeBlocking {
     protected final WebSocketEndpoint[] endpoint;
     protected final Vertx vertx;
     protected final CommType commType;
     protected final Consumer<Throwable> errorMethodHandler;
     protected final WebSocketRegistry registry;
 
-    protected ResponseTypeAsync(WebSocketEndpoint[] endpoint, Vertx vertx, final CommType commType, Consumer<Throwable> errorMethodHandler, WebSocketRegistry registry) {
+    protected ResponseTypeBlocking(WebSocketEndpoint[] endpoint, Vertx vertx, final CommType commType, Consumer<Throwable> errorMethodHandler, WebSocketRegistry registry) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.commType = commType;

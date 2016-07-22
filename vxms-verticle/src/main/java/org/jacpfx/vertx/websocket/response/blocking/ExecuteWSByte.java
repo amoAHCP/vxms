@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.response;
+package org.jacpfx.vertx.websocket.response.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -7,6 +7,7 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
+import org.jacpfx.vertx.websocket.response.basic.ExecuteWSBasicByte;
 import org.jacpfx.vertx.websocket.util.CommType;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
@@ -16,7 +17,7 @@ import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 18.12.15.
- * This class defines several error methods for the createResponse methods and executes the async createResponse chain.
+ * This class defines several error methods for the createResponse methods and executes the blocking createResponse chain.
  */
 public class ExecuteWSByte extends ExecuteWSBasicByte {
     protected final long delay;

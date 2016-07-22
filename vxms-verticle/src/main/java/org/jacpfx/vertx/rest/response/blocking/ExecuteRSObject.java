@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.response.async;
+package org.jacpfx.vertx.rest.response.blocking;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;

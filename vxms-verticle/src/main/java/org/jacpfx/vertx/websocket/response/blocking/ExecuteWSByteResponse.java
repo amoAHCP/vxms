@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.response;
+package org.jacpfx.vertx.websocket.response.blocking;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ThrowableSupplier;
@@ -12,12 +12,12 @@ import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 18.12.15.
- * This class defines several error methods for the createResponse methods and executes the async createResponse chain.
+ * This class defines several error methods for the createResponse methods and executes the blocking createResponse chain.
  */
 public class ExecuteWSByteResponse extends ExecuteWSByte {
 
 
-    protected ExecuteWSByteResponse(WebSocketEndpoint[] endpoint, Vertx vertx, CommType commType, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Consumer<Throwable> errorMethodHandler, Function<Throwable, byte[]> errorHandlerByte, WebSocketRegistry registry, int retryCount, long timeout, long delay) {
+    public ExecuteWSByteResponse(WebSocketEndpoint[] endpoint, Vertx vertx, CommType commType, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Consumer<Throwable> errorMethodHandler, Function<Throwable, byte[]> errorHandlerByte, WebSocketRegistry registry, int retryCount, long timeout, long delay) {
         super(endpoint, vertx, commType, byteSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, registry, retryCount,timeout,delay);
     }
 

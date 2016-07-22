@@ -143,7 +143,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
         @GET
         public void rsAsyncStringResponse(RestHandler reply) throws InterruptedException {
             System.out.println("asyncStringResponse: " + reply);
-            reply.response().async().stringResponse(() -> {
+            reply.response().blocking().stringResponse(() -> {
                 System.out.println("WAIT");
                 Thread.sleep(2500);
                 System.out.println("WAIT END");
@@ -155,7 +155,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
         @GET
         public void rsAsyncByteResponse(RestHandler reply) throws InterruptedException {
             System.out.println("asyncStringResponse: " + reply);
-            reply.response().async().byteResponse(() -> {
+            reply.response().blocking().byteResponse(() -> {
                 System.out.println("WAIT");
                 Thread.sleep(2500);
                 System.out.println("WAIT END");
@@ -167,7 +167,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
         @GET
         public void rsAsyncObjectResponse(RestHandler reply) throws InterruptedException {
             System.out.println("asyncStringResponse: " + reply);
-            reply.response().async().objectResponse(() -> {
+            reply.response().blocking().objectResponse(() -> {
                 System.out.println("WAIT");
                 Thread.sleep(2500);
                 System.out.println("WAIT END");
@@ -181,7 +181,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
         public void rsAsyncStringResponseParameter(RestHandler handler) {
             String productType = handler.request().param("help");
             System.out.println("asyncStringResponseParameter: " + handler);
-            handler.response().async().stringResponse(() -> {
+            handler.response().blocking().stringResponse(() -> {
                 System.out.println("WAIT");
                 Thread.sleep(2500);
                 System.out.println("WAIT END");

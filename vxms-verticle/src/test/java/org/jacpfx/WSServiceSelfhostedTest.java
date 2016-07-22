@@ -665,7 +665,7 @@ testComplete();
 
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     stringResponse(() -> reply.payload().getString() + "-2").
                     execute();
@@ -699,7 +699,7 @@ testComplete();
 
             reply.
                     response().
-                    async().
+                    blocking().
                     reply().
                     objectResponse(() -> new Payload<>(reply.payload().getString().get()), new ExampleByteEncoder()).
                     timeout(2000).
@@ -759,7 +759,7 @@ testComplete();
 
 
         private void replyAsyncTwo(String name, WebSocketHandler reply) {
-            reply.response().async().reply().stringResponse(() -> {
+            reply.response().blocking().reply().stringResponse(() -> {
                 TimeUnit.MILLISECONDS.sleep(1000);
                 return name + Thread.currentThread();
             }).execute();
@@ -768,7 +768,7 @@ testComplete();
         private void replyToAllAsync(String name, WebSocketHandler reply) {
             reply.
                     response().
-                    async().
+                    blocking().
                     toAll().
                     stringResponse(() -> {
                         TimeUnit.MILLISECONDS.sleep(1000);

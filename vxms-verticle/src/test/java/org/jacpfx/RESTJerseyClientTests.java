@@ -135,7 +135,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     }
 
 
-    @Ignore // TODO add autoclose after method execution... be aware of async processes in background
+    @Ignore // TODO add autoclose after method execution... be aware of blocking processes in background
     @Test
     public void stringPOSTNoEnd() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);

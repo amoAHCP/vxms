@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.response;
+package org.jacpfx.vertx.websocket.response.basic;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ThrowableSupplier;

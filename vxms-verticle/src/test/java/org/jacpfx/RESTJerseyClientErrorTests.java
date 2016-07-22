@@ -204,7 +204,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
-        /////------------- sync async ----------------
+        /////------------- sync blocking ----------------
 
         @Path("/stringGETResponseSyncAsync")
         @GET
@@ -219,18 +219,18 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         @GET
         public void rsstringGETResponseSyncAsyncError(Throwable t, RestHandler handler) {
             System.out.println("ERROR stringGETResponseSyncAsync");
-            handler.response().async().stringResponse(() -> t.getMessage()).execute();
+            handler.response().blocking().stringResponse(() -> t.getMessage()).execute();
         }
 
-        /////------------- sync async  END----------------
+        /////------------- sync blocking  END----------------
 
-        /////------------- async sync ----------------
+        /////------------- blocking sync ----------------
 
         @Path("/stringGETResponseAsyncSync")
         @GET
         public void rsstringGETResponseAsyncSync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().async().stringResponse(() ->{
+            reply.response().blocking().stringResponse(() ->{
                 throw new NullPointerException("test-123");
             }).execute();
         }
@@ -241,15 +241,15 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
             System.out.println("ERROR stringGETResponseAsyncSync");
             handler.response().stringResponse(() -> t.getMessage()).execute();
         }
-        /////------------- async sync  END----------------
+        /////------------- blocking sync  END----------------
 
-        /////------------- async async ----------------
+        /////------------- blocking blocking ----------------
 
         @Path("/stringGETResponseAsyncAsync")
         @GET
         public void rsstringGETResponseAsyncAsync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().async().stringResponse(() ->{
+            reply.response().blocking().stringResponse(() ->{
                 throw new NullPointerException("test-123");
             }).execute();
         }
@@ -258,10 +258,10 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         @GET
         public void rsstringGETResponseAsyncAsyncError(Throwable t, RestHandler handler) {
             System.out.println("ERROR stringGETResponseAsyncAsync: "+t.getMessage());
-            handler.response().async().stringResponse(() -> t.getMessage()).execute();
+            handler.response().blocking().stringResponse(() -> t.getMessage()).execute();
         }
 
-        /////------------- async async END ----------------
+        /////------------- blocking blocking END ----------------
 
         /////------------- sync sync ----------------
 
@@ -281,7 +281,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
             handler.response().stringResponse(() -> t.getMessage()).execute();
         }
 
-        /////------------- async async END ----------------
+        /////------------- blocking blocking END ----------------
 
     }
 

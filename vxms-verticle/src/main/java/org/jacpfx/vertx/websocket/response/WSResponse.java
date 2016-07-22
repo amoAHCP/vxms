@@ -25,12 +25,12 @@ public class WSResponse {
     }
 
     /**
-     * Returns the async response handler
+     * Returns the blocking response handler
      *
      * @return @see{org.jacpfx.vertx.websocket.response.TargetTypeAsync}
      */
-    public WSResponseAsync async() {
-        return new WSResponseAsync(endpoint, vertx, registry, errorMethodHandler);
+    public WSResponseBlocking blocking() {
+        return new WSResponseBlocking(endpoint, vertx, registry, errorMethodHandler);
     }
 
     /**

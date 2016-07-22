@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.websocket.response;
+package org.jacpfx.vertx.websocket.response.basic;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ThrowableSupplier;
@@ -8,6 +8,7 @@ import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 import org.jacpfx.vertx.websocket.util.CommType;
 import org.jacpfx.vertx.websocket.util.WebSocketExecutionUtil;
 
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,28 +17,28 @@ import java.util.function.Function;
  * Created by Andy Moncsek on 18.12.15.
  * This class defines several error methods for the createResponse methods and executes the createResponse chain.
  */
-public class ExecuteWSBasicByte {
+public class ExecuteWSBasicObject {
     protected final WebSocketEndpoint[] endpoint;
     protected final Vertx vertx;
     protected final CommType commType;
-    protected final ThrowableSupplier<byte[]> byteSupplier;
+    protected final ThrowableSupplier<Serializable> objectSupplier;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
     protected final Consumer<Throwable> errorMethodHandler;
-    protected final Function<Throwable, byte[]> errorHandlerByte;
+    protected final Function<Throwable, Serializable> errorHandlerObject;
     protected final WebSocketRegistry registry;
     protected final int retryCount;
 
 
-    protected ExecuteWSBasicByte(WebSocketEndpoint[] endpoint, Vertx vertx, CommType commType, ThrowableSupplier<byte[]> byteSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Consumer<Throwable> errorMethodHandler, Function<Throwable, byte[]> errorHandlerByte, WebSocketRegistry registry, int retryCount) {
+    protected ExecuteWSBasicObject(WebSocketEndpoint[] endpoint, Vertx vertx, CommType commType, ThrowableSupplier<Serializable> objectSupplier, Encoder encoder, Consumer<Throwable> errorHandler, Consumer<Throwable> errorMethodHandler, Function<Throwable, Serializable> errorHandlerObject, WebSocketRegistry registry, int retryCount) {
         this.endpoint = endpoint;
         this.vertx = vertx;
         this.commType = commType;
-        this.byteSupplier = byteSupplier;
+        this.objectSupplier = objectSupplier;
         this.encoder = encoder;
         this.errorHandler = errorHandler;
         this.errorMethodHandler = errorMethodHandler;
-        this.errorHandlerByte = errorHandlerByte;
+        this.errorHandlerObject = errorHandlerObject;
         this.registry = registry;
         this.retryCount = retryCount;
     }
@@ -48,16 +49,17 @@ public class ExecuteWSBasicByte {
      */
     public void execute() {
         int retry = retryCount > 0 ? retryCount : 0;
-        Optional.ofNullable(byteSupplier).
+        Optional.ofNullable(objectSupplier).
                 ifPresent(supplier ->
                         Optional.ofNullable(WebSocketExecutionUtil.executeRetryAndCatch(supplier,
                                 null,
                                 errorHandler,
-                                errorHandlerByte,
+                                errorHandlerObject,
                                 errorMethodHandler,
                                 retry)
                         ).
-                                ifPresent(value -> WebSocketExecutionUtil.sendBinary(commType, vertx, registry, endpoint, value)));
+                                ifPresent(value -> WebSocketExecutionUtil.encode(value, encoder).
+                                        ifPresent(val -> WebSocketExecutionUtil.sendObjectResult(val, commType, vertx, registry, endpoint))));
     }
 
 

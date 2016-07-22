@@ -8,7 +8,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCallAsync;
-import org.jacpfx.vertx.rest.response.async.ExecuteRSByteResponse;
+import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;

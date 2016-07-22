@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.response.async;
+package org.jacpfx.vertx.rest.response.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
