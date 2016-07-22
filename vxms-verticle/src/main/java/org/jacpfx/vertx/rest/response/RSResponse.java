@@ -31,7 +31,10 @@ public class RSResponse {
         this.headers = headers;
     }
 
-
+    /**
+     * Swicht to blocking mode
+     * @return @see{org.jacpfx.vertx.rest.response.RSAsyncResponse}
+     */
     public RSAsyncResponse async() {
         return new RSAsyncResponse(vertx, t, errorMethodHandler, context, headers);
     }

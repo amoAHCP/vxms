@@ -109,14 +109,24 @@ public class ExecuteRSBasicString {
                                 String result = null;
                                 Optional.
                                         ofNullable(ResponseUtil.
-                                        createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler)).
+                                                createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler)).
                                         ifPresent(res -> repond(res));
+
+                                checkAndCloseResponse(retry);
+
                             }
                     );
 
         });
 
 
+    }
+
+    protected void checkAndCloseResponse(int retry) {
+        final HttpServerResponse response = context.response();
+        if (retry == 0 && !response.ended()) {
+            response.end();
+        }
     }
 
     protected void repond(String result) {

@@ -23,7 +23,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
     /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
+     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value, this handler is a terminal handler and will be executed only once
      *
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
@@ -32,11 +32,20 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         return new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
-
+    /**
+     * intermediate error handler which will be called on each error (at least 1 time, in case on N retries... up to N times)
+     * @param errorHandler
+     * @return
+     */
     public ExecuteRSBasicStringResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }
 
+    /**
+     * retry execution N times before
+     * @param retryCount
+     * @return
+     */
     public ExecuteRSBasicStringResponse retry(int retryCount) {
         return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
     }

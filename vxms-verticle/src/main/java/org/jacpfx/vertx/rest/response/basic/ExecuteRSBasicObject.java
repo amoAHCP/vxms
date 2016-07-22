@@ -119,10 +119,17 @@ public class ExecuteRSBasicObject {
                                         ofNullable(ResponseUtil.
                                                 createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler)).
                                         ifPresent(res -> repond(res));
-
+                                checkAndCloseResponse(retry);
                             }
                     );
         });
+    }
+
+    protected void checkAndCloseResponse(int retry) {
+        final HttpServerResponse response = context.response();
+        if (retry == 0 && !response.ended()) {
+            response.end();
+        }
     }
 
     protected void repond(Serializable result) {
