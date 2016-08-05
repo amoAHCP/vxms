@@ -31,7 +31,7 @@ public class ExecuteWSByteResponse extends ExecuteWSByte {
     /**
      * {@inheritDoc }
      */
-    public ExecuteWSByte onErrorResponse(Function<Throwable, byte[]> errorHandlerByte) {
+    public ExecuteWSByte onFailureRespond(Function<Throwable, byte[]> errorHandlerByte) {
         return new ExecuteWSByte(endpoint, vertx, commType, byteSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, registry, retryCount, timeout, delay);
     }
 

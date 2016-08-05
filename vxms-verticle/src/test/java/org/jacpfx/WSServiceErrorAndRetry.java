@@ -530,7 +530,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     retry(3).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         t.printStackTrace();
                         return new Payload<String>(reply.payload().getString().get());
                     }, new ExampleByteEncoder()).
@@ -553,7 +553,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                             }, new ExampleByteEncoder()
                     ).
                     retry(3).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         throw new NullPointerException("test");
                     }, new ExampleByteEncoder()).
                     execute();
@@ -786,7 +786,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                         error.printStackTrace();
                     }).
                     retry(3).
-                    onErrorResponse(error -> {
+                    onFailureRespond(error -> {
 
                                 System.out.println("return payload after failover");
                                 return new Payload<String>(reply.payload().getString().get());
@@ -905,7 +905,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                         return null;
                     }).
                     retry(3).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         t.printStackTrace();
                         try {
                             Payload<String> p = new Payload<String>(reply.payload().getString().get());
@@ -933,7 +933,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                         return null;
                     }).
                     retry(3).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         t.printStackTrace();
                         return reply.payload().getString().get();
                     }).
@@ -960,7 +960,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     }).
                     retry(3).
                     delay(1000).
-                    onErrorResponse((t) -> {
+                    onFailureRespond((t) -> {
                         System.out.print("the stack trace --> ");
                         t.printStackTrace();
                         return reply.payload().getString().get();

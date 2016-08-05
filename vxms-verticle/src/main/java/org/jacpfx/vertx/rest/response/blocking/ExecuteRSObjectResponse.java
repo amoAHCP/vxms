@@ -33,6 +33,11 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
+    /**
+     * Will be executed on each error
+     * @param errorHandler
+     * @return the createResponse chain
+     */
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }

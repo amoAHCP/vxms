@@ -31,7 +31,7 @@ public class ExecuteWSStringResponse extends ExecuteWSString {
     /**
      * {@inheritDoc }
      */
-    public ExecuteWSStringResponse onErrorResponse(Function<Throwable, String> errorHandlerString) {
+    public ExecuteWSStringResponse onFailureRespond(Function<Throwable, String> errorHandlerString) {
         return new ExecuteWSStringResponse(endpoint, vertx, commType, stringSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerString, registry, retryCount, timeout, delay);
     }
 

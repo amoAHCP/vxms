@@ -38,7 +38,7 @@ public class ExecuteWSBasicStringResponse extends ExecuteWSBasicString{
      * @param errorHandlerString the handler (function) to execute on error
      * @return the response chain
      */
-    public ExecuteWSBasicString onErrorResponse(Function<Throwable, String> errorHandlerString) {
+    public ExecuteWSBasicString onFailureRespond(Function<Throwable, String> errorHandlerString) {
         return new ExecuteWSBasicString(endpoint, vertx, commType, stringSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerString, registry, retryCount);
     }
 

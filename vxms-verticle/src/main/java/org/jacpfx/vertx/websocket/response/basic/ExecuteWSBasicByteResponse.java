@@ -38,7 +38,7 @@ public class ExecuteWSBasicByteResponse extends ExecuteWSBasicByte{
      * @param errorHandlerByte the handler (function) to execute on error
      * @return the response chain
      */
-    public ExecuteWSBasicByte onErrorResponse(Function<Throwable, byte[]> errorHandlerByte) {
+    public ExecuteWSBasicByte onFailureRespond(Function<Throwable, byte[]> errorHandlerByte) {
         return new ExecuteWSBasicByte(endpoint, vertx, commType, byteSupplier, encoder, errorHandler, errorMethodHandler, errorHandlerByte, registry, retryCount);
     }
 
