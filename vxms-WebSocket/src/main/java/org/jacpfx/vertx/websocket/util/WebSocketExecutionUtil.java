@@ -5,8 +5,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.common.exceptions.EndpointExecutionException;
 import org.jacpfx.common.encoder.Encoder;
+import org.jacpfx.common.exceptions.EndpointExecutionException;
 import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
 

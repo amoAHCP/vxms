@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.services.util;
+package org.jacpfx.vertx.websocket.util;
 
 import io.vertx.core.Vertx;
 import org.jacpfx.common.exceptions.EndpointExecutionException;

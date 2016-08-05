@@ -3,7 +3,6 @@ package org.jacpfx.vertx.services;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -12,19 +11,13 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import or.jacpfx.spi.RESThandlerSPI;
+import or.jacpfx.spi.WebSockethandlerSPI;
 import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.CustomServerOptions;
-import org.jacpfx.common.ServiceInfo;
-import org.jacpfx.common.Type;
 import org.jacpfx.common.configuration.DefaultEndpointConfiguration;
 import org.jacpfx.common.configuration.EndpointConfig;
 import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
-import org.jacpfx.common.util.Serializer;
-import org.jacpfx.vertx.services.util.MetadataUtil;
-import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
-import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
-import org.jacpfx.vertx.websocket.util.WebSocketInitializer;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -39,10 +32,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     private String host;
     private boolean secure;
     private CustomServerOptions endpointConfig;
-    private ServiceInfo descriptor;
     private boolean clustered;
     private int port = 0;
-    private WebSocketRegistry webSocketRegistry;
     private Consumer<Future<Void>> onStop;
     private ServiceDiscoverySpi serviceDiscovery;
 
@@ -69,10 +60,6 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         final HttpServerOptions options = endpointConfig.getOptions(this.getConfig());
         secure = options.isSsl();
         getConfig().put("secure", secure);
-        // collect all service operations in service for descriptor
-
-        descriptor = MetadataUtil.createInfoObject(port, getConfig(), this.getClass());
-        updateConfigurationToSelfhosted();
 
         clustered = getConfig().getBoolean("clustered", false);
 
@@ -85,8 +72,9 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
         initEndoitConfiguration(endpointConfiguration, vertx, router);
 
-        // TODO move to SPI
-        initWebSocket(server);
+        Optional.
+                ofNullable(getWebSocketSPI()).
+                ifPresent(webSockethandlerSPI -> webSockethandlerSPI.registerWebSocketHandler(server, vertx, getConfig(), this));
         Optional.
                 ofNullable(getRESTSPI()).
                 ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vertx, router, getConfig(), this));
@@ -97,6 +85,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             if (status.succeeded()) {
                 log("started on PORT: " + port + " host: " + host);
                 serviceDiscovery = getServiceDiscoverySPI();
+                // TODO pass object serviceDiscovery
                 if (serviceDiscovery != null) {
                     handleServiceRegistration(startFuture);
                 } else {
@@ -135,6 +124,12 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     private RESThandlerSPI getRESTSPI() {
         ServiceLoader<RESThandlerSPI> loader = ServiceLoader.load(RESThandlerSPI.class);
+        if (!loader.iterator().hasNext()) return null;
+        return loader.iterator().next();
+    }
+
+    private WebSockethandlerSPI getWebSocketSPI() {
+        ServiceLoader<WebSockethandlerSPI> loader = ServiceLoader.load(WebSockethandlerSPI.class);
         if (!loader.iterator().hasNext()) return null;
         return loader.iterator().next();
     }
@@ -194,47 +189,19 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
 
-    private void initWebSocket(HttpServer server) {
-        final Object service = this;
-        descriptor.getOperationsByType(Type.WEBSOCKET).findFirst().ifPresent(operation -> {
-            webSocketRegistry = initWebSocketRegistryInstance();
-            WebSocketInitializer.registerWebSocketHandler(server, vertx, webSocketRegistry, getConfig(), service);
-        });
-    }
-
-
-    private WebSocketRegistry initWebSocketRegistryInstance() {
-        if (clustered) {
-            return null;
-        } else {
-            return new LocalWebSocketRegistry(this.vertx);
-        }
-    }
-
-    private void updateConfigurationToSelfhosted() {
-        getConfig().put("selfhosted", true);
-        getConfig().put("selfhosted-host", ConfigurationUtil.serviceName(getConfig(), this.getClass()));
-    }
-
-
     private void log(final String value) {
         log.info(value);
     }
 
 
     private void info(Message m) {
-
-        try {
-            m.reply(Serializer.serialize(getServiceDescriptor()), new DeliveryOptions().setSendTimeout(10000));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-    private ServiceInfo getServiceDescriptor() {
-        return this.descriptor;
+// TODO create info message about service
+        /**  try {
+         m.reply(Serializer.serialize(getServiceDescriptor()), new DeliveryOptions().setSendTimeout(10000));
+         } catch (Exception e) {
+         e.printStackTrace();
+         }
+         **/
     }
 
 
