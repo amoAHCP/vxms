@@ -1,10 +1,9 @@
-package org.jacpfx.vertx.services.util;
+package org.jacpfx.vertx.rest.util;
 
 import io.vertx.core.Vertx;
+import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.exceptions.EndpointExecutionException;
-import org.jacpfx.vertx.websocket.registry.WebSocketEndpoint;
-import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
-import org.jacpfx.vertx.websocket.response.WebSocketHandler;
+import org.jacpfx.vertx.rest.response.RestHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,18 +16,20 @@ import java.util.function.Supplier;
 public class ReflectionUtil {
 
 
-    public static Object[] invokeWebSocketParameters(byte[] payload, Method method, WebSocketEndpoint endpoint, WebSocketRegistry webSocketRegistry, Vertx vertx, Throwable t,Consumer<Throwable> errorMethodHandler) {
+
+
+    public static Object[] invokeRESTParameters(RoutingContext context, Method method, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
         method.setAccessible(true);
         final java.lang.reflect.Parameter[] parameters = method.getParameters();
         final Object[] parameterResult = new Object[parameters.length];
         int i = 0;
 
         for (java.lang.reflect.Parameter p : parameters) {
-            if (WebSocketHandler.class.equals(p.getType())) {
-                parameterResult[i] = new WebSocketHandler(webSocketRegistry, endpoint, payload, vertx, errorMethodHandler);
-            } else if (WebSocketEndpoint.class.equals(p.getType())) {
-                parameterResult[i] = endpoint;
-            } else if (Throwable.class.isAssignableFrom(p.getType())) {
+            if (RestHandler.class.equals(p.getType())) {
+                parameterResult[i] = new RestHandler(context, vertx,t, errorMethodHandler);
+            } else if (RoutingContext.class.equals(p.getType())) {
+                parameterResult[i] = context;
+            } if (Throwable.class.isAssignableFrom(p.getType())) {
                 parameterResult[i] = t;
             }
 
@@ -38,11 +39,6 @@ public class ReflectionUtil {
         return parameterResult;
     }
 
-
-
-    public static Object[] invokeWebSocketParameters(Method method, WebSocketEndpoint endpoint) {
-        return invokeWebSocketParameters(null, method, endpoint, null, null, null, null);
-    }
 
 
 

@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
+import or.jacpfx.spi.RESThandlerSPI;
 import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.ServiceInfo;
@@ -20,7 +21,6 @@ import org.jacpfx.common.configuration.EndpointConfig;
 import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.common.util.Serializer;
-import org.jacpfx.vertx.rest.util.RESTInitializer;
 import org.jacpfx.vertx.services.util.MetadataUtil;
 import org.jacpfx.vertx.websocket.registry.LocalWebSocketRegistry;
 import org.jacpfx.vertx.websocket.registry.WebSocketRegistry;
@@ -68,7 +68,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         endpointConfig = ConfigurationUtil.getEndpointOptions(this.getClass());
         final HttpServerOptions options = endpointConfig.getOptions(this.getConfig());
         secure = options.isSsl();
-        getConfig().put("secure",secure);
+        getConfig().put("secure", secure);
         // collect all service operations in service for descriptor
 
         descriptor = MetadataUtil.createInfoObject(port, getConfig(), this.getClass());
@@ -83,12 +83,13 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         Router router = Router.router(vertx);
         final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(this);
 
-        initEndoitConfiguration(endpointConfiguration,vertx, router);
+        initEndoitConfiguration(endpointConfiguration, vertx, router);
 
         // TODO move to SPI
         initWebSocket(server);
-        // TODO move to SPI
-        initRest(router);
+        Optional.
+                ofNullable(getRESTSPI()).
+                ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vertx, router, getConfig(), this));
 
         postEndoitConfiguration(endpointConfiguration, router);
 
@@ -96,7 +97,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             if (status.succeeded()) {
                 log("started on PORT: " + port + " host: " + host);
                 serviceDiscovery = getServiceDiscoverySPI();
-                if (serviceDiscovery!=null) {
+                if (serviceDiscovery != null) {
                     handleServiceRegistration(startFuture);
                 } else {
                     postConstruct(router, startFuture);
@@ -132,6 +133,12 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         return loader.iterator().next();
     }
 
+    private RESThandlerSPI getRESTSPI() {
+        ServiceLoader<RESThandlerSPI> loader = ServiceLoader.load(RESThandlerSPI.class);
+        if (!loader.iterator().hasNext()) return null;
+        return loader.iterator().next();
+    }
+
 
     /**
      * Overwrite this method to handle your own initialisation after all vxms init is done
@@ -152,11 +159,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         startFuture.complete();
     }
 
-    private void initRest(Router router) {
-        RESTInitializer.initRESTHandler(vertx, router, getConfig(), this);
-    }
 
-    private  void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router) {
+    private void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router) {
         Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
 
             endpointConfig.corsHandler(router);
@@ -171,11 +175,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         });
     }
 
-    private  void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Router router) {
+    private void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Router router) {
         Optional.of(endpointConfiguration).ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
     }
 
-    private  EndpointConfiguration getEndpointConfiguration(Object service) {
+    private EndpointConfiguration getEndpointConfiguration(Object service) {
         EndpointConfiguration endpointConfig = null;
         if (service.getClass().isAnnotationPresent(EndpointConfig.class)) {
             final EndpointConfig annotation = service.getClass().getAnnotation(EndpointConfig.class);
