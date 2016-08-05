@@ -56,8 +56,8 @@
     <modules>
         <module>vxms-common</module>
         <module>vxms-verticle</module>
-        <module>vxms-REST</module>
-        <module>vxms-WebSocket</module>
+        <module>vxms-rest</module>
+        <module>vxms-websocket</module>
         <module>vxms-etcd-discovery</module>
         <module>vxms-service-discovery</module>
     </modules>
