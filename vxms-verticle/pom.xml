@@ -35,13 +35,13 @@
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-REST</artifactId>
+            <artifactId>vxms-rest</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-WebSocket</artifactId>
+            <artifactId>vxms-websocket</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
