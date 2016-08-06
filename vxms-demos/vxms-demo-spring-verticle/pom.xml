@@ -32,6 +32,12 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        <!-- We use services -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-service-factory</artifactId>
+            <version>3.3.2</version>
+        </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-common</artifactId>
@@ -40,6 +46,11 @@
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-verticle</artifactId>
+            <version>${vxms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jacpfx</groupId>
+            <artifactId>vxms-rest</artifactId>
             <version>${vxms.version}</version>
         </dependency>
         <dependency>

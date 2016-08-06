@@ -40,6 +40,11 @@
             <artifactId>vxms-verticle</artifactId>
             <version>${vxms.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jacpfx</groupId>
+            <artifactId>vxms-rest</artifactId>
+            <version>${vxms.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

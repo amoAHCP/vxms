@@ -70,13 +70,6 @@
     </repositories>
 
     <dependencies>
-        <!--Vertx provided dependencies-->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-hazelcast</artifactId>
-            <version>${vertx.version}</version>
-            <scope>compile</scope>
-        </dependency>
         <!-- If you're using the Vert.x Java API you need this dependency -->
         <dependency>
             <groupId>io.vertx</groupId>
@@ -85,19 +78,7 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-dropwizard-metrics</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-
-
-
-
-        <!-- If you're using the Vert.x Groovy API you need this dependency -->
-
-        <!-- We use services -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-factory</artifactId>
+            <artifactId>vertx-web</artifactId>
             <version>${vertx.version}</version>
         </dependency>
         <!-- We depend on the Vert.x test jar so we can extend VertxTestBase for asynchronous tests -->
@@ -108,10 +89,12 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <!--Vertx provided dependencies-->
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
+            <artifactId>vertx-hazelcast</artifactId>
             <version>${vertx.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>junit</groupId>
