@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
  */
 public interface CustomServerOptions {
 
-    default HttpServerOptions getOptions(JsonObject config) {
+    default HttpServerOptions getServerOptions(JsonObject config) {
         return new HttpServerOptions();
     }
 }

@@ -57,7 +57,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         port = ConfigurationUtil.getEndpointPort(getConfig(), this.getClass());
         host = ConfigurationUtil.getEndpointHost(getConfig(), this.getClass());
         endpointConfig = ConfigurationUtil.getEndpointOptions(this.getClass());
-        final HttpServerOptions options = endpointConfig.getOptions(this.getConfig());
+        final HttpServerOptions options = endpointConfig.getServerOptions(this.getConfig());
         secure = options.isSsl();
         getConfig().put("secure", secure);
 
@@ -70,7 +70,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         Router router = Router.router(vertx);
         final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(this);
 
-        initEndoitConfiguration(endpointConfiguration, vertx, router);
+        initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
 
         Optional.
                 ofNullable(getWebSocketSPI()).
@@ -155,7 +155,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     }
 
 
-    private void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router) {
+    private void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx, Router router, boolean secure, String host, int port) {
         Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
 
             endpointConfig.corsHandler(router);
@@ -166,7 +166,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
             endpointConfig.sessionHandler(vertx, router);
 
-            endpointConfig.customRouteConfiguration(vertx, router);
+            endpointConfig.customRouteConfiguration(vertx, router, secure, host, port);
         });
     }
 
