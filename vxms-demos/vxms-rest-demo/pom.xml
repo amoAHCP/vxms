@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jacpfx</groupId>
-    <artifactId>vxms-demo-verticle-one</artifactId>
+    <artifactId>vxms-rest-demo</artifactId>
     <version>${vxms.version}</version>
     <packaging>jar</packaging>
 
-    <name>vxms-demo-verticle-one</name>
+    <name>vxms-rest-demo</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -24,17 +24,6 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-common</artifactId>
-            <version>${vxms.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-verticle</artifactId>

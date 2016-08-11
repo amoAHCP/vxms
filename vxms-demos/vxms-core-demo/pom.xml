@@ -3,19 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jacpfx</groupId>
-    <artifactId>vxms-demo-spring-verticle</artifactId>
+    <artifactId>vxms-core-demo</artifactId>
     <version>${vxms.version}</version>
     <packaging>jar</packaging>
 
-    <name>vxms-demo-spring-verticle</name>
+    <name>vxms-core-demo</name>
     <url>http://maven.apache.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vxms.version>1.0-SNAPSHOT</vxms.version>
-        <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
-        <spring.version>4.2.1.RELEASE</spring.version>
-        <main.verticle>java-spring:org.jacpfx.SimpleSpringREST</main.verticle>
+        <main.verticle>org.jacpfx.verticle.SimpleREST</main.verticle>
     </properties>
 
     <repositories>
@@ -27,51 +25,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- We use services -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-factory</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-common</artifactId>
-            <version>${vxms.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-verticle</artifactId>
             <version>${vxms.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-rest</artifactId>
-            <version>${vxms.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jacpfx.vertx.spring</groupId>
-            <artifactId>vertx-spring-ext</artifactId>
-            <version>${vertx-spring-ext.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
-        </dependency>
+
     </dependencies>
     <build>
         <plugins>
-            <!-- Other plugins required by the build -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -100,13 +61,9 @@
                                         <Main-Verticle>${main.verticle}</Main-Verticle>
                                     </manifestEntries>
                                 </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
-                                </transformer>
                             </transformers>
                             <artifactSet/>
-                            <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
+                            <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
                         </configuration>
                     </execution>
                 </executions>
