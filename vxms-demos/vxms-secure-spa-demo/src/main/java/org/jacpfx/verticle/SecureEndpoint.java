@@ -32,11 +32,71 @@ public class SecureEndpoint extends VxmsEndpoint {
 
     @Inject
     private UserLocalRepository userLocalRepository;
-    public static final HttpClientOptions OPTIONS = new HttpClientOptions().
-            setLogActivity(true).
-            setSsl(true).
-            setTrustAll(true);
 
+
+    @Path("/private/api/users")
+    @GET
+    public void userGet(RestHandler handler) {
+        // we use blocking here, since we assume a spring bean is doing some long running/blocking tasks
+        handler.response().
+                blocking().
+                stringResponse(() -> userLocalRepository.getAll().encodePrettily()).
+                onFailureRespond(error -> new JsonArray().add(DefaultResponses.defaultErrorResponse()).encodePrettily()).
+                execute();
+    }
+
+    @Path("/private/api/users/:id")
+    @GET
+    public void userGetById(RestHandler handler) {
+        final String id = handler.request().param("id");
+        // we use blocking here, since we assume a spring bean is doing some long running/blocking tasks
+        handler.response().
+                blocking().
+                stringResponse(() -> userLocalRepository.getUserById(id).encodePrettily()).
+                onFailureRespond(error -> DefaultResponses.defaultErrorResponse().encodePrettily()).
+                execute();
+    }
+
+    @Path("/private/api/users")
+    @POST
+    public void userPOST(RestHandler handler) {
+        final Buffer body = handler.request().body();
+        // we use blocking here, since we assume a spring bean is doing some long running/blocking tasks
+        handler.response().
+                blocking().
+                stringResponse(() -> userLocalRepository.addUser(body.toJsonObject()).encodePrettily()).
+                onFailureRespond(error -> DefaultResponses.defaultErrorResponse().encodePrettily()).
+                execute();
+    }
+
+    @Path("/private/api/users/:id")
+    @PUT
+    public void userPutById(RestHandler handler) {
+        final String id = handler.request().param("id");
+        final Buffer body = handler.request().body();
+        final JsonObject message = DefaultResponses.mapToUser(body.toJsonObject(), id);
+        // we use blocking here, since we assume a spring bean is doing some long running/blocking tasks
+        handler.response().
+                blocking().
+                stringResponse(() -> userLocalRepository.updateUser(message).encodePrettily()).
+                onFailureRespond(error -> DefaultResponses.defaultErrorResponse().encodePrettily()).
+                execute();
+    }
+
+    @Path("/private/api/users/:id")
+    @DELETE
+    public void userDeleteById(RestHandler handler) {
+        final String id = handler.request().param("id");
+        // we use blocking here, since we assume a spring bean is doing some long running/blocking tasks
+        handler.response().
+                blocking().
+                stringResponse(() -> {
+                    userLocalRepository.deleteUser(id);
+                    return "ok";
+                }).execute();
+
+
+    }
 
     @Path("/private/userinfo")
     @GET
@@ -58,56 +118,6 @@ public class SecureEndpoint extends VxmsEndpoint {
         return entries.getString("name");
     }
 
-    @Path("/private/api/users")
-    @GET
-    public void userGet(RestHandler handler) {
-        handler.response().
-                stringResponse(() -> userLocalRepository.getAll().encodePrettily()).
-                onFailureRespond(error -> new JsonArray().add(DefaultResponses.defaultErrorResponse()).encodePrettily()).
-                execute();
-    }
-
-    @Path("/private/api/users/:id")
-    @GET
-    public void userGetById(RestHandler handler) {
-        final String id = handler.request().param("id");
-        handler.response().stringResponse(() -> userLocalRepository.getUserById(id).encodePrettily()).
-                onFailureRespond(error -> DefaultResponses.defaultErrorResponse().encodePrettily()).
-                execute();
-    }
-
-    @Path("/private/api/users")
-    @POST
-    public void userPOST(RestHandler handler) {
-        final Buffer body = handler.request().body();
-        handler.response().stringResponse(() -> userLocalRepository.addUser(body.toJsonObject()).encodePrettily()).
-                onFailureRespond(error -> DefaultResponses.defaultErrorResponse().encodePrettily()).
-                execute();
-    }
-
-    @Path("/private/api/users/:id")
-    @PUT
-    public void userPutById(RestHandler handler) {
-        final String id = handler.request().param("id");
-        final Buffer body = handler.request().body();
-        final JsonObject message = DefaultResponses.mapToUser(body.toJsonObject(), id);
-        handler.response().stringResponse(() -> userLocalRepository.updateUser(message).encodePrettily()).
-                onFailureRespond(error -> DefaultResponses.defaultErrorResponse().encodePrettily()).
-                execute();
-    }
-
-    @Path("/private/api/users/:id")
-    @DELETE
-    public void userDeleteById(RestHandler handler) {
-        final String id = handler.request().param("id");
-        handler.response().stringResponse(() -> {
-            userLocalRepository.deleteUser(id);
-            return "ok";
-        }).execute();
-
-
-    }
-
 
     /**
      * for local testing
@@ -120,4 +130,9 @@ public class SecureEndpoint extends VxmsEndpoint {
 
 
     }
+
+    public static final HttpClientOptions OPTIONS = new HttpClientOptions().
+            setLogActivity(true).
+            setSsl(true).
+            setTrustAll(true);
 }

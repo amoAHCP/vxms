@@ -8,10 +8,12 @@ angular.module('CrudApp', []).config(['$routeProvider','$locationProvider', func
 
 function ListCtrl($scope, $http,$location) {
 
-    var code = $location.search().code;
-    window.console.log(code);
     $http.get('/private/api/users').success(function (data) {
         $scope.users = data;
+    });
+    $http.get('/private/userinfo').success(function (data) {
+        $scope.userinfo = data;
+        window.console.log(data);
     });
 }
 

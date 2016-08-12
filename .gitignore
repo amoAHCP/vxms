@@ -15,7 +15,8 @@ build
 target
 file-uploads
 .vertx
-vxms-demos/vxms-petshop
+vxms-demos/vxms-petshop-demo/*
+vxms-demos/vxms-petshop-demo/
 out
 mod
 etcd-ca
