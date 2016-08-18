@@ -10,7 +10,6 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Router;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
-import mousio.etcd4j.EtcdClient;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientBuilder;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
@@ -100,17 +99,6 @@ public class BasicEtcRegTest extends VertxTestBase {
 
     }
 
-
-    public void etcdClientTest() {
-        try(EtcdClient etcd = new EtcdClient(
-                URI.create("http://123.45.67.89:8001"),
-                URI.create("http://123.45.67.90:8001"))){
-            // Logs etcd version
-            System.out.println(etcd.getVersion());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
 
@@ -373,14 +361,11 @@ public class BasicEtcRegTest extends VertxTestBase {
                     HttpClient client = vertx.
                             createHttpClient(options);
 
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointOne", resp -> {
-                        resp.bodyHandler(body -> {
-                            System.out.println("Got a response: " + body.toString());
-                            Assert.assertEquals(body.toString(), "test");
-                            testComplete();
-                        });
-
-                    });
+                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointOne", resp -> resp.bodyHandler(body -> {
+                        System.out.println("Got a response: " + body.toString());
+                        Assert.assertEquals(body.toString(), "test");
+                        testComplete();
+                    }));
                     request.end();
 
                 });

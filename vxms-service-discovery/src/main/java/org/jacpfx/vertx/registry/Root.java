@@ -1,11 +1,13 @@
 package org.jacpfx.vertx.registry;
 
+import io.vertx.core.shareddata.Shareable;
+
 import java.io.Serializable;
 
 /**
  * Created by Andy Moncsek on 04.05.16.
  */
-public class Root implements Serializable{
+public class Root implements Serializable,Shareable {
     private final String action;
     private final Node node;
     private final Node prevNode;

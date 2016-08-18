@@ -11,8 +11,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import or.jacpfx.spi.RESThandlerSPI;
-import or.jacpfx.spi.WebSockethandlerSPI;
 import or.jacpfx.spi.ServiceDiscoverySpi;
+import or.jacpfx.spi.WebSockethandlerSPI;
 import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.configuration.DefaultEndpointConfiguration;
 import org.jacpfx.common.configuration.EndpointConfig;
@@ -25,14 +25,12 @@ import java.util.function.Consumer;
 
 /**
  * Extend a service verticle to provide pluggable sevices for vet.x microservice project
- * Created by amo on 28.10.14.
+ * Created by amo on 28.10.15.
  */
 public abstract class VxmsEndpoint extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(VxmsEndpoint.class);
     private String host;
-    private boolean secure;
     private CustomServerOptions endpointConfig;
-    private boolean clustered;
     private int port = 0;
     private Consumer<Future<Void>> onStop;
     private ServiceDiscoverySpi serviceDiscovery;
@@ -58,10 +56,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         host = ConfigurationUtil.getEndpointHost(getConfig(), this.getClass());
         endpointConfig = ConfigurationUtil.getEndpointOptions(this.getClass());
         final HttpServerOptions options = endpointConfig.getServerOptions(this.getConfig());
-        secure = options.isSsl();
+        boolean secure = options.isSsl();
         getConfig().put("secure", secure);
-
-        clustered = getConfig().getBoolean("clustered", false);
 
         HttpServer server = vertx.
                 createHttpServer(options.setHost(host).setPort(port));
@@ -139,7 +135,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
      * Overwrite this method to handle your own initialisation after all vxms init is done
      *
      * @param router      the http router handler
-     * @param startFuture
+     * @param startFuture the vert.x start future
      */
     protected void postConstruct(Router router, final Future<Void> startFuture) {
         postConstruct(startFuture);
@@ -195,13 +191,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
 
     private void info(Message m) {
-// TODO create info message about service
-        /**  try {
-         m.reply(Serializer.serialize(getServiceDescriptor()), new DeliveryOptions().setSendTimeout(10000));
-         } catch (Exception e) {
-         e.printStackTrace();
-         }
-         **/
+        // TODO create info message about service
     }
 
 
@@ -209,10 +199,5 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         return context != null ? context.config() : new JsonObject();
     }
 
-
-    // TODO add versioning to service
-    protected String getVersion() {
-        return null;
-    }
 
 }

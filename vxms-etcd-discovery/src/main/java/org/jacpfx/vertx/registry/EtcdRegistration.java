@@ -48,7 +48,7 @@ public class EtcdRegistration {
     private final URI fetchAll;
 
 
-    public static final String ETCD_BASE_PATH = "/v2/keys/";
+    private static final String ETCD_BASE_PATH = "/v2/keys/";
 
     // TODO add HttpClientOptions see:DiscoveryClientBuilder
     private EtcdRegistration(Vertx vertx, String etcdHost, int etcdPort, int ttl, String domainname, String servicename, String nodename, String host, int port) {
@@ -85,7 +85,7 @@ public class EtcdRegistration {
 
     }
 
-    protected Root decodeRoot(Buffer body) {
+    private Root decodeRoot(Buffer body) {
         try {
             return Json.decodeValue(new String(body.getBytes()), Root.class);
         } catch (Exception e) {

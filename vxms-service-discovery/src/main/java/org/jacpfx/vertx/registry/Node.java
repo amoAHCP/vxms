@@ -1,5 +1,7 @@
 package org.jacpfx.vertx.registry;
 
+import io.vertx.core.shareddata.Shareable;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.List;
 /**
  * Created by Andy Moncsek on 04.05.16.
  */
-public class Node implements Serializable {
+public class Node implements Serializable, Shareable {
     private final boolean dir;
     private final String key;
     private final String value;
@@ -29,7 +31,7 @@ public class Node implements Serializable {
     }
 
     public Node() {
-       this(false, "", "", "", 0, 0, 0, Collections.emptyList());
+        this(false, "", "", "", 0, 0, 0, Collections.emptyList());
     }
 
     public interface Nodes {

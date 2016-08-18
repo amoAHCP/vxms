@@ -3,6 +3,7 @@ package org.jacpfx.vertx.registry;
 import io.vertx.core.json.Json;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,9 +26,16 @@ public class NodeResponse {
 
     public ServiceNode getServiceNode() {
         // TODO add client side loadbalancing by iterating through NodeList
-        NodeMetadata metadata = Json.decodeValue(node.getValue(),NodeMetadata.class);
+        Node selectedNode = null;
+        if(nodes.size()>1) {
+            Collections.shuffle(nodes);
+            selectedNode = nodes.get(0);
+        } else {
+            selectedNode = node;
+        }
+        NodeMetadata metadata = Json.decodeValue(selectedNode.getValue(),NodeMetadata.class);
         URI uri =  URI.create(metadata.getProtocol()+"://"+metadata.getHost()+":"+metadata.getPort()+metadata.getPath());
-        return new ServiceNode(node.getKey(),metadata.getHost(),metadata.getPort(),metadata.isSecure(),uri,null);
+        return new ServiceNode(selectedNode.getKey(),metadata.getHost(),metadata.getPort(),metadata.isSecure(),uri,null);
     }
 
     public Node getNode() {

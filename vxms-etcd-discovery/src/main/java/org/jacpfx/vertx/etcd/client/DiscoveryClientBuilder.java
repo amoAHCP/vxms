@@ -14,9 +14,9 @@ import java.util.Objects;
  * Created by Andy Moncsek on 23.06.16.
  */
 public class DiscoveryClientBuilder  implements DiscoveryClientSpi<DiscoveryClientEtcd>{
-    public static final String ETCD_BASE_PATH = "/v2/keys/";
-    public static final String HTTPS = "https://";
-    public static final String HTTP = "http://";
+    private static final String ETCD_BASE_PATH = "/v2/keys/";
+    private static final String HTTPS = "https://";
+    private static final String HTTP = "http://";
 
     @Override
     public DiscoveryClientEtcd getClient(AbstractVerticle verticleInstance) {
@@ -36,9 +36,7 @@ public class DiscoveryClientBuilder  implements DiscoveryClientSpi<DiscoveryClie
     private CustomConnectionOptions getConnectionOptions(EtcdClient client) {
         try {
             return client.options().newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return new DefaultConnectionOptions();
