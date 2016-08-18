@@ -76,7 +76,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             if (serviceNode.getNodes() != null & serviceNode.getKey().equals(key)) {
                 final Optional<Node> first = serviceNode.getNodes().stream().findAny();
                 if (!first.isPresent()) {
-                    consumer.accept(new NodeResponse(serviceNode, Collections.emptyList(), domainname, false, new NodeNotFoundException("no active node found")));
+                    consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, false, new NodeNotFoundException("no active node found")));
                 }
                 first.ifPresent(node -> handleServiceNode(service, consumer, node, serviceNode));
             } else {
@@ -85,19 +85,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         }, () -> findNodeFromEtcd(service, consumer));
     }
 
-    @Override
-    public void findService(String serviceName, Consumer<NodeResponse> consumer) {
-        final String service = serviceName.startsWith("/") ? serviceName : "/" + serviceName;
-        retrieveKeys(root -> {
-            Node node = findNode(root.getNode(), "/" + domainname + service);
-            if (node == null || node.getKey().isEmpty()) {
-                consumer.accept(new NodeResponse(node, Collections.emptyList(), domainname, false, new NodeNotFoundException("no node found")));
-            } else {
-                consumer.accept(new NodeResponse(node, Collections.emptyList(), domainname, true, null));
-            }
 
-        });
-    }
 
 
     /**
@@ -111,7 +99,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         ZonedDateTime nowUTC = ZonedDateTime.now(ZoneOffset.UTC);
         // check if expire date is still valid
         if (dateTime.compareTo(nowUTC.toLocalDateTime()) >= 0) {
-            consumer.accept(new NodeResponse(node, serviceNode.getNodes(), domainname, true, null));
+            consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, true, null));
         } else {
             findNodeFromEtcd(serviceName, consumer);
         }
@@ -124,14 +112,11 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             final String key = "/" + domainname + service;
             final Node serviceNode = findNode(root.getNode(), key);
             if (serviceNode.getNodes() != null && serviceNode.getKey().equals(key)) {
-                final Optional<Node> first = serviceNode.getNodes().stream().findFirst();
-                if (!first.isPresent()) {
-                    consumer.accept(new NodeResponse(serviceNode, Collections.emptyList(), domainname, false, new NodeNotFoundException("no active node found")));
-                }
+                boolean isEmpty =serviceNode.getNodes().isEmpty();
+                consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, !isEmpty, isEmpty?new NodeNotFoundException("no active node found"):null));
 
-                first.ifPresent(node -> consumer.accept(new NodeResponse(node, serviceNode.getNodes(), domainname, true, null)));
             } else {
-                consumer.accept(new NodeResponse(serviceNode, Collections.emptyList(), domainname, false, new NodeNotFoundException("service not found")));
+                consumer.accept(new NodeResponse(Collections.emptyList(), domainname, false, new NodeNotFoundException("service not found")));
             }
         });
     }

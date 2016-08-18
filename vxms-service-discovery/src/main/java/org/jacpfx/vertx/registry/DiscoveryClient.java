@@ -25,8 +25,6 @@ public interface DiscoveryClient {
 
     void findNode(String serviceName, Consumer<NodeResponse> consumer);
 
-    void findService(String serviceName, Consumer<NodeResponse> consumer);
-
 
     static DiscoveryClient createClient(AbstractVerticle verticle) {
         ServiceLoader<DiscoveryClientSpi> loader = ServiceLoader.load(DiscoveryClientSpi.class);

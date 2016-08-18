@@ -167,40 +167,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         await();
     }
 
-    @Test
 
-    public void findService() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                nodeName("instance3");
-
-
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                final DiscoveryClient client = result.result();
-                client.findService("/myService", service -> {
-                    System.out.println("found: " + service.succeeded()+" node: "+service.getNode());
-                    assertEquals("/petShop/myService", service.getNode().getKey());
-                    testComplete();
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
-
-
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
 
     @Test
 
