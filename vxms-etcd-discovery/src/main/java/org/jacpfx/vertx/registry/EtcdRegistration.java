@@ -134,8 +134,8 @@ public class EtcdRegistration {
     }
 
     private void putRootToCache(Root root) {
-        final LocalMap<String, String> cache = data.getLocalMap(MAP_KEY);
-        cache.put(CACHE_KEY, Json.encode(root));
+        final LocalMap<String, Root> cache = data.getLocalMap(MAP_KEY);
+        cache.put(CACHE_KEY, root);
     }
 
     private void startNodeRefresh(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port) {

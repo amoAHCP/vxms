@@ -175,10 +175,10 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
     private void retrieveKeysFromCache(Consumer<Root> consumer, Runnable onMiss) {
-        final LocalMap<String, String> cache = data.getLocalMap(MAP_KEY);
-        final String local = cache.get(CACHE_KEY);
+        final LocalMap<String, Root> cache = data.getLocalMap(MAP_KEY);
+        final Root local = cache.get(CACHE_KEY);
         if (local != null) {
-            consumer.accept(Json.decodeValue(local, Root.class));
+            consumer.accept(local);
         } else {
             onMiss.run();
         }
@@ -195,7 +195,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
     private void putRootToCache(Root root) {
-        final LocalMap<String, String> cache = data.getLocalMap(MAP_KEY);
-        cache.put(CACHE_KEY, Json.encode(root));
+        final LocalMap<String, Root> cache = data.getLocalMap(MAP_KEY);
+        cache.put(CACHE_KEY, root);
     }
 }
