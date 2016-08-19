@@ -31,7 +31,7 @@ import java.util.concurrent.Future;
 public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
 
     protected int getNumNodes() {
@@ -91,7 +91,7 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     public void stringGETResponse() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETConsumesResponse/123");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETConsumesResponse/123");
         Future<String> getCallback = target.request().header("Content-Type", "application/json;charset=UTF-8").async().get(new InvocationCallback<String>() {
 
             @Override
@@ -157,7 +157,7 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     public void stringPOSTResponse() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTConsumesResponse/123");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringPOSTConsumesResponse/123");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
 
             @Override

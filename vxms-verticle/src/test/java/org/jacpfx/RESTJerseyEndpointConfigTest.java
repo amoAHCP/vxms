@@ -45,7 +45,7 @@ import java.util.concurrent.ExecutionException;
 public class RESTJerseyEndpointConfigTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
 
     protected int getNumNodes() {
@@ -110,7 +110,7 @@ public class RESTJerseyEndpointConfigTest extends VertxTestBase {
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar").field("hello","world").bodyPart(filePart);
 
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/simpleFilePOSTupload");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/simpleFilePOSTupload");
         final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
 
         //Use createResponse object to verify upload success

@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WSServiceErrorAndRetry extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9999;
 
     protected int getNumNodes() {

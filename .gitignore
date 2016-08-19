@@ -17,6 +17,7 @@ file-uploads
 .vertx
 vxms-demos/vxms-petshop-demo/*
 vxms-demos/vxms-petshop-demo/
+vxms-demos/vxms-stream-demo
 out
 mod
 etcd-ca

@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
     public static final int PORT2 = 9999;
     public static final int PORT3 = 9991;
@@ -126,7 +126,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexByteResponse");
+        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/complexByteResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -161,7 +161,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexByteErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexByteErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -196,7 +196,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleByteNoConnectionErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -230,7 +230,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleByteNoConnectionRetryErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionRetryErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -264,7 +264,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override

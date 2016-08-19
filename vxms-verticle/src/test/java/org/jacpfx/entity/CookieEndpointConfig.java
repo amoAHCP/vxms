@@ -10,7 +10,7 @@ import org.jacpfx.common.configuration.EndpointConfiguration;
 public class CookieEndpointConfig implements EndpointConfiguration {
 
     public void cookieHandler(Router router) {
-        router.route().handler(CorsHandler.create("localhost").
+        router.route().handler(CorsHandler.create("127.0.0.1").
                 allowedMethod(io.vertx.core.http.HttpMethod.GET).
                 allowedMethod(io.vertx.core.http.HttpMethod.POST).
                 allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).

@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
 public class RESTJerseyClientTests extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
 
     protected int getNumNodes() {
@@ -90,7 +90,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringGETResponse() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETResponse");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponse");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -115,7 +115,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringPOST() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOST");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringPOST");
         target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
             @Override
             public void completed(String response) {
@@ -140,7 +140,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringPOSTNoEnd() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTNoEnd");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringPOSTNoEnd");
         target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
             @Override
             public void completed(String response) {
@@ -163,7 +163,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringPOSTResponse() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTResponse");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringPOSTResponse");
        target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
            @Override
            public void completed(String response) {
@@ -187,7 +187,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringOPTIONSResponse() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringOPTIONSResponse");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringOPTIONSResponse");
         target.request(MediaType.APPLICATION_JSON_TYPE).async().options( new InvocationCallback<String>() {
             @Override
             public void completed(String response) {
@@ -211,7 +211,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringPUTResponse() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPUTResponse");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringPUTResponse");
         target.request(MediaType.APPLICATION_JSON_TYPE).async().put(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
             @Override
             public void completed(String response) {
@@ -237,7 +237,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
     public void stringDELETEResponse() throws InterruptedException, ExecutionException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringDELETEResponse");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringDELETEResponse");
         target.request(MediaType.APPLICATION_JSON_TYPE).async().delete( new InvocationCallback<String>() {
             @Override
             public void completed(String response) {
@@ -262,7 +262,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETResponseWithParameter/123");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponseWithParameter/123");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -289,7 +289,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringPOSTResponseWithParameter/123");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringPOSTResponseWithParameter/123");
         target.request(MediaType.APPLICATION_JSON_TYPE).async().post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE), new InvocationCallback<String>() {
             @Override
             public void completed(String response) {

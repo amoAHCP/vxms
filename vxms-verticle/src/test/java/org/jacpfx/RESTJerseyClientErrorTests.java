@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 public class RESTJerseyClientErrorTests extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
 
     protected int getNumNodes() {
@@ -93,7 +93,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     public void stringGETResponseSyncAsync() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETResponseSyncAsync");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponseSyncAsync");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -119,7 +119,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     public void stringGETResponseAsyncSync() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETResponseAsyncSync");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponseAsyncSync");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -146,7 +146,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     public void stringGETResponseAsyncAsync() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETResponseAsyncAsync");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponseAsyncAsync");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -172,7 +172,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     public void stringGETResponseSyncSync() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:"+PORT).path("/wsService/stringGETResponseSyncSync");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponseSyncSync");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override

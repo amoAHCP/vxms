@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
     public static final int PORT2 = 9999;
     public static final int PORT3 = 9991;
@@ -137,7 +137,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexResponse");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -165,7 +165,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/complexErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexErrorResponse");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override
@@ -193,7 +193,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/onFailureRespond");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/onFailureRespond");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
             @Override

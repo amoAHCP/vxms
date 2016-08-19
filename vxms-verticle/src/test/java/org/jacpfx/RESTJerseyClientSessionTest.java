@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 public class RESTJerseyClientSessionTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
 
 
@@ -102,7 +102,7 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
        // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT).path(SERVICE_REST_GET+"/session");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT).path(SERVICE_REST_GET+"/session");
         Future<String> getCallback = target.request().async().get(new InvocationCallback<String>() {
 
             @Override
