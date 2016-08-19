@@ -15,6 +15,7 @@ import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.GET;
@@ -95,7 +96,7 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
 
 
     @Test
-
+    @Ignore
     public void cookieTest() throws InterruptedException {
         System.out.println("start cookie test");
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
