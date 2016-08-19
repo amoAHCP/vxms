@@ -2,12 +2,10 @@ package org.jacpfx;
 
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Cookie;
@@ -27,6 +25,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
@@ -35,7 +35,16 @@ import java.util.concurrent.Future;
  */
 public class RESTJerseyClientCookieTest extends VertxTestBase {
     public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "localhost";
+    private static String HOST;
+
+    static {
+       // try {
+            HOST = "127.0.0.1";
+       // } catch (UnknownHostException e) {
+       //     e.printStackTrace();
+       // }
+    }
+
     public static final int PORT2 = 8888;
 
     protected int getNumNodes() {
@@ -75,6 +84,9 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
         getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
+            if(asyncResult.failed()) {
+                asyncResult.cause().printStackTrace();
+            }
             assertTrue(asyncResult.succeeded());
             assertNotNull("deploymentID should not be null", asyncResult.result());
             // If deployed correctly then start the tests!
@@ -99,31 +111,29 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
         CountDownLatch latch = new CountDownLatch(1);
         HttpClientOptions options = new HttpClientOptions();
         options.setDefaultPort(PORT2);
-        HttpClient client = vertx.
-                createHttpClient(options);
-        HttpClientRequest request = client.get("/wsService/stringGETResponseSyncAsync", new Handler<HttpClientResponse>() {
-            public void handle(HttpClientResponse resp) {
+        options.setDefaultHost(HOST);
+        HttpClient client = vertx.createHttpClient(options);
+        HttpClientRequest request = client.get("/wsService/stringGETResponseSyncAsync", resp -> {
 
-                System.out.println("response from vertx client");
-                Client client = ClientBuilder.newClient();
-                WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/stringGETResponseSyncAsync");
-                Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).cookie("c1", "xyz").async().get(new InvocationCallback<String>() {
+            System.out.println("response from vertx client");
+            Client client1 = ClientBuilder.newClient();
+            WebTarget target = client1.target("http://" + HOST + ":" + PORT2 + "/wsService/stringGETResponseSyncAsync");
+            Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).cookie("c1", "xyz").async().get(new InvocationCallback<String>() {
 
-                    @Override
-                    public void completed(String response) {
-                        System.out.println("Response entity '" + response + "' received.");
-                        Assert.assertEquals(response, "xyz");
-                        latch.countDown();
-                    }
+                @Override
+                public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "xyz");
+                    latch.countDown();
+                }
 
-                    @Override
-                    public void failed(Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
+                @Override
+                public void failed(Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            });
 
 
-            }
         });
         request.end();
 
