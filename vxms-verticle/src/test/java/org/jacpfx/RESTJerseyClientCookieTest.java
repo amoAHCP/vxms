@@ -97,6 +97,7 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
     @Test
 
     public void cookieTest() throws InterruptedException {
+        System.out.println("start cookie test");
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
@@ -115,7 +116,7 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
                 throwable.printStackTrace();
             }
         });
-
+        System.out.println("wait cookie test");
         latch.await();
         testComplete();
 
