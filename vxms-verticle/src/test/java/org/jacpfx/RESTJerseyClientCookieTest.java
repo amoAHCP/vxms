@@ -31,12 +31,9 @@ import java.util.concurrent.Future;
  * Created by Andy Moncsek on 23.04.15.
  */
 public class RESTJerseyClientCookieTest extends VertxTestBase {
-    private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "localhost";
-    public static final int PORT = 9998;
-    public static final int PORT2 = 9999;
-    public static final int PORT3 = 9991;
+    public static final int PORT2 = 8888;
 
     protected int getNumNodes() {
         return 1;
