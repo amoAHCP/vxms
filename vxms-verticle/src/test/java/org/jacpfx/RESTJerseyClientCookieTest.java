@@ -96,13 +96,12 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
 
 
     @Test
-    @Ignore
     public void cookieTest() throws InterruptedException {
         System.out.println("start cookie test");
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/stringGETResponseSyncAsync");
+        WebTarget target = client.target("http://127.0.0.1:" + PORT2).path("/wsService/stringGETResponseSyncAsync");
         Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).cookie("c1", "xyz").async().get(new InvocationCallback<String>() {
 
             @Override
