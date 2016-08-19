@@ -90,7 +90,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
 
     public void asyncStringResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -111,7 +111,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
     @Test
     public void asyncStringResponseParameter() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 

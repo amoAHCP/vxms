@@ -95,7 +95,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointOne() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -118,7 +118,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointTwo() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -140,7 +140,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointThree() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -162,7 +162,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointFourErrorRetryTest() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -184,7 +184,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointFourErrorReturnRetryTest() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -207,7 +207,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointFive() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -232,7 +232,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointFive_error() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -256,7 +256,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointSix() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -287,7 +287,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointSeven() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -318,7 +318,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointSeven_error() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -348,7 +348,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointEight_header() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -374,7 +374,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointEight_put_header() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -403,7 +403,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointNine_exception() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 

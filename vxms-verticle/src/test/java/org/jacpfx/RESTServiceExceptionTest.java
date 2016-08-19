@@ -91,7 +91,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void noResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -117,7 +117,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInMethodBody() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -142,7 +142,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void rsexceptionInMethodBodyWithErrorHandler() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -167,7 +167,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInStringResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -192,7 +192,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInAsyncStringResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -217,7 +217,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInByteResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -242,7 +242,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInObjectResponse() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -267,7 +267,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInStringResponseWithErrorHandler() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -292,7 +292,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void exceptionInAsyncStringResponseWithErrorHandler() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -318,7 +318,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void catchedAsyncStringErrorDelay() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -343,7 +343,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void catchedAsyncByteErrorDelay() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -368,7 +368,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @Test
     public void catchedAsyncObjectErrorDelay() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-        options.setDefaultPort(PORT);
+       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
