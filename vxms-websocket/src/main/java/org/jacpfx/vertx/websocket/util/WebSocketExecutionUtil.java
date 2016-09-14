@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -31,13 +32,20 @@ public class WebSocketExecutionUtil {
 
             try {
                 if (timeout > 0L) {
-                    final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
-                    vertx.
-                            executeBlocking((innerHandler) ->
-                                    executeAndCompleate(supplier, timeoutFuture), false, (val) -> {
+                    Future<T> operationResult = Future.future();
+                    vertx.setTimer(timeout, (l) -> {
+                        if (!operationResult.isComplete()) {
+                            operationResult.fail(new TimeoutException("operation timeout"));
+                        }
+                    });
 
-                            });
-                    result = timeoutFuture.get(timeout, TimeUnit.MILLISECONDS);
+                    executeAndCompleate(supplier, operationResult);
+
+                    if(!operationResult.failed()) {
+                        result = operationResult.result();
+                    } else {
+                        throw  operationResult.cause();
+                    }
                     retry = -1;
                 } else {
                     result = supplier.get();
@@ -58,6 +66,16 @@ public class WebSocketExecutionUtil {
         }
         if (!handler.isComplete()) handler.complete(result);
         return result;
+    }
+
+    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier,  Future<T> operationResult) {
+        T temp = null;
+        try {
+            temp = supplier.get();
+        } catch (Throwable throwable) {
+            operationResult.fail(throwable);
+        }
+        if(!operationResult.failed())operationResult.complete(temp);
     }
 
     protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier, CompletableFuture<T> timeoutFuture) {

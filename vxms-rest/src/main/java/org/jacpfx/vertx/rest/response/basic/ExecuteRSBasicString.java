@@ -97,7 +97,6 @@ public class ExecuteRSBasicString {
                 try {
                     evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
                 } catch (Exception e) {
-                    System.err.println("EXCEPTION ::::::");
                     e.printStackTrace();
                 }
 

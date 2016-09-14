@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -21,18 +22,27 @@ import java.util.function.Function;
  */
 public class RESTExecutionUtil {
 
-    public static <T> void executeRetryAndCatchAsync(ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
+    public static <T> void executeRetryAndCatchAsync(ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
         T result = null;
         boolean errorHandling = false;
         while (retry >= 0) {
             errorHandling = false;
             try {
                 if (timeout > 0L) {
-                    final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
-                    vertx.executeBlocking((innerHandler) -> executeAndCompleate(supplier, timeoutFuture), false, (val) -> {
-
+                    Future<T> operationResult = Future.future();
+                    vertx.setTimer(timeout, (l) -> {
+                        if (!operationResult.isComplete()) {
+                            operationResult.fail(new TimeoutException("operation timeout"));
+                        }
                     });
-                    result = timeoutFuture.get(timeout, TimeUnit.MILLISECONDS);
+
+                    executeAndCompleate(supplier, operationResult);
+
+                    if(!operationResult.failed()) {
+                        result = operationResult.result();
+                    } else {
+                        throw  operationResult.cause();
+                    }
                     retry = -1;
                 } else {
                     result = supplier.get();
@@ -42,7 +52,7 @@ public class RESTExecutionUtil {
             } catch (Throwable e) {
                 retry--;
                 if (retry < 0) {
-                    result = handleError(result, errorHandler, errorFunction, errorMethodHandler, e);
+                    result = handleError(result, errorHandler, onFailureRespond, errorMethodHandler, e);
                     errorHandling = true;
                 } else {
                     handleError(errorHandler, e);
@@ -54,15 +64,16 @@ public class RESTExecutionUtil {
         if (!handler.isComplete()) handler.complete(result);
     }
 
-    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier, CompletableFuture<T> timeoutFuture) {
+    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier,  Future<T> operationResult) {
         T temp = null;
         try {
             temp = supplier.get();
         } catch (Throwable throwable) {
-            timeoutFuture.obtrudeException(throwable);
+            operationResult.fail(throwable);
         }
-        timeoutFuture.complete(temp);
+        if(!operationResult.failed())operationResult.complete(temp);
     }
+
 
     private static void handleDelay(long delay) {
         try {
@@ -81,14 +92,14 @@ public class RESTExecutionUtil {
     }
 
 
-    public static  <T> T handleError(T result, Consumer<Throwable> errorHandler, Function<Throwable, T> errorFunction,Consumer<Throwable> errorMethodHandler, Throwable e) {
+    public static  <T> T handleError(T result, Consumer<Throwable> errorHandler, Function<Throwable, T> onFailureRespond,Consumer<Throwable> errorMethodHandler, Throwable e) {
         if (errorHandler != null) {
             errorHandler.accept(e);
         }
-        if (errorFunction != null) {
-            result = errorFunction.apply(e);
+        if (onFailureRespond != null) {
+            result = onFailureRespond.apply(e);
         }
-        if (errorHandler == null && errorFunction == null) {
+        if (errorHandler == null && onFailureRespond == null) {
             errorMethodHandler.accept(e);
             return null;
 
