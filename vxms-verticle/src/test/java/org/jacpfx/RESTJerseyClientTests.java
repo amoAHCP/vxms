@@ -323,7 +323,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
         @GET
         public void rsstringGETResponse(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse(() -> "test").execute();
+            reply.response().stringResponse((future) -> future.complete("test")).execute();
         }
 
         @Path("/stringPOSTResponse")
@@ -332,7 +332,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
             String val = handler.request().body().getString(0,handler.request().body().length());
             System.out.println("stringPOSTResponse: " + val);
-            handler.response().stringResponse(() -> val).execute();
+            handler.response().stringResponse((future) -> future.complete(val)).execute();
         }
 
         @Path("/stringOPTIONSResponse")
@@ -341,7 +341,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
             String val = handler.request().body().getString(0,handler.request().body().length());
             System.out.println("stringOPTIONSResponse: " + val);
-            handler.response().stringResponse(() -> "hello").execute();
+            handler.response().stringResponse((future) -> future.complete("hello")).execute();
         }
 
         @Path("/stringPUTResponse")
@@ -350,7 +350,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
             String val = handler.request().body().getString(0,handler.request().body().length());
             System.out.println("stringPUTResponse: " + val);
-            handler.response().stringResponse(() -> val).execute();
+            handler.response().stringResponse((future) -> future.complete(val)).execute();
         }
 
         @Path("/stringDELETEResponse")
@@ -359,7 +359,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
             String val = handler.request().body().getString(0,handler.request().body().length());
             System.out.println("stringDELETEResponse: " + val);
-            handler.response().stringResponse(() -> "hello").execute();
+            handler.response().stringResponse((future) -> future.complete("hello")).execute();
         }
 
 
@@ -386,7 +386,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
         public void rsstringGETResponseWithParameter(RestHandler handler) {
             String productType = handler.request().param("help");
             System.out.println("wsEndpointTwo: " + handler);
-            handler.response().stringResponse(() -> productType).execute();
+            handler.response().stringResponse((future) -> future.complete(productType)).execute();
         }
         @Path("/stringPOSTResponseWithParameter/:help")
         @POST
@@ -394,7 +394,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
             String productType = handler.request().param("help");
             String val = handler.request().body().getString(0,handler.request().body().length());
             System.out.println("stringPOSTResponse: " + val+":"+productType);
-            handler.response().stringResponse(() -> val+":"+productType).execute();
+            handler.response().stringResponse((future) -> future.complete(val+":"+productType)).execute();
         }
 
     }

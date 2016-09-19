@@ -243,7 +243,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         @GET
         public void rsstringGETResponseSyncAsync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse(() -> {
+            reply.response().stringResponse((future) -> {
                 throw new NullPointerException("test-123");
             }).execute();
         }
@@ -262,8 +262,8 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         @GET
         public void rsstringGETResponseSyncAsync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse(() -> {
-                return "test-123";
+            reply.response().stringResponse((future) -> {
+                future.complete("test-123");
             }).execute();
         }
 
@@ -279,8 +279,8 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         @GET
         public void rsstringGETResponseSyncAsync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse(() -> {
-                return "test-123";
+            reply.response().stringResponse((future) -> {
+                future.complete("test-123");
             }).execute();
         }
 
@@ -288,8 +288,8 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         @GET
         public void rsstringGETResponseSyncAsync2(RestHandler reply) {
             System.out.println("stringResponse xyz: " + reply);
-            reply.response().stringResponse(() -> {
-                return "test-123";
+            reply.response().stringResponse((future) -> {
+                future.complete("test-123");
             }).execute();
         }
 

@@ -3,6 +3,7 @@ package org.jacpfx.vertx.rest.response;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
@@ -52,11 +53,11 @@ public class RSResponse {
     /**
      * Returns a String to the target type
      *
-     * @param stringSupplier supplier which returns the createResponse value as String
+     * @param stringConsumer consumer which returns the createResponse value as String
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
-    public ExecuteRSBasicStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0);
+    public ExecuteRSBasicStringResponse stringResponse(ThrowableFutureConsumer<String> stringConsumer) {
+        return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringConsumer, null, null, null, null, 0, 0,0);
     }
 
     /**

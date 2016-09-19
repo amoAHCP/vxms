@@ -440,7 +440,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
         @GET
         public void rsEndpointOne(RestHandler reply) {
             System.out.println("wsEndpointOne: " + reply);
-            reply.response().stringResponse(() -> "test").execute();
+            reply.response().stringResponse((future) -> future.complete("test")).execute();
         }
 
         @Path("/endpointTwo/:help")
@@ -448,7 +448,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
         public void rsEndpointTwo(RestHandler handler) {
             String productType = handler.request().param("help");
             System.out.println("wsEndpointTwo: " + handler);
-            handler.response().stringResponse(() -> productType).execute();
+            handler.response().stringResponse((future) -> future.complete(productType)).execute();
         }
 
         @Path("/endpointThree")
@@ -457,7 +457,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String productType = handler.request().param("val");
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
-            handler.response().stringResponse(() -> productType + product).execute();
+            handler.response().stringResponse((future) -> future.complete(productType + product)).execute();
         }
 
         @Path("/endpointFourErrorRetryTest")
@@ -467,22 +467,18 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
             AtomicInteger count = new AtomicInteger(4);
-            handler.response().stringResponse(() -> {
+            handler.response().stringResponse((future) -> {
                 if (count.decrementAndGet() >= 0) {
                     System.out.println("throw:" + count.get());
                     throw new NullPointerException("test");
                 }
-                return productType + product;
+                future.complete(productType + product);
             }).onError(error -> {
                 error.printStackTrace();
                 System.out.println("count: " + count.get());
-                if (count.get() == 1) {
-                    handler.response().stringResponse(() -> {
-                        return productType + product;
-                    }).execute();
-                }
 
-            }).retry(3).execute();
+
+            }).retry(3).onFailureRespond(e -> productType + product).execute();
         }
 
         @Path("/endpointFourErrorReturnRetryTest")
@@ -494,12 +490,12 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(4);
             handler.
                     response().
-                    stringResponse(() -> {
+                    stringResponse((future) -> {
                         if (count.decrementAndGet() >= 0) {
                             System.out.println("throw:" + count.get());
                             throw new NullPointerException("test");
                         }
-                        return productType + product;
+                        future.complete(productType + product);
                     }).
                     onError(error -> System.out.println("retry: " + count.get() + "   " + error.getStackTrace())).
                     retry(3).
@@ -588,9 +584,9 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointTwo: " + handler);
             AtomicInteger count = new AtomicInteger(4);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().stringResponse(() -> {
+            handler.response().stringResponse((future) -> {
 
-                return productType + product;
+                future.complete(productType + product);
             }).execute("application/json");
         }
 
@@ -602,9 +598,9 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointTwo: " + handler);
             AtomicInteger count = new AtomicInteger(4);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().stringResponse(() -> {
+            handler.response().stringResponse((future) -> {
 
-                return productType + product;
+                future.complete(productType + product);
             }).putHeader("key", "val").execute("application/json");
         }
 
@@ -614,7 +610,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String productType = handler.request().param("val");
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
-            handler.response().stringResponse(() -> {
+            handler.response().stringResponse((future) -> {
                 throw new NullPointerException("test");
             }).putHeader("key", "val").execute("application/json");
         }

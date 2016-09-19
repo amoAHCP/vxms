@@ -144,8 +144,8 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
         @GET
         public void rsstringGETResponseSyncAsync(RestHandler reply) {
             Session session = reply.context().session();
-            reply.response().stringResponse(() -> {
-                return session.id();
+            reply.response().stringResponse((future) -> {
+                future.complete(session.id());
             }).execute();
         }
 

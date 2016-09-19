@@ -78,16 +78,6 @@ public class WebSocketExecutionUtil {
         if(!operationResult.failed())operationResult.complete(temp);
     }
 
-    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier, CompletableFuture<T> timeoutFuture) {
-        T temp = null;
-        try {
-            temp = supplier.get();
-        } catch (Throwable throwable) {
-            timeoutFuture.obtrudeException(throwable);
-        }
-        timeoutFuture.complete(temp);
-    }
-
     private static void handleDelay(long delay) {
         try {
             if (delay > 0L) Thread.sleep(delay);

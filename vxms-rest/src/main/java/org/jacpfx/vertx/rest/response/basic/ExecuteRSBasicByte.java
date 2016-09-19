@@ -115,7 +115,7 @@ public class ExecuteRSBasicByte {
                                 byte[] result = null;
                                 Optional.
                                         ofNullable(ResponseUtil.
-                                                createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler)).
+                                                createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler,vertx,0)). // TODO add timeout
                                         ifPresent(res -> repond(res));
                                 checkAndCloseResponse(retry);
                             }

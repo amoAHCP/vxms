@@ -263,7 +263,7 @@ public class EtcdRegistrationTest extends VertxTestBase
         @GET
         public void simpleRESTEndpoint(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse(() -> "test-123").execute();
+            reply.response().stringResponse((future) -> future.complete("test-123")).execute();
         }
 
     }
@@ -296,7 +296,7 @@ public class EtcdRegistrationTest extends VertxTestBase
                     if(resp.statusCode()==200) {
                         resp.bodyHandler(body -> {
                             System.out.println("Got a createResponse in EtcdAwareServiceA: " + body.toString());
-                            reply.response().stringResponse(()->body.toString()).execute();
+                            reply.response().stringResponse((future)->future.complete(body.toString())).execute();
                         });
                     } else {
                         // do something
@@ -330,7 +330,7 @@ public class EtcdRegistrationTest extends VertxTestBase
         @GET
         public void simpleRESTEndpoint(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse(() -> "test-123"+reply.request().param("value")).execute();
+            reply.response().stringResponse((future) -> future.complete("test-123"+reply.request().param("value"))).execute();
         }
 
     }

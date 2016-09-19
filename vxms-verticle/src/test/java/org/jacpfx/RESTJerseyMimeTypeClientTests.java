@@ -232,7 +232,7 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
         public void rsstringGETResponse(RestHandler handler) {
             final String myJSON = handler.request().param("myJSON");
             System.out.println("stringResponse: " + myJSON);
-            handler.response().stringResponse(() -> myJSON).execute();
+            handler.response().stringResponse((future) -> future.complete(myJSON)).execute();
         }
 
 
@@ -242,7 +242,7 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
         public void rsstringPOSTResponse(RestHandler handler) {
             String val = handler.request().body().getString(0,handler.request().body().length());
             System.out.println("stringPOSTResponse: " + val);
-            handler.response().stringResponse(() -> val).execute();
+            handler.response().stringResponse((future) -> future.complete(val)).execute();
         }
 
 

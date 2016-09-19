@@ -22,15 +22,15 @@ import java.util.function.Function;
  */
 public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
-    protected final long timeout;
     protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
+    protected final ThrowableSupplier<String> stringSupplier;
 
     public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
                            Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
         this.delay = delay;
-        this.timeout = timeout;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
+        this.stringSupplier = stringSupplier;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                                     false,
                                     (Handler<AsyncResult<String>>) value -> {
                                         if (!value.failed()) {
-                                            repond(value.result());
+                                            respond(value.result());
                                         } else {
                                             checkAndCloseResponse(retry);
                                         }

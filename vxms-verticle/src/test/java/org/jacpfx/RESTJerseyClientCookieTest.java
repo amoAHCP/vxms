@@ -162,8 +162,8 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
                 reply.response().end();
             } else {
                 String cookieValue = someCookie.getValue();
-                reply.response().stringResponse(() -> {
-                    return cookieValue;
+                reply.response().stringResponse((future) -> {
+                    future.complete(cookieValue);
                 }).execute();
             }
 
