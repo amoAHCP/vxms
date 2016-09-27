@@ -1,8 +1,11 @@
 package org.jacpfx.vertx.rest.util;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import org.jacpfx.common.ExecutionResult;
+import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 
@@ -14,8 +17,8 @@ import java.util.function.Function;
  * Created by Andy Moncsek on 21.07.16.
  */
 public class ResponseUtil {
-    public static <T> void createResponse(int _retry, long _timeout, T _result, ThrowableFutureConsumer<T> _userOperation,
-                                          Consumer<Throwable> errorHandler, Function<Throwable, T> onFailureRespond,
+    public static <T> void createResponse(int _retry, long _timeout, ThrowableFutureConsumer<T> _userOperation,
+                                          Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                           Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer) {
 
         final Future<T> operationResult = Future.future();
@@ -23,39 +26,70 @@ public class ResponseUtil {
             if (event.failed()) {
                 int retryTemp = _retry - 1;
                 if (retryTemp < 0) {
-                    try {
-                        T errorResult = RESTExecutionUtil.handleError(_result, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
-                        resultConsumer.accept(new ExecutionResult(errorResult, true, null));
-                    } catch (Exception e) {
-                        resultConsumer.accept(new ExecutionResult(null, false, e));
-                    }
-
+                    errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, event);
                 } else {
-                    try {
-                        RESTExecutionUtil.handleError(errorHandler, event.cause());
-                    } catch (Exception e) {
-                        // no error handling needed
-                    }
-                    createResponse(retryTemp, _timeout, _result, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer);
+                    retry(_timeout, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer, event, retryTemp);
                 }
-
             } else {
                 resultConsumer.accept(new ExecutionResult(event.result(), true, null));
             }
         });
         if (_timeout > 0L) {
-
-            vertx.setTimer(_timeout, (l) -> {
+            addTimeoutHandler(_timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));
                 }
             });
-
             executeAndCompleate(_userOperation, operationResult);
 
         } else {
             executeAndCompleate(_userOperation, operationResult);
 
+        }
+
+    }
+
+    protected static void addTimeoutHandler(long _timeout, Vertx vertx, Handler<Long> longHandler) {
+        vertx.setTimer(_timeout, longHandler);
+    }
+
+    protected static <T> void errorHandling(Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event) {
+        try {
+            final Future<T> errorResult = Future.future();
+            errorResult.setHandler(resultHandler -> {
+                if (resultHandler.succeeded()) {
+                    resultConsumer.accept(new ExecutionResult(resultHandler.result(), true, null));
+                } else {
+                   // resultConsumer.accept(new ExecutionResult(null, false, resultHandler.cause()));
+                  handleError(null, errorHandler, null, errorMethodHandler, resultHandler.cause());
+                }
+            });
+            handleError(errorResult, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
+
+        } catch (Exception e) {
+            resultConsumer.accept(new ExecutionResult(null, false, e));
+        }
+    }
+
+    protected static <T> void retry(long _timeout, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event, int retryTemp) {
+        try {
+            RESTExecutionUtil.handleError(errorHandler, event.cause());
+        } catch (Exception e) {
+            // no error handling needed
+        }
+        createResponse(retryTemp, _timeout,  _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer);
+    }
+
+    public static <T> void handleError(Future<T> errorResult, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Throwable e) {
+        RESTExecutionUtil.handleError(errorHandler, e);
+        if (onFailureRespond != null) {
+            try {
+                onFailureRespond.accept(e, errorResult);
+            } catch (Throwable throwable) {
+                errorResult.fail(throwable);
+            }
+        } else {
+            errorMethodHandler.accept(e);
         }
 
     }
@@ -76,7 +110,7 @@ public class ResponseUtil {
                 if (timeout > 0L) {
                     Future<T> operationResult = Future.future();
                     // TODO this is not working
-                    vertx.setTimer(timeout, (l) -> {
+                    addTimeoutHandler(timeout, vertx, (l) -> {
                         if (!operationResult.isComplete()) {
                             operationResult.fail(new TimeoutException("operation timeout"));
                         }

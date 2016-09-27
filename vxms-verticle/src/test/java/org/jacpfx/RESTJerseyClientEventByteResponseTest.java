@@ -326,14 +326,14 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                     mapToByteResponse(handler -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onFailureRespond(error -> {
+                    onFailureRespond((error,future) -> {
                         try {
                             Payload<String> p = new Payload<>(error.getMessage());
-                            return Serializer.serialize(p);
+                            future.complete(Serializer.serialize(p));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        return new byte[0];
+                        future.complete(new byte[0]);
                     }).
                     execute();
         }
@@ -343,7 +343,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    onErrorResult(handler -> {
+                    onFailureRespond(handler -> {
                         try {
                             Payload<String> p = new Payload<>("no connection");
                             return Serializer.serialize(p);

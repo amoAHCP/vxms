@@ -314,17 +314,19 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                     mapToStringResponse(handler -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onFailureRespond(error -> error.getMessage()).
+                    onFailureRespond((error,response) -> response.complete(error.getMessage())).
                     execute();
         }
 
         @Path("/simpleSyncNoConnectionErrorResponse")
         @GET
         public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
+            System.out.println("-------1");
             reply.eventBusRequest().
-                    send("hello1", "welt").onErrorResult(handler -> "no connection").
+                    send("hello1", "welt").onFailureRespond(handler -> "no connection").
                     mapToStringResponse(handler -> handler.result().body().toString()).
                     execute();
+            System.out.println("-------2");
         }
 
         @Path("/simpleSyncNoConnectionError")

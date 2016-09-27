@@ -21,17 +21,19 @@ import java.util.function.Function;
  * Created by Andy Moncsek on 12.01.16.
  */
 public class ExecuteRSByte extends ExecuteRSBasicByte {
-    protected final long timeout;
     protected final long delay;
     protected final ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply;
+    protected final ThrowableSupplier<byte[]> byteSupplier;
+    protected final Function<Throwable, byte[]> onFailureRespond;
 
     public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                          ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
                          Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
-        this.timeout = timeout;
+        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount,timeout);
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
+        this.byteSupplier = byteSupplier;
+        this.onFailureRespond = onFailureRespond;
     }
 
     @Override
@@ -88,7 +90,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
                                     false,
                                     (Handler<AsyncResult<byte[]>>) value -> {
                                         if (!value.failed()) {
-                                            repond(value.result());
+                                            respond(value.result());
                                         } else {
                                             checkAndCloseResponse(retry);
                                         }

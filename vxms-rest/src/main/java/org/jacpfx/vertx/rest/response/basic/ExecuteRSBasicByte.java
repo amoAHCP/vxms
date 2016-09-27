@@ -5,7 +5,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.ThrowableErrorConsumer;
+import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
 import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -27,27 +27,30 @@ public class ExecuteRSBasicByte {
     protected final Consumer<Throwable> errorMethodHandler;
     protected final RoutingContext context;
     protected final Map<String, String> headers;
-    protected final ThrowableSupplier<byte[]> byteSupplier;
+    protected final ThrowableFutureConsumer<byte[]> byteConsumer;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
-    protected final Function<Throwable, byte[]> onFailureRespond;
+    protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
+    protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
     protected final int httpStatusCode;
     protected final int retryCount;
-    protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
+    protected final long timeout;
 
-    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount) {
+    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
+                              Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount,long timeout) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.headers = headers;
-        this.byteSupplier = byteSupplier;
+        this.byteConsumer = byteConsumer;
         this.encoder = encoder;
         this.errorHandler = errorHandler;
         this.onFailureRespond = onFailureRespond;
         this.retryCount = retryCount;
         this.httpStatusCode = httpStatusCode;
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
+        this.timeout = timeout;
     }
 
     /**
@@ -57,8 +60,8 @@ public class ExecuteRSBasicByte {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount);
-        lastStep.execute();
+        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder,
+                errorHandler, onFailureRespond, status.code(), retryCount,timeout).execute();
     }
 
     /**
@@ -71,8 +74,8 @@ public class ExecuteRSBasicByte {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount);
-        lastStep.execute();
+        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteConsumer, excecuteEventBusAndReply, encoder,
+                errorHandler, onFailureRespond, status.code(), retryCount,timeout).execute();
     }
 
     /**
@@ -83,8 +86,8 @@ public class ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSBasicByte lastStep = new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
-        lastStep.execute();
+        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteConsumer, excecuteEventBusAndReply, encoder,
+                errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout).execute();
     }
 
     protected Map<String, String> updateContentMap(String contentType) {
@@ -102,22 +105,24 @@ public class ExecuteRSBasicByte {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
             Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
             });
 
-            Optional.ofNullable(byteSupplier).
-                    ifPresent(supplier -> {
+            Optional.ofNullable(byteConsumer).
+                    ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                byte[] result = null;
-                                Optional.
-                                        ofNullable(ResponseUtil.
-                                                createResponse(retry, result, supplier, errorHandler, onFailureRespond, errorMethodHandler,vertx,0)). // TODO add timeout
-                                        ifPresent(res -> repond(res));
-                                checkAndCloseResponse(retry);
+                                ResponseUtil.createResponse(retry, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
+                                    if (value.succeeded()) {
+                                        respond(value.getResult());
+                                    } else {
+                                        respond(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                                    }
+                                    checkAndCloseResponse(retry);
+                                });
                             }
                     );
         });
@@ -131,11 +136,10 @@ public class ExecuteRSBasicByte {
         }
     }
 
-    protected void repond(byte[] result) {
+    protected void respond(byte[] result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            RESTExecutionUtil.updateResponseHaders(headers, response);
-            RESTExecutionUtil.updateResponseStatusCode(httpStatusCode, response);
+            updateHeaderAndStatuscode(statuscode, response);
             if (result != null) {
                 response.end(Buffer.buffer(result));
             } else {
@@ -143,6 +147,29 @@ public class ExecuteRSBasicByte {
             }
         }
     }
+
+    private void updateHeaderAndStatuscode(int statuscode, HttpServerResponse response) {
+        RESTExecutionUtil.updateResponseHaders(headers, response);
+        RESTExecutionUtil.updateResponseStatusCode(statuscode, response);
+    }
+
+    protected void respond(String result, int statuscode) {
+        final HttpServerResponse response = context.response();
+        if (!response.ended()) {
+            updateHeaderAndStatuscode(statuscode, response);
+            if (result != null) {
+                response.end(result);
+            } else {
+                response.end();
+            }
+        }
+    }
+
+    protected void respond(byte[] result) {
+        respond(result,httpStatusCode);
+    }
+
+
 
 
 }

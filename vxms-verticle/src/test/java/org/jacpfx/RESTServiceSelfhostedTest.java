@@ -478,7 +478,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                 System.out.println("count: " + count.get());
 
 
-            }).retry(3).onFailureRespond(e -> productType + product).execute();
+            }).retry(3).onFailureRespond((e,response) -> response.complete(productType + product)).execute();
         }
 
         @Path("/endpointFourErrorReturnRetryTest")
@@ -499,7 +499,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                     }).
                     onError(error -> System.out.println("retry: " + count.get() + "   " + error.getStackTrace())).
                     retry(3).
-                    onFailureRespond(error -> product + productType).
+                    onFailureRespond((error,response) ->response.complete(product + productType)).
                     execute();
         }
 
@@ -549,7 +549,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().byteResponse(() -> Serializer.serialize(pp)).execute();
+            handler.response().byteResponse((future) ->  future.complete(Serializer.serialize(pp))).execute();
         }
 
         @Path("/endpointSeven_error")
@@ -560,19 +560,19 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointTwo: " + handler);
             AtomicInteger count = new AtomicInteger(4);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().byteResponse(() -> {
+            handler.response().byteResponse((future) -> {
                 if (count.decrementAndGet() >= 0) {
                     System.out.println("throw:" + count.get());
                     throw new NullPointerException("test");
                 }
-                return Serializer.serialize(pp);
-            }).retry(3).onFailureRespond(error -> {
+                future.complete(Serializer.serialize(pp));
+            }).retry(3).onFailureRespond((error,future) -> {
                 try {
-                    return Serializer.serialize(pp);
+                    future.complete(Serializer.serialize(pp));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return null;
+                future.complete(null);
             }).execute();
         }
 

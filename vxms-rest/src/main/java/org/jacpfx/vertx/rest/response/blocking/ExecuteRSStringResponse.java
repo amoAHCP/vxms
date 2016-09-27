@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.response.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
@@ -17,7 +18,8 @@ import java.util.function.Function;
 public class ExecuteRSStringResponse extends ExecuteRSString {
 
 
-    public ExecuteRSStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply,  Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+    public ExecuteRSStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler,
+                                   Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
         super(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply,encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 

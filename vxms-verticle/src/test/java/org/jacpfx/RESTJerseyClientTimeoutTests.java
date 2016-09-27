@@ -1,21 +1,20 @@
 package org.jacpfx;
 
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.ext.web.Router;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,10 +26,6 @@ import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.hamcrest.core.Is.is;
 
 /**
  * Created by Andy Moncsek on 23.04.15.
@@ -69,8 +64,7 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
     public void startVerticles() throws InterruptedException {
 
 
-        CountDownLatch latch2 = new CountDownLatch(1);
-
+        CountDownLatch latch2 = new CountDownLatch(2);
 
 
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
@@ -79,6 +73,18 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         // don't have to hardecode it in your tests
 
         getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
+            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+            System.out.println("start service: " + asyncResult.succeeded());
+            assertTrue(asyncResult.succeeded());
+            assertNotNull("deploymentID should not be null", asyncResult.result());
+            // If deployed correctly then start the tests!
+            //   latch2.countDown();
+
+            latch2.countDown();
+
+        });
+
+        getVertx().deployVerticle(new TestVerticle(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
             assertTrue(asyncResult.succeeded());
@@ -180,6 +186,32 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
 
     }
 
+    @Test
+
+    public void eventbusTimeoutNonBlockingTest() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" + PORT).path("/wsService/eventbusTimeoutNonBlockingTest");
+        target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext((e) -> assertEquals(response, "timeout"));
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        });
+
+
+        latch.await();
+        testComplete();
+
+    }
 
 
     public HttpClient getClient() {
@@ -213,13 +245,37 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
             reply.response().
                     stringResponse((future) -> {
                         getVertx().
-                                createHttpClient(new HttpClientOptions()).getNow(PORT, HOST, SERVICE_REST_GET+"/long", response -> {
-                            if(!future.isComplete())future.complete("reply");
+                                createHttpClient(new HttpClientOptions()).getNow(PORT, HOST, SERVICE_REST_GET + "/long", response -> {
+                            if (!future.isComplete()) future.complete("reply");
                         });
 
                     }).
                     timeout(1000).
-                    onFailureRespond((error) -> "failure").
+                    onError(e -> {
+                        System.out.println("TIMEOUT");
+                    }).
+                    retry(3).
+                    onFailureRespond((error,response) -> {
+                        System.out.println("ON FAILURE");
+                        response.complete("failure");
+                    }).
+                    execute();
+        }
+
+
+        @Path("/eventbusTimeoutNonBlockingTest")
+        @GET
+        public void eventbusTimeoutNonBlockingTest(RestHandler reply) {
+            System.out.println("stringResponse: " + reply);
+            reply.eventBusRequest().send("hello", "payload", new DeliveryOptions().setSendTimeout(500)).
+                    onFailureRespond(e -> {
+                        System.out.println("TIMEOUT ERROR" + e.cause());
+                        return "timeout";
+                    }).
+                    mapToStringResponse(message -> {
+                        System.out.println("CAUSE: "+message.cause());
+                        return message.result().body().toString();
+                    }).retry(2).
                     execute();
         }
 
@@ -236,6 +292,26 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         }
 
 
+    }
+
+    public class TestVerticle extends AbstractVerticle {
+        public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+            System.out.println("start");
+            vertx.eventBus().consumer("hello", handler -> {
+                vertx.executeBlocking(blocking -> {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("request::" + handler.body().toString());
+                    handler.reply("hello");
+                }, result -> {
+                });
+
+            });
+            startFuture.complete();
+        }
     }
 
 }

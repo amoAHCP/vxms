@@ -31,6 +31,10 @@ public class EventBusRequest {
         return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, null, null);
     }
 
+    public EventBusResponse send(String id, Object message,DeliveryOptions options) {
+        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options, null);
+    }
+
 
     public void sendAndRespondRequest(String id, Object message) {
         sendAndRespondRequest(id, message, new DeliveryOptions());

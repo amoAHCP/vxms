@@ -62,12 +62,6 @@ public class ConfigurationUtil {
     // TODO should not be used
     @Deprecated
     public static String getHostName() {
-        try {
-            InetAddress.getLocalHost().getHostName();
-            return "0.0.0.0";
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            return "127.0.0.1";
-        }
+        return "127.0.0.1";
     }
 }

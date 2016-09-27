@@ -43,17 +43,17 @@ public class RSResponse {
     /**
      * Returns a byte array to the target type
      *
-     * @param byteSupplier supplier which returns the createResponse value as byte array
+     * @param byteConsumer consumes a io.vertx.core.Future to compleate with a byte response
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
-    public ExecuteRSBasicByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0);
+    public ExecuteRSBasicByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
+        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteConsumer, null, null, null, null, 0, 0,0);
     }
 
     /**
      * Returns a String to the target type
      *
-     * @param stringConsumer consumer which returns the createResponse value as String
+     * @param stringConsumer consumes a io.vertx.core.Future to compleate with a String response
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicStringResponse stringResponse(ThrowableFutureConsumer<String> stringConsumer) {

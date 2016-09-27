@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.interfaces;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;
@@ -16,5 +17,5 @@ public interface ExecuteEventBusByteCall {
 
     void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
                  Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                 Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount);
+                 ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout);
 }

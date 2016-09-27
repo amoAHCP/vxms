@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.response.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
@@ -19,7 +20,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
     public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
-                                        Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+                                        Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
         super(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
@@ -30,7 +31,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
-    public ExecuteRSBasicString onFailureRespond(Function<Throwable, String> onFailureRespond) {
+    public ExecuteRSBasicString onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
         return new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 

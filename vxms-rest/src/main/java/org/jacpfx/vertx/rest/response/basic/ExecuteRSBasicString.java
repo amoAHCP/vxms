@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
@@ -30,15 +31,15 @@ public class ExecuteRSBasicString {
     protected final ThrowableFutureConsumer<String> stringConsumer;
     protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
-    protected final Function<Throwable, String> onFailureRespond;
+    protected final ThrowableErrorConsumer<Throwable, String> onFailureRespond;
+    protected final ExecuteEventBusStringCall excecuteEventBusAndReply;
     protected final int httpStatusCode;
     protected final int retryCount;
-    protected final ExecuteEventBusStringCall excecuteEventBusAndReply;
     protected final long timeout;
 
 
     public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
-                                Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount,long timeout) {
+                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount,long timeout) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -110,8 +111,7 @@ public class ExecuteRSBasicString {
             Optional.ofNullable(stringConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                String result = null;
-                                ResponseUtil.createResponse(retry,timeout, result, userOperation, errorHandler, onFailureRespond, errorMethodHandler,vertx, value -> {
+                                ResponseUtil.createResponse(retry,timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler,vertx, value -> {
                                     if(value.succeeded()) {
                                         respond(value.getResult());
                                     } else {

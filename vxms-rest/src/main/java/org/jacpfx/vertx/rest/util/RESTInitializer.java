@@ -144,11 +144,9 @@ public class RESTInitializer {
                 ReflectionUtil.genericMethodInvocation(onErrorMethod.get(), () -> ReflectionUtil.invokeRESTParameters(routingContext, onErrorMethod.get(), vertx, throwable, null), service);
             } catch (Throwable throwable1) {
                 routingContext.fail(throwable1);
-                throwable1.printStackTrace();
             }
         } else {
             routingContext.fail(throwable);
-            throwable.printStackTrace();
         }
     }
 }

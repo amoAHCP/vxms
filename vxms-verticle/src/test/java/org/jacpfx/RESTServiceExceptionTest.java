@@ -464,7 +464,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         @GET
         public void rsexceptionInByteResponse(RestHandler handler) {
             System.out.println("exceptionInByteResponse: " + handler);
-            handler.response().byteResponse(() -> {
+            handler.response().byteResponse((future) -> {
                 throw new NullPointerException("Test");
                 //return "";
             }).execute();
@@ -481,6 +481,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         }
 
         @OnRestError("/exceptionInStringResponseWithErrorHandler")
+        @GET
         public void rsexceptionInStringResponseWithErrorHandlerError(RestHandler handler, Throwable t) {
             System.out.println("+++++++rsexceptionInStringResponseWithErrorHandlerError: " + handler);
             t.printStackTrace();
@@ -499,6 +500,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         }
 
         @OnRestError("/exceptionInAsyncStringResponseWithErrorHandler")
+        @GET
         public void exceptionInAsyncStringResponseWithErrorHandlerError(RestHandler handler, Throwable t) {
             System.out.println("+++++++rsexceptionInAsyncStringResponseWithErrorHandler: " + handler);
             t.printStackTrace();

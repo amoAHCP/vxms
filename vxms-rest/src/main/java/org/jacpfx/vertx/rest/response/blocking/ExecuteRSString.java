@@ -5,6 +5,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
@@ -24,13 +25,15 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
     protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<String> stringSupplier;
+    protected final Function<Throwable, String> onFailureRespond;
 
     public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
                            Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout);
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
         this.stringSupplier = stringSupplier;
+        this.onFailureRespond = onFailureRespond;
     }
 
     @Override

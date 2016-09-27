@@ -46,7 +46,7 @@ public class EventBusResponse {
 
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusByteExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0);
+        return EventbusByteExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
     }
 
     public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
@@ -67,7 +67,7 @@ public class EventBusResponse {
         return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options, errorFunction);
     }
 
-    public EventBusResponse onErrorResult(Function<AsyncResult<Message<Object>>, ?> errorFunction) {
+    public EventBusResponse onFailureRespond(Function<AsyncResult<Message<Object>>, ?> errorFunction) {
         return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options, errorFunction);
     }
 
