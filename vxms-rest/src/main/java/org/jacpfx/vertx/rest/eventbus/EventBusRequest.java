@@ -28,11 +28,11 @@ public class EventBusRequest {
     }
 
     public EventBusResponse send(String id, Object message) {
-        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, null, null);
+        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, null);
     }
 
-    public EventBusResponse send(String id, Object message,DeliveryOptions options) {
-        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options, null);
+    public EventBusResponse send(String id, Object message, DeliveryOptions options) {
+        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options);
     }
 
 
@@ -58,7 +58,7 @@ public class EventBusRequest {
             response.end(Buffer.buffer((byte[]) resp));
         } else {
             // TODO implement object Response
-           // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.createResponse()));
+            // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.createResponse()));
         }
     }
 

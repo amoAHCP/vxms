@@ -68,7 +68,12 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
-
+    /**
+     * put HTTP header to response
+     * @param key the header name
+     * @param value the header value
+     * @return the response chain
+     */
     public ExecuteRSStringResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);

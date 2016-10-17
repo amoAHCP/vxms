@@ -19,8 +19,9 @@ import java.util.function.Function;
 public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
-    public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
-                                        Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+    public ExecuteRSBasicStringResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer,
+                                        ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+                                        int httpStatusCode, int retryCount, long timeout) {
         super(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
@@ -29,7 +30,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
      * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value, this handler is a terminal handler and will be executed only once
      *
      * @param onFailureRespond the handler (function) to execute on error
-     * @return the createResponse chain
+     * @return the response chain
      */
     public ExecuteRSBasicString onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
         return new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
@@ -37,8 +38,8 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
     /**
      * intermediate error handler which will be called on each error (at least 1 time, in case on N retries... up to N times)
-     * @param errorHandler
-     * @return
+     * @param errorHandler the handler to be executed on each error
+     * @return the response chain
      */
     public ExecuteRSBasicStringResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout);
@@ -46,8 +47,8 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
     /**
      * Defines how long a method can be executed before aborted.
-     * @param timeout
-     * @return
+     * @param timeout the amount of timeout in ms
+     * @return the response chain
      */
     public ExecuteRSBasicStringResponse timeout(long timeout) {
         return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout);
@@ -55,13 +56,19 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
     /**
      * retry execution N times before
-     * @param retryCount
-     * @return
+     * @param retryCount the amount of retries
+     * @return the response chain
      */
     public ExecuteRSBasicStringResponse retry(int retryCount) {
         return new ExecuteRSBasicStringResponse(vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout);
     }
 
+    /**
+     * put HTTP header to response
+     * @param key the header name
+     * @param value the header value
+     * @return the response chain
+     */
     public ExecuteRSBasicStringResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);

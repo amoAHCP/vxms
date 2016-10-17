@@ -2,6 +2,8 @@ package org.jacpfx.vertx.rest.response.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableErrorConsumer;
+import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
@@ -18,8 +20,9 @@ import java.util.function.Function;
 public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
 
 
-    public ExecuteRSBasicObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount) {
-        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+    public ExecuteRSBasicObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<Serializable> objectConsumer, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder,
+                                        Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+        super(vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
 
@@ -29,21 +32,44 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
-    public ExecuteRSBasicObject onFailureRespond(Function<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-        return new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+    public ExecuteRSBasicObject onFailureRespond(ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
+        return new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
-
+    /**
+     * intermediate error handler which will be called on each error (at least 1 time, in case on N retries... up to N times)
+     * @param errorHandler the handler to be executed on each error
+     * @return the response chain
+     */
     public ExecuteRSBasicObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
+    /**
+     * Defines how long a method can be executed before aborted.
+     * @param timeout the amount of timeout in ms
+     * @return the response chain
+     */
+    public ExecuteRSBasicObjectResponse timeout(long timeout) {
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+    }
+
+    /**
+     * retry execution N times before
+     * @param retryCount the amount of retries
+     * @return the response chain
+     */
     public ExecuteRSBasicObjectResponse retry(int retryCount) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
-
+    /**
+     * put HTTP header to response
+     * @param key the header name
+     * @param value the header value
+     * @return the response chain
+     */
     public ExecuteRSBasicObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headerMap, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 }

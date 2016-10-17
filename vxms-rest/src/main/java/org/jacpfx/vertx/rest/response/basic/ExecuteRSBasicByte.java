@@ -24,14 +24,14 @@ import java.util.function.Consumer;
 public class ExecuteRSBasicByte {
     protected final Vertx vertx;
     protected final Throwable t;
-    protected final Consumer<Throwable> errorMethodHandler;
     protected final RoutingContext context;
     protected final Map<String, String> headers;
-    protected final ThrowableFutureConsumer<byte[]> byteConsumer;
-    protected final Encoder encoder;
     protected final Consumer<Throwable> errorHandler;
+    protected final Consumer<Throwable> errorMethodHandler;
+    protected final ThrowableFutureConsumer<byte[]> byteConsumer;
     protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
     protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
+    protected final Encoder encoder;
     protected final int httpStatusCode;
     protected final int retryCount;
     protected final long timeout;

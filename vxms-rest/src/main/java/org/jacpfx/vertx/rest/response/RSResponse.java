@@ -63,11 +63,11 @@ public class RSResponse {
     /**
      * Returns a Serializable to the target type
      *
-     * @param objectSupplier supplier which returns the createResponse value as Serializable
+     * @param objectConsumer consumes a io.vertx.core.Future to compleate with a Serialized Object response
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
-    public ExecuteRSBasicObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers,  objectSupplier, null, encoder, null, null, 0, 0);
+    public ExecuteRSBasicObjectResponse objectResponse(ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
+        return new ExecuteRSBasicObjectResponse(vertx, t, errorMethodHandler, context, headers,  objectConsumer, null, encoder, null, null, 0, 0, 0);
     }
 
 

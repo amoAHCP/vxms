@@ -138,8 +138,11 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("hello").getValue());
-                //Assert.assertEquals(response, "hello1");
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("hello").getValue());
+                });
                 latch.countDown();
             }
 
@@ -174,7 +177,11 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("test exception").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("test exception").getValue());
+                });
                 latch.countDown();
             }
 
@@ -209,7 +216,12 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("no connection").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("no connection").getValue());
+                });
+
                 latch.countDown();
             }
 
@@ -243,7 +255,12 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
+
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("hello1").getValue());
+                });
                 latch.countDown();
             }
 
@@ -277,7 +294,11 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("hello1").getValue());
+                });
                 latch.countDown();
             }
 
@@ -326,7 +347,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
                     mapToByteResponse(handler -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onFailureRespond((error,future) -> {
+                    onFailureRespond((error, future) -> {
                         try {
                             Payload<String> p = new Payload<>(error.getMessage());
                             future.complete(Serializer.serialize(p));
@@ -343,16 +364,15 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    onFailureRespond(handler -> {
+                    mapToByteResponse(handler -> (byte[]) handler.result().body()).
+                    onFailureRespond((t, c) -> {
                         try {
                             Payload<String> p = new Payload<>("no connection");
-                            return Serializer.serialize(p);
+                            c.complete(Serializer.serialize(p));
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            c.fail(e);
                         }
-                        return new byte[0];
                     }).
-                    mapToByteResponse(handler -> (byte[]) handler.result().body()).
                     execute();
         }
 

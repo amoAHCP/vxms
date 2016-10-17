@@ -25,12 +25,17 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     protected final long delay;
     protected final long timeout;
     protected final ExecuteEventBusObjectCallAsync excecuteEventBusAndReply;
+    protected final ThrowableSupplier<Serializable> objectSupplier;
+    protected final Function<Throwable, Serializable> onFailureRespond;
 
-    public ExecuteRSObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount);
+    public ExecuteRSObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder,
+                           Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout);
         this.delay = delay;
         this.timeout = timeout;
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
+        this.objectSupplier = objectSupplier;
+        this.onFailureRespond = onFailureRespond;
     }
 
     @Override
@@ -89,7 +94,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
                                     false,
                                     (Handler<AsyncResult<Serializable>>) value -> {
                                         if (!value.failed()) {
-                                            repond(value.result());
+                                            respond(value.result());
                                         } else {
                                             checkAndCloseResponse(retry);
                                         }

@@ -11,6 +11,7 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
+import org.jacpfx.entity.Payload;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
@@ -129,7 +130,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "hello1");
+                String value = response;
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, "hello1");
+                });
                 latch.countDown();
             }
 
@@ -158,6 +163,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
                 Assert.assertEquals(response, "test exception");
+                String value = response;
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, "test exception");
+                });
                 latch.countDown();
             }
 
@@ -185,7 +195,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "no connection");
+                String value = response;
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value,"no connection");
+                });
                 latch.countDown();
             }
 
@@ -212,7 +226,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "no connection");
+                String value = response;
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, "no connection");
+                });
                 latch.countDown();
             }
 
@@ -239,7 +257,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "hello1");
+                String value = response;
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, "hello1");
+                });
                 latch.countDown();
             }
 
@@ -266,7 +288,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "hello1");
+                String value = response;
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, "hello1");
+                });
                 latch.countDown();
             }
 
@@ -323,8 +349,12 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
             System.out.println("-------1");
             reply.eventBusRequest().
-                    send("hello1", "welt").onFailureRespond(handler -> "no connection").
-                    mapToStringResponse(handler -> handler.result().body().toString()).
+                    send("hello1", "welt").
+                    mapToStringResponse(handler -> {
+                        System.out.println("value from event  ");
+                        return handler.result().body().toString();
+                    }).
+                    onFailureRespond((t,c)-> c.complete("no connection")).
                     execute();
             System.out.println("-------2");
         }

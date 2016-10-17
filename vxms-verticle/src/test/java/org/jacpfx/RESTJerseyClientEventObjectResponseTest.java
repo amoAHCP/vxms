@@ -139,8 +139,11 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("hello").getValue());
-                //Assert.assertEquals(response, "hello1");
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("hello").getValue());
+                });
                 latch.countDown();
             }
 
@@ -161,7 +164,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/complexByteErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexByteErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -175,7 +178,11 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("test exception").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("test exception").getValue());
+                });
                 latch.countDown();
             }
 
@@ -210,7 +217,11 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("no connection").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("no connection").getValue());
+                });
                 latch.countDown();
             }
 
@@ -230,7 +241,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/simpleByteNoConnectionRetryErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionRetryErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -244,7 +255,11 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("hello1").getValue());
+                });
                 latch.countDown();
             }
 
@@ -264,7 +279,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -278,7 +293,11 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
+                String value = pp.getValue();
+                vertx.runOnContext( h -> {
+
+                    assertEquals(value, new Payload<>("hello1").getValue());
+                });
                 latch.countDown();
             }
 
@@ -309,7 +328,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
             reply.
                     eventBusRequest().
                     send("hello", "welt").
-                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
+                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()), new ExampleByteEncoder()).
                     execute();
         }
 
@@ -321,8 +340,8 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                     send("hello", "welt").
                     mapToObjectResponse(handler -> {
                         throw new NullPointerException("test exception");
-                    },new ExampleByteEncoder()).
-                    onFailureRespond(error -> new Payload<>(error.getMessage()),new ExampleByteEncoder()).
+                    }, new ExampleByteEncoder()).
+                    onFailureRespond((error, future) -> future.complete(new Payload<>(error.getMessage())), new ExampleByteEncoder()).
                     execute();
         }
 
@@ -331,8 +350,8 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    onFailureRespond(handler -> new Payload<>("no connection")).
-                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
+                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()), new ExampleByteEncoder()).
+                    onFailureRespond((t,c) -> c.complete(new Payload<>("no connection")), new ExampleByteEncoder()).
                     execute();
         }
 
@@ -341,7 +360,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("error", "1").
-                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString() + "1"),new ExampleByteEncoder()).
+                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString() + "1"), new ExampleByteEncoder()).
                     retry(3).
                     execute();
         }
@@ -356,7 +375,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
                         System.out.println("retry: " + count.get());
                         if (count.incrementAndGet() < 3) throw new NullPointerException("test");
                         return new Payload<>(handler.result().body().toString() + "1");
-                    },new ExampleByteEncoder()).
+                    }, new ExampleByteEncoder()).
                     retry(3).
                     execute();
         }

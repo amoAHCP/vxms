@@ -510,7 +510,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().objectResponse(() -> pp, new ExampleStringEncoder()).execute();
+            handler.response().objectResponse((future) -> future.complete(pp), new ExampleStringEncoder()).execute();
         }
 
         @Path("/endpointFive_error")
@@ -521,15 +521,15 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             System.out.println("wsEndpointTwo: " + handler);
             Payload<String> pp = new Payload<>(productType + product);
             AtomicInteger count = new AtomicInteger(4);
-            handler.response().objectResponse(() -> {
+            handler.response().objectResponse((future) -> {
                         if (count.decrementAndGet() >= 0) {
                             System.out.println("throw:" + count.get());
                             throw new NullPointerException("test");
                         }
-                        return new Payload<>("hallo");
+                        future.complete(new Payload<>("hallo"));
                     }
                     , new ExampleStringEncoder()
-            ).retry(3).onFailureRespond(error -> pp, new ExampleStringEncoder()).execute();
+            ).retry(3).onFailureRespond((error,future) -> future.complete(pp), new ExampleStringEncoder()).execute();
         }
 
         @Path("/endpointSix")
@@ -539,7 +539,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().objectResponse(() -> pp, new ExampleByteEncoder()).execute();
+            handler.response().objectResponse((future) -> future.complete(pp), new ExampleByteEncoder()).execute();
         }
 
         @Path("/endpointSeven")

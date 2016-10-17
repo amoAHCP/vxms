@@ -35,6 +35,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
     /**
      * Will be executed on each error
+     *
      * @param errorHandler
      * @return the createResponse chain
      */
@@ -42,6 +43,12 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
+    /**
+     * retry operation on error
+     *
+     * @param retryCount
+     * @return the createResponse chain
+     */
     public ExecuteRSObjectResponse retry(int retryCount) {
         return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
@@ -66,7 +73,13 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
-
+    /**
+     * put HTTP header to response
+     *
+     * @param key   the header name
+     * @param value the header value
+     * @return the response chain
+     */
     public ExecuteRSObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);

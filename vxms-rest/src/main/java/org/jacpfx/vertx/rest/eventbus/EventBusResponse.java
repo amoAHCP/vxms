@@ -29,10 +29,10 @@ public class EventBusResponse {
     private final String id;
     private final Object message;
     private final DeliveryOptions options;
-    private final Function<AsyncResult<Message<Object>>, ?> errorFunction;
 
 
-    public EventBusResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction) {
+    public EventBusResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String id,
+                            Object message, DeliveryOptions options) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -40,36 +40,27 @@ public class EventBusResponse {
         this.id = id;
         this.message = message;
         this.options = options;
-        this.errorFunction = errorFunction;
     }
 
 
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusByteExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
+       return EventbusByteExecutionUtil.mapToByteResponse(id,message,options,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
     }
 
     public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusObjectExecutionUtil.mapToObjectResponse(id,message,options,errorFunction,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0);
+        return EventbusObjectExecutionUtil.mapToObjectResponse(id,message,options,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0);
     }
 
     public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
 
-        return EventbusStringExecutionUtil.mapToStringResponse(id,message,options,errorFunction,stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
+        return EventbusStringExecutionUtil.mapToStringResponse(id,message,options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
     }
 
 
 
 
-
-    public EventBusResponse deliveryOptions(DeliveryOptions options) {
-        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options, errorFunction);
-    }
-
-    public EventBusResponse onFailureRespond(Function<AsyncResult<Message<Object>>, ?> errorFunction) {
-        return new EventBusResponse(vertx, t, errorMethodHandler, context, id, message, options, errorFunction);
-    }
 
 
 }
