@@ -20,6 +20,7 @@ import java.util.function.Function;
 /**
  * Created by Andy Moncsek on 19.01.16.
  */
+// TODO Refactor class similar to ResponseUtil
 public class RESTExecutionUtil {
 
     public static <T> void executeRetryAndCatchAsync(ThrowableSupplier<T> supplier, Future<T> handler, Consumer<Throwable> errorHandler, Function<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, int retry, long timeout, long delay) {
@@ -52,6 +53,7 @@ public class RESTExecutionUtil {
             } catch (Throwable e) {
                 retry--;
                 if (retry < 0) {
+                    // TODO handle exceptions in onErrorCode
                     result = handleError(result, errorHandler, onFailureRespond, errorMethodHandler, e);
                     errorHandling = true;
                 } else {
@@ -76,6 +78,7 @@ public class RESTExecutionUtil {
 
 
     private static void handleDelay(long delay) {
+        // TODO switch to timer implementation
         try {
             if(delay>0L)Thread.sleep(delay);
         } catch (InterruptedException e1) {

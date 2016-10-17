@@ -5,7 +5,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
@@ -42,18 +41,35 @@ public class EventBusResponse {
         this.options = options;
     }
 
-    // TODO switch impl to ThrowableFutureConsumer<String> stringConsumer
+    /**
+     * Map Response from event-bus call to REST response
+     *
+     * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
+     * @return the response chain
+     */
     public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
         return EventbusStringExecutionUtil.mapToStringResponse(id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
     }
 
-
+    /**
+     * Map Response from event-bus call to REST response
+     *
+     * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
+     * @return the response chain
+     */
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
         return EventbusByteExecutionUtil.mapToByteResponse(id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
     }
 
+    /**
+     * Map Response from event-bus call to REST response
+     *
+     * @param objectFunction pass io.vertx.core.AsyncResult and future to complete with a Object
+     * @param encoder        the Object encoder
+     * @return the response chain
+     */
     public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
         return EventbusObjectExecutionUtil.mapToObjectResponse(id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0);

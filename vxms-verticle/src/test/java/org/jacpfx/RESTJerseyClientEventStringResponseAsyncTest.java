@@ -15,6 +15,7 @@ import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.GET;
@@ -199,7 +200,41 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "failed");
+                vertx.runOnContext(c -> {
+                    assertEquals(response, "failed");
+                });
+
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+    @Test
+    @Ignore
+    public void onErrorResponseErrorTest() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/onFailurePassError");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext(c -> {
+                    assertEquals(response, "failed");
+                });
+
                 latch.countDown();
             }
 
@@ -273,10 +308,29 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         @Path("/onFailurePass")
         @GET
         public void onErrorResponse(RestHandler reply) {
-            reply.eventBusRequest().async().send("hello1", "welt").onErrorResult(handler -> {
-                System.err.println("::: " + handler.cause().getMessage());
-                return "failed";
-            }).mapToStringResponse(handler -> handler.result().body().toString()).execute();
+            reply.
+                    eventBusRequest().
+                    async().
+                    send("hello1", "welt").
+                    mapToStringResponse(handler -> handler.result().body().toString()).
+                    onFailureRespond(handler -> {
+                        System.err.println("::: " + handler.getMessage());
+                        return "failed";
+                    }).execute();
+        }
+
+        @Path("/onFailurePassError")
+        @GET
+        public void onFailurePassError(RestHandler reply) {
+            reply.
+                    eventBusRequest().
+                    async().
+                    send("hello1", "welt").
+                    mapToStringResponse(handler -> handler.result().body().toString()).
+                    onFailureRespond(handler -> {
+                        System.err.println("::: " + handler.getCause().getMessage());
+                        return "failed";
+                    }).execute();
         }
 
     }

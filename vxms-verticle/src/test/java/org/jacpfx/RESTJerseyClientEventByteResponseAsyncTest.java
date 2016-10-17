@@ -125,7 +125,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/complexByteResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexByteResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -160,7 +160,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/complexByteErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexByteErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -195,7 +195,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/simpleByteNoConnectionErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -229,7 +229,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/simpleByteNoConnectionRetryErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionRetryErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -263,7 +263,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":"  + PORT2).path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
         Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
 
             @Override
@@ -346,7 +346,8 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
             reply.eventBusRequest().
                     async().
                     send("hello1", "welt").
-                    onErrorResult(handler -> {
+                    mapToByteResponse(handler -> (byte[]) handler.result().body()).
+                    onFailureRespond(handler -> {
                         try {
                             Payload<String> p = new Payload<>("no connection");
                             return Serializer.serialize(p);
@@ -355,7 +356,6 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
                         }
                         return new byte[0];
                     }).
-                    mapToByteResponse(handler -> (byte[]) handler.result().body()).
                     execute();
         }
 

@@ -334,8 +334,8 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
             reply.eventBusRequest().
                     async().
                     send("hello1", "welt").
-                    onErrorResult(handler -> new Payload<>("no connection")).
                     mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
+                    onFailureRespond(handler -> new Payload<>("no connection"),new ExampleByteEncoder()).
                     execute();
         }
 

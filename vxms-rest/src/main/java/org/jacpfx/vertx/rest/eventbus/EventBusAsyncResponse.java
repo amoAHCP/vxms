@@ -45,27 +45,19 @@ public class EventBusAsyncResponse {
 
 
     public ExecuteRSStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-        return EventbusAsyncStringExecutionUtil.mapToStringResponse(id, message,options,errorFunction,stringFunction,vertx, t, errorMethodHandler, context, null, null,  null, null, null, 0, 0, 0, 0);
+        return EventbusAsyncStringExecutionUtil.mapToStringResponse(id, message,options,stringFunction,vertx, t, errorMethodHandler, context, null, null,  null, null, null, 0, 0, 0, 0);
     }
 
     public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusAsyncByteExecutionUtil.mapToByteResponse(id,message,options,errorFunction,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0,0);
+        return EventbusAsyncByteExecutionUtil.mapToByteResponse(id,message,options,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0,0);
     }
 
     public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(id,message,options,errorFunction,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0,0,0);
+        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(id,message,options,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0,0,0);
     }
 
-
-    public EventBusAsyncResponse deliveryOptions(DeliveryOptions options) {
-        return new EventBusAsyncResponse(vertx, t, errorMethodHandler, context, id, message, options, errorFunction);
-    }
-
-    public EventBusAsyncResponse onErrorResult(Function<AsyncResult<Message<Object>>, ?> errorFunction) {
-        return new EventBusAsyncResponse(vertx, t, errorMethodHandler, context, id, message, options, errorFunction);
-    }
 
 
 }
