@@ -7,6 +7,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
 public class EventbusByteExecutionUtil {
 
     public static ExecuteRSBasicByteResponse mapToByteResponse(String _id, Object _message, DeliveryOptions _options,
-                                                               ThrowableFunction<AsyncResult<Message<Object>>, byte[]> _byteFunction, Vertx _vertx, Throwable _t,
+                                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> _byteFunction, Vertx _vertx, Throwable _t,
                                                                Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
                                                                ThrowableFutureConsumer<byte[]> _byteSupplier, Encoder _encoder, Consumer<Throwable> _errorHandler,
                                                                ThrowableErrorConsumer<Throwable, byte[]> _onFailureRespond, int _httpStatusCode, int _retryCount, long _timeout) {
@@ -39,7 +40,7 @@ public class EventbusByteExecutionUtil {
     }
 
     private static void sendMessageAndSupplyByteHandler(String id, Object message, DeliveryOptions options,
-                                                        ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t,
+                                                        ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t,
                                                         Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                         Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
                                                         int httpStatusCode, int retryCount, long timeout) {
@@ -55,7 +56,7 @@ public class EventbusByteExecutionUtil {
     }
 
     private static void createByteSupplierAndExecute(String id, Object message, DeliveryOptions options,
-                                                     ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+                                                     ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
                                                      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                      Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
                                                      int httpStatusCode, int retryCount, long timeout, AsyncResult<Message<Object>> event) {
@@ -69,7 +70,7 @@ public class EventbusByteExecutionUtil {
     }
 
     private static void retryByteOperation(String id, Object message, DeliveryOptions options,
-                                           ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+                                           ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
                                            Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                            Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
                                            int httpStatusCode, int retryCount, long timeout) {
@@ -80,7 +81,7 @@ public class EventbusByteExecutionUtil {
 
 
     private static ThrowableFutureConsumer<byte[]> createByteSupplier(String id, Object message, DeliveryOptions options,
-                                                                      ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
+                                                                      ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
                                                                       Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                                       Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
                                                                       int httpStatusCode, int retryCount, long timeout, AsyncResult<Message<Object>> event) {
@@ -94,10 +95,8 @@ public class EventbusByteExecutionUtil {
                     throw event.cause();
                 }
             } else {
-                resp = byteFunction.apply(event);
+                 byteFunction.accept(event,future);
             }
-
-            future.complete(resp);
         };
     }
 

@@ -329,11 +329,11 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
             reply.
                     eventBusRequest().
                     send("hello", "welt").
-                    mapToByteResponse(handler -> {
+                    mapToByteResponse((handler, replyFuture)  -> {
                         Payload<String> p = new Payload<>(handler.
                                 result().
                                 body().toString());
-                        return Serializer.serialize(p);
+                        replyFuture.complete(Serializer.serialize(p));
                     }).
                     execute();
         }
@@ -344,7 +344,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         public void complexByteErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToByteResponse(handler -> {
+                    mapToByteResponse((handler, replyFuture)  -> {
                         throw new NullPointerException("test exception");
                     }).
                     onFailureRespond((error, future) -> {
@@ -364,7 +364,7 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    mapToByteResponse(handler -> (byte[]) handler.result().body()).
+                    mapToByteResponse((handler, replyFuture) -> replyFuture.complete((byte[]) handler.result().body())).
                     onFailureRespond((t, c) -> {
                         try {
                             Payload<String> p = new Payload<>("no connection");
@@ -381,9 +381,9 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("error", "1").
-                    mapToByteResponse(handler -> {
+                    mapToByteResponse((handler, replyFuture) -> {
                         Payload<String> p = new Payload<>(handler.result().body().toString() + "1");
-                        return Serializer.serialize(p);
+                        replyFuture.complete(Serializer.serialize(p));
                     }).
                     retry(3).
                     execute();
@@ -395,11 +395,11 @@ public class RESTJerseyClientEventByteResponseTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToByteResponse(handler -> {
+                    mapToByteResponse((handler, replyFuture) -> {
                         System.out.println("retry: " + count.get());
                         if (count.incrementAndGet() < 3) throw new NullPointerException("test");
                         Payload<String> p = new Payload<>(handler.result().body().toString() + "1");
-                        return Serializer.serialize(p);
+                        replyFuture.complete(Serializer.serialize(p));
                     }).
                     retry(3).
                     execute();

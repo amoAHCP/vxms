@@ -11,7 +11,6 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.entity.Payload;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Assert;
@@ -131,7 +130,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
                 String value = response;
-                vertx.runOnContext( h -> {
+                vertx.runOnContext(h -> {
 
                     assertEquals(value, "hello1");
                 });
@@ -164,7 +163,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                 System.out.println("Response entity '" + response + "' received.");
                 Assert.assertEquals(response, "test exception");
                 String value = response;
-                vertx.runOnContext( h -> {
+                vertx.runOnContext(h -> {
 
                     assertEquals(value, "test exception");
                 });
@@ -196,9 +195,9 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
                 String value = response;
-                vertx.runOnContext( h -> {
+                vertx.runOnContext(h -> {
 
-                    assertEquals(value,"no connection");
+                    assertEquals(value, "no connection");
                 });
                 latch.countDown();
             }
@@ -227,7 +226,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
                 String value = response;
-                vertx.runOnContext( h -> {
+                vertx.runOnContext(h -> {
 
                     assertEquals(value, "no connection");
                 });
@@ -258,7 +257,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
                 String value = response;
-                vertx.runOnContext( h -> {
+                vertx.runOnContext(h -> {
 
                     assertEquals(value, "hello1");
                 });
@@ -289,7 +288,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
                 String value = response;
-                vertx.runOnContext( h -> {
+                vertx.runOnContext(h -> {
 
                     assertEquals(value, "hello1");
                 });
@@ -324,10 +323,10 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             reply.
                     eventBusRequest().
                     send("hello", "welt").
-                    mapToStringResponse(handler ->
-                            handler.
+                    mapToStringResponse((handler, future) ->
+                            future.complete(handler.
                                     result().
-                                    body().toString() + "1").
+                                    body().toString() + "1")).
                     execute();
         }
 
@@ -337,10 +336,10 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         public void complexSyncErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToStringResponse(handler -> {
+                    mapToStringResponse((handler, future) -> {
                         throw new NullPointerException("test exception");
                     }).
-                    onFailureRespond((error,response) -> response.complete(error.getMessage())).
+                    onFailureRespond((error, response) -> response.complete(error.getMessage())).
                     execute();
         }
 
@@ -350,11 +349,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             System.out.println("-------1");
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    mapToStringResponse(handler -> {
+                    mapToStringResponse((handler, future) -> {
                         System.out.println("value from event  ");
-                        return handler.result().body().toString();
+                        future.complete(handler.result().body().toString());
                     }).
-                    onFailureRespond((t,c)-> c.complete("no connection")).
+                    onFailureRespond((t, c) -> c.complete("no connection")).
                     execute();
             System.out.println("-------2");
         }
@@ -364,7 +363,8 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         public void simpleSyncNoConnectionError(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    mapToStringResponse(handler -> handler.result().body().toString()).//onFailure(error-> System.out.println("ERROR:"+error.getMessage()+"type: "+error.getClass())).
+                    mapToStringResponse((handler, future) ->
+                            future.complete(handler.result().body().toString())).//onFailure(error-> System.out.println("ERROR:"+error.getMessage()+"type: "+error.getClass())).
                     execute();
         }
 
@@ -373,7 +373,8 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         public void simpleSyncNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("error", "1").
-                    mapToStringResponse(handler -> handler.result().body().toString() + "1").
+                    mapToStringResponse((handler, future) ->
+                            future.complete(handler.result().body().toString() + "1")).
                     retry(3).
                     execute();
         }
@@ -384,10 +385,10 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToStringResponse(handler -> {
-                        System.out.println("retry: "+count.get());
+                    mapToStringResponse((handler, future) -> {
+                        System.out.println("retry: " + count.get());
                         if (count.incrementAndGet() < 3) throw new NullPointerException("test");
-                        return handler.result().body().toString() + "1";
+                        future.complete(handler.result().body().toString() + "1");
                     }).
                     retry(3).
                     execute();
@@ -395,7 +396,6 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
 
 
     }
-
 
 
     public class TestVerticle extends AbstractVerticle {

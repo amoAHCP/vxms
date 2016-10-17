@@ -6,6 +6,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
@@ -16,7 +17,6 @@ import org.jacpfx.vertx.rest.util.EventbusStringExecutionUtil;
 
 import java.io.Serializable;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
@@ -42,25 +42,22 @@ public class EventBusResponse {
         this.options = options;
     }
 
+    // TODO switch impl to ThrowableFutureConsumer<String> stringConsumer
+    public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-    public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
-
-       return EventbusByteExecutionUtil.mapToByteResponse(id,message,options,byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
-    }
-
-    public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
-
-        return EventbusObjectExecutionUtil.mapToObjectResponse(id,message,options,objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0);
-    }
-
-    public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-
-        return EventbusStringExecutionUtil.mapToStringResponse(id,message,options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0);
+        return EventbusStringExecutionUtil.mapToStringResponse(id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
     }
 
 
+    public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
+        return EventbusByteExecutionUtil.mapToByteResponse(id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
+    }
 
+    public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
+
+        return EventbusObjectExecutionUtil.mapToObjectResponse(id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0);
+    }
 
 
 }

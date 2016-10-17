@@ -328,7 +328,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
             reply.
                     eventBusRequest().
                     send("hello", "welt").
-                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()), new ExampleByteEncoder()).
+                    mapToObjectResponse((handler,replyFuture) -> replyFuture.complete(new Payload<>(handler.result().body().toString())), new ExampleByteEncoder()).
                     execute();
         }
 
@@ -338,7 +338,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         public void complexByteErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToObjectResponse(handler -> {
+                    mapToObjectResponse((handler,replyFuture) -> {
                         throw new NullPointerException("test exception");
                     }, new ExampleByteEncoder()).
                     onFailureRespond((error, future) -> future.complete(new Payload<>(error.getMessage())), new ExampleByteEncoder()).
@@ -350,7 +350,7 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()), new ExampleByteEncoder()).
+                    mapToObjectResponse((handler,replyFuture) -> replyFuture.complete(new Payload<>(handler.result().body().toString())), new ExampleByteEncoder()).
                     onFailureRespond((t,c) -> c.complete(new Payload<>("no connection")), new ExampleByteEncoder()).
                     execute();
         }
@@ -360,7 +360,8 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
                     send("error", "1").
-                    mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString() + "1"), new ExampleByteEncoder()).
+                    mapToObjectResponse((handler,replyFuture) ->
+                            replyFuture.complete(new Payload<>(handler.result().body().toString() + "1")), new ExampleByteEncoder()).
                     retry(3).
                     execute();
         }
@@ -371,10 +372,10 @@ public class RESTJerseyClientEventObjectResponseTest extends VertxTestBase {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
                     send("hello", "welt").
-                    mapToObjectResponse(handler -> {
+                    mapToObjectResponse((handler,replyFuture) -> {
                         System.out.println("retry: " + count.get());
                         if (count.incrementAndGet() < 3) throw new NullPointerException("test");
-                        return new Payload<>(handler.result().body().toString() + "1");
+                        replyFuture.complete(new Payload<>(handler.result().body().toString() + "1"));
                     }, new ExampleByteEncoder()).
                     retry(3).
                     execute();

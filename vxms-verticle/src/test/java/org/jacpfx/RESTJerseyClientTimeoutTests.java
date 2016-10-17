@@ -268,9 +268,9 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         public void eventbusTimeoutNonBlockingTest(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
             reply.eventBusRequest().send("hello", "payload", new DeliveryOptions().setSendTimeout(500)).
-                    mapToStringResponse(message -> {
+                    mapToStringResponse((message,future) -> {
                         System.out.println("CAUSE: "+message.cause());
-                        return message.result().body().toString();
+                        future.complete(message.result().body().toString());
                     }).
                     retry(2).
                     onFailureRespond((t,c) -> {

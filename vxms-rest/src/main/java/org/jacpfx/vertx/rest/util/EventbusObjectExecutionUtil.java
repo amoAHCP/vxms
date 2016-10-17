@@ -7,6 +7,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
 public class EventbusObjectExecutionUtil {
 
     public static ExecuteRSBasicObjectResponse mapToObjectResponse(String id, Object message, DeliveryOptions options,
-                                                                   ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx _vertx, Throwable _t,
+                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx _vertx, Throwable _t,
                                                                    Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
                                                                    ThrowableFutureConsumer<Serializable> _objectConsumer, Encoder _encoder, Consumer<Throwable> _errorHandler,
                                                                    ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond, int _httpStatusCode, int _retryCount, long _timeout) {
@@ -38,7 +39,7 @@ public class EventbusObjectExecutionUtil {
         return new ExecuteRSBasicObjectResponse(_vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _retryCount, _timeout);
     }
 
-    protected static void sendMessageAndSupplyObjectHandler(String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction,
+    protected static void sendMessageAndSupplyObjectHandler(String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
                                                             DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                                             Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
         vertx.
@@ -53,7 +54,7 @@ public class EventbusObjectExecutionUtil {
     }
 
     private static void createObjectSupplierAndExecute(String id, Object message, DeliveryOptions options,
-                                                       ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
+                                                       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
                                                        Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                        Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
                                                        int httpStatusCode, int retryCount, long timeout, AsyncResult<Message<Object>> event) {
@@ -68,7 +69,7 @@ public class EventbusObjectExecutionUtil {
         }
     }
 
-    private static void retryObjectOperation(String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction,
+    private static void retryObjectOperation(String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
                                              Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                              Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
         mapToObjectResponse(id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount - 1, timeout).
@@ -76,7 +77,7 @@ public class EventbusObjectExecutionUtil {
     }
 
     private static ThrowableFutureConsumer<Serializable> createObjectSupplier(String id, Object message, DeliveryOptions options,
-                                                                              ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
+                                                                              ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
                                                                               Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                                               Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
                                                                               int httpStatusCode, int retryCount, long timeout, AsyncResult<Message<Object>> event) {
@@ -90,10 +91,10 @@ public class EventbusObjectExecutionUtil {
                     throw event.cause();
                 }
             } else {
-                resp = objectFunction.apply(event);
+               objectFunction.accept(event,future);
             }
 
-            future.complete(resp);
+
         };
     }
 
