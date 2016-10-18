@@ -58,7 +58,7 @@ public class EventBusRequest {
             response.end(Buffer.buffer((byte[]) resp));
         } else {
             // TODO implement object Response
-            // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.createResponse()));
+            // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> ResponseAsyncUtil.sendObjectResult(value, context.createResponse()));
         }
     }
 

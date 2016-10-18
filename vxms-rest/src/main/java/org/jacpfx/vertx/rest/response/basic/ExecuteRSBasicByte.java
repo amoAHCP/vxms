@@ -9,14 +9,13 @@ import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
-import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.rest.util.ResponseUtil;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
+
+import static java.util.Optional.*;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -73,8 +72,7 @@ public class ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentMap(contentType);
-        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteConsumer, excecuteEventBusAndReply, encoder,
+        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType), byteConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, status.code(), retryCount,timeout).execute();
     }
 
@@ -85,16 +83,10 @@ public class ExecuteRSBasicByte {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentMap(contentType);
-        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headerMap, byteConsumer, excecuteEventBusAndReply, encoder,
+        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType), byteConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout).execute();
     }
 
-    protected Map<String, String> updateContentMap(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
-        return headerMap;
-    }
 
 
     /**
@@ -103,7 +95,7 @@ public class ExecuteRSBasicByte {
     public void execute() {
         vertx.runOnContext(action -> {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
-            Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+            ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
                     evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout);
                 } catch (Exception e) {
@@ -112,7 +104,8 @@ public class ExecuteRSBasicByte {
 
             });
 
-            Optional.ofNullable(byteConsumer).
+
+            ofNullable(byteConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
                                 ResponseUtil.createResponse(retry, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
@@ -139,7 +132,7 @@ public class ExecuteRSBasicByte {
     protected void respond(byte[] result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            updateHeaderAndStatuscode(statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
             if (result != null) {
                 response.end(Buffer.buffer(result));
             } else {
@@ -148,15 +141,12 @@ public class ExecuteRSBasicByte {
         }
     }
 
-    private void updateHeaderAndStatuscode(int statuscode, HttpServerResponse response) {
-        RESTExecutionUtil.updateResponseHaders(headers, response);
-        RESTExecutionUtil.updateResponseStatusCode(statuscode, response);
-    }
+
 
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            updateHeaderAndStatuscode(statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {

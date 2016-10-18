@@ -29,10 +29,9 @@ public class EventBusAsyncResponse {
     private final String id;
     private final Object message;
     private final DeliveryOptions options;
-    private final Function<AsyncResult<Message<Object>>, ?> errorFunction;
 
 
-    public EventBusAsyncResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String id, Object message, DeliveryOptions options, Function<AsyncResult<Message<Object>>, ?> errorFunction) {
+    public EventBusAsyncResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String id, Object message, DeliveryOptions options) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -40,7 +39,6 @@ public class EventBusAsyncResponse {
         this.id = id;
         this.message = message;
         this.options = options;
-        this.errorFunction = errorFunction;
     }
 
 

@@ -5,12 +5,12 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
-import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
+import org.jacpfx.vertx.rest.util.ResponseAsyncUtil;
+import org.jacpfx.vertx.rest.util.ResponseUtil;
 
 import java.util.Map;
 import java.util.Objects;
@@ -53,8 +53,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -67,8 +66,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentType(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -86,7 +84,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                 ifPresent(supplier -> {
                             int retry = retryCount;
                             this.vertx.executeBlocking(handler ->
-                                            RESTExecutionUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
+                                            ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
                                     false,
                                     (Handler<AsyncResult<String>>) value -> {
                                         if (!value.failed()) {

@@ -1,5 +1,6 @@
 package org.jacpfx.vertx.rest.util;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -143,10 +144,12 @@ public class RESTInitializer {
             try {
                 ReflectionUtil.genericMethodInvocation(onErrorMethod.get(), () -> ReflectionUtil.invokeRESTParameters(routingContext, onErrorMethod.get(), vertx, throwable, null), service);
             } catch (Throwable throwable1) {
-                routingContext.fail(throwable1);
+                routingContext.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()).setStatusMessage(throwable1.getMessage()).end();
+                throwable1.printStackTrace();
             }
         } else {
-            routingContext.fail(throwable);
+            routingContext.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()).setStatusMessage(throwable.getMessage()).end();
+            throwable.printStackTrace();
         }
     }
 }

@@ -6,19 +6,16 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
-import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
-import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.rest.util.ResponseUtil;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -78,8 +75,7 @@ public class ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
         lastStep.execute();
     }
 
@@ -90,16 +86,10 @@ public class ExecuteRSBasicObject {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final Map<String, String> headerMap = updateContentMap(contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headerMap, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
         lastStep.execute();
     }
 
-    protected Map<String, String> updateContentMap(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
-        return headerMap;
-    }
 
     /**
      * Execute the reply chain
@@ -107,7 +97,7 @@ public class ExecuteRSBasicObject {
     public void execute() {
         vertx.runOnContext(action -> {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
-            Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+            ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
                     evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
                 } catch (Exception e) {
@@ -115,7 +105,7 @@ public class ExecuteRSBasicObject {
                 }
 
             });
-            Optional.ofNullable(objectConsumer).
+            ofNullable(objectConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
                                 ResponseUtil.createResponse(retry, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
@@ -141,7 +131,7 @@ public class ExecuteRSBasicObject {
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            updateHeaderAndStatuscode(statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {
@@ -153,17 +143,15 @@ public class ExecuteRSBasicObject {
     protected void respond(Serializable result) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            updateHeaderAndStatuscode(httpStatusCode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers,httpStatusCode, response);
             if (result != null) {
-                RESTExecutionUtil.encode(result, encoder).ifPresent(value -> RESTExecutionUtil.sendObjectResult(value, context.response()));
+                ResponseUtil.encode(result, encoder).ifPresent(value -> ResponseUtil.sendObjectResult(value, context.response()));
             } else {
                 response.end();
             }
         }
     }
-    private void updateHeaderAndStatuscode(int statuscode, HttpServerResponse response) {
-        RESTExecutionUtil.updateResponseHaders(headers, response);
-        RESTExecutionUtil.updateResponseStatusCode(statuscode, response);
-    }
+
+
 
 }

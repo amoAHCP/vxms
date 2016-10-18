@@ -250,7 +250,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
             public void handle(HttpClientResponse resp) {
                 resp.bodyHandler(body -> {
                     String val = body.getString(0, body.length());
-                    System.out.println("--------exceptionInObjectResponse: " + val);
+                    System.out.println("--------exceptionInObjectResponse: " + val+" resp:"+resp.statusMessage()+" code:"+resp.statusCode());
                     //assertEquals(key, "val");
                     testComplete();
                 });
@@ -455,6 +455,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         public void rsexceptionInObjectResponse(RestHandler handler) {
             System.out.println("rsexceptionInObjectResponse: " + handler);
             handler.response().objectResponse((future) -> {
+                System.out.println("Exception-->>>>>><");
                 throw new NullPointerException("Test");
                 //return "";
             }, new ExampleByteEncoder()).execute();

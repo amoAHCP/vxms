@@ -6,18 +6,15 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
-import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
-import org.jacpfx.vertx.rest.util.RESTExecutionUtil;
 import org.jacpfx.vertx.rest.util.ResponseUtil;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
+
+import static java.util.Optional.*;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -75,7 +72,7 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, updateContentType(contentType),
+        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType),
                 stringConsumer, excecuteEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, status.code(), retryCount,timeout).execute();
     }
@@ -88,7 +85,7 @@ public class ExecuteRSBasicString {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicString(vertx, t, errorMethodHandler, context,
-                updateContentType(contentType), stringConsumer, excecuteEventBusAndReply,
+                ResponseUtil.updateContentType(headers,contentType), stringConsumer, excecuteEventBusAndReply,
                 encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout).execute();
     }
 
@@ -96,10 +93,9 @@ public class ExecuteRSBasicString {
      * Execute the reply chain
      */
     public void execute() {
-        // TODO timeout should trac eventbus call and mapToString together !!!!
         vertx.runOnContext(action -> {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
-            Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+            ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
                     evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
                 } catch (Exception e) {
@@ -108,7 +104,7 @@ public class ExecuteRSBasicString {
 
             });
 
-            Optional.ofNullable(stringConsumer).
+            ofNullable(stringConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
                                 ResponseUtil.createResponse(retry,timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler,vertx, value -> {
@@ -142,8 +138,7 @@ public class ExecuteRSBasicString {
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            RESTExecutionUtil.updateResponseHaders(headers, response);
-            RESTExecutionUtil.updateResponseStatusCode(statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {
@@ -152,10 +147,6 @@ public class ExecuteRSBasicString {
         }
     }
 
-    protected Map<String, String> updateContentType(String contentType) {
-        Map<String, String> headerMap = new HashMap<>(headers);
-        headerMap.put("content-type", contentType);
-        return headerMap;
-    }
+
 
 }

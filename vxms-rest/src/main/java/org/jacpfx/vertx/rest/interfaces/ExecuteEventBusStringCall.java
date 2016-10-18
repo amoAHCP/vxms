@@ -7,7 +7,6 @@ import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 21.03.16.

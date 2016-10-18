@@ -24,6 +24,6 @@ public class EventBusAsyncRequest {
 
 
     public EventBusAsyncResponse send(String id, Object message) {
-        return new EventBusAsyncResponse(vertx, t, errorMethodHandler, context, id, message, null, null);
+        return new EventBusAsyncResponse(vertx, t, errorMethodHandler, context, id, message, null);
     }
 }

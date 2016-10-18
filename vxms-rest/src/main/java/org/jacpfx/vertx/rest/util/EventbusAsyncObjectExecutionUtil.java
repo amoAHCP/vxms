@@ -40,7 +40,7 @@ public class EventbusAsyncObjectExecutionUtil {
                 _encoder, _errorHandler, _errorHandlerObject, _httpStatusCode, _retryCount, _timeout, _delay);
     }
 
-    protected static void sendMessageAndSupplyObjectHandler(String id, Object message, DeliveryOptions options,
+    private static void sendMessageAndSupplyObjectHandler(String id, Object message, DeliveryOptions options,
                                                             ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, DeliveryOptions deliveryOptions,
                                                             Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                             Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
