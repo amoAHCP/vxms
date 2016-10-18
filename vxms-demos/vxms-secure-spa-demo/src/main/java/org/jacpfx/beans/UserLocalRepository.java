@@ -59,7 +59,7 @@ public class UserLocalRepository {
     }
 
     public JsonObject updateUser(JsonObject user) {
-        users.stream().filter(u -> u.getString("_id").equals(user.getString("_id"))).findFirst().ifPresent(us -> users.remove(us));
+        deleteUser(user.getString("_id"));
         users.add(user);
         return user;
     }

@@ -1,6 +1,7 @@
 package org.jacpfx.verticle;
 
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
@@ -104,12 +105,21 @@ public class SecureEndpoint extends VxmsEndpoint {
         Optional.ofNullable(handler.context().user()).ifPresent(user -> {
             final JsonObject principal = user.principal();
             final String token = principal.getString("access_token");
-            vertx.createHttpClient(OPTIONS).getAbs("https://api.github.com/user?access_token=" + token, responseHandler ->
-                    responseHandler.handler(body ->
-                            handler.response().stringResponse(() -> getUsername(body)).execute())).
-                    putHeader("User-Agent", "demo-app").
-                    end();
+            handler.
+                    response().
+                    stringResponse((response) -> requestUser(token, response)).
+                    timeout(1000).
+                    onFailureRespond((error, response) -> response.complete("no data")).
+                    execute();
+
         });
+    }
+
+    public void requestUser(String token, Future<String> response) {
+        vertx.createHttpClient(OPTIONS).getAbs("https://api.github.com/user?access_token=" + token, responseHandler ->
+                responseHandler.handler(body -> response.complete(getUsername(body)))).
+                putHeader("User-Agent", "demo-app").
+                end();
     }
 
     protected String getUsername(Buffer body) {

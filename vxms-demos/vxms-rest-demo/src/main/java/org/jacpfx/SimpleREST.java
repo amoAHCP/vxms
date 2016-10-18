@@ -19,14 +19,20 @@ public class SimpleREST extends VxmsEndpoint {
     @Path("/helloGET")
     @GET
     public void simpleRESTHello(RestHandler handler) {
-         handler.response().stringResponse(()->"simple response").execute();
+         handler.
+                 response().
+                 stringResponse((response)->response.complete("simple response")).
+                 execute();
     }
 
 
     @Path("/helloGET/:name")
     @GET
     public void simpleRESTHelloWithParameter(RestHandler handler) {
-        handler.response().stringResponse(()->"hello World "+handler.request().param("name")).execute();
+        handler.
+                response().
+                stringResponse((response)->response.complete("hello World "+handler.request().param("name"))).
+                execute();
     }
 
     public static void main(String[] args) {
