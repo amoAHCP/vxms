@@ -1,9 +1,13 @@
 package org.jacpfx.vertx.registry;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
 import or.jacpfx.spi.ServiceDiscoverySpi;
+import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.util.ConfigurationUtil;
+import org.jacpfx.vertx.etcd.client.CustomConnectionOptions;
+import org.jacpfx.vertx.etcd.client.DefaultConnectionOptions;
 import org.jacpfx.vertx.etcd.client.EtcdClient;
 
 import java.util.Optional;
@@ -13,7 +17,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 06.07.16.
  */
 public class ServiceDiscoveryService implements ServiceDiscoverySpi {
-     private EtcdRegistration etcdRegistration;
+    private EtcdRegistration etcdRegistration;
 
     public void registerService(Runnable onSuccess, Consumer<Throwable> onFail, AbstractVerticle verticleInstance) {
         etcdRegistration = createEtcdRegistrationHandler(verticleInstance);
@@ -25,36 +29,54 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
                 onSuccess.run();
             }
         }));
-       if(!etcdRegistrationOpt.isPresent()) onSuccess.run();
+        if (!etcdRegistrationOpt.isPresent()) onSuccess.run();
     }
-    // TODO add HttpClientOptions see:DiscoveryClientBuilder
+
+    // TODO finish passing of service metadata like secure and url (do not use service name for url anymore)
     private EtcdRegistration createEtcdRegistrationHandler(AbstractVerticle verticleInstance) {
-        if(verticleInstance==null || verticleInstance.config()==null) return null;
+        if (verticleInstance == null || verticleInstance.config() == null) return null;
         int etcdPort;
         int ttl;
         String domain;
         String etcdHost;
         String serviceName;
-        if(verticleInstance.getClass().isAnnotationPresent(EtcdClient.class)) {
+        String contextRoot;
+        HttpClientOptions clientOptions;
+        CustomConnectionOptions connection;
+        CustomServerOptions endpointConfig;
+        HttpServerOptions options;
+        if (verticleInstance.getClass().isAnnotationPresent(EtcdClient.class)) {
             final EtcdClient client = verticleInstance.getClass().getAnnotation(EtcdClient.class);
             etcdPort = verticleInstance.config().getInteger("etcdport", client.port());
             ttl = verticleInstance.config().getInteger("ttl", client.ttl());
             domain = verticleInstance.config().getString("domain", client.domain());
             etcdHost = verticleInstance.config().getString("etcdhost", client.host());
-            serviceName = ConfigurationUtil.serviceName(verticleInstance.config(), verticleInstance.getClass());
+            connection = getConnectionOptions(client);
+            clientOptions = connection.getClientOptions(verticleInstance.config());
+
+
+            serviceName = ConfigurationUtil.getServiceName(verticleInstance.config(), verticleInstance.getClass());
+            contextRoot = ConfigurationUtil.getContextRoot(verticleInstance.config(), verticleInstance.getClass());
+            endpointConfig = ConfigurationUtil.getEndpointOptions(verticleInstance.getClass());
+            options = endpointConfig.getServerOptions(verticleInstance.config());
+
         } else {
-            etcdPort = verticleInstance.config().getInteger("etcdport",0);
-            ttl = verticleInstance.config().getInteger("ttl",0);
-            domain = verticleInstance.config().getString("domain",null);
-            etcdHost = verticleInstance.config().getString("etcdhost",null);
-            serviceName = ConfigurationUtil.serviceName(verticleInstance.config(), verticleInstance.getClass());
+            etcdPort = verticleInstance.config().getInteger("etcdport", 0);
+            ttl = verticleInstance.config().getInteger("ttl", 0);
+            domain = verticleInstance.config().getString("domain", null);
+            etcdHost = verticleInstance.config().getString("etcdhost", null);
+            contextRoot = ConfigurationUtil.getContextRoot(verticleInstance.config(), verticleInstance.getClass());
+            serviceName = null;
+            clientOptions = null;
+            options = null;
         }
 
-        if(domain==null || etcdHost==null || serviceName==null || etcdPort==0) return null;
+        if (domain == null || etcdHost == null || serviceName == null || etcdPort == 0) return null;
 
         return EtcdRegistration.
                 buildRegistration().
-                vertx(Vertx.vertx()).
+                vertx(verticleInstance.getVertx()).
+                clientOptions(clientOptions).
                 etcdHost(etcdHost).
                 etcdPort(etcdPort).
                 ttl(ttl).
@@ -62,6 +84,8 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
                 serviceName(serviceName).
                 serviceHost(ConfigurationUtil.getEndpointHost(verticleInstance.config(), verticleInstance.getClass())).
                 servicePort(ConfigurationUtil.getEndpointPort(verticleInstance.config(), verticleInstance.getClass())).
+                serviceContextRoot(contextRoot).
+                secure(options.isSsl()).
                 nodeName(verticleInstance.deploymentID());
     }
 
@@ -69,5 +93,14 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         Optional.ofNullable(this.etcdRegistration).ifPresent(reg -> reg.disconnect(handler -> {
 
         }));
+    }
+
+    private CustomConnectionOptions getConnectionOptions(EtcdClient client) {
+        try {
+            return client.options().newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return new DefaultConnectionOptions();
     }
 }

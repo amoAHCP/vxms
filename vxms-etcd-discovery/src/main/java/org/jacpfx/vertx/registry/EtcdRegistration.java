@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -36,49 +35,78 @@ public class EtcdRegistration {
     private static final String APPLICATION_X_WWW_FORM_URLENCODED = HttpHeaders.APPLICATION_X_WWW_FORM_URLENCODED.toString();
     private static final String CACHE_KEY = "local";
     private static final String MAP_KEY = "cache";
+    public static final String ROOT = "/";
     private final Vertx vertx;
     private final int ttl;
     private final String domainname;
     private final String servicename;
     private final String host;
     private final int port;
-    private HttpClient httpClient;
     private final String nodename;
+    private final String contextRoot;
+    private final boolean secure;
     private final SharedData data;
     private final URI fetchAll;
+    private final HttpClientOptions options;
+    private final HttpClient httpClient;
 
 
     private static final String ETCD_BASE_PATH = "/v2/keys/";
+    private static final String HTTPS = "https://";
+    private static final String HTTP = "http://";
 
     // TODO add HttpClientOptions see:DiscoveryClientBuilder
-    private EtcdRegistration(Vertx vertx, String etcdHost, int etcdPort, int ttl, String domainname, String servicename, String nodename, String host, int port) {
+
+    /**
+     * @param vertx         the Vert.x instance
+     * @param clientOptions the http client options to connect to etcd
+     * @param etcdHost      the etcd host name
+     * @param etcdPort      the etcd connection port
+     * @param ttl           the default ttl tile for an entry
+     * @param domainname    the domain name (all entries in one domain group under the same root enry)
+     * @param servicename   the name/key of the service
+     * @param host          the service host
+     * @param port          the service port
+     * @param contextRoot   the service context root
+     * @param secure        true if ssl connection is used
+     * @param nodename      the node/instance name
+     */
+    private EtcdRegistration(Vertx vertx, HttpClientOptions clientOptions, String etcdHost, int etcdPort, int ttl, String domainname, String servicename, String host, int port, String contextRoot, boolean secure, String nodename) {
         this.vertx = vertx;
         this.ttl = ttl;
         this.nodename = nodename;
         this.domainname = domainname;
-        this.servicename = servicename.startsWith("/") ? servicename : "/" + servicename;
+        this.servicename = cleanPath(servicename);
+        this.contextRoot = cleanPath(contextRoot);
         this.host = host;
         this.port = port;
-        // TODO check http(s)
-        this.fetchAll = URI.create("http://" + etcdHost + ":" + etcdPort + ETCD_BASE_PATH + domainname + "/?recursive=true");
+        this.secure = secure;
+
+
+        this.fetchAll = URI.create(clientOptions.isSsl() ? HTTPS : HTTP + etcdHost + ":" + etcdPort + ETCD_BASE_PATH + domainname + "/?recursive=true");
         data = vertx.sharedData();
-        try {
-            httpClient = vertx.createHttpClient(new HttpClientOptions()
-                    .setDefaultHost(etcdHost)
-                    .setDefaultPort(etcdPort)
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.options = clientOptions
+                .setDefaultHost(etcdHost)
+                .setDefaultPort(etcdPort);
+        httpClient = vertx.createHttpClient(options);
 
 
     }
 
+    private static String cleanPath(String path) {
+        final String path01 = path.startsWith(ROOT) ? path : ROOT + path;
+        final int len = path01.length();
+        if (path01.charAt(len - 1) == '/') return path01.substring(0, len - 1);
+        return path01;
+    }
 
 
     public void retrieveKeys(Consumer<Root> consumer) {
         httpClient.getAbs(fetchAll.toString(), handler -> handler.
-                exceptionHandler(error -> {error.printStackTrace();consumer.accept(new Root());}).
+                exceptionHandler(error -> {
+                    error.printStackTrace();
+                    consumer.accept(new Root());
+                }).
                 bodyHandler(body -> consumer.accept(decodeRoot(body)))
         ).end();
 
@@ -97,40 +125,39 @@ public class EtcdRegistration {
 
 
     public void connect(AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        connectToEtcd(vertx, httpClient, domainname, servicename, nodename, ttl, host, port, asyncResultHandler);
+        // TODO get ssl status of service to define correct metadata
+        connectToEtcd(vertx, domainname, servicename, nodename, ttl, contextRoot, host, port, secure, asyncResultHandler);
     }
 
     public void disconnect(Handler<HttpClientResponse> responseHandler) {
-        deleteInstanceNode(httpClient, domainname, servicename, nodename, responseHandler, null);
+        deleteInstanceNode(domainname, servicename, nodename, responseHandler, null);
     }
 
-    private void connectToEtcd(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-
-        createServiceNode(httpClient, servicename,
+    private void connectToEtcd(Vertx vertx, String _domainname, String _servicename, String _nodename, int _ttl, String _contextRoot, String _host, int _port, boolean _secure, AsyncResultHandler<DiscoveryClient> _asyncResultHandler) {
+        createServiceNode(_servicename,
                 pathCreated -> {
                     //403 means the directory already existed
                     if (SUCCESS_CODES.contains(pathCreated.statusCode()))
-                        createInstanceNode(httpClient, domainname, servicename, nodename, "value=" + Json.encode(new NodeMetadata(servicename, host, port, "http", false)) + "&ttl=" + ttl,
+                        // TODO handle secure connections
+                        createInstanceNode(_domainname, _servicename, _nodename, "value=" + Json.encode(new NodeMetadata(_contextRoot, _host, _port, _secure)) + "&ttl=" + ttl,
                                 nodeCreated -> {
                                     if (SUCCESS_CODES.contains(nodeCreated.statusCode()) || 403 == nodeCreated.statusCode()) {
                                         retrieveKeys(root -> {
                                             putRootToCache(root);
-                                            startNodeRefresh(vertx, httpClient, domainname, servicename, nodename, ttl, host, port);
-                                            asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClientEtcd(httpClient, vertx, domainname, fetchAll)));
+                                            startNodeRefresh(vertx, _domainname, _servicename, nodename, _ttl, _contextRoot, _host, _port, _secure);
+                                            _asyncResultHandler.handle(Future.factory.succeededFuture(new DiscoveryClientEtcd(vertx, options, _domainname, fetchAll)));
                                         });
-
-
                                     } else {
                                         LOG.error("Unable to create node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage());
-                                        asyncResultHandler.handle(Future.factory.failureFuture(("Unable to create node node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage())));
+                                        _asyncResultHandler.handle(Future.factory.failureFuture(("Unable to create node node (" + nodeCreated.statusCode() + ") " + nodeCreated.statusMessage())));
                                     }
 
-                                }, asyncResultHandler);
+                                }, _asyncResultHandler);
                     else {
                         LOG.error("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage());
-                        asyncResultHandler.handle(Future.factory.failureFuture("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage()));
+                        _asyncResultHandler.handle(Future.factory.failureFuture("Unable to create service node (" + pathCreated.statusCode() + ") " + pathCreated.statusMessage()));
                     }
-                }, asyncResultHandler);
+                }, _asyncResultHandler);
     }
 
     private void putRootToCache(Root root) {
@@ -138,12 +165,12 @@ public class EtcdRegistration {
         cache.put(CACHE_KEY, root);
     }
 
-    private void startNodeRefresh(Vertx vertx, HttpClient httpClient, String domainname, String servicename, String nodename, int ttl, String host, int port) {
+    private void startNodeRefresh(Vertx vertx, String _domainname, String _servicename, String _nodename, int ttl, String _contextRoot, String _host, int _port, boolean _secure) {
         LOG.info("Succeeded registering");
         // ttl in s setPeriodic in ms
         vertx.setPeriodic((ttl * 1000) - 900,
                 // TODO check if http(s)
-                refresh -> createInstanceNode(httpClient, domainname, servicename, nodename, "value=" + Json.encode(new NodeMetadata(servicename, host, port, "http", false)) + "&ttl=" + ttl, refreshed -> {
+                refresh -> createInstanceNode(_domainname, _servicename, _nodename, "value=" + Json.encode(new NodeMetadata(_contextRoot, _host, _port, _secure)) + "&ttl=" + ttl, refreshed -> {
                     if (refreshed.statusCode() != 200) {
                         LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage());
                     } else {
@@ -153,8 +180,8 @@ public class EtcdRegistration {
     }
 
 
-    private void createServiceNode(HttpClient client, String serviceName, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        client
+    private void createServiceNode(String serviceName, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+        httpClient
                 .put(ETCD_BASE_PATH + domainname + serviceName)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
@@ -166,8 +193,8 @@ public class EtcdRegistration {
                 .end("dir=true");
     }
 
-    private static void createInstanceNode(HttpClient client, String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        client
+    private void createInstanceNode(String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+        httpClient
                 .put(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
@@ -179,17 +206,11 @@ public class EtcdRegistration {
                 .end(data);
     }
 
-    private void deleteInstanceNode(HttpClient client, String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        client
+    private void deleteInstanceNode(String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
+        // create new Vert.x instance to be sure that connection is still possible, even when the service verticle is currently shuts down and Vert.x instance is closed
+        Vertx.vertx().createHttpClient(options)
                 .delete(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
-                .handler(handler ->
-                        retrieveKeys(root ->
-                                Optional.ofNullable(root.getNode()).ifPresent(node -> {
-                                    // TODO check why this is called twice, while second one is crap
-                                    // idea: i register here a handler, at the same time an other handler is registered and this one will be executed twice?
-                                    putRootToCache(root);
-                                    responseHandler.handle(handler);
-                                })))
+                .handler(handler -> responseHandler.handle(handler))
                 .exceptionHandler(error -> {
                     error.printStackTrace();
                     if (asyncResultHandler != null) asyncResultHandler.handle(Future.factory.failedFuture(error));
@@ -200,7 +221,11 @@ public class EtcdRegistration {
 
 
     public interface VertxBuilder {
-        EtcdHostBuilder vertx(Vertx vertx);
+        ClientOptionsBuilder vertx(Vertx vertx);
+    }
+
+    public interface ClientOptionsBuilder {
+        EtcdHostBuilder clientOptions(HttpClientOptions client);
     }
 
     public interface EtcdHostBuilder {
@@ -228,7 +253,15 @@ public class EtcdRegistration {
     }
 
     public interface ServicePortBuilder {
-        NodeNameBuilder servicePort(int servicePort);
+        ServiceContextRootBuilder servicePort(int servicePort);
+    }
+
+    public interface ServiceContextRootBuilder {
+        ServiceSecureBuilder serviceContextRoot(String contextRoot);
+    }
+
+    public interface ServiceSecureBuilder {
+        NodeNameBuilder secure(boolean secure);
     }
 
     public interface NodeNameBuilder {
@@ -236,6 +269,6 @@ public class EtcdRegistration {
     }
 
     public static VertxBuilder buildRegistration() {
-        return vertx -> etcdHost -> etcdPort -> ttl -> domainname -> servicename -> serviceHost -> servicePort -> nodename -> new EtcdRegistration(vertx, etcdHost, etcdPort, ttl, domainname, servicename, nodename, serviceHost, servicePort);
+        return vertx -> clientOptions -> etcdHost -> etcdPort -> ttl -> domainname -> servicename -> serviceHost -> servicePort -> contextRoot -> secure -> nodename -> new EtcdRegistration(vertx, clientOptions, etcdHost, etcdPort, ttl, domainname, servicename, serviceHost, servicePort, contextRoot, secure, nodename);
     }
 }

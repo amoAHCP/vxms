@@ -12,7 +12,7 @@ public class RestrictedCorsEndpointConfig3 implements EndpointConfiguration {
 
 
     public void corsHandler(Router router) {
-        router.route("/wsService/stringGETResponseSyncAsync*").handler(CorsHandler.create("http://example.com").
+        router.route("/stringGETResponseSyncAsync*").handler(CorsHandler.create("http://example.com").
                 allowedMethod(io.vertx.core.http.HttpMethod.GET).
                 allowedMethod(io.vertx.core.http.HttpMethod.POST).
                 allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).

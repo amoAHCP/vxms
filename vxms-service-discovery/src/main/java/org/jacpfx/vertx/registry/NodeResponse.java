@@ -35,6 +35,7 @@ public class NodeResponse {
         Collections.shuffle(nodes);
         Node selectedNode = nodes.get(0);
         NodeMetadata metadata = Json.decodeValue(selectedNode.getValue(), NodeMetadata.class);
+        // TODO check for context root correct format
         URI uri = URI.create(metadata.getProtocol() + PROTOCOL_DELIMITER + metadata.getHost() + PORT_DELIMITER + metadata.getPort() + metadata.getPath());
         return new ServiceNode(selectedNode.getKey(), metadata.getHost(), metadata.getPort(), metadata.isSecure(), uri, null);
     }

@@ -27,7 +27,7 @@ public class DiscoveryClientBuilder  implements DiscoveryClientSpi<DiscoveryClie
             final boolean secure = verticleInstance.config().getBoolean("etcd-secure",clientOptions.isSsl());
             final String prefix = secure? HTTPS : HTTP;
             final URI fetchAll = URI.create(prefix + client.host() + ":" + client.port() + ETCD_BASE_PATH + client.domain() + "/?recursive=true");
-            return new DiscoveryClientEtcd(verticleInstance.getVertx(),clientOptions, client.domain(),fetchAll,client.host(),client.port());
+            return new DiscoveryClientEtcd(Vertx.vertx(),clientOptions, client.domain(),fetchAll,client.host(),client.port());
         } else {
             throw new MissingResourceException("missing @EtcdClient annotation",verticleInstance.getClass().getName(),"");
         }

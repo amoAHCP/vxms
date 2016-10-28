@@ -87,11 +87,13 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                                             ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
                                     false,
                                     (Handler<AsyncResult<String>>) value -> {
-                                        if (!value.failed()) {
+                                        if (value.succeeded()) {
                                             respond(value.result());
-                                        } else {
                                             checkAndCloseResponse(retry);
+                                        } else {
+                                            //respond(value.cause().getMessage(),HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                                         }
+                                      //  checkAndCloseResponse(retry);
                                     });
                         }
 

@@ -38,7 +38,7 @@ public class WebSocketInitializer {
             }
             logDebug("connect socket to path: " + serverSocket.path());
             final String path = serverSocket.path();
-            final String sName = Optional.ofNullable(ConfigurationUtil.serviceName(config, service.getClass())).orElse("");
+            final String sName = Optional.ofNullable(ConfigurationUtil.getContextRoot(config, service.getClass())).orElse("");
             if (path.startsWith(sName)) {
                 serverSocket.pause();
                 final List<Method> webSocketMethodsForURL = getWebSocketMethods(service, path, sName);

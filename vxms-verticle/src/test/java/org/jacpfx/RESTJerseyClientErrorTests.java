@@ -151,7 +151,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
 
             @Override
             public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
+                System.out.println("Response-- entity '" + response + "' received.");
                 Assert.assertEquals(response,"test-123");
                 latch.countDown();
             }
@@ -201,7 +201,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     }
 
     // TODO extend test for POST, OPTIONAL,....
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
         /////------------- sync blocking ----------------
@@ -257,7 +257,8 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
         @OnRestError("/stringGETResponseAsyncAsync")
         @GET
         public void rsstringGETResponseAsyncAsyncError(Throwable t, RestHandler handler) {
-            System.out.println("ERROR stringGETResponseAsyncAsync: "+t.getMessage());
+            System.out.println("ERROR-- stringGETResponseAsyncAsync: "+t.getMessage());
+
             handler.response().blocking().stringResponse(() -> t.getMessage()).execute();
         }
 

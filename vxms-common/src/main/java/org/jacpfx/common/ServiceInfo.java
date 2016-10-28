@@ -116,7 +116,7 @@ public class ServiceInfo implements Serializable {
 
 
     public static ServiceInfo buildFromJson(JsonObject info,Vertx vertx) {
-        final String serviceName = info.getString("serviceName");
+        final String serviceName = info.getString("getServiceName");
         final String lastConnection = info.getString("lastConnection");
         final String hostName = info.getString("hostName");
         final String serviceURL = info.getString("serviceURL");
@@ -134,7 +134,7 @@ public class ServiceInfo implements Serializable {
         final String type = operation.getString("type");
         final String url = operation.getString("url");
         final String name = operation.getString("name");
-        final String serviceName1 = operation.getString("serviceName");
+        final String serviceName1 = operation.getString("getServiceName");
         final String connectionHost = operation.getString("connectionHost");
         final String connectionPort = operation.getInteger("connectionPort").toString();
         final String descriptionOperation = operation.getString("description");
@@ -167,7 +167,7 @@ public class ServiceInfo implements Serializable {
         final JsonObject tmp = new JsonObject();
         final JsonArray operationsArray = new JsonArray();
         Stream.of(info.getOperations()).forEach(op -> operationsArray.add(createOperation(op)));
-        tmp.put("serviceName", info.getServiceName());
+        tmp.put("getServiceName", info.getServiceName());
         tmp.put("lastConnection", info.getLastConnection());
         tmp.put("hostName", info.getHostName());
         tmp.put("serviceURL", info.getServiceURL());
@@ -226,7 +226,7 @@ public class ServiceInfo implements Serializable {
     @Override
     public String toString() {
         return "ServiceInfo{" +
-                "serviceName='" + serviceName + '\'' +
+                "getServiceName='" + serviceName + '\'' +
                 ", lastConnection='" + lastConnection + '\'' +
                 ", hostName='" + hostName + '\'' +
                 ", serviceURL='" + serviceURL + '\'' +

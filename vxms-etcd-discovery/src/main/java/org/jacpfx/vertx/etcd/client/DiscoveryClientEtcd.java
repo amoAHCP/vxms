@@ -40,19 +40,17 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         this.fetchAll = fetchAll;
     }
 
-    public DiscoveryClientEtcd(Vertx vertx, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort) {
-        this(vertx.createHttpClient(new HttpClientOptions()
-                .setDefaultHost(discoveryServerHost)
-                .setDefaultPort(discoveryServerPort)
-        ), vertx, domainname, fetchAll);
-
-    }
 
     public DiscoveryClientEtcd(Vertx vertx, HttpClientOptions options, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort) {
         this(vertx.createHttpClient(options
                 .setDefaultHost(discoveryServerHost)
                 .setDefaultPort(discoveryServerPort)
         ), vertx, domainname, fetchAll);
+
+    }
+
+    public DiscoveryClientEtcd(Vertx vertx, HttpClientOptions options, String domainname, URI fetchAll) {
+        this(vertx.createHttpClient(options), vertx, domainname, fetchAll);
 
     }
     /**
@@ -114,7 +112,6 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             if (serviceNode.getNodes() != null && serviceNode.getKey().equals(key)) {
                 boolean isEmpty =serviceNode.getNodes().isEmpty();
                 consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, !isEmpty, isEmpty?new NodeNotFoundException("no active node found"):null));
-
             } else {
                 consumer.accept(new NodeResponse(Collections.emptyList(), domainname, false, new NodeNotFoundException("service not found")));
             }

@@ -20,7 +20,7 @@ public class JSONTool {
                 put("description", op.getDescription()).
                 put("url", op.getUrl()).
                 put("type", op.getType()).
-                put("serviceName",op.getServiceName()).
+                put("getServiceName",op.getServiceName()).
                 put("connectionHost", op.getConnectionHost()).
                 put("connectionPort",op.getConnectionPort());
         if(op.getProduces()!=null) {

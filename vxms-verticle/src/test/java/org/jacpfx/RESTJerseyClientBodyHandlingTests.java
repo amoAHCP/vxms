@@ -99,16 +99,16 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
 
     @Test
     /**
-     *   The default EndpointConfig returns a valid BodyHandler... if a custom config set this to null no body handling should be possible
+     *   The default EndpointConfig returns a valid BodyHandler... if a custom EndpointConfig set this to null no body handling should be possible
      */
-    public void stringPOSTResponseWithParameter() throws InterruptedException, ExecutionException, IOException {
+    public void noBodyHandling() throws InterruptedException, ExecutionException, IOException {
         final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
         File file = new File(getClass().getClassLoader().getResource("payload.xml").getFile());
         final FileDataBodyPart filePart = new FileDataBodyPart("file", file);
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar").field("hello","world").bodyPart(filePart);
 
-        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/simpleFilePOSTupload");
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/noBodyHandling");
         final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
 
         //Use createResponse object to verify upload success
@@ -127,15 +127,15 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
     }
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     @EndpointConfig(RestrictedBodyHandlingEndpointConfig.class)
     public class WsServiceOne extends VxmsEndpoint {
 
 
 
-        @Path("/simpleFilePOSTupload")
+        @Path("/noBodyHandling")
         @POST
-        public void rsstringPOSTResponse(RestHandler handler) {
+        public void noBodyHandling(RestHandler handler) {
             handler.response().blocking().stringResponse(()-> {
                 Set<FileUpload> files = handler.request().fileUploads();
                 System.out.println("FILES: "+files+"   "+handler.request().param("foo"));

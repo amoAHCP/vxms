@@ -209,6 +209,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
             @Override
             public void completed(String response) {
+                System.out.println("MESSAGE: "+response);
             }
 
             @Override
@@ -233,7 +234,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     }
 
     // TODO extend test for POST, OPTIONAL,....
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     @EndpointConfig(RestrictedCorsEndpointConfig.class)
     public class WsServiceOne extends VxmsEndpoint {
 
@@ -252,7 +253,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT2)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT2)
     @EndpointConfig(RestrictedCorsEndpointConfig2.class)
     public class WsServiceTwo extends VxmsEndpoint {
 
@@ -269,7 +270,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
     }
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT3)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT3)
     @EndpointConfig(RestrictedCorsEndpointConfig3.class)
     public class WsServiceThree extends VxmsEndpoint {
 

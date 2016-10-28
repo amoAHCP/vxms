@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyPOSTClientTests extends VertxTestBase {
+public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "127.0.0.1";
@@ -127,7 +127,7 @@ public class RESTJerseyPOSTClientTests extends VertxTestBase {
     }
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
 

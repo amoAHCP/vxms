@@ -12,15 +12,15 @@ public class NodeMetadata implements Serializable{
     private final String protocol;
     private final boolean secure;
 
-    public NodeMetadata(String path, String host, int port, String protocol, boolean secure) {
+    public NodeMetadata(String path, String host, int port,  boolean secure) {
         this.path = path;
         this.host = host;
         this.port = port;
-        this.protocol = protocol;
+        this.protocol = secure ? "https" : "http";
         this.secure = secure;
     }
     public NodeMetadata() {
-        this(null,null,0,null,false);
+        this(null,null,0,false);
     }
     public String getPath() {
         return path;

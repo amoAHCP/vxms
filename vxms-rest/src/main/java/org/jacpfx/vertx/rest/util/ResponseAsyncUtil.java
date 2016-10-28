@@ -45,7 +45,6 @@ public class ResponseAsyncUtil {
             } catch (Throwable e) {
                 _retry--;
                 if (_retry < 0) {
-                    // TODO handle exceptions in onErrorCode
                     result = handleError(result, errorHandler, onFailureRespond, errorMethodHandler, e);
                     errorHandling = true;
                 } else {
@@ -54,8 +53,10 @@ public class ResponseAsyncUtil {
                 }
             }
         }
-        if(errorHandling && result==null) handler.fail(new EndpointExecutionException("error...")); // TODO define Error
-        if (!handler.isComplete()) handler.complete(result);
+        if(!errorHandling || errorHandling && result!=null){
+            if (!handler.isComplete()) handler.complete(result);
+        }
+
     }
 
     protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier,  Future<T> operationResult) {
@@ -88,7 +89,7 @@ public class ResponseAsyncUtil {
             result = onFailureRespond.apply(e);
         }
         if (errorHandler == null && onFailureRespond == null) {
-            errorMethodHandler.accept(e);
+            errorMethodHandler.accept(e); // TODO switch to function to return true if an error method was executed, no if no error method is available
             return null;
 
         }

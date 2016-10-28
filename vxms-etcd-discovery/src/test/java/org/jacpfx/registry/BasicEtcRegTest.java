@@ -108,6 +108,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -115,6 +116,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance1");
         reg.connect(result -> {
             if (result.succeeded()) {
@@ -138,6 +141,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -145,6 +149,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance2");
 
         System.out.println("connect ");
@@ -175,6 +181,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -182,6 +189,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -212,6 +221,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -219,6 +229,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -250,6 +262,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -257,9 +270,25 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
+        EtcdRegistration reg2 = EtcdRegistration.
+                buildRegistration().
+                vertx(vertx).
+                clientOptions(new HttpClientOptions()).
+                etcdHost("127.0.0.1").
+                etcdPort(4001).
+                ttl(60).
+                domainName("deletIt").
+                serviceName("myServicexy").
+                serviceHost("localhost").
+                servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
+                nodeName("instance");
 
 
         reg.connect(result -> {
@@ -272,13 +301,16 @@ public class BasicEtcRegTest extends VertxTestBase {
                     reg.disconnect(handler -> {
                         System.out.println("status code: "+handler.statusCode());
                         if(handler.statusCode() == 200) {
-
-                            client.findNode("/myService", node2 -> {
-                                if(!node2.succeeded()) {
-                                    testComplete();
-                                } else {
-                                    System.out.println(node2.toString());
-                                }
+                            reg2.connect(result2 -> {
+                                final DiscoveryClient client2 = result2.result();
+                                client2.findNode("/myService", node2 -> {
+                                    if (!node2.succeeded()) {
+                                        // myservice should not exists anymore
+                                        testComplete();
+                                    } else {
+                                        System.out.println(node2.toString());
+                                    }
+                                });
                             });
 
                         }
@@ -304,6 +336,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -311,6 +344,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -353,6 +388,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -360,6 +396,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -405,6 +443,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -412,6 +451,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -457,6 +498,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -464,6 +506,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -496,6 +540,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         EtcdRegistration reg = EtcdRegistration.
                 buildRegistration().
                 vertx(vertx).
+                clientOptions(new HttpClientOptions()).
                 etcdHost("127.0.0.1").
                 etcdPort(4001).
                 ttl(60).
@@ -503,6 +548,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                 serviceName("myService").
                 serviceHost("localhost").
                 servicePort(8080).
+                serviceContextRoot("/myService").
+                secure(false).
                 nodeName("instance");
 
 
@@ -646,6 +693,7 @@ public class BasicEtcRegTest extends VertxTestBase {
             EtcdRegistration reg = EtcdRegistration.
                     buildRegistration().
                     vertx(vertx).
+                    clientOptions(new HttpClientOptions()).
                     etcdHost("127.0.0.1").
                     etcdPort(4001).
                     ttl(60).
@@ -653,6 +701,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                     serviceName(SERVICE_REST_GET).
                     serviceHost(HOST).
                     servicePort(PORT).
+                    serviceContextRoot(SERVICE_REST_GET).
+                    secure(false).
                     nodeName(this.toString());
             reg.connect(result -> {
                 client = result.result();
@@ -685,6 +735,7 @@ public class BasicEtcRegTest extends VertxTestBase {
             EtcdRegistration reg = EtcdRegistration.
                     buildRegistration().
                     vertx(vertx).
+                    clientOptions(new HttpClientOptions()).
                     etcdHost("127.0.0.1").
                     etcdPort(4001).
                     ttl(60).
@@ -692,6 +743,8 @@ public class BasicEtcRegTest extends VertxTestBase {
                     serviceName(SERVICE2_REST_GET).
                     serviceHost(HOST).
                     servicePort(PORT2).
+                    serviceContextRoot(SERVICE2_REST_GET).
+                    secure(false).
                     nodeName(this.toString());
             reg.connect(result -> {
                 if(!startFuture.isComplete())startFuture.complete();

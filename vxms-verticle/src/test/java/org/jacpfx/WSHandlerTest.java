@@ -28,5 +28,13 @@ public class WSHandlerTest
         System.out.println("sdsdf");
     }
 
+    @Test
+    public void testCharacter() {
+        String root ="/cxy/";
+        System.out.println(root.charAt(root.length()-1));
+        System.out.println(root.substring(0,root.length()-1));
+
+    }
+
 
 }

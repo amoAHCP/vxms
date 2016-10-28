@@ -386,7 +386,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
         });
         request.end();
 
-        await(5000, TimeUnit.MILLISECONDS);
+        await(10000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -396,7 +396,7 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     }
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
         @Path("/noResponse")

@@ -23,22 +23,32 @@ import java.util.stream.Stream;
 public class RESTInitializer {
 
 
+    public static final String ROOT = "/";
 
+    /**
+     * initialize default REST implementation for vxms
+     * @param vertx the Vert.x instance
+     * @param router the Router instance
+     * @param config the Configuration provided by the Vert.x instance
+     * @param service the Vxms service object itself
+     */
     public static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
-
-
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
                 forEach(restMethod -> initRestMethod(vertx, router, config, service, restMethod));
-
     }
 
-
-
-    protected static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
+    /**
+     *
+     * @param vertx
+     * @param router
+     * @param config
+     * @param service
+     * @param restMethod
+     */
+    public static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
         final Path path = restMethod.getAnnotation(Path.class);
-        final String sName = ConfigurationUtil.serviceName(config, service.getClass());
-
+        final String contextRoot = ConfigurationUtil.getContextRoot(config, service.getClass());
         final Stream<Method> errorMethodStream = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class));
         final Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
         final Optional<GET> get = Optional.ofNullable(restMethod.isAnnotationPresent(GET.class) ? restMethod.getAnnotation(GET.class) : null);
@@ -47,15 +57,14 @@ public class RESTInitializer {
         final Optional<PUT> put = Optional.ofNullable(restMethod.isAnnotationPresent(PUT.class) ? restMethod.getAnnotation(PUT.class) : null);
         final Optional<DELETE> delete = Optional.ofNullable(restMethod.isAnnotationPresent(DELETE.class) ? restMethod.getAnnotation(DELETE.class) : null);
 
-        get.ifPresent(g -> initHttpGet(vertx, router, service, restMethod, path, sName, errorMethodStream, consumes));
-        post.ifPresent(g -> initHttpPost(vertx, router, service, restMethod, path, sName, errorMethodStream, consumes));
-        options.ifPresent(g -> initHttpOptions(vertx, router, service, restMethod, path, sName, errorMethodStream, consumes));
-        put.ifPresent(g -> initHttpPut(vertx, router, service, restMethod, path, sName, errorMethodStream, consumes));
-        delete.ifPresent(g -> initHttpDelete(vertx, router, service, restMethod, path, sName, errorMethodStream, consumes));
+        get.ifPresent(g -> initHttpGet(vertx, router, service, restMethod, path, contextRoot, errorMethodStream, consumes));
+        post.ifPresent(g -> initHttpPost(vertx, router, service, restMethod, path, contextRoot, errorMethodStream, consumes));
+        options.ifPresent(g -> initHttpOptions(vertx, router, service, restMethod, path, contextRoot, errorMethodStream, consumes));
+        put.ifPresent(g -> initHttpPut(vertx, router, service, restMethod, path, contextRoot, errorMethodStream, consumes));
+        delete.ifPresent(g -> initHttpDelete(vertx, router, service, restMethod, path, contextRoot, errorMethodStream, consumes));
 
-        if (!get.isPresent() && !post.isPresent() && options.isPresent() && !put.isPresent() && delete.isPresent()) {
-            // TODO check for Config provider or fallback
-            initHttpAll(vertx, router, service, restMethod, path, sName, errorMethodStream,consumes);
+        if (!get.isPresent() && !post.isPresent() && !options.isPresent() && !put.isPresent() && !delete.isPresent()) {
+            initHttpAll(vertx, router, service, restMethod, path, contextRoot, errorMethodStream,consumes);
         }
     }
 
@@ -64,34 +73,34 @@ public class RESTInitializer {
         initHttpRoute(vertx, service, restMethod, consumes, errorMethod, route);
     }
 
-    protected static void initHttpAll(Vertx vertx, Router router, Object service, Method restMethod, Path path, String sName, Stream<Method> errorMethodStream,Optional<Consumes> consumes) {
+    protected static void initHttpAll(Vertx vertx, Router router, Object service, Method restMethod, Path path, String contextRoot, Stream<Method> errorMethodStream,Optional<Consumes> consumes) {
         final Optional<Method> errorMethod = errorMethodStream.findFirst();
-        final Route route = router.route(sName + path.value());
+        final Route route = router.route(cleanPath(path.value()));
         initHttpRoute(vertx, service, restMethod, consumes, errorMethod, route);
     }
 
-    protected static void initHttpDelete(Vertx vertx, Router router, Object service, Method restMethod, Path path, String sName, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.delete(sName + path.value());
+    protected static void initHttpDelete(Vertx vertx, Router router, Object service, Method restMethod, Path path, String contextRoot, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+        final Route route = router.delete(cleanPath(path.value()));
         initHttpOperation(vertx,service,restMethod,route,errorMethodStream,consumes,DELETE.class);
     }
 
-    protected static void initHttpPut(Vertx vertx, Router router, Object service, Method restMethod, Path path, String sName, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.put(sName + path.value());
+    protected static void initHttpPut(Vertx vertx, Router router, Object service, Method restMethod, Path path, String contextRoot, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+        final Route route = router.put(cleanPath(path.value()));
         initHttpOperation(vertx,service,restMethod,route,errorMethodStream,consumes,PUT.class);
     }
 
-    protected static void initHttpOptions(Vertx vertx, Router router, Object service, Method restMethod, Path path, String sName, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.options(sName + path.value());
+    protected static void initHttpOptions(Vertx vertx, Router router, Object service, Method restMethod, Path path, String contextRoot, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+        final Route route = router.options(cleanPath(path.value()));
         initHttpOperation(vertx,service,restMethod,route,errorMethodStream,consumes,OPTIONS.class);
     }
 
-    protected static void initHttpPost(Vertx vertx, Router router, Object service, Method restMethod, Path path, String sName, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.post(sName + path.value());
+    protected static void initHttpPost(Vertx vertx, Router router, Object service, Method restMethod, Path path, String contextRoot, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+        final Route route = router.post(cleanPath(path.value()));
         initHttpOperation(vertx,service,restMethod,route,errorMethodStream,consumes,POST.class);
     }
 
-    protected static void initHttpGet(Vertx vertx, Router router, Object service, Method restMethod, Path path, String sName, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.get(sName + path.value());
+    protected static void initHttpGet(Vertx vertx, Router router, Object service, Method restMethod, Path path, String contextRoot, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+        final Route route = router.get(cleanPath(path.value()));
         initHttpOperation(vertx,service,restMethod,route,errorMethodStream,consumes,GET.class);
     }
 
@@ -109,8 +118,10 @@ public class RESTInitializer {
     private static List<Method> getRESTMethods(Object service, String sName) {
         final String methodName = sName;
         final Method[] declaredMethods = service.getClass().getDeclaredMethods();
-        return Stream.of(declaredMethods).
-                filter(method -> filterRESTMethods(method, methodName)).collect(Collectors.toList());
+        return Stream.
+                of(declaredMethods).
+                filter(method -> filterRESTMethods(method, methodName)).
+                collect(Collectors.toList());
     }
 
     private static boolean filterRESTMethods(final Method method, final String methodName) {
@@ -126,7 +137,6 @@ public class RESTInitializer {
             ReflectionUtil.genericMethodInvocation(restMethod,() -> parameters, service);
         } catch (Throwable throwable) {
             handleRestError(vertx, service, onErrorMethod, routingContext, throwable);
-
         }
     }
 
@@ -151,5 +161,10 @@ public class RESTInitializer {
             routingContext.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()).setStatusMessage(throwable.getMessage()).end();
             throwable.printStackTrace();
         }
+    }
+
+
+    private static String cleanPath(String path) {
+        return path.startsWith(ROOT)?path: ROOT +path;
     }
 }

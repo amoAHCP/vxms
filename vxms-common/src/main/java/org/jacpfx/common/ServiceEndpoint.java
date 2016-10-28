@@ -25,6 +25,10 @@ public @interface ServiceEndpoint {
     // TODO currently the name will be used as url prefix : http://host:port/name/methodPath the name should be kept but not used in URL
     String name() default "";
 
+
+
+    String contextRoot() default "/";
+
     /**
      *
      * @return The host name to bind

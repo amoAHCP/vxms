@@ -243,7 +243,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         });
 
 
-        await(10000, TimeUnit.MILLISECONDS);
+        await(20000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -460,7 +460,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
     }
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
         ////----------------- sync objectReply ------------------------------
@@ -705,14 +705,14 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
                     reply().
                     objectResponse(() -> {
                                 System.out.println("TIMEOUT");
-                                Thread.sleep(5000);
+                                Thread.sleep(1000);
                                 return new Payload<String>(reply.payload().getString().get());
                             }, new ExampleByteEncoder()
                     ).
                     timeout(500).
                     retry(3).
                     execute();
-            System.out.println("binaryReply-1: " + name + "   :::" + this);
+            System.out.println("binaryReply-1: " + reply.payload().getString().get() + "   :::" + this);
         }
 
         @OnWebSocketError("/uncatchedTimeoutErrorAsync")
@@ -1013,7 +1013,7 @@ public class WSServiceErrorAndRetry extends VertxTestBase {
         try {
             Payload<String> payload = (Payload<String>) Serializer.deserialize(data.getBytes());
             assertTrue(payload.equals(new Payload<String>("xhello")));
-            System.out.println(payload);
+            System.out.println(payload.getValue());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

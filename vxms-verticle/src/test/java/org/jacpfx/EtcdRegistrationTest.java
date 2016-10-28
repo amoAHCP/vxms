@@ -16,6 +16,7 @@ import org.jacpfx.vertx.registry.DiscoveryClient;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.GET;
@@ -69,7 +70,7 @@ public class EtcdRegistrationTest extends VertxTestBase
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         getVertx().deployVerticle(new EtcdAwareService(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
+            System.out.println("start service EtcdAwareService: " + asyncResult.succeeded());
             if (asyncResult.failed()) {
                 // Test should proceed on connection error
                 System.out.println("failed; " + asyncResult.cause().getMessage());
@@ -89,7 +90,7 @@ public class EtcdRegistrationTest extends VertxTestBase
         });
         getVertx().deployVerticle(new EtcdAwareServiceA(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
+            System.out.println("start service EtcdAwareServiceA: " + asyncResult.succeeded());
             if (asyncResult.failed()) {
                 // Test should proceed on connection error
                 System.out.println("failed; " + asyncResult.cause().getMessage());
@@ -109,7 +110,7 @@ public class EtcdRegistrationTest extends VertxTestBase
         });
         getVertx().deployVerticle(new EtcdAwareServiceB(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
+            System.out.println("start service EtcdAwareServiceB: " + asyncResult.succeeded());
             if (asyncResult.failed()) {
                 // Test should proceed on connection error
                 System.out.println("failed; " + asyncResult.cause().getMessage());
@@ -137,6 +138,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
 
     @Test
+    @Ignore
     public void testSuccsessfulRegistration() {
 
     }
@@ -172,20 +174,22 @@ public class EtcdRegistrationTest extends VertxTestBase
     @Test
     public void testEtcdDiscoveryClientAndConnect() {
         EtcdAwareService service = new EtcdAwareService();
+        Vertx vertx = Vertx.vertx();
         service.init(vertx, vertx.getOrCreateContext());
-        final DiscoveryClient client = DiscoveryClient.createClient(service);
+       final DiscoveryClient client = DiscoveryClient.createClient(vertx,new HttpClientOptions(), new JsonObject().put("etcd-host","127.0.0.1").put("etcd-port","4001").put("etcd-domain","etcdAwareTest"));
+
+      //  final DiscoveryClient client = DiscoveryClient.createClient(service);
         if (client.isConnected()) {
             client.find(SERVICE_REST_GET).onSuccess(val -> {
                 HttpClientOptions options = new HttpClientOptions();
-                HttpClient httpclient = vertx.
-                        createHttpClient(options);
-
+                HttpClient httpclient = this.vertx.createHttpClient(options);
                 HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/", resp -> {
                     if(resp.statusCode()==200) {
                         resp.bodyHandler(body -> {
 
                             System.out.println("Got a createResponse: " + body.toString());
                             assertTrue("test-123".equals(body.toString()));
+
                             testComplete();
                         });
                     } else {
@@ -251,7 +255,7 @@ public class EtcdRegistrationTest extends VertxTestBase
     }
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10)
     public class EtcdAwareService extends VxmsEndpoint {
 
@@ -268,7 +272,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
     }
 
-    @ServiceEndpoint(name = SERVICE_REST_GET_2, port = PORT_2)
+    @ServiceEndpoint(name = SERVICE_REST_GET_2, contextRoot = SERVICE_REST_GET_2, port = PORT_2)
     @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10)
     public class EtcdAwareServiceA extends VxmsEndpoint {
         private DiscoveryClient client;
@@ -312,7 +316,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
     }
 
-    @ServiceEndpoint(name = SERVICE_REST_GET_3, port = PORT_3)
+    @ServiceEndpoint(name = SERVICE_REST_GET_3, contextRoot = SERVICE_REST_GET_3, port = PORT_3)
     @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10)
     public class EtcdAwareServiceB extends VxmsEndpoint {
          private DiscoveryClient client;
