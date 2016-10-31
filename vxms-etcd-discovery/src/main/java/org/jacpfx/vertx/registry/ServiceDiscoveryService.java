@@ -32,7 +32,6 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         if (!etcdRegistrationOpt.isPresent()) onSuccess.run();
     }
 
-    // TODO finish passing of service metadata like secure and url (do not use service name for url anymore)
     private EtcdRegistration createEtcdRegistrationHandler(AbstractVerticle verticleInstance) {
         if (verticleInstance == null || verticleInstance.config() == null) return null;
         int etcdPort;
@@ -82,11 +81,21 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
                 ttl(ttl).
                 domainName(domain).
                 serviceName(serviceName).
-                serviceHost(ConfigurationUtil.getEndpointHost(verticleInstance.config(), verticleInstance.getClass())).
+                serviceHost(getHostname(verticleInstance)).
                 servicePort(ConfigurationUtil.getEndpointPort(verticleInstance.config(), verticleInstance.getClass())).
                 serviceContextRoot(contextRoot).
                 secure(options.isSsl()).
                 nodeName(verticleInstance.deploymentID());
+    }
+
+    private String getHostname(AbstractVerticle verticleInstance) {
+        String host = System.getenv("COMPUTERNAME");
+        if (host != null)
+            return host;
+        host = System.getenv("HOSTNAME");
+        if (host != null)
+            return host;
+        return ConfigurationUtil.getEndpointHost(verticleInstance.config(), verticleInstance.getClass());
     }
 
     public void disconnect() {

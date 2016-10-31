@@ -13,8 +13,6 @@ import java.net.UnknownHostException;
  */
 public class ConfigurationUtil {
 
-    private static final String HOST = getHostName();
-    private static final String HOST_PREFIX = "";
 
     public static String getServiceName(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
@@ -33,20 +31,12 @@ public class ConfigurationUtil {
         return config.getInteger("port", 8080);
     }
 
-    // TODO find out current address where the endpoint is listening, especially when running in Docker
     public static String getEndpointHost(final JsonObject config, Class clazz) {
-        String hostName = "";
-        try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             org.jacpfx.common.ServiceEndpoint selfHosted = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
-            String host = selfHosted.host().isEmpty() ? hostName : selfHosted.host();
-            return config.getString("host", host);
+            return config.getString("host", selfHosted.host());
         }
-        return config.getString("host", hostName.isEmpty() ? HOST : hostName);
+        return config.getString("host", getHostName());
     }
 
     public static String getContextRoot(final JsonObject config, Class clazz) {
@@ -69,9 +59,13 @@ public class ConfigurationUtil {
         return new DefaultServerOptions();
     }
 
-    // TODO should not be used
-    @Deprecated
     public static String getHostName() {
-        return "127.0.0.1";
+        String hostName = "";
+        try {
+            hostName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return hostName;
     }
 }
