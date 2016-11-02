@@ -13,17 +13,43 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EtcdClient {
 
+    /**
+     * the etcd connection port
+     * @return the port number
+     */
     int port() default 4001;
 
+    /**
+     * the etcd host
+     * @return the host name / IP
+     */
     String host() default "127.0.0.1";
 
-    String domain() default "default";
 
     /**
      * ttl in seconds
      * @return  ttl sec. value
      */
     int ttl() default 30;
+
+    /**
+     * The domain name where to register
+     * @return the domain name
+     */
+    String domain() default "default";
+
+    /**
+     *  Overwrite host name for service location
+     * @return the host name to be registered
+     */
+    String exportedHost() default "";
+
+    /**
+     * Overwrite exported port
+     * @return the port number to be registered
+     */
+    int exportedPort() default 0;
+
 
 
     /**

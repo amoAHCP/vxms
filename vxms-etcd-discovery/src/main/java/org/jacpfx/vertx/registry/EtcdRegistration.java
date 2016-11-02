@@ -169,7 +169,6 @@ public class EtcdRegistration {
         LOG.info("Succeeded registering");
         // ttl in s setPeriodic in ms
         vertx.setPeriodic((ttl * 1000) - 900,
-                // TODO check if http(s)
                 refresh -> createInstanceNode(_domainname, _servicename, _nodename, "value=" + Json.encode(new NodeMetadata(_contextRoot, _host, _port, _secure)) + "&ttl=" + ttl, refreshed -> {
                     if (refreshed.statusCode() != 200) {
                         LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage());

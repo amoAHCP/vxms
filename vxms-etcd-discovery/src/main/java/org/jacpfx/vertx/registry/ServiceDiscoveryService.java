@@ -10,6 +10,8 @@ import org.jacpfx.vertx.etcd.client.CustomConnectionOptions;
 import org.jacpfx.vertx.etcd.client.DefaultConnectionOptions;
 import org.jacpfx.vertx.etcd.client.EtcdClient;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -39,6 +41,8 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         String domain;
         String etcdHost;
         String serviceName;
+        String serviceHostName;
+        int servicePort;
         String contextRoot;
         HttpClientOptions clientOptions;
         CustomConnectionOptions connection;
@@ -46,13 +50,15 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         HttpServerOptions options;
         if (verticleInstance.getClass().isAnnotationPresent(EtcdClient.class)) {
             final EtcdClient client = verticleInstance.getClass().getAnnotation(EtcdClient.class);
+            //TODO check for System.env
             etcdPort = verticleInstance.config().getInteger("etcdport", client.port());
             ttl = verticleInstance.config().getInteger("ttl", client.ttl());
             domain = verticleInstance.config().getString("domain", client.domain());
             etcdHost = verticleInstance.config().getString("etcdhost", client.host());
             connection = getConnectionOptions(client);
             clientOptions = connection.getClientOptions(verticleInstance.config());
-
+            serviceHostName = verticleInstance.config().getString("exportedHost", client.exportedHost());
+            servicePort = verticleInstance.config().getInteger("exportedPort", client.exportedPort());
 
             serviceName = ConfigurationUtil.getServiceName(verticleInstance.config(), verticleInstance.getClass());
             contextRoot = ConfigurationUtil.getContextRoot(verticleInstance.config(), verticleInstance.getClass());
@@ -64,6 +70,8 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
             ttl = verticleInstance.config().getInteger("ttl", 0);
             domain = verticleInstance.config().getString("domain", null);
             etcdHost = verticleInstance.config().getString("etcdhost", null);
+            serviceHostName = verticleInstance.config().getString("exportedHost", "");
+            servicePort = verticleInstance.config().getInteger("exportedPort", 0);
             contextRoot = ConfigurationUtil.getContextRoot(verticleInstance.config(), verticleInstance.getClass());
             serviceName = null;
             clientOptions = null;
@@ -81,8 +89,8 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
                 ttl(ttl).
                 domainName(domain).
                 serviceName(serviceName).
-                serviceHost(getHostname(verticleInstance)).
-                servicePort(ConfigurationUtil.getEndpointPort(verticleInstance.config(), verticleInstance.getClass())).
+                serviceHost(serviceHostName.isEmpty()?getHostname(verticleInstance):serviceHostName).
+                servicePort(servicePort==0?ConfigurationUtil.getEndpointPort(verticleInstance.config(), verticleInstance.getClass()):servicePort).
                 serviceContextRoot(contextRoot).
                 secure(options.isSsl()).
                 nodeName(verticleInstance.deploymentID());

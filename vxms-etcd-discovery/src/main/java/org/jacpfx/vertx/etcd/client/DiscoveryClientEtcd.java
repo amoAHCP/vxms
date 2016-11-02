@@ -74,7 +74,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             if (serviceNode.getNodes() != null & serviceNode.getKey().equals(key)) {
                 final Optional<Node> first = serviceNode.getNodes().stream().findAny();
                 if (!first.isPresent()) {
-                    consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, false, new NodeNotFoundException("no active node found")));
+                    this.findNodeFromEtcd(service, consumer);
                 }
                 first.ifPresent(node -> handleServiceNode(service, consumer, node, serviceNode));
             } else {
