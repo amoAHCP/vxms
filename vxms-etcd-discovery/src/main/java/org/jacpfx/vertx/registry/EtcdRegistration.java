@@ -125,7 +125,6 @@ public class EtcdRegistration {
 
 
     public void connect(AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        // TODO get ssl status of service to define correct metadata
         connectToEtcd(vertx, domainname, servicename, nodename, ttl, contextRoot, host, port, secure, asyncResultHandler);
     }
 

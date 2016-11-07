@@ -14,37 +14,50 @@ import java.net.UnknownHostException;
 public class ConfigurationUtil {
 
 
+    public static String getStringConfiguration(final JsonObject config, String propertyName, String defaultValue) {
+        String env = System.getenv(propertyName);
+        if (env != null && !env.isEmpty()) return env;
+        return config.getString(propertyName, defaultValue);
+    }
+
+    public static Integer getIntegerConfiguration(final JsonObject config, String propertyName, int defaultValue) {
+        String env = System.getenv(propertyName);
+        if (env != null && !env.isEmpty()) return Integer.valueOf(env);
+        return config.getInteger(propertyName, defaultValue);
+    }
+
+
     public static String getServiceName(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             final org.jacpfx.common.ServiceEndpoint name = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
-            return config.getString("service-name", name.name());
+            return getStringConfiguration(config, "service-name", name.name());
         }
-        return config.getString("service-name", clazz.getSimpleName());
+        return getStringConfiguration(config, "service-name", clazz.getSimpleName());
     }
 
 
     public static Integer getEndpointPort(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             org.jacpfx.common.ServiceEndpoint endpoint = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
-            return config.getInteger("port", endpoint.port());
+            return getIntegerConfiguration(config, "port", endpoint.port());
         }
-        return config.getInteger("port", 8080);
+        return getIntegerConfiguration(config, "port", 8080);
     }
 
     public static String getEndpointHost(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             org.jacpfx.common.ServiceEndpoint selfHosted = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
-            return config.getString("host", selfHosted.host());
+            return getStringConfiguration(config, "host", selfHosted.host());
         }
-        return config.getString("host", getHostName());
+        return getStringConfiguration(config, "host", getHostName());
     }
 
     public static String getContextRoot(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             final org.jacpfx.common.ServiceEndpoint endpoint = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
-            return config.getString("context-root", endpoint.contextRoot());
+            return getStringConfiguration(config, "context-root", endpoint.contextRoot());
         }
-        return config.getString("context-root", "/");
+        return getStringConfiguration(config, "context-root", "/");
     }
 
     public static CustomServerOptions getEndpointOptions(Class clazz) {

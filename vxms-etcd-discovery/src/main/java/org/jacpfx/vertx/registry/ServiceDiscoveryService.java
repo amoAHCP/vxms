@@ -50,15 +50,14 @@ public class ServiceDiscoveryService implements ServiceDiscoverySpi {
         HttpServerOptions options;
         if (verticleInstance.getClass().isAnnotationPresent(EtcdClient.class)) {
             final EtcdClient client = verticleInstance.getClass().getAnnotation(EtcdClient.class);
-            //TODO check for System.env
-            etcdPort = verticleInstance.config().getInteger("etcdport", client.port());
-            ttl = verticleInstance.config().getInteger("ttl", client.ttl());
-            domain = verticleInstance.config().getString("domain", client.domain());
-            etcdHost = verticleInstance.config().getString("etcdhost", client.host());
+            etcdPort = ConfigurationUtil.getIntegerConfiguration(verticleInstance.config(),"etcdport", client.port());
+            ttl = ConfigurationUtil.getIntegerConfiguration(verticleInstance.config(),"ttl", client.ttl());
+            domain = ConfigurationUtil.getStringConfiguration(verticleInstance.config(),"domain", client.domain());
+            etcdHost = ConfigurationUtil.getStringConfiguration(verticleInstance.config(),"etcdhost", client.host());
             connection = getConnectionOptions(client);
             clientOptions = connection.getClientOptions(verticleInstance.config());
-            serviceHostName = verticleInstance.config().getString("exportedHost", client.exportedHost());
-            servicePort = verticleInstance.config().getInteger("exportedPort", client.exportedPort());
+            serviceHostName = ConfigurationUtil.getStringConfiguration(verticleInstance.config(),"exportedHost", client.exportedHost());
+            servicePort = ConfigurationUtil.getIntegerConfiguration(verticleInstance.config(),"exportedPort", client.exportedPort());
 
             serviceName = ConfigurationUtil.getServiceName(verticleInstance.config(), verticleInstance.getClass());
             contextRoot = ConfigurationUtil.getContextRoot(verticleInstance.config(), verticleInstance.getClass());
