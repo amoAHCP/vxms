@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 30.05.16.
+ * Defines a builder API for defining lookup operation for service discovery.
  */
 public class OnSuccessDiscovery {
 
@@ -20,8 +21,14 @@ public class OnSuccessDiscovery {
     }
 
 
-    public ExecuteDiscovery onSuccess(Consumer<NodeResponse> consumer){
-         return new ExecuteDiscovery(vertx,client,serviceName,consumer,null,null,0,0);
+    /**
+     * define consumer for handling the NodeResponse if Client finds a valid entry
+     *
+     * @param consumer
+     * @return @see{ErrorDiscovery} the next step, define onError or onFailure
+     */
+    public ErrorDiscovery onSuccess(Consumer<NodeResponse> consumer) {
+        return new ErrorDiscovery(vertx, client, serviceName, consumer, null, null, 0, 0);
     }
 
 

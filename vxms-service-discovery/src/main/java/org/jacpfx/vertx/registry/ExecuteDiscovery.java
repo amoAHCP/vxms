@@ -37,23 +37,9 @@ public class ExecuteDiscovery {
                         ifPresent(name -> findAndHandle(client, name, consumer, onFailure, amount, delay)));
     }
 
-    /**
-     * Intermediate on failure method which is called on each error
-     * @param onError
-     * @return
-     */
-    public RetryDiscovery onError(Consumer<NodeResponse> onError) {
-        return new RetryDiscovery(vertx, client, serviceName, consumer, onFailure,onError);
-    }
 
-    /**
-     * Terminal on failure method which is called after retries are failed
-     * @param onFailure
-     * @return
-     */
-    public RetryDiscovery onFailure(Consumer<NodeResponse> onFailure) {
-        return new RetryDiscovery(vertx, client, serviceName, consumer, onFailure,onError);
-    }
+
+
 
     protected void findAndHandle(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {
         vertx.runOnContext(handler ->

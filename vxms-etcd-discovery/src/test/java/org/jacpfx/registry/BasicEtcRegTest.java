@@ -581,7 +581,7 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
     @Test
-    public void findServiceWitchDiscoveryClient() throws InterruptedException {
+    public void findServiceWithDiscoveryClient() throws InterruptedException {
         DiscoveryClientBuilder builder = new DiscoveryClientBuilder();
         WsServiceOne service = new WsServiceOne();
         service.init(vertx,vertx.getOrCreateContext());
