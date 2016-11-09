@@ -20,7 +20,7 @@ public class FailureDiscovery extends ExecuteDiscovery {
      * Terminal on failure method which is called after retries are failed
      *
      * @param onFailure
-     * @return @see{RetryDiscovery}, define the amount of retries
+     * @return {@link RetryDiscovery}, define the amount of retries
      */
     public RetryDiscovery onFailure(Consumer<NodeResponse> onFailure) {
         return new RetryDiscovery(vertx, client, serviceName, consumer, onFailure, onError);

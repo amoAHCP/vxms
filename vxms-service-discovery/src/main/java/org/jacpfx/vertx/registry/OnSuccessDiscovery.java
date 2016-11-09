@@ -25,7 +25,7 @@ public class OnSuccessDiscovery {
      * define consumer for handling the NodeResponse if Client finds a valid entry
      *
      * @param consumer
-     * @return @see{ErrorDiscovery} the next step, define onError or onFailure
+     * @return {@link ErrorDiscovery} the next step, define onError or onFailure
      */
     public ErrorDiscovery onSuccess(Consumer<NodeResponse> consumer) {
         return new ErrorDiscovery(vertx, client, serviceName, consumer, null, null, 0, 0);

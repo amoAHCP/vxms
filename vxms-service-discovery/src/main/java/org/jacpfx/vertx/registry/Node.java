@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Created by Andy Moncsek on 04.05.16.
+ * Represents a service node with all metadata to connect the Service. Is used to register a service at the discovery server
  */
 public class Node implements Serializable, Shareable {
     private final boolean dir;

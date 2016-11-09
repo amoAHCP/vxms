@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 30.05.16.
+ * Defines the delay time between retries
  */
 public class DelayDiscovery extends ExecuteDiscovery {
 
@@ -16,6 +17,11 @@ public class DelayDiscovery extends ExecuteDiscovery {
     }
 
 
+    /**
+     * The delay time in ms before a retry
+     * @param ms time in ms
+     * @return {@link ExecuteDiscovery} execute chain
+     */
     public ExecuteDiscovery delay(long ms){
         return new ExecuteDiscovery(vertx,client,serviceName,consumer,onFailure,onError,amount,ms);
     }

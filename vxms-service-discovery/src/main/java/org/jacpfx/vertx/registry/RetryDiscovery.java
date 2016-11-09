@@ -19,7 +19,7 @@ public class RetryDiscovery extends ExecuteDiscovery {
     /**
      * Define the amount of retries
      * @param amount the amount of retries
-     * @return @see{DelayDiscovery} define the delay time between retries
+     * @return {@link DelayDiscovery} define the delay time between retries
      */
     public DelayDiscovery retry(int amount) {
         return new DelayDiscovery(vertx, client, serviceName, consumer, onFailure,onError, amount);

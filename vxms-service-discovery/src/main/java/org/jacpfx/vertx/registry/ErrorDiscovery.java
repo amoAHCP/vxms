@@ -20,7 +20,7 @@ public class ErrorDiscovery extends FailureDiscovery {
      * Intermediate on failure method which is called on each error
      *
      * @param onError
-     * @return @see{FailureDiscovery} the next step, define onFailure
+     * @return {@link FailureDiscovery} the next step, define onFailure
      */
     public FailureDiscovery onError(Consumer<NodeResponse> onError) {
         return new FailureDiscovery(vertx, client, serviceName, consumer, onFailure, onError, 0, 0);

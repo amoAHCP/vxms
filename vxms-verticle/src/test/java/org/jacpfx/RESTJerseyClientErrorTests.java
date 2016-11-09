@@ -204,6 +204,15 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends VxmsEndpoint {
 
+        @Path("/circuitBreakerTest1")
+        @GET
+        public void circuitBreakerTest1(RestHandler reply) {
+            System.out.println("stringResponse: " + reply);
+            reply.response().stringResponse((future) ->{
+                throw new NullPointerException("test-123");
+            }).retry(3).execute();
+        }
+
         /////------------- sync blocking ----------------
 
         @Path("/stringGETResponseSyncAsync")

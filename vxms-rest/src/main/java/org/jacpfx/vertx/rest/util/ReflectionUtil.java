@@ -18,7 +18,7 @@ public class ReflectionUtil {
 
 
 
-    public static Object[] invokeRESTParameters(RoutingContext context, Method method, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
+    public static Object[] invokeRESTParameters(RoutingContext context, Method method, Throwable t, RestHandler handler) {
         method.setAccessible(true);
         final java.lang.reflect.Parameter[] parameters = method.getParameters();
         final Object[] parameterResult = new Object[parameters.length];
@@ -26,7 +26,7 @@ public class ReflectionUtil {
 
         for (java.lang.reflect.Parameter p : parameters) {
             if (RestHandler.class.equals(p.getType())) {
-                parameterResult[i] = new RestHandler(context, vertx,t, errorMethodHandler);
+                parameterResult[i] = handler;
             } else if (RoutingContext.class.equals(p.getType())) {
                 parameterResult[i] = context;
             } if (Throwable.class.isAssignableFrom(p.getType())) {

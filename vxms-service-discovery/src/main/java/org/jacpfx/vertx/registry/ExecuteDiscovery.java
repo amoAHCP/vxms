@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 30.05.16.
+ * Execute service discovery lookup
  */
 public class ExecuteDiscovery {
     protected final Vertx vertx;
@@ -30,7 +31,9 @@ public class ExecuteDiscovery {
         this.delay = delay;
     }
 
-
+    /**
+     * Execute the lookup
+     */
     public void execute() {
         Optional.ofNullable(client).
                 ifPresent(client -> Optional.ofNullable(serviceName).
