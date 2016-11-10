@@ -18,8 +18,8 @@ import java.util.function.Function;
 public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
 
-    public ExecuteRSObjectResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+    public ExecuteRSObjectResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
 
@@ -30,7 +30,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObject onFailureRespond(Function<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-        return new ExecuteRSObject(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -40,7 +40,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse retry(int retryCount) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse timeout(long timeout) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -70,7 +70,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse delay(long delay) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 
     /**
@@ -83,6 +83,6 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
     public ExecuteRSObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
     }
 }

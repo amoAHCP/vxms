@@ -20,6 +20,7 @@ import static java.util.Optional.*;
  * Created by Andy Moncsek on 12.01.16.
  */
 public class ExecuteRSBasicString {
+    protected final String methodId;
     protected final Vertx vertx;
     protected final Throwable t;
     protected final Consumer<Throwable> errorMethodHandler;
@@ -35,8 +36,9 @@ public class ExecuteRSBasicString {
     protected final long timeout;
 
 
-    public ExecuteRSBasicString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
+    public ExecuteRSBasicString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
                                 Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount,long timeout) {
+        this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -59,7 +61,7 @@ public class ExecuteRSBasicString {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, headers, stringConsumer,
+        new ExecuteRSBasicString(methodId,vertx, t, errorMethodHandler, context, headers, stringConsumer,
                 excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
@@ -72,7 +74,7 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType),
+        new ExecuteRSBasicString(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType),
                 stringConsumer, excecuteEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, status.code(), retryCount,timeout).execute();
     }
@@ -84,7 +86,7 @@ public class ExecuteRSBasicString {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicString(vertx, t, errorMethodHandler, context,
+        new ExecuteRSBasicString(methodId,vertx, t, errorMethodHandler, context,
                 ResponseUtil.updateContentType(headers,contentType), stringConsumer, excecuteEventBusAndReply,
                 encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout).execute();
     }

@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.response.blocking;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
@@ -27,10 +28,10 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     protected final ThrowableSupplier<byte[]> byteSupplier;
     protected final Function<Throwable, byte[]> onFailureRespond;
 
-    public ExecuteRSByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+    public ExecuteRSByte(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                          ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
                          Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount,timeout);
+        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout);
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
         this.byteSupplier = byteSupplier;
@@ -40,7 +41,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -54,7 +55,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -66,7 +67,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -84,22 +85,27 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
-                            this.vertx.executeBlocking(handler ->
-                                            ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
-                                    false,
-                                    (Handler<AsyncResult<byte[]>>) value -> {
-                                        if (!value.failed()) {
-                                            respond(value.result());
-                                        } else {
-                                            checkAndCloseResponse(retry);
-                                        }
-
-                                    });
+                            this.vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false, getAsyncResultHandler(retry));
                         }
 
                 );
 
 
+    }
+
+    public void executeAsync(ThrowableSupplier<byte[]> supplier, int retry, Future<byte[]> handler) {
+        ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay);
+    }
+
+    public Handler<AsyncResult<byte[]>> getAsyncResultHandler(int retry) {
+        return value -> {
+            if (!value.failed()) {
+                respond(value.result());
+            } else {
+                checkAndCloseResponse(retry);
+            }
+
+        };
     }
 
 

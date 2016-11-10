@@ -17,9 +17,9 @@ import java.util.function.Consumer;
 public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
 
 
-    public ExecuteRSBasicByteResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
+    public ExecuteRSBasicByteResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
                                       Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
-        super(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        super(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
     /**
@@ -29,7 +29,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      * @return the createResponse chain
      */
     public ExecuteRSBasicByte onFailureRespond(ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond) {
-        return new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        return new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
     /**
@@ -39,7 +39,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      * @return the response chain
      */
     public ExecuteRSBasicByteResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      */
 
     public ExecuteRSBasicByteResponse timeout(long timeout) {
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      * @return the response chain
      */
     public ExecuteRSBasicByteResponse retry(int retryCount) {
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 
     /**
@@ -73,6 +73,6 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
     public ExecuteRSBasicByteResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSBasicByteResponse(vertx, t, errorMethodHandler, context, headerMap, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headerMap, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
     }
 }

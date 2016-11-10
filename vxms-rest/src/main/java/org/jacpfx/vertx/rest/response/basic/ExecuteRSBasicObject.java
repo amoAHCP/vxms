@@ -21,7 +21,7 @@ import static java.util.Optional.ofNullable;
  * Created by Andy Moncsek on 12.01.16.
  */
 public class ExecuteRSBasicObject {
-
+    protected final String methodId;
     protected final Vertx vertx;
     protected final Throwable t;
     protected final RoutingContext context;
@@ -36,8 +36,9 @@ public class ExecuteRSBasicObject {
     protected final int retryCount;
     protected final long timeout;
 
-    public ExecuteRSBasicObject(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<Serializable> objectConsumer, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder,
+    public ExecuteRSBasicObject(String methodId,Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<Serializable> objectConsumer, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder,
                                 Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+        this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -61,7 +62,7 @@ public class ExecuteRSBasicObject {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId,vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
         lastStep.execute();
     }
 
@@ -75,7 +76,7 @@ public class ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
         lastStep.execute();
     }
 
@@ -86,7 +87,7 @@ public class ExecuteRSBasicObject {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
         lastStep.execute();
     }
 

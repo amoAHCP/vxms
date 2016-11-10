@@ -113,6 +113,10 @@ public class RESTInitializer {
     private static void initHttpRoute(String methodId, Vertx vertx, Object service, Method restMethod, Optional<Consumes> consumes, Optional<Method> errorMethod, Route route) {
         route.handler(routingContext ->
                 handleRESTRoutingContext(methodId, vertx, service, restMethod, errorMethod, routingContext));
+        updateHttpConsumes(consumes, route);
+    }
+
+    private static void updateHttpConsumes(Optional<Consumes> consumes, Route route) {
         consumes.ifPresent(cs -> {
             if (cs.value().length > 0) {
                 Stream.of(cs.value()).forEach(route::consumes);

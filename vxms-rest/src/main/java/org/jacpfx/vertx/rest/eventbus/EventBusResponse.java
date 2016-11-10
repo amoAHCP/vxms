@@ -21,22 +21,24 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 14.03.16.
  */
 public class EventBusResponse {
+    private final String methodId;
     private final Vertx vertx;
     private final Throwable t;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
-    private final String id;
+    private final String targetId;
     private final Object message;
     private final DeliveryOptions options;
 
 
-    public EventBusResponse(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String id,
+    public EventBusResponse(String methodId,Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String targetId,
                             Object message, DeliveryOptions options) {
+        this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
-        this.id = id;
+        this.targetId = targetId;
         this.message = message;
         this.options = options;
     }
@@ -49,7 +51,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-        return EventbusStringExecutionUtil.mapToStringResponse(id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
+        return EventbusStringExecutionUtil.mapToStringResponse(methodId,targetId, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
     }
 
     /**
@@ -60,7 +62,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusByteExecutionUtil.mapToByteResponse(id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
+        return EventbusByteExecutionUtil.mapToByteResponse(methodId,targetId, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
     }
 
     /**
@@ -72,7 +74,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusObjectExecutionUtil.mapToObjectResponse(id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0);
+        return EventbusObjectExecutionUtil.mapToObjectResponse(methodId,targetId, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0);
     }
 
 

@@ -16,13 +16,15 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 12.01.16.
  */
 public class RSResponseBlocking {
+    private final String methodId;
     private final Vertx vertx;
     private final Throwable t;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
     private final Map<String, String> headers;
 
-    public RSResponseBlocking(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
+    public RSResponseBlocking(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
+        this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -38,7 +40,7 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSByteResponse(vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0, 0, 0);
+        return new ExecuteRSByteResponse(methodId,vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0, 0, 0);
     }
 
     /**
@@ -48,7 +50,7 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSStringResponse(vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0, 0);
+        return new ExecuteRSStringResponse(methodId,vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0, 0);
     }
 
     /**
@@ -58,6 +60,6 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSObjectResponse(vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, null, null, 0, 0, 0, 0);
+        return new ExecuteRSObjectResponse(methodId,vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, null, null, 0, 0, 0, 0);
     }
 }

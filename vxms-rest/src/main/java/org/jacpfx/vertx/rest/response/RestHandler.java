@@ -18,7 +18,7 @@ public class RestHandler {
     private final RoutingContext context;
     private final String methodId;
 
-    public RestHandler(String methodId,RoutingContext context, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
+    public RestHandler(String methodId, RoutingContext context, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
         this.context = context;
         this.vertx = vertx;
@@ -36,11 +36,11 @@ public class RestHandler {
     }
 
     public RSResponse response() {
-        return new RSResponse(vertx, t, errorMethodHandler, context, new HashMap<>());
+        return new RSResponse(methodId, vertx, t, errorMethodHandler, context, new HashMap<>());
     }
 
     public EventBusRequest eventBusRequest() {
-        return new EventBusRequest(vertx, t, errorMethodHandler, context);
+        return new EventBusRequest(methodId, vertx, t, errorMethodHandler, context);
     }
 
 }

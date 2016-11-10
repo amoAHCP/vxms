@@ -15,12 +15,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
 public class ExecuteRSBasicByte {
+    protected final String methodId;
     protected final Vertx vertx;
     protected final Throwable t;
     protected final RoutingContext context;
@@ -35,8 +36,9 @@ public class ExecuteRSBasicByte {
     protected final int retryCount;
     protected final long timeout;
 
-    public ExecuteRSBasicByte(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
-                              Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount,long timeout) {
+    public ExecuteRSBasicByte(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
+                              Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+        this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -59,8 +61,8 @@ public class ExecuteRSBasicByte {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, status.code(), retryCount,timeout).execute();
+        new ExecuteRSBasicByte(methodId,vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder,
+                errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
     /**
@@ -72,8 +74,8 @@ public class ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType), byteConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, status.code(), retryCount,timeout).execute();
+        new ExecuteRSBasicByte(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
+                errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
     /**
@@ -83,10 +85,9 @@ public class ExecuteRSBasicByte {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicByte(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType), byteConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout).execute();
+        new ExecuteRSBasicByte(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
+                errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout).execute();
     }
-
 
 
     /**
@@ -97,7 +98,7 @@ public class ExecuteRSBasicByte {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout);
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -132,7 +133,7 @@ public class ExecuteRSBasicByte {
     protected void respond(byte[] result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers, statuscode, response);
             if (result != null) {
                 response.end(Buffer.buffer(result));
             } else {
@@ -142,11 +143,10 @@ public class ExecuteRSBasicByte {
     }
 
 
-
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers, statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {
@@ -156,10 +156,8 @@ public class ExecuteRSBasicByte {
     }
 
     protected void respond(byte[] result) {
-        respond(result,httpStatusCode);
+        respond(result, httpStatusCode);
     }
-
-
 
 
 }

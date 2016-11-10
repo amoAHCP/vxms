@@ -27,9 +27,9 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     protected final ThrowableSupplier<String> stringSupplier;
     protected final Function<Throwable, String> onFailureRespond;
 
-    public ExecuteRSString(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
+    public ExecuteRSString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
                            Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout);
+        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout);
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
         this.stringSupplier = stringSupplier;
@@ -39,7 +39,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId,vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -53,7 +53,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -66,7 +66,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
         lastStep.execute();
     }
 
@@ -93,7 +93,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                                         } else {
                                             //respond(value.cause().getMessage(),HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                                         }
-                                      //  checkAndCloseResponse(retry);
+                                        //  checkAndCloseResponse(retry);
                                     });
                         }
 
