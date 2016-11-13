@@ -61,7 +61,7 @@ public class ExecuteRSBasicByte {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        new ExecuteRSBasicByte(methodId,vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder,
+        new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
@@ -74,7 +74,7 @@ public class ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicByte(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
+        new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
@@ -85,7 +85,7 @@ public class ExecuteRSBasicByte {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicByte(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
+        new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout).execute();
     }
 
@@ -109,7 +109,7 @@ public class ExecuteRSBasicByte {
             ofNullable(byteConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(retry, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
+                                ResponseUtil.createResponse(methodId, retry, 0, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
                                     if (value.succeeded()) {
                                         respond(value.getResult());
                                     } else {

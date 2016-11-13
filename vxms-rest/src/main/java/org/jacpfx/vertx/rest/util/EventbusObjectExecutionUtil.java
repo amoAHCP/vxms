@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class EventbusObjectExecutionUtil {
 
     public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,String _id, Object _message, DeliveryOptions _options,
-                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx _vertx, Throwable _t,
+                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction, Vertx _vertx, Throwable _t,
                                                                    Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
                                                                    ThrowableFutureConsumer<Serializable> _objectConsumer, Encoder _encoder, Consumer<Throwable> _errorHandler,
                                                                    ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond, int _httpStatusCode, int _retryCount, long _timeout) {
@@ -32,7 +32,7 @@ public class EventbusObjectExecutionUtil {
                                                                     context, headers,
                                                                     encoder, errorHandler, onFailureRespond,
                                                                     httpStatusCode, retryCount, timeout) ->
-                sendMessageAndSupplyObjectHandler(_methodId,_id, _message, _options, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+                sendMessageAndSupplyObjectHandler(_methodId,_id, _message, _options, _objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
 
 
         return new ExecuteRSBasicObjectResponse(_methodId,_vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _retryCount, _timeout);

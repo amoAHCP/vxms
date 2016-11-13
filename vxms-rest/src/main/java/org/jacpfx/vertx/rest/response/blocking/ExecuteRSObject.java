@@ -2,6 +2,7 @@ package org.jacpfx.vertx.rest.response.blocking;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
@@ -88,20 +89,25 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
         Optional.ofNullable(objectSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
-                            this.vertx.executeBlocking(handler ->
-                                            ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay),
-                                    false,
-                                    (Handler<AsyncResult<Serializable>>) value -> {
-                                        if (!value.failed()) {
-                                            respond(value.result());
-                                        } else {
-                                            checkAndCloseResponse(retry);
-                                        }
-                                    });
+                            this.vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false, getAsyncResultHandler(retry));
                         }
 
                 );
 
+    }
+
+    public void executeAsync(ThrowableSupplier<Serializable> supplier, int retry, Future<Serializable> handler) {
+        ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay);
+    }
+
+    public Handler<AsyncResult<Serializable>> getAsyncResultHandler(int retry) {
+        return value -> {
+            if (!value.failed()) {
+                respond(value.result());
+            } else {
+                checkAndCloseResponse(retry);
+            }
+        };
     }
 
 

@@ -188,7 +188,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
         HttpClient client = vertx.
                 createHttpClient(options);
 
-        HttpClientRequest request = client.get("/wsService/endpointFourErrorReturnRetryTest?val=123&tmp=456", new Handler<HttpClientResponse>() {
+        HttpClientRequest request = client.get("/wsService/endpointFourErrorReturnRetryTest?productType=123&product=456", new Handler<HttpClientResponse>() {
             public void handle(HttpClientResponse resp) {
                 resp.bodyHandler(body -> {
                     System.out.println("Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
@@ -484,8 +484,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
         @Path("/endpointFourErrorReturnRetryTest")
         @GET
         public void rsEndpointFourErrorReturnRetryTest(RestHandler handler) {
-            String productType = handler.request().param("val");
-            String product = handler.request().param("tmp");
+            String productType = handler.request().param("productType");
+            String product = handler.request().param("product");
             System.out.println("wsEndpointTwo: " + handler);
             AtomicInteger count = new AtomicInteger(4);
             handler.

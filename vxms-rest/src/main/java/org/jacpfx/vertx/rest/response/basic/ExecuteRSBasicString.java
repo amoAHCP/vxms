@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -37,7 +37,7 @@ public class ExecuteRSBasicString {
 
 
     public ExecuteRSBasicString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
-                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount,long timeout) {
+                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -61,7 +61,7 @@ public class ExecuteRSBasicString {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        new ExecuteRSBasicString(methodId,vertx, t, errorMethodHandler, context, headers, stringConsumer,
+        new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer,
                 excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
@@ -74,9 +74,9 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicString(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers,contentType),
+        new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType),
                 stringConsumer, excecuteEventBusAndReply, encoder, errorHandler,
-                onFailureRespond, status.code(), retryCount,timeout).execute();
+                onFailureRespond, status.code(), retryCount, timeout).execute();
     }
 
     /**
@@ -86,9 +86,9 @@ public class ExecuteRSBasicString {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicString(methodId,vertx, t, errorMethodHandler, context,
-                ResponseUtil.updateContentType(headers,contentType), stringConsumer, excecuteEventBusAndReply,
-                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,timeout).execute();
+        new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context,
+                ResponseUtil.updateContentType(headers, contentType), stringConsumer, excecuteEventBusAndReply,
+                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout).execute();
     }
 
     /**
@@ -109,11 +109,11 @@ public class ExecuteRSBasicString {
             ofNullable(stringConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(retry,timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler,vertx, value -> {
-                                    if(value.succeeded()) {
+                                ResponseUtil.createResponse(methodId, retry, timeout, 0, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
+                                    if (value.succeeded()) {
                                         respond(value.getResult());
                                     } else {
-                                        respond(value.getCause().getMessage(),HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                                        respond(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                                     }
                                     checkAndCloseResponse(retry);
                                 });
@@ -134,13 +134,13 @@ public class ExecuteRSBasicString {
     }
 
     protected void respond(String result) {
-        respond(result,httpStatusCode);
+        respond(result, httpStatusCode);
     }
 
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers, statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {
@@ -148,7 +148,6 @@ public class ExecuteRSBasicString {
             }
         }
     }
-
 
 
 }
