@@ -33,7 +33,7 @@ public class EtcdRegistrationTest extends VertxTestBase
     public static final String SERVICE_REST_GET = "/wsService";
     public static final String SERVICE_REST_GET_2 = "/EtcdAwareServiceA";
     public static final String SERVICE_REST_GET_3 = "/EtcdAwareServiceB";
-    private static final String HOST = "localhost";
+    private static final String HOST = "127.0.0.1";
     public static final int PORT = 9998;
     public static final int PORT_2 = 9997;
     public static final int PORT_3 = 9996;
@@ -256,7 +256,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
 
     @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = HOST , exportedPort = PORT)
     public class EtcdAwareService extends VxmsEndpoint {
 
         public void postConstruct(final Future<Void> startFuture) {
@@ -273,7 +273,7 @@ public class EtcdRegistrationTest extends VertxTestBase
     }
 
     @ServiceEndpoint(name = SERVICE_REST_GET_2, contextRoot = SERVICE_REST_GET_2, port = PORT_2)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = HOST, exportedPort = PORT_2)
     public class EtcdAwareServiceA extends VxmsEndpoint {
         private DiscoveryClient client;
         private HttpClient httpclient;
@@ -318,7 +318,7 @@ public class EtcdRegistrationTest extends VertxTestBase
     }
 
     @ServiceEndpoint(name = SERVICE_REST_GET_3, contextRoot = SERVICE_REST_GET_3, port = PORT_3)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = HOST, exportedPort = PORT_3)
     public class EtcdAwareServiceB extends VxmsEndpoint {
         private DiscoveryClient client;
 

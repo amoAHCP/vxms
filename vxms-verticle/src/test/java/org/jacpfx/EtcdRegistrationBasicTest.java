@@ -144,7 +144,7 @@ public class EtcdRegistrationBasicTest extends VertxTestBase
 
 
     @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = HOST, exportedPort = PORT)
     public class EtcdAwareService extends VxmsEndpoint {
 
         public void postConstruct(final Future<Void> startFuture) {
