@@ -51,7 +51,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-        return EventbusStringExecutionUtil.mapToStringResponse(methodId,targetId, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0);
+        return EventbusStringExecutionUtil.mapToStringResponse(methodId,targetId, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0l,0l);
     }
 
     /**

@@ -14,7 +14,8 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface ExecuteEventBusStringCall {
 
-    void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
-                 Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                 ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout);
+    void execute(
+            Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+            Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+            ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout);
 }

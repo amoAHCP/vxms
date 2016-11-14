@@ -95,7 +95,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointOne() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -118,7 +119,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointTwo() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -140,7 +142,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointThree() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -162,7 +165,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointFourErrorRetryTest() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -184,7 +188,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointFourErrorReturnRetryTest() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -207,7 +212,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointFive() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -232,7 +238,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointFive_error() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -256,7 +263,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointSix() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -287,7 +295,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointSeven() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -318,7 +327,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
     public void endpointSeven_error() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -348,7 +358,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointEight_header() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -374,7 +385,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointEight_put_header() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -403,7 +415,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     @Test
     public void endpointNine_exception() throws InterruptedException {
         HttpClientOptions options = new HttpClientOptions();
-       options.setDefaultPort(PORT);         options.setDefaultHost(HOST);
+        options.setDefaultPort(PORT);
+        options.setDefaultHost(HOST);
         HttpClient client = vertx.
                 createHttpClient(options);
 
@@ -412,7 +425,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                 resp.bodyHandler(body -> {
                     System.out.println("Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
 
-                   // assertEquals(body.toString(), "123456");
+                    // assertEquals(body.toString(), "123456");
 
                 });
                 String contentType = resp.getHeader("Content-Type");
@@ -467,18 +480,22 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
             AtomicInteger count = new AtomicInteger(4);
-            handler.response().stringResponse((future) -> {
-                if (count.decrementAndGet() >= 0) {
-                    System.out.println("throw:" + count.get());
-                    throw new NullPointerException("test");
-                }
-                future.complete(productType + product);
-            }).onError(error -> {
-                error.printStackTrace();
-                System.out.println("count: " + count.get());
+            handler.response().
+                    stringResponse((future) -> {
+                        if (count.decrementAndGet() >= 0) {
+                            System.out.println("throw:" + count.get());
+                            throw new NullPointerException("test");
+                        }
+                        future.complete(productType + product);
+                    }).
+                    onError(error -> {
+                        error.printStackTrace();
+                        System.out.println("count: " + count.get());
 
 
-            }).retry(3).onFailureRespond((e,response) -> response.complete(productType + product)).execute();
+                    }).
+                    retry(3).
+                    onFailureRespond((e, response) -> response.complete(productType + product)).execute();
         }
 
         @Path("/endpointFourErrorReturnRetryTest")
@@ -499,7 +516,8 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                     }).
                     onError(error -> System.out.println("retry: " + count.get() + "   " + error.getStackTrace())).
                     retry(3).
-                    onFailureRespond((error,response) ->response.complete(product + productType)).
+                    closeCircuitBreaker(0l).
+                    onFailureRespond((error, response) -> response.complete(product + productType)).
                     execute();
         }
 
@@ -529,7 +547,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                         future.complete(new Payload<>("hallo"));
                     }
                     , new ExampleStringEncoder()
-            ).retry(3).onFailureRespond((error,future) -> future.complete(pp), new ExampleStringEncoder()).execute();
+            ).retry(3).onFailureRespond((error, future) -> future.complete(pp), new ExampleStringEncoder()).execute();
         }
 
         @Path("/endpointSix")
@@ -549,7 +567,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
             String product = handler.request().param("tmp");
             System.out.println("wsEndpointTwo: " + handler);
             Payload<String> pp = new Payload<>(productType + product);
-            handler.response().byteResponse((future) ->  future.complete(Serializer.serialize(pp))).execute();
+            handler.response().byteResponse((future) -> future.complete(Serializer.serialize(pp))).execute();
         }
 
         @Path("/endpointSeven_error")
@@ -566,7 +584,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
                     throw new NullPointerException("test");
                 }
                 future.complete(Serializer.serialize(pp));
-            }).retry(3).onFailureRespond((error,future) -> {
+            }).retry(3).onFailureRespond((error, future) -> {
                 try {
                     future.complete(Serializer.serialize(pp));
                 } catch (IOException e) {

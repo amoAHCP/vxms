@@ -24,7 +24,7 @@ public class RSResponse {
     private final RoutingContext context;
     private final Map<String, String> headers;
 
-    public RSResponse(String methodId,Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
+    public RSResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -35,10 +35,11 @@ public class RSResponse {
 
     /**
      * Switch to blocking mode
+     *
      * @return @see{org.jacpfx.vertx.rest.response.RSAsyncResponse}
      */
     public RSResponseBlocking blocking() {
-        return new RSResponseBlocking(methodId,vertx, t, errorMethodHandler, context, headers);
+        return new RSResponseBlocking(methodId, vertx, t, errorMethodHandler, context, headers);
     }
 
     /**
@@ -48,7 +49,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
-        return new ExecuteRSBasicByteResponse(methodId,vertx, t, errorMethodHandler, context, headers, byteConsumer, null, null, null, null, 0, 0,0);
+        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, null, null, null, null, 0, 0, 0l);
     }
 
     /**
@@ -58,7 +59,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicStringResponse stringResponse(ThrowableFutureConsumer<String> stringConsumer) {
-        return new ExecuteRSBasicStringResponse(methodId,vertx, t, errorMethodHandler, context, headers, stringConsumer, null, null, null, null, 0, 0,0);
+        return new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, null, null, null, null, 0, 0, 0l, 0l);
     }
 
     /**
@@ -68,7 +69,7 @@ public class RSResponse {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSBasicObjectResponse objectResponse(ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(methodId,vertx, t, errorMethodHandler, context, headers,  objectConsumer, null, encoder, null, null, 0, 0, 0);
+        return new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectConsumer, null, encoder, null, null, 0, 0, 0l);
     }
 
 

@@ -34,10 +34,11 @@ public class ExecuteRSBasicString {
     protected final int httpStatusCode;
     protected final int retryCount;
     protected final long timeout;
+    protected final long circuitBreakerTimeout;
 
 
     public ExecuteRSBasicString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder,
-                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -52,6 +53,7 @@ public class ExecuteRSBasicString {
         this.retryCount = retryCount;
         this.httpStatusCode = httpStatusCode;
         this.timeout = timeout;
+        this.circuitBreakerTimeout = circuitBreakerTimeout;
     }
 
     /**
@@ -62,7 +64,7 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer,
-                excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout).execute();
+                excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout,circuitBreakerTimeout).execute();
     }
 
     /**
@@ -76,7 +78,7 @@ public class ExecuteRSBasicString {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType),
                 stringConsumer, excecuteEventBusAndReply, encoder, errorHandler,
-                onFailureRespond, status.code(), retryCount, timeout).execute();
+                onFailureRespond, status.code(), retryCount, timeout,circuitBreakerTimeout).execute();
     }
 
     /**
@@ -88,7 +90,7 @@ public class ExecuteRSBasicString {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context,
                 ResponseUtil.updateContentType(headers, contentType), stringConsumer, excecuteEventBusAndReply,
-                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout).execute();
+                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout,circuitBreakerTimeout).execute();
     }
 
     /**
@@ -99,7 +101,7 @@ public class ExecuteRSBasicString {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -109,7 +111,7 @@ public class ExecuteRSBasicString {
             ofNullable(stringConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(methodId, retry, timeout, 0, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
+                                ResponseUtil.createResponse(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
                                     if (value.succeeded()) {
                                         respond(value.getResult());
                                     } else {
@@ -124,6 +126,16 @@ public class ExecuteRSBasicString {
         });
 
 
+    }
+
+    /**
+     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value, this handler is a terminal handler and will be executed only once
+     *
+     * @param onFailureRespond the handler (function) to execute on error
+     * @return the response chain
+     */
+    public ExecuteRSBasicString onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
+        return new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
     protected void checkAndCloseResponse(int retry) {

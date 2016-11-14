@@ -10,6 +10,7 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
+import org.jacpfx.entity.Payload;
 import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
@@ -100,18 +101,22 @@ public class RESTJerseyClientCircuitBrakerTests extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response,"test-123");
-                latch.countDown();
+                vertx.runOnContext( h -> {
+                    System.out.println("--------");
+                    assertEquals(response, "xyz");
+                    System.out.println("----ccc----");
+                    testComplete();
+                });
             }
 
             @Override
             public void failed(Throwable throwable) {
-
+                System.out.println("fffffff");
             }
         });
 
-        latch.await();
-        testComplete();
+      //  latch.await();
+      //  testComplete();
 
     }
 
