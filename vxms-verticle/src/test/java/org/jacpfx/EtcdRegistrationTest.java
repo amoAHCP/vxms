@@ -176,15 +176,15 @@ public class EtcdRegistrationTest extends VertxTestBase
         EtcdAwareService service = new EtcdAwareService();
         Vertx vertx = Vertx.vertx();
         service.init(vertx, vertx.getOrCreateContext());
-       final DiscoveryClient client = DiscoveryClient.createClient(vertx,new HttpClientOptions(), new JsonObject().put("etcd-host","127.0.0.1").put("etcd-port","4001").put("etcd-domain","etcdAwareTest"));
+        final DiscoveryClient client = DiscoveryClient.createClient(vertx, new HttpClientOptions(), new JsonObject().put("etcd-host", "127.0.0.1").put("etcd-port", "4001").put("etcd-domain", "etcdAwareTest"));
 
-      //  final DiscoveryClient client = DiscoveryClient.createClient(service);
+        //  final DiscoveryClient client = DiscoveryClient.createClient(service);
         if (client.isConnected()) {
             client.find(SERVICE_REST_GET).onSuccess(val -> {
                 HttpClientOptions options = new HttpClientOptions();
                 HttpClient httpclient = this.vertx.createHttpClient(options);
                 HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/", resp -> {
-                    if(resp.statusCode()==200) {
+                    if (resp.statusCode() == 200) {
                         resp.bodyHandler(body -> {
 
                             System.out.println("Got a createResponse: " + body.toString());
@@ -217,7 +217,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
     @Test
     public void testEtcdDiscoveryClientRequestChain() {
-        final DiscoveryClient client = DiscoveryClient.createClient(vertx,new HttpClientOptions(), new JsonObject().put("etcd-host","127.0.0.1").put("etcd-port","4001").put("etcd-domain","etcdAwareTest"));
+        final DiscoveryClient client = DiscoveryClient.createClient(vertx, new HttpClientOptions(), new JsonObject().put("etcd-host", "127.0.0.1").put("etcd-port", "4001").put("etcd-domain", "etcdAwareTest"));
         if (client.isConnected()) {
             client.find(SERVICE_REST_GET_2).onSuccess(val -> {
                 HttpClientOptions options = new HttpClientOptions();
@@ -225,7 +225,7 @@ public class EtcdRegistrationTest extends VertxTestBase
                         createHttpClient(options);
 
                 HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/hello", resp -> {
-                    if(resp.statusCode()==200) {
+                    if (resp.statusCode() == 200) {
                         resp.bodyHandler(body -> {
                             System.out.println("Got a createResponse: " + body.toString());
                             assertTrue("test-123hello".equals(body.toString()));
@@ -256,7 +256,7 @@ public class EtcdRegistrationTest extends VertxTestBase
 
 
     @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10)
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
     public class EtcdAwareService extends VxmsEndpoint {
 
         public void postConstruct(final Future<Void> startFuture) {
@@ -273,19 +273,20 @@ public class EtcdRegistrationTest extends VertxTestBase
     }
 
     @ServiceEndpoint(name = SERVICE_REST_GET_2, contextRoot = SERVICE_REST_GET_2, port = PORT_2)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10)
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
     public class EtcdAwareServiceA extends VxmsEndpoint {
         private DiscoveryClient client;
         private HttpClient httpclient;
+
         public void postConstruct(final Future<Void> startFuture) {
             client = DiscoveryClient.createClient(this);
 
             HttpClientOptions options = new HttpClientOptions();
             httpclient = vertx.
                     createHttpClient(options);
-            if(client.isConnected()) {
+            if (client.isConnected()) {
                 startFuture.complete();
-            }else {
+            } else {
                 startFuture.fail("no connection to discovery service");
             }
         }
@@ -296,16 +297,16 @@ public class EtcdRegistrationTest extends VertxTestBase
 
             client.find(SERVICE_REST_GET_3).onSuccess(node -> {
                 HttpClientRequest request = httpclient.
-                        getAbs(node.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/"+reply.request().param("value"), resp -> {
-                    if(resp.statusCode()==200) {
-                        resp.bodyHandler(body -> {
-                            System.out.println("Got a createResponse in EtcdAwareServiceA: " + body.toString());
-                            reply.response().stringResponse((future)->future.complete(body.toString())).execute();
+                        getAbs(node.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/" + reply.request().param("value"), resp -> {
+                            if (resp.statusCode() == 200) {
+                                resp.bodyHandler(body -> {
+                                    System.out.println("Got a createResponse in EtcdAwareServiceA: " + body.toString());
+                                    reply.response().stringResponse((future) -> future.complete(body.toString())).execute();
+                                });
+                            } else {
+                                // do something
+                            }
                         });
-                    } else {
-                        // do something
-                    }
-                });
 
                 request.end();
             }).onError((e) -> {
@@ -317,14 +318,15 @@ public class EtcdRegistrationTest extends VertxTestBase
     }
 
     @ServiceEndpoint(name = SERVICE_REST_GET_3, contextRoot = SERVICE_REST_GET_3, port = PORT_3)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10)
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = "127.0.0.1")
     public class EtcdAwareServiceB extends VxmsEndpoint {
-         private DiscoveryClient client;
+        private DiscoveryClient client;
+
         public void postConstruct(final Future<Void> startFuture) {
             client = DiscoveryClient.createClient(this);
-            if(client.isConnected()) {
+            if (client.isConnected()) {
                 startFuture.complete();
-            }else {
+            } else {
                 startFuture.fail("no connection to discovery service");
             }
 
@@ -334,7 +336,7 @@ public class EtcdRegistrationTest extends VertxTestBase
         @GET
         public void simpleRESTEndpoint(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
-            reply.response().stringResponse((future) -> future.complete("test-123"+reply.request().param("value"))).execute();
+            reply.response().stringResponse((future) -> future.complete("test-123" + reply.request().param("value"))).execute();
         }
 
     }
