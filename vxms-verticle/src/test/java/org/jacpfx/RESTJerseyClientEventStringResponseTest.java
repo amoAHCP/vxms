@@ -197,7 +197,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                 String value = response;
                 vertx.runOnContext(h -> {
 
-                    assertEquals(value, "no connection");
+                    assertEquals(value, "No handlers for address hello1");
                 });
                 latch.countDown();
             }
@@ -353,7 +353,11 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
                         System.out.println("value from event  ");
                         future.complete(handler.result().body().toString());
                     }).
-                    onFailureRespond((t, c) -> c.complete("no connection")).
+                    onError(error -> {
+                        System.out.println(":::"+error.getMessage());
+                    }).
+                    retry(3).
+                    onFailureRespond((t, c) -> c.complete(t.getMessage())).
                     execute();
             System.out.println("-------2");
         }
