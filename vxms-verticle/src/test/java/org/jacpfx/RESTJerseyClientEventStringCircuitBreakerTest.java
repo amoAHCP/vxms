@@ -169,27 +169,49 @@ public class RESTJerseyClientEventStringCircuitBreakerTest extends VertxTestBase
 
                     assertEquals(value, "No handlers for address hello1");
 
-                    WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
-                    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+                   vertx.setTimer(1000,val -> {
+                       WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
+                       Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
-                        @Override
-                        public void completed(String response) {
-                            System.out.println("Response entity '" + response + "' received.");
-                            String value = response;
-                            vertx.runOnContext(h -> {
+                           @Override
+                           public void completed(String response) {
+                               System.out.println("Response entity '" + response + "' received.");
+                               String value = response;
+                               vertx.runOnContext(h -> {
 
-                                assertEquals(value, "circuit open");
-                            });
+                                   assertEquals(value, "circuit open");
+
+                                   vertx.setTimer(2000,val -> {
+                                       WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
+                                       Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                                           @Override
+                                           public void completed(String response) {
+                                               System.out.println("Response entity '" + response + "' received.");
+                                               String value = response;
+                                               vertx.runOnContext(h -> {
+                                                   assertEquals(value, "No handlers for address hello1");
+                                               });
+                                               latch.countDown();
+                                           }
+
+                                           @Override
+                                           public void failed(Throwable throwable) {
+                                               throwable.printStackTrace();
+                                           }
+                                       });
+                                   });
+                               });
 
 
-                            latch.countDown();
-                        }
+                           }
 
-                        @Override
-                        public void failed(Throwable throwable) {
-                            throwable.printStackTrace();
-                        }
-                    });
+                           @Override
+                           public void failed(Throwable throwable) {
+                               throwable.printStackTrace();
+                           }
+                       });
+                   });
                 });
 
 
