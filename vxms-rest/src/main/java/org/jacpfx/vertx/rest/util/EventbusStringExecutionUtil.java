@@ -64,23 +64,24 @@ public class EventbusStringExecutionUtil {
                                     executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler);
                                 } else {
                                     ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(Future.failedFuture("circuit open").cause());
-                                    executeErrorState(methodId, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, failConsumer);
+                                    executeErrorState(methodId, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, failConsumer,lockHandler);
                                 }
                             });
                         } else {
                             ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(resultHandler.cause());
-                            executeErrorState(methodId, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, failConsumer);
+                            executeErrorState(methodId, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, failConsumer,lockHandler);
                         }
                     });
                 } else {
                     ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(lockHandler.cause());
-                    executeErrorState(methodId, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, failConsumer);
+                    executeErrorState(methodId, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, failConsumer,null);
                 }
             });
         }
     }
 
-    private static void executeErrorState(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, ThrowableFutureConsumer<String> failConsumer) {
+    private static void executeErrorState(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, ThrowableFutureConsumer<String> failConsumer,AsyncResult<Lock> lockHandler) {
+        Optional.ofNullable(lockHandler).ifPresent(lck -> lck.result().release());
         new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
                 failConsumer, null, encoder, errorHandler, onFailureRespond,
                 httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
@@ -157,7 +158,7 @@ public class EventbusStringExecutionUtil {
                                     } else {
                                         lockHandler.result().release();
                                         ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(valHandler.cause());
-                                        new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
+                                        new ExecuteRSBasicStringResponse(methodId, vertx, valHandler.cause(), errorMethodHandler, context, headers,
                                                 failConsumer, null, encoder, errorHandler, onFailureRespond,
                                                 httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
                                                 execute();
@@ -166,7 +167,7 @@ public class EventbusStringExecutionUtil {
                             } else {
                                 lockHandler.result().release();
                                 ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(resultHandler.cause());
-                                new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
+                                new ExecuteRSBasicStringResponse(methodId, vertx, resultHandler.cause(), errorMethodHandler, context, headers,
                                         failConsumer, null, encoder, errorHandler, onFailureRespond,
                                         httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
                                         execute();
@@ -175,7 +176,7 @@ public class EventbusStringExecutionUtil {
                     } else {
                         lockHandler.result().release();
                         ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(lockHandler.cause());
-                        new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
+                        new ExecuteRSBasicStringResponse(methodId, vertx, lockHandler.cause(), errorMethodHandler, context, headers,
                                 failConsumer, null, encoder, errorHandler, onFailureRespond,
                                 httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
                                 execute();

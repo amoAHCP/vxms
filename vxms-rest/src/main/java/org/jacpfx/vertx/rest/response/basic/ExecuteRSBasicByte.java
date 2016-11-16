@@ -109,7 +109,7 @@ public class ExecuteRSBasicByte {
             ofNullable(byteConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(methodId, retry, 0, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
+                                ResponseUtil.createResponse(methodId, retry, 0, timeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx,t, value -> {
                                     if (value.succeeded()) {
                                         respond(value.getResult());
                                     } else {

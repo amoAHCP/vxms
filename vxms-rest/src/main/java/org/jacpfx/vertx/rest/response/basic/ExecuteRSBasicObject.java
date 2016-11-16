@@ -109,7 +109,7 @@ public class ExecuteRSBasicObject {
             ofNullable(objectConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(methodId,retry, timeout,0, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, value -> {
+                                ResponseUtil.createResponse(methodId,retry, timeout,0, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
                                     if (value.succeeded()) {
                                         respond(value.getResult());
                                     } else {

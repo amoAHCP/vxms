@@ -27,10 +27,10 @@ import java.util.function.Consumer;
 public class ResponseUtil {
     public static <T> void createResponse(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation,
                                           Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond,
-                                          Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer) {
+                                          Consumer<Throwable> errorMethodHandler, Vertx vertx, Throwable t, Consumer<ExecutionResult<T>> resultConsumer) {
 
         if (_circuitBreakerTimeout > 0) {
-            executeStateful(_methodId, _retry, _timeout, _circuitBreakerTimeout, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer);
+            executeStateful(_methodId, _retry, _timeout, _circuitBreakerTimeout, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx,t, resultConsumer);
         } else {
             executeStateless(_methodId, _retry, _timeout, _circuitBreakerTimeout, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer);
         }
@@ -76,7 +76,7 @@ public class ResponseUtil {
         }
     }
 
-    private static <T> void executeStateful(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer) {
+    private static <T> void executeStateful(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx,Throwable t, Consumer<ExecutionResult<T>> resultConsumer) {
         final Future<T> operationResult = Future.future();
         operationResult.setHandler(event -> {
             if (event.failed()) {
@@ -99,7 +99,7 @@ public class ResponseUtil {
                             } else if (currentVal > 0) {
                                 executeDefaultState(_timeout, _userOperation, vertx, operationResult, lockHandler);
                             } else {
-                                executeErrorState(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler,Future.failedFuture("circuit open"));
+                                executeErrorState(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler,t!=null?Future.failedFuture(t):Future.failedFuture("circuit open"));
                             }
                         });
                     } else {
@@ -107,6 +107,7 @@ public class ResponseUtil {
                     }
                 });
             }else {
+                lockHandler.cause().printStackTrace();
                 executeErrorState(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler,Future.failedFuture(lockHandler.cause()));
             }
 
@@ -222,7 +223,7 @@ public class ResponseUtil {
 
     protected static <T> void retry(String _methodId, int retryTemp, long _timeout, long _release, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event) {
         ResponseUtil.handleError(errorHandler, event.cause());
-        createResponse(_methodId, retryTemp, _timeout, _release, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer);
+        createResponse(_methodId, retryTemp, _timeout, _release, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx,null, resultConsumer);
     }
 
     public static <T> void handleExecutionError(Future<T> errorResult, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Throwable e) {
