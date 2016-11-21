@@ -245,7 +245,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         public void rsstringGETResponseSyncAsync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
             reply.response().stringResponse((future) -> {
-                throw new NullPointerException("test-123");
+                future.complete("");
             }).execute();
         }
 
