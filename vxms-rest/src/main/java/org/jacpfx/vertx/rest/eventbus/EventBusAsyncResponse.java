@@ -44,7 +44,7 @@ public class EventBusAsyncResponse {
 
 
     public ExecuteRSStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-        return EventbusAsyncStringExecutionUtil.mapToStringResponse(methodId,id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0, 0);
+        return EventbusAsyncStringExecutionUtil.mapToStringResponse(methodId,id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0l, 0l,0l);
     }
 
     public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {

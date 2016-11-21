@@ -50,7 +50,7 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSStringResponse(methodId,vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0, 0);
+        return new ExecuteRSStringResponse(methodId,vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0l, 0l,0l);
     }
 
     /**

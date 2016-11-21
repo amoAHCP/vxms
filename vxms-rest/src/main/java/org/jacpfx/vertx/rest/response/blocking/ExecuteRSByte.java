@@ -94,7 +94,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     }
 
     public void executeAsync(ThrowableSupplier<byte[]> supplier, int retry, Future<byte[]> handler) {
-        ResponseAsyncUtil.executeRetryAndCatchAsync(supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, delay);
+        ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout,0l, delay);
     }
 
     public Handler<AsyncResult<byte[]>> getAsyncResultHandler(int retry) {
