@@ -194,6 +194,220 @@ public class RESTJerseyClientStatefulCircuitBrakerAsyncTests extends VertxTestBa
 
     }
 
+    @Test
+    public void stringGETResponseCircuitBaseWithDelayTest() throws InterruptedException {
+        Client client = ClientBuilder.newClient();
+
+        //////// Request 1 -- creates crash
+        WebTarget target = client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseCircuitBaseWithDelayTest/crash");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext(h -> {
+                    System.out.println("--------");
+                    assertEquals("failure", response);
+
+                    //////// Request 1 -- is valid but crashes due to open circuit
+                    WebTarget target2 = client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseCircuitBaseWithDelayTest/value");
+                    target2.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                        @Override
+                        public void completed(String response) {
+                            System.out.println("Response entity '" + response + "' received.");
+                            vertx.runOnContext(h -> {
+                                System.out.println("--------");
+                                assertEquals("failure", response);
+
+
+                                // wait 1s, but circuit is still open
+                                vertx.setTimer(1205, handler -> {
+                                    target2.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                                        @Override
+                                        public void completed(String response) {
+                                            System.out.println("Response entity '" + response + "' received.");
+                                            vertx.runOnContext(h -> {
+                                                System.out.println("--------");
+                                                assertEquals("failure", response);
+
+
+                                                // wait another 1s, now circuit should be closed
+                                                vertx.setTimer(1005, handler -> {
+                                                    target2.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                                                        @Override
+                                                        public void completed(String response) {
+                                                            System.out.println("Response entity '" + response + "' received.");
+                                                            vertx.runOnContext(h -> {
+                                                                System.out.println("--------");
+                                                                assertEquals("value", response);
+
+
+                                                                testComplete();
+
+
+                                                            });
+
+
+                                                        }
+
+                                                        @Override
+                                                        public void failed(Throwable throwable) {
+
+                                                        }
+                                                    });
+                                                });
+
+
+                                            });
+
+
+                                        }
+
+                                        @Override
+                                        public void failed(Throwable throwable) {
+
+                                        }
+                                    });
+                                });
+
+
+                            });
+
+
+                        }
+
+                        @Override
+                        public void failed(Throwable throwable) {
+
+                        }
+                    });
+
+
+                });
+                // Assert.assertEquals(response, "test-123");
+
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        });
+
+        await(80000, TimeUnit.MILLISECONDS);
+
+    }
+
+
+    @Test
+    public void stringGETResponseCircuitBaseWithTimeoutTest() throws InterruptedException {
+        Client client = ClientBuilder.newClient();
+
+        //////// Request 1 -- creates crash
+        WebTarget target = client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseCircuitBaseWithTimeoutTest/crash");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext(h -> {
+                    System.out.println("--------");
+                    assertEquals("failure", response);
+
+                    //////// Request 1 -- is valid but crashes due to open circuit
+                    WebTarget target2 = client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseCircuitBaseWithTimeoutTest/value");
+                    target2.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                        @Override
+                        public void completed(String response) {
+                            System.out.println("Response entity '" + response + "' received.");
+                            vertx.runOnContext(h -> {
+                                System.out.println("--------");
+                                assertEquals("failure", response);
+
+
+                                // wait 1s, but circuit is still open
+                                vertx.setTimer(1205, handler -> {
+                                    target2.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                                        @Override
+                                        public void completed(String response) {
+                                            System.out.println("Response entity '" + response + "' received.");
+                                            vertx.runOnContext(h -> {
+                                                System.out.println("--------");
+                                                assertEquals("failure", response);
+
+
+                                                // wait another 1s, now circuit should be closed
+                                                vertx.setTimer(1005, handler -> {
+                                                    target2.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+
+                                                        @Override
+                                                        public void completed(String response) {
+                                                            System.out.println("Response entity '" + response + "' received.");
+                                                            vertx.runOnContext(h -> {
+                                                                System.out.println("--------");
+                                                                assertEquals("value", response);
+
+
+                                                                testComplete();
+
+
+                                                            });
+
+
+                                                        }
+
+                                                        @Override
+                                                        public void failed(Throwable throwable) {
+
+                                                        }
+                                                    });
+                                                });
+
+
+                                            });
+
+
+                                        }
+
+                                        @Override
+                                        public void failed(Throwable throwable) {
+
+                                        }
+                                    });
+                                });
+
+
+                            });
+
+
+                        }
+
+                        @Override
+                        public void failed(Throwable throwable) {
+
+                        }
+                    });
+
+
+                });
+                // Assert.assertEquals(response, "test-123");
+
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        });
+
+        await(80000, TimeUnit.MILLISECONDS);
+
+    }
 
     public HttpClient getClient() {
         return client;
@@ -219,7 +433,43 @@ public class RESTJerseyClientStatefulCircuitBrakerAsyncTests extends VertxTestBa
                     onFailureRespond(error->"failure").
                     execute();
         }
+        @Path("/stringGETResponseCircuitBaseWithDelayTest/:val")
+        @GET
+        public void stringGETResponseCircuitBaseWithDelayTest(RestHandler reply) {
+            final String val = reply.request().param("val");
+            System.out.println("stringResponse: " + reply);
+            reply.response().blocking().
+                    stringResponse(() -> {
+                        if (val.equals("crash")) throw new NullPointerException("test-123");
+                        return val;
+                    }).onError(e -> System.out.println(e.getMessage())).
+                    retry(3).
+                    closeCircuitBreaker(2000).
+                    delay(2000).
+                    onFailureRespond(error->"failure").
+                    execute();
+        }
 
+        @Path("/stringGETResponseCircuitBaseWithTimeoutTest/:val")
+        @GET
+        public void stringGETResponseCircuitBaseWithTimeoutTest(RestHandler reply) {
+            final String val = reply.request().param("val");
+            System.out.println("stringResponse: " + reply);
+            reply.response().blocking().
+                    stringResponse(() -> {
+                        if (val.equals("crash")) {
+                            System.out.println("start sleep");
+                            Thread.sleep(8000);
+                            System.out.println("stop sleep");
+                        }
+                        return val;
+                    }).onError(e -> System.out.println(e.getMessage())).
+                    retry(3).
+                    closeCircuitBreaker(2000).
+                    timeout(500).
+                    onFailureRespond(error->"failure").
+                    execute();
+        }
 
     }
 

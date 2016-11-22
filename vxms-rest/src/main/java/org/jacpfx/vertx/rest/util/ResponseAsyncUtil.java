@@ -9,6 +9,8 @@ import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.common.ThrowableSupplier;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -43,7 +45,7 @@ public class ResponseAsyncUtil {
                                 }
                             });
                         } else {
-                            releaseLockAndHandleError( _blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, resultHandler.cause(),lock);
+                            releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, resultHandler.cause(), lock);
                         }
                     });
                 } else {
@@ -65,33 +67,41 @@ public class ResponseAsyncUtil {
                                           Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx,
                                           int _retry, long _timeout, long _circuitBreakerTimeout, long _delay, SharedData sharedData, Lock lock) {
         Optional.ofNullable(lock).ifPresent(lck -> lck.release());
-        try {
-            executeDefaultState(_supplier, _blockingHandler, vertx, _timeout);
-        } catch (Throwable e) {
-            sharedData.getLockWithTimeout(_methodId, 2000, lckHandler -> {
-                if (lckHandler.succeeded()) {
-                    final Lock lck = lckHandler.result();
-                    sharedData.getCounter(_methodId, resHandler -> {
-                        if (resHandler.succeeded()) {
-                            final Counter counter = resHandler.result();
-                            counter.decrementAndGet(valHandler -> {
-                                if (valHandler.succeeded()) {
-                                    handleStatefulError(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
-                                            _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay, e, lck, counter, valHandler);
-                                } else {
-                                    releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, valHandler.cause(), lck);
-                                }
-                            });
-                        } else {
-                            releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, resHandler.cause(), lck);
+        vertx.executeBlocking(bhandler -> {
+            try {
+                executeDefaultState(_supplier, _blockingHandler, vertx, _timeout);
+                bhandler.complete();
+            } catch (Throwable e) {
+                sharedData.getLockWithTimeout(_methodId, 2000, lckHandler -> {
+                    if (lckHandler.succeeded()) {
+                        final Lock lck = lckHandler.result();
+                        sharedData.getCounter(_methodId, resHandler -> {
+                            if (resHandler.succeeded()) {
+                                final Counter counter = resHandler.result();
+                                counter.decrementAndGet(valHandler -> {
+                                    if (valHandler.succeeded()) {
+                                        handleStatefulError(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
+                                                _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay, e, lck, counter, valHandler);
+                                        bhandler.complete();
+                                    } else {
+                                        releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, valHandler.cause(), lck);
+                                        bhandler.complete();
+                                    }
+                                });
+                            } else {
+                                releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, resHandler.cause(), lck);
+                            }
+                        });
+                    } else {
+                        handleErrorExecution(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, lckHandler.cause());
+                        bhandler.complete();
+                    }
+                });
+            }
 
-                        }
-                    });
-                } else {
-                    handleErrorExecution(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, lckHandler.cause());
-                }
-            });
-        }
+        }, false, res -> {
+
+        });
     }
 
     public static <T> void executeInitialState(String _methodId, ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> _errorHandler, Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler,
@@ -118,17 +128,8 @@ public class ResponseAsyncUtil {
         //////////////////////////////////////////
         long count = valHandler.result();
         if (count <= 0) {
-            if (_circuitBreakerTimeout > 0) {
-                setCircuitBreakerReleaseTimer(vertx, _retry, _circuitBreakerTimeout, counter);
-                openCircuitBreakerAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, e, lck, counter);
-            } else {
-                // should not happen
-
-                counter.addAndGet(Integer.valueOf(_retry + 1).longValue(), val -> {
-                    releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, e, lck);
-
-                });
-            }
+            setCircuitBreakerReleaseTimer(vertx, _retry, _circuitBreakerTimeout, counter);
+            openCircuitBreakerAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vertx, e, lck, counter);
         } else {
             lck.release();
             ResponseUtil.handleError(_errorHandler, e);
@@ -140,22 +141,24 @@ public class ResponseAsyncUtil {
     }
 
     public static <T> void openCircuitBreakerAndHandleError(Future<T> _blockingHandler, Consumer<Throwable> _errorHandler, Function<Throwable, T> _onFailureRespond,
-                                                            Consumer<Throwable> _errorMethodHandler, Throwable e, Lock lck, Counter counter) {
+                                                            Consumer<Throwable> _errorMethodHandler, Vertx vertx, Throwable e, Lock lck, Counter counter) {
         counter.addAndGet(-1l, val -> {
             lck.release();
-            T result = null;
-            // TODO check on which thread this execution is running, be aware this mus run on worker thread
-            result = handleError(result, _errorHandler, _onFailureRespond, _errorMethodHandler, e);
-            if (!_blockingHandler.isComplete()) _blockingHandler.complete(result);
+            vertx.executeBlocking(bhandler -> {
+                T result = null;
+                // TODO check on which thread this execution is running, be aware this mus run on worker thread
+                result = handleError(result, _errorHandler, _onFailureRespond, _errorMethodHandler, e);
+                if (!_blockingHandler.isComplete()) _blockingHandler.complete(result);
+            }, false, res -> {
+
+            });
         });
     }
 
     public static void setCircuitBreakerReleaseTimer(Vertx vertx, int _retry, long _circuitBreakerTimeout, Counter counter) {
         // TODO should the counter executed with lock?
-        System.out.println("SET TIMER: ");
         vertx.setTimer(_circuitBreakerTimeout, timer -> {
             counter.addAndGet(Integer.valueOf(_retry + 1).longValue(), val -> {
-                System.out.println("UNLOCK: ");
             });
         });
     }
@@ -172,18 +175,22 @@ public class ResponseAsyncUtil {
 
     public static <T> T executeWithTimeout(ThrowableSupplier<T> _supplier, Vertx vertx, long _timeout) throws Throwable {
         T result;
-        final Future<T> operationResult = Future.future();
-        vertx.setTimer(_timeout, (l) -> {
-            if (!operationResult.isComplete()) {
-                operationResult.fail(new TimeoutException("operation _timeout"));
+        final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
+        vertx.executeBlocking((innerHandler) -> {
+            try {
+                timeoutFuture.complete(_supplier.get());
+            } catch (Throwable throwable) {
+                timeoutFuture.obtrudeException(throwable);
             }
+        }, false, (val) -> {
         });
-        executeAndCompleate(_supplier, operationResult);
-        if (!operationResult.failed()) {
-            result = operationResult.result();
-        } else {
-            throw operationResult.cause();
+
+        try {
+            result = timeoutFuture.get(_timeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException timeout) {
+            throw new TimeoutException("operation _timeout");
         }
+
         return result;
     }
 
@@ -191,6 +198,7 @@ public class ResponseAsyncUtil {
         T result = null;
         boolean errorHandling = false;
         while (_retry >= 0) {
+            System.out.println("THREAD STATELESS:  " + Thread.currentThread());
             errorHandling = false;
             try {
                 if (timeout > 0L) {

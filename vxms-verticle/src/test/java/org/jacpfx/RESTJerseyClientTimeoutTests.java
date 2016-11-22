@@ -115,7 +115,7 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "failure"));
+                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
                 latch.countDown();
             }
 
@@ -130,7 +130,7 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
             @Override
             public void completed(String response) {
                 System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "failure"));
+                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
                 latch.countDown();
             }
 
@@ -230,11 +230,12 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
                     blocking().
                     stringResponse(() -> {
                         System.out.println("SLEEP");
-                        Thread.sleep(2000);
+                        Thread.sleep(8000);
+                        System.out.println("SLEEP END");
                         return "reply";
                     }).
-                    timeout(1500).
-                    onFailureRespond((error) -> "failure").
+                    timeout(1000).
+                    onFailureRespond((error) -> error.getMessage()).
                     execute();
         }
 
