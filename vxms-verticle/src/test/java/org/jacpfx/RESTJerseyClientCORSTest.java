@@ -124,10 +124,11 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target("http://" + HOST + ":"  + PORT).path("/wsService/stringGETResponseSyncAsync");
-        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).header("Origin", "http://example.com").async().get(new InvocationCallback<String>() {
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).header("Origin", "http://jacpfx.org").async().get(new InvocationCallback<String>() {
 
             @Override
             public void completed(String response) {
+                System.out.println("should not be called::::");
             }
 
             @Override
@@ -245,7 +246,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
         public void rsstringGETResponseSyncAsync(RestHandler reply) {
             System.out.println("stringResponse: " + reply);
             reply.response().stringResponse((future) -> {
-                future.complete("");
+                future.complete("xxxx");
             }).execute();
         }
 
