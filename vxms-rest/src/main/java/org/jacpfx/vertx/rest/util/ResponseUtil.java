@@ -83,7 +83,7 @@ public class ResponseUtil {
                 statefulErrorHandling(_methodId, _retry, _timeout, _circuitBreakerTimeout, _userOperation,
                         errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer, event);
             } else {
-                resultConsumer.accept(new ExecutionResult(event.result(), true, null));
+                resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
             }
         });
 
@@ -94,41 +94,19 @@ public class ResponseUtil {
             } else if (currentVal > 0) {
                 executeDefaultState(_timeout, _userOperation, vertx, operationResult, lockHandler);
             } else {
-                executeErrorState(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler,
-                        t != null ? Future.failedFuture(t) : Future.failedFuture("circuit open"));
+                releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler.result(),
+                        t != null ? t : Future.failedFuture("circuit open").cause());
             }
         },_methodId,vertx,errorHandler,onFailureRespond,errorMethodHandler,resultConsumer);
 
 
     }
 
-    private static <T> void executeLocked(LockedConsumer consumer,String _methodId, Vertx vertx, Consumer<Throwable> errorHandler,ThrowableErrorConsumer<Throwable, T> onFailureRespond,Consumer<Throwable> errorMethodHandler,Consumer<ExecutionResult<T>> resultConsumer) {
-        final SharedData sharedData = vertx.sharedData();
-        sharedData.getLockWithTimeout(_methodId, 2000, lockHandler -> {
-            if (lockHandler.succeeded()) {
-                sharedData.getCounter(_methodId, resultHandler -> {
-                    if (resultHandler.succeeded()) {
-                        resultHandler.result().get(counterHandler -> consumer.execute(lockHandler, resultHandler, counterHandler));
-                    } else {
-                        executeErrorState(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler, Future.failedFuture(resultHandler.cause()));
-                    }
-                });
-            } else {
-                executeErrorState(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler, Future.failedFuture(lockHandler.cause()));
-            }
-
-        });
-    }
-
-    private interface LockedConsumer {
-        void execute(AsyncResult<Lock> lockHandler, AsyncResult<Counter> resultHandler, AsyncResult<Long> counterHandler);
-    }
 
 
-
-    private static <T> void executeErrorState(Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<Lock> lockHandler, AsyncResult<T> event) {
-        lockHandler.result().release();
-        errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, event);
+    private static <T> void releaseLockAndHandleError(Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer, Lock lock, Throwable cause) {
+        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
+        errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, Future.failedFuture(cause));
     }
 
     private static <T> void executeDefaultState(long _timeout, ThrowableFutureConsumer<T> _userOperation, Vertx vertx, Future<T> operationResult, AsyncResult<Lock> lockHandler) {
@@ -151,29 +129,19 @@ public class ResponseUtil {
 
     private static <T> void statefulErrorHandling(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler,
                                                   ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event) {
-        final SharedData sharedData = vertx.sharedData();
-        sharedData.getLockWithTimeout(_methodId, 2000, lockHandler -> {
-            if (lockHandler.succeeded()) {
-                final Lock lock = lockHandler.result();
-                sharedData.getCounter(_methodId, resultHandler -> {
-                    if (resultHandler.succeeded()) {
-                        final Counter counter = resultHandler.result();
-                        counter.decrementAndGet(valHandler -> {
-                            if (valHandler.succeeded()) {
-                                handleStatefulError(_methodId, _retry, _timeout, _circuitBreakerTimeout,
-                                        _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer, event, lock, counter, valHandler);
-                            } else {
-                                releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lock, valHandler.cause());
-                            }
-                        });
-                    } else {
-                        releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lock, resultHandler.cause());
-                    }
-                });
-            } else {
-                errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, Future.failedFuture(lockHandler.cause()));
-            }
-        });
+
+        executeLocked((lockHandler, resultHandler, counterHandler) -> {
+            final Lock lock = lockHandler.result();
+            final Counter counter = resultHandler.result();
+            counter.decrementAndGet(valHandler -> {
+                if (valHandler.succeeded()) {
+                    handleStatefulError(_methodId, _retry, _timeout, _circuitBreakerTimeout,
+                            _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer, event, lock, counter, valHandler);
+                } else {
+                    releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lock, valHandler.cause());
+                }
+            });
+        },_methodId,vertx,errorHandler,onFailureRespond,errorMethodHandler,resultConsumer);
     }
 
     private static <T> void handleStatefulError(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event, Lock lock, Counter counter, AsyncResult<Long> valHandler) {
@@ -209,10 +177,7 @@ public class ResponseUtil {
         }));
     }
 
-    private static <T> void releaseLockAndHandleError(Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer, Lock lock, Throwable cause) {
-        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
-        errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, Future.failedFuture(cause));
-    }
+
 
     protected static void addTimeoutHandler(long _timeout, Vertx vertx, Handler<Long> longHandler) {
         vertx.setTimer(_timeout, longHandler);
@@ -305,5 +270,28 @@ public class ResponseUtil {
 
         return Optional.empty();
     }
+
+    private static <T> void executeLocked(LockedConsumer consumer,String _methodId, Vertx vertx, Consumer<Throwable> errorHandler,ThrowableErrorConsumer<Throwable, T> onFailureRespond,Consumer<Throwable> errorMethodHandler,Consumer<ExecutionResult<T>> resultConsumer) {
+        final SharedData sharedData = vertx.sharedData();
+        sharedData.getLockWithTimeout(_methodId, 2000, lockHandler -> {
+            if (lockHandler.succeeded()) {
+                sharedData.getCounter(_methodId, resultHandler -> {
+                    if (resultHandler.succeeded()) {
+                        resultHandler.result().get(counterHandler -> consumer.execute(lockHandler, resultHandler, counterHandler));
+                    } else {
+                        releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler.result(), resultHandler.cause());
+                    }
+                });
+            } else {
+                releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lockHandler.result(), lockHandler.cause());
+            }
+
+        });
+    }
+
+    private interface LockedConsumer {
+        void execute(AsyncResult<Lock> lockHandler, AsyncResult<Counter> resultHandler, AsyncResult<Long> counterHandler);
+    }
+
 
 }
