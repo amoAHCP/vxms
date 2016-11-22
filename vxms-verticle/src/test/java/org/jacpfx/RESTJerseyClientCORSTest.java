@@ -128,7 +128,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
             @Override
             public void completed(String response) {
-                System.out.println("should not be called::::");
+                System.out.println("should not be called::::"+ System.getProperty("sun.net.http.allowRestrictedHeaders"));
             }
 
             @Override
