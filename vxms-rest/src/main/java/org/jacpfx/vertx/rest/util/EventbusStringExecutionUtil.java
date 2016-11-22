@@ -159,7 +159,7 @@ public class EventbusStringExecutionUtil {
                             if (valHandler.succeeded()) {
                                 long count = valHandler.result();
                                 if (count <= 0) {
-                                    lockAndHandleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, lockHandler, counter);
+                                    openCircuitAndHandleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, lockHandler, counter);
                                 } else {
                                     lockHandler.result().release();
                                     retryStringOperation(methodId, id, message, options, stringFunction, vertx,
@@ -187,7 +187,35 @@ public class EventbusStringExecutionUtil {
         });
     }
 
-    private static void lockAndHandleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, AsyncResult<Lock> lockHandler, Counter counter) {
+
+  /**  private static <T> void executeLocked(LockedConsumer consumer, String _methodId, Vertx vertx, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer) {
+        final SharedData sharedData = vertx.sharedData();
+        sharedData.getLockWithTimeout(_methodId, 2000, lockHandler -> {
+            if (lockHandler.succeeded()) {
+                sharedData.getCounter(_methodId, resultHandler -> {
+                    if (resultHandler.succeeded()) {
+                        resultHandler.result().get(counterHandler -> consumer.execute(lockHandler, resultHandler, counterHandler));
+                    } else {
+                        final Throwable cause = resultHandler.cause();
+                        handleError(_methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
+                                onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, cause);
+                    }
+                });
+            } else {
+                final Throwable cause = lockHandler.cause();
+                handleError(_methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
+                        onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, cause);
+            }
+
+        });
+    }**/
+
+    private interface LockedConsumer {
+        void execute(AsyncResult<Lock> lockHandler, AsyncResult<Counter> resultHandler, AsyncResult<Long> counterHandler);
+    }
+
+
+    private static void openCircuitAndHandleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, AsyncResult<Lock> lockHandler, Counter counter) {
         vertx.setTimer(circuitBreakerTimeout, timer -> counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), val -> {
         }));
         counter.addAndGet(-1l, val -> {

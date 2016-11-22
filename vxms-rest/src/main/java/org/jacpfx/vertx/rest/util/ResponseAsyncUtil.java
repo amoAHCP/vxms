@@ -90,6 +90,7 @@ public class ResponseAsyncUtil {
                                 });
                             } else {
                                 releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, resHandler.cause(), lck);
+                                bhandler.complete();
                             }
                         });
                     } else {
@@ -198,7 +199,6 @@ public class ResponseAsyncUtil {
         T result = null;
         boolean errorHandling = false;
         while (_retry >= 0) {
-            System.out.println("THREAD STATELESS:  " + Thread.currentThread());
             errorHandling = false;
             try {
                 if (timeout > 0L) {
