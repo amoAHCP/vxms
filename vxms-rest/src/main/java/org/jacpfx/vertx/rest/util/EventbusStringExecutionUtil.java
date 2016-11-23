@@ -55,54 +55,48 @@ public class EventbusStringExecutionUtil {
     }
 
     private static void executeStateful(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
-        final SharedData sharedData = vertx.sharedData();
-        sharedData.getLockWithTimeout(methodId, 2000, lockHandler -> {
-            if (lockHandler.succeeded()) {
-                sharedData.getCounter(methodId, resultHandler -> {
-                    if (resultHandler.succeeded()) {
-                        resultHandler.result().get(counterHandler -> {
-                            long currentVal = counterHandler.result();
-                            if (currentVal == 0) {
-                                executeInitialState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, resultHandler);
-                            } else if (currentVal > 0) {
-                                executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler);
-                            } else {
-                                executeErrorState(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler);
-                            }
-                        });
-                    } else {
-                        final Throwable cause = resultHandler.cause();
-                        handleError(methodId, vertx, errorMethodHandler, context, headers, encoder,
-                                errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout,
-                                circuitBreakerTimeout, lockHandler, cause);
-                    }
-                });
-            } else {
-                final Throwable cause = lockHandler.cause();
-                handleError(methodId, vertx, errorMethodHandler, context, headers, encoder,
-                        errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout,
-                        circuitBreakerTimeout, null, cause);
 
-            }
-        });
+        executeLocked(((lock, counter) ->
+                counter.get(counterHandler -> {
+                    long currentVal = counterHandler.result();
+                    if (currentVal == 0) {
+                        executeInitialState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock, counter);
+                    } else if (currentVal > 0) {
+                        executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock);
+                    } else {
+                        executeErrorState(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock);
+                    }
+                })), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
-    private static void executeErrorState(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Lock> lockHandler) {
+    private static void executeErrorState(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                                          Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                                          ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout,
+                                          Lock lock) {
         final Throwable cause = Future.failedFuture("circuit open").cause();
         handleError(methodId, vertx, errorMethodHandler, context, headers,
                 encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,
-                timeout, circuitBreakerTimeout, lockHandler, cause);
+                timeout, circuitBreakerTimeout, lock, cause);
     }
 
 
-    private static void executeInitialState(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Lock> lockHandler, AsyncResult<Counter> resultHandler) {
-        resultHandler.result().addAndGet(Integer.valueOf(retryCount + 1).longValue(), rHandler -> {
-            executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler);
+    private static void executeInitialState(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                            DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                                            Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                                            ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout,
+                                            Lock lock, Counter counter) {
+        counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), rHandler -> {
+            executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler,
+                    context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock);
         });
     }
 
-    private static void executeDefaultState(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Lock> lockHandler) {
-        Optional.ofNullable(lockHandler).ifPresent(lck -> lck.result().release());
+    private static void executeDefaultState(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                            DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                                            Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                                            ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout,
+                                            Lock lock) {
+        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
         vertx.
                 eventBus().
                 send(id, message, deliveryOptions,
@@ -121,114 +115,117 @@ public class EventbusStringExecutionUtil {
                                                        int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
         final ThrowableFutureConsumer<String> stringSupplier = createStringSupplier(stringFunction, event);
         if (circuitBreakerTimeout == 0l) {
-            if (event.succeeded() || (event.failed() && retryCount <= 0)) {
-                new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
-                        stringSupplier, null, encoder, errorHandler, onFailureRespond,
-                        httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
-                        execute();
-            } else if (event.failed() && retryCount > 0) {
-                // retry operation
-                retryStringOperation(methodId, id, message, options, stringFunction, vertx,
-                        event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
-                        onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
-            }
+            statelessExecution(methodId, id, message, options, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, stringSupplier);
         } else {
-            // TODO check if retry set... otherwise it makes no sense... throw exception
-            if (event.succeeded()) {
-                new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
-                        stringSupplier, null, encoder, errorHandler, onFailureRespond,
-                        httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
-                        execute();
-            } else {
-                statefulErrorHandling(methodId, id, message, options, stringFunction,
-                        vertx, errorMethodHandler, context, headers, encoder, errorHandler,
-                        onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event);
-            }
-
+            statefulExecution(methodId, id, message, options, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, stringSupplier);
         }
     }
 
-    private static void statefulErrorHandling(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
-        final SharedData sharedData = vertx.sharedData();
-        sharedData.getLockWithTimeout(methodId, 2000, lockHandler -> {
-            if (lockHandler.succeeded()) {
-                sharedData.getCounter(methodId, resultHandler -> {
-                    if (resultHandler.succeeded()) {
-                        final Counter counter = resultHandler.result();
-                        counter.decrementAndGet(valHandler -> {
-                            if (valHandler.succeeded()) {
-                                long count = valHandler.result();
-                                if (count <= 0) {
-                                    openCircuitAndHandleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, lockHandler, counter);
-                                } else {
-                                    lockHandler.result().release();
-                                    retryStringOperation(methodId, id, message, options, stringFunction, vertx,
-                                            event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
-                                            onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
-                                }
-                            } else {
-                                final Throwable cause = valHandler.cause();
-                                handleError(methodId, vertx, errorMethodHandler, context, headers, encoder,
-                                        errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout,
-                                        circuitBreakerTimeout, lockHandler, cause);
-                            }
-                        });
+    private static void statefulExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<String> stringSupplier) {
+        // TODO check if retry set... otherwise it makes no sense... throw exception
+        if (event.succeeded()) {
+            new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
+                    stringSupplier, null, encoder, errorHandler, onFailureRespond,
+                    httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
+                    execute();
+        } else {
+            statefulErrorHandling(methodId, id, message, options, stringFunction,
+                    vertx, errorMethodHandler, context, headers, encoder, errorHandler,
+                    onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event);
+        }
+    }
+
+    private static void statelessExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<String> stringSupplier) {
+        if (event.succeeded() || (event.failed() && retryCount <= 0)) {
+            new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
+                    stringSupplier, null, encoder, errorHandler, onFailureRespond,
+                    httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
+                    execute();
+        } else if (event.failed() && retryCount > 0) {
+            // retry operation
+            retryStringOperation(methodId, id, message, options, stringFunction, vertx,
+                    event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
+                    onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+        }
+    }
+
+    private static void statefulErrorHandling(String methodId, String id, Object message, DeliveryOptions options,
+                                              ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx,
+                                              Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+                                              Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+                                              int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
+
+        executeLocked((lock, counter) ->
+                counter.decrementAndGet(valHandler -> {
+                    if (valHandler.succeeded()) {
+                        long count = valHandler.result();
+                        if (count <= 0) {
+                            openCircuitAndHandleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
+                                    onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, lock, counter);
+                        } else {
+                            lock.release();
+                            retryStringOperation(methodId, id, message, options, stringFunction, vertx,
+                                    event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
+                                    onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+                        }
                     } else {
-                        final Throwable cause = resultHandler.cause();
-                        handleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
-                                onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, cause);
+                        final Throwable cause = valHandler.cause();
+                        handleError(methodId, vertx, errorMethodHandler, context, headers, encoder,
+                                errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout,
+                                circuitBreakerTimeout, lock, cause);
                     }
-                });
-            } else {
-                final Throwable cause = lockHandler.cause();
-                handleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
-                        onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, cause);
-            }
-        });
+                }), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+
+
     }
 
 
-  /**  private static <T> void executeLocked(LockedConsumer consumer, String _methodId, Vertx vertx, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer) {
+    private static void executeLocked(LockedConsumer consumer, String _methodId, Vertx vertx, Consumer<Throwable> errorHandler,
+                                      ThrowableErrorConsumer<Throwable, String> onFailureRespond, Consumer<Throwable> errorMethodHandler,
+                                      RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                      int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         final SharedData sharedData = vertx.sharedData();
         sharedData.getLockWithTimeout(_methodId, 2000, lockHandler -> {
             if (lockHandler.succeeded()) {
+                final Lock lock = lockHandler.result();
                 sharedData.getCounter(_methodId, resultHandler -> {
                     if (resultHandler.succeeded()) {
-                        resultHandler.result().get(counterHandler -> consumer.execute(lockHandler, resultHandler, counterHandler));
+                        consumer.execute(lock, resultHandler.result());
                     } else {
                         final Throwable cause = resultHandler.cause();
                         handleError(_methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
-                                onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, cause);
+                                onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock, cause);
                     }
                 });
             } else {
                 final Throwable cause = lockHandler.cause();
                 handleError(_methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
-                        onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lockHandler, cause);
+                        onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, null, cause);
             }
 
         });
-    }**/
+    }
 
     private interface LockedConsumer {
-        void execute(AsyncResult<Lock> lockHandler, AsyncResult<Counter> resultHandler, AsyncResult<Long> counterHandler);
+        void execute(Lock lock, Counter counter);
     }
 
 
-    private static void openCircuitAndHandleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, AsyncResult<Lock> lockHandler, Counter counter) {
+    private static void openCircuitAndHandleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+                                                  int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, Lock lock, Counter counter) {
         vertx.setTimer(circuitBreakerTimeout, timer -> counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), val -> {
         }));
         counter.addAndGet(-1l, val -> {
             final Throwable cause = event.cause();
             handleError(methodId, vertx, errorMethodHandler, context, headers,
                     encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,
-                    timeout, circuitBreakerTimeout, lockHandler, cause);
+                    timeout, circuitBreakerTimeout, lock, cause);
 
         });
     }
 
-    private static void handleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Lock> lockHandler, Throwable cause) {
-        Optional.ofNullable(lockHandler).ifPresent(lck -> lck.result().release());
+    private static void handleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, Lock lock, Throwable cause) {
+        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
         final ThrowableFutureConsumer<String> failConsumer = (future) -> future.fail(cause);
         new ExecuteRSBasicStringResponse(methodId, vertx, cause, errorMethodHandler, context, headers,
                 failConsumer, null, encoder, errorHandler, onFailureRespond,

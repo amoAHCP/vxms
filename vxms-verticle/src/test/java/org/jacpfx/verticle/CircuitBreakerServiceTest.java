@@ -101,6 +101,53 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
                 execute();
     }
 
+    @Path("/statefulExceptionWithRetryTest/:val")
+    @GET
+    public void statefulExceptionWithRetryTest(RestHandler reply) {
+        final String val = reply.request().param("val");
+        System.out.println("stringResponse: " + val);
+        reply.response().
+                blocking().
+                stringResponse(() -> {
+                    System.out.println("+++stateless stringResponse: " + val + " equals: " + val.equals("crash"));
+                    if (val.equals("crash"))
+                        throw new NullPointerException("Test");
+                    return val;
+                }).
+                timeout(500).
+                retry(3).
+                closeCircuitBreaker(4000).
+                onFailureRespond((error) -> {
+                    System.out.println("---stateless stringResponse: " + val);
+                    System.out.println(error.getMessage());
+                    return error.getMessage();
+                }).
+                execute();
+    }
+
+    @Path("/statelessTimeoutWithRetryTest/:val")
+    @GET
+    public void statelessTimeoutWithRetryTest(RestHandler reply) {
+        final String val = reply.request().param("val").trim();
+
+        reply.response().
+                stringResponse((future) -> {
+                    System.out.println("+++stateless stringResponse: " + val + " equals: " + val.equals("crash"));
+                    if (val.equals("crash"))
+                        throw new NullPointerException("Test");
+                    future.complete(val);
+                }).
+                timeout(500).
+                retry(3).
+                closeCircuitBreaker(1000).
+                onFailureRespond((error, future) -> {
+                    System.out.println("---stateless stringResponse: " + val);
+                    System.out.println(error.getMessage());
+                    future.complete(error.getMessage());
+                }).
+                execute();
+    }
+
 
     public static void main(String[] args) {
         DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("host", "localhost"));

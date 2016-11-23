@@ -147,7 +147,6 @@ public class ResponseAsyncUtil {
             lck.release();
             vertx.executeBlocking(bhandler -> {
                 T result = null;
-                // TODO check on which thread this execution is running, be aware this mus run on worker thread
                 result = handleError(result, _errorHandler, _onFailureRespond, _errorMethodHandler, e);
                 if (!_blockingHandler.isComplete()) _blockingHandler.complete(result);
             }, false, res -> {
@@ -195,7 +194,8 @@ public class ResponseAsyncUtil {
         return result;
     }
 
-    public static <T> void executeStateless(ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> errorHandler, Function<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, int _retry, long timeout, long delay) {
+    public static <T> void executeStateless(ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> errorHandler, Function<Throwable, T> onFailureRespond,
+                                            Consumer<Throwable> errorMethodHandler, Vertx vertx, int _retry, long timeout, long delay) {
         T result = null;
         boolean errorHandling = false;
         while (_retry >= 0) {
@@ -225,15 +225,7 @@ public class ResponseAsyncUtil {
         }
     }
 
-    protected static <T> void executeAndCompleate(ThrowableSupplier<T> supplier, Future<T> operationResult) {
-        T temp = null;
-        try {
-            temp = supplier.get();
-        } catch (Throwable throwable) {
-            operationResult.fail(throwable);
-        }
-        if (!operationResult.failed()) operationResult.complete(temp);
-    }
+
 
 
     private static void handleDelay(long delay) {
