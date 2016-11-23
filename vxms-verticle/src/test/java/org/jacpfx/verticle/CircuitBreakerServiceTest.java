@@ -1,8 +1,10 @@
 package org.jacpfx.verticle;
 
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
@@ -15,6 +17,12 @@ import javax.ws.rs.Path;
  */
 @ServiceEndpoint(name = "CircuitBreakerServiceTest")
 public class CircuitBreakerServiceTest extends VxmsEndpoint {
+
+    public void postConstruct(Router router, final Future<Void> startFuture) {
+       router.get("/test").handler(handler -> {
+          handler.response().end("hello");
+       });
+    }
 
     @Path("/simpleTest")
     @GET
@@ -109,7 +117,7 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
         reply.response().
                 blocking().
                 stringResponse(() -> {
-                    System.out.println("+++stateless stringResponse: " + val + " equals: " + val.equals("crash"));
+                   // System.out.println("+++stateless stringResponse: " + val + " equals: " + val.equals("crash"));
                     if (val.equals("crash"))
                         throw new NullPointerException("Test");
                     return val;
@@ -118,16 +126,16 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
                 retry(3).
                 closeCircuitBreaker(4000).
                 onFailureRespond((error) -> {
-                    System.out.println("---stateless stringResponse: " + val);
-                    System.out.println(error.getMessage());
+                  //  System.out.println("---stateless stringResponse: " + val);
+                  //  System.out.println(error.getMessage());
                     return error.getMessage();
                 }).
                 execute();
     }
 
-    @Path("/statelessTimeoutWithRetryTest/:val")
+    @Path("/statefulNonBlockingTimeoutWithRetryTest/:val")
     @GET
-    public void statelessTimeoutWithRetryTest(RestHandler reply) {
+    public void statefulNonBlockingTimeoutWithRetryTest(RestHandler reply) {
         final String val = reply.request().param("val").trim();
 
         reply.response().
@@ -141,8 +149,48 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
                 retry(3).
                 closeCircuitBreaker(1000).
                 onFailureRespond((error, future) -> {
-                    System.out.println("---stateless stringResponse: " + val);
-                    System.out.println(error.getMessage());
+                   // System.out.println("---stateless stringResponse: " + val);
+                   // System.out.println(error.getMessage());
+                    future.complete(error.getMessage());
+                }).
+                execute();
+    }
+
+
+    @Path("/statelessTimeoutWithRetryTest/:val")
+    @GET
+    public void statelessTimeoutWithRetryTest(RestHandler reply) {
+        final String val = reply.request().param("val").trim();
+
+        reply.response().
+                stringResponse((future) -> {
+                    //System.out.println("+++stateless stringResponse: " + val + " equals: " + val.equals("crash"));
+                    if (val.equals("crash"))
+                        throw new NullPointerException("Test");
+                    future.complete(val);
+                }).
+                timeout(500).
+                retry(3).
+                onFailureRespond((error, future) -> {
+                   // System.out.println("---stateless stringResponse: " + val);
+                    //System.out.println(error.getMessage());
+                    future.complete(error.getMessage());
+                }).
+                execute();
+    }
+
+    @Path("/statelessTest/:val")
+    @GET
+    public void statelessTest(RestHandler reply) {
+        final String val = reply.request().param("val").trim();
+        reply.response().
+                stringResponse((future) -> {
+                    //System.out.println("+++stateless stringResponse: " + val + " equals: " + val.equals("crash"));
+                    future.complete(val);
+                }).
+                onFailureRespond((error, future) -> {
+                    // System.out.println("---stateless stringResponse: " + val);
+                    //System.out.println(error.getMessage());
                     future.complete(error.getMessage());
                 }).
                 execute();
@@ -150,7 +198,7 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
 
 
     public static void main(String[] args) {
-        DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("host", "localhost"));
+        DeploymentOptions options = new DeploymentOptions().setInstances(2).setConfig(new JsonObject().put("host", "localhost"));
         Vertx.vertx().deployVerticle(CircuitBreakerServiceTest.class.getName(), options);
     }
 
