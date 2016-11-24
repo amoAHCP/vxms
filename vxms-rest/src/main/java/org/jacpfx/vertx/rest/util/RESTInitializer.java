@@ -41,11 +41,12 @@ public class RESTInitializer {
     }
 
     /**
-     * @param vertx
-     * @param router
-     * @param config
-     * @param service
-     * @param restMethod
+     * Initialize a specific REST method from Service
+     * @param vertx The Vertx instance
+     * @param router The Router object
+     * @param config The Vertx configuration
+     * @param service The Service itself
+     * @param restMethod the REST Method
      */
     public static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
         final Path path = restMethod.getAnnotation(Path.class);
@@ -68,37 +69,37 @@ public class RESTInitializer {
         }
     }
 
-    protected static void initHttpOperation(String methodId, Vertx vertx, Object service, Method restMethod, Route route, Stream<Method> errorMethodStream, Optional<Consumes> consumes, Class<? extends Annotation> httpAnnotation) {
+    private static void initHttpOperation(String methodId, Vertx vertx, Object service, Method restMethod, Route route, Stream<Method> errorMethodStream, Optional<Consumes> consumes, Class<? extends Annotation> httpAnnotation) {
         final Optional<Method> errorMethod = errorMethodStream.filter(method -> method.isAnnotationPresent(httpAnnotation)).findFirst();
         initHttpRoute(methodId, vertx, service, restMethod, consumes, errorMethod, route);
     }
 
-    protected static void initHttpAll(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+    private static void initHttpAll(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
         final Optional<Method> errorMethod = errorMethodStream.findFirst();
         final Route route = router.route(cleanPath(path.value()));
         final String methodId = path.value() + "ALL";
         initHttpRoute(methodId, vertx, service, restMethod, consumes, errorMethod, route);
     }
 
-    protected static void initHttpDelete(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+    private static void initHttpDelete(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
         final Route route = router.delete(cleanPath(path.value()));
         final String methodId = path.value() + DELETE.class.getName();
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, DELETE.class);
     }
 
-    protected static void initHttpPut(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+    private static void initHttpPut(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
         final Route route = router.put(cleanPath(path.value()));
         final String methodId = path.value() + PUT.class.getName();
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, PUT.class);
     }
 
-    protected static void initHttpOptions(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+    private static void initHttpOptions(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
         final Route route = router.options(cleanPath(path.value()));
         final String methodId = path.value() + OPTIONS.class.getName();
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, OPTIONS.class);
     }
 
-    protected static void initHttpPost(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
+    private static void initHttpPost(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
         final Route route = router.post(cleanPath(path.value()));
         final String methodId = path.value() + POST.class.getName();
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, POST.class);
