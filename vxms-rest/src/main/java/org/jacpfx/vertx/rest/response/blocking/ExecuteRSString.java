@@ -92,11 +92,11 @@ public class ExecuteRSString extends ExecuteRSBasicString {
 
     }
 
-    public void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<String> blockingHandler) {
+    private void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<String> blockingHandler) {
         ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, circuitBreakerTimeout, delay);
     }
 
-    public Handler<AsyncResult<String>> getAsyncResultHandler(int retry) {
+    private Handler<AsyncResult<String>> getAsyncResultHandler(int retry) {
         return value -> {
             if (!value.failed()) {
                 respond(value.result());

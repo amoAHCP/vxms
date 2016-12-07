@@ -128,15 +128,7 @@ public class ExecuteRSBasicString {
 
     }
 
-    /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value, this handler is a terminal handler and will be executed only once
-     *
-     * @param onFailureRespond the handler (function) to execute on error
-     * @return the response chain
-     */
-    public ExecuteRSBasicString onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
-        return new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
-    }
+
 
     protected void checkAndCloseResponse(int retry) {
         final HttpServerResponse response = context.response();

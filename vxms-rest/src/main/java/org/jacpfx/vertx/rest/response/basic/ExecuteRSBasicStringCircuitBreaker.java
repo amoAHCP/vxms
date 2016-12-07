@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicString {
+public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResponse {
 
 
     public ExecuteRSBasicStringCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer,
