@@ -49,12 +49,12 @@ public class EventBusAsyncResponse {
 
     public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusAsyncByteExecutionUtil.mapToByteResponse(methodId,id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0, 0);
+        return EventbusAsyncByteExecutionUtil.mapToByteResponse(methodId,id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0l, 0l, 0l);
     }
 
     public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0, 0);
+        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0l, 0l, 0l);
     }
 
 

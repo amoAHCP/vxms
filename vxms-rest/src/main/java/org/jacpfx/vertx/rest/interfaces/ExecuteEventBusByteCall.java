@@ -16,5 +16,5 @@ public interface ExecuteEventBusByteCall {
 
     void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
                  Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                 ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout);
+                 ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout);
 }

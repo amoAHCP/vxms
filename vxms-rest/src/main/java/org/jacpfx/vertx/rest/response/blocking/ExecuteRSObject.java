@@ -31,8 +31,8 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     protected final Function<Throwable, Serializable> onFailureRespond;
 
     public ExecuteRSObject(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder,
-                           Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout);
+                           Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         this.delay = delay;
         this.timeout = timeout;
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
@@ -43,7 +43,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, delay, timeout);
+        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -57,7 +57,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, delay, timeout);
+        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -69,7 +69,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     @Override
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, delay, timeout);
+        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -78,7 +78,8 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     public void execute() {
         Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay);
+                // TODO update executeEventBusAndReply !!
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
             } catch (Exception e) {
                 System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();

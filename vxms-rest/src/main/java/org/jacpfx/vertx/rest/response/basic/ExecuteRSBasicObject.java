@@ -35,9 +35,10 @@ public class ExecuteRSBasicObject {
     protected final int httpStatusCode;
     protected final int retryCount;
     protected final long timeout;
+    protected final long circuitBreakerTimeout;
 
-    public ExecuteRSBasicObject(String methodId,Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<Serializable> objectConsumer, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder,
-                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+    public ExecuteRSBasicObject(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<Serializable> objectConsumer, ExecuteEventBusObjectCall excecuteEventBusAndReply, Encoder encoder,
+                                Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -52,6 +53,7 @@ public class ExecuteRSBasicObject {
         this.retryCount = retryCount;
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
         this.timeout = timeout;
+        this.circuitBreakerTimeout = circuitBreakerTimeout;
     }
 
 
@@ -62,7 +64,7 @@ public class ExecuteRSBasicObject {
      */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId,vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId, vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -76,7 +78,7 @@ public class ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -87,7 +89,7 @@ public class ExecuteRSBasicObject {
      */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId,vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -100,7 +102,7 @@ public class ExecuteRSBasicObject {
             // excecuteEventBusAndReply & stringSupplier never non null at the same time
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -109,7 +111,7 @@ public class ExecuteRSBasicObject {
             ofNullable(objectConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(methodId,retry, timeout,0, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
+                                ResponseUtil.createResponse(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
                                     if (value.succeeded()) {
                                         respond(value.getResult());
                                     } else {
@@ -132,7 +134,7 @@ public class ExecuteRSBasicObject {
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            ResponseUtil.updateHeaderAndStatuscode(headers,statuscode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers, statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {
@@ -144,7 +146,7 @@ public class ExecuteRSBasicObject {
     protected void respond(Serializable result) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            ResponseUtil.updateHeaderAndStatuscode(headers,httpStatusCode, response);
+            ResponseUtil.updateHeaderAndStatuscode(headers, httpStatusCode, response);
             if (result != null) {
                 ResponseUtil.encode(result, encoder).ifPresent(value -> ResponseUtil.sendObjectResult(value, context.response()));
             } else {
@@ -152,7 +154,6 @@ public class ExecuteRSBasicObject {
             }
         }
     }
-
 
 
 }

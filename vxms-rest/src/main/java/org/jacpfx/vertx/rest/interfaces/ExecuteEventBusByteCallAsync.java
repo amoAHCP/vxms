@@ -16,5 +16,5 @@ public interface ExecuteEventBusByteCallAsync {
 
     void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
                  Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                 Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay);
+                 Function<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout);
 }

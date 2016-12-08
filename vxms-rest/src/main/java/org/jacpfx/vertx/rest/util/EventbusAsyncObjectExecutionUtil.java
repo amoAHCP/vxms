@@ -26,24 +26,24 @@ public class EventbusAsyncObjectExecutionUtil {
                                                               ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx _vertx, Throwable _t,
                                                               Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
                                                               ThrowableSupplier<Serializable> _objectSupplier, Encoder _encoder, Consumer<Throwable> _errorHandler,
-                                                              Function<Throwable, Serializable> _errorHandlerObject, int _httpStatusCode, int _retryCount, long _timeout, long _delay) {
+                                                              Function<Throwable, Serializable> _errorHandlerObject, int _httpStatusCode, int _retryCount, long _timeout, long _delay, long _circuitBreakerTimeout) {
         final DeliveryOptions deliveryOptions = Optional.ofNullable(options).orElse(new DeliveryOptions());
         final ExecuteEventBusObjectCallAsync excecuteEventBusAndReply = (vertx, t, errorMethodHandler,
                                                                          context, headers,
                                                                          encoder, errorHandler, errorHandlerObject,
-                                                                         httpStatusCode, retryCount, timeout, delay) ->
+                                                                         httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout) ->
                 sendMessageAndSupplyObjectHandler(_methodId,id, message, options, objectFunction, deliveryOptions, vertx, t,
-                        errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+                        errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
 
 
         return new ExecuteRSObjectResponse(_methodId,_vertx, _t, _errorMethodHandler, _context, _headers, _objectSupplier, excecuteEventBusAndReply,
-                _encoder, _errorHandler, _errorHandlerObject, _httpStatusCode, _retryCount, _timeout, _delay);
+                _encoder, _errorHandler, _errorHandlerObject, _httpStatusCode, _retryCount, _timeout, _delay, _circuitBreakerTimeout);
     }
 
     private static void sendMessageAndSupplyObjectHandler(String methodId,String id, Object message, DeliveryOptions options,
                                                             ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, DeliveryOptions deliveryOptions,
                                                             Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-                                                            Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
+                                                            Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         vertx.
                 eventBus().
                 send(id, message, deliveryOptions,
@@ -52,28 +52,30 @@ public class EventbusAsyncObjectExecutionUtil {
                                         vertx, t, errorMethodHandler,
                                         context, headers, encoder,
                                         errorHandler, errorHandlerObject, httpStatusCode,
-                                        retryCount, timeout, delay, event));
+                                        retryCount, timeout, delay, circuitBreakerTimeout, event));
     }
 
     private static void createObjectSupplierAndExecute(String methodId,String id, Object message, DeliveryOptions options,
                                                        ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
                                                        Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                        Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject,
-                                                       int httpStatusCode, int retryCount, long timeout, long delay, AsyncResult<Message<Object>> event) {
+                                                       int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
         final ThrowableSupplier<Serializable> objectSupplier = createObjectSupplier(methodId,id, message, options,  objectFunction, vertx, t,
-                errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay, event);
+                errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout, event);
 
 
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
             new ExecuteRSObjectResponse(methodId,vertx, t, errorMethodHandler, context, headers, objectSupplier, null,
-                    encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay).execute();
+                    encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout).execute();
         } else if (event.failed() && retryCount > 0) {
-            retryObjectOperation(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+            retryObjectOperation(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
         }
     }
 
-    private static void retryObjectOperation(String methodId,String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject, int httpStatusCode, int retryCount, long timeout, long delay) {
-        mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount - 1, timeout, delay).
+    private static void retryObjectOperation(String methodId,String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
+                                             Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject,
+                                             int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+        mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount - 1, timeout, delay, circuitBreakerTimeout).
                 execute();
     }
 
@@ -81,12 +83,12 @@ public class EventbusAsyncObjectExecutionUtil {
                                                                         ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
                                                                         Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                                         Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, Serializable> errorHandlerObject,
-                                                                        int httpStatusCode, int retryCount, long timeout, long delay, AsyncResult<Message<Object>> event) {
+                                                                        int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
         return () -> {
             Serializable resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryObjectOperation(methodId,id, message, options,  objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay);
+                    retryObjectOperation(methodId,id, message, options,  objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, errorHandlerObject, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
                 } else {
                     throw event.cause();
                 }

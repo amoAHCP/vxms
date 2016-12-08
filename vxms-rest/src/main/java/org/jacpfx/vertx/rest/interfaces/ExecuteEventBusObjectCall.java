@@ -17,5 +17,5 @@ public interface ExecuteEventBusObjectCall {
 
     void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
                  Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                 ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout);
+                 ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout);
 }

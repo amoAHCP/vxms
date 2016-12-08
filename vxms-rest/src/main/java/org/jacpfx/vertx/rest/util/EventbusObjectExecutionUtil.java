@@ -22,75 +22,75 @@ import java.util.function.Consumer;
  */
 public class EventbusObjectExecutionUtil {
 
-    public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,String _id, Object _message, DeliveryOptions _options,
+    public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId, String _id, Object _message, DeliveryOptions _options,
                                                                    ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction, Vertx _vertx, Throwable _t,
                                                                    Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
                                                                    ThrowableFutureConsumer<Serializable> _objectConsumer, Encoder _encoder, Consumer<Throwable> _errorHandler,
-                                                                   ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond, int _httpStatusCode, int _retryCount, long _timeout) {
+                                                                   ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond, int _httpStatusCode, int _retryCount, long _timeout, long _circuitBreakerTimeout) {
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_options).orElse(new DeliveryOptions());
         final ExecuteEventBusObjectCall excecuteEventBusAndReply = (vertx, t, errorMethodHandler,
                                                                     context, headers,
                                                                     encoder, errorHandler, onFailureRespond,
-                                                                    httpStatusCode, retryCount, timeout) ->
-                sendMessageAndSupplyObjectHandler(_methodId,_id, _message, _options, _objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+                                                                    httpStatusCode, retryCount, timeout, circuitBreakerTimeout) ->
+                sendMessageAndSupplyObjectHandler(_methodId, _id, _message, _options, _objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
 
 
-        return new ExecuteRSBasicObjectResponse(_methodId,_vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _retryCount, _timeout);
+        return new ExecuteRSBasicObjectResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _retryCount, _timeout, _circuitBreakerTimeout);
     }
 
-    private static void sendMessageAndSupplyObjectHandler(String methodId,String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
-                                                            DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
-                                                            Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
+    private static void sendMessageAndSupplyObjectHandler(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
+                                                          DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                                          Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         vertx.
                 eventBus().
                 send(id, message, deliveryOptions,
                         event ->
-                                createObjectSupplierAndExecute(methodId,id, message, options, objectFunction,
+                                createObjectSupplierAndExecute(methodId, id, message, options, objectFunction,
                                         vertx, t, errorMethodHandler,
                                         context, headers, encoder,
                                         errorHandler, onFailureRespond, httpStatusCode,
-                                        retryCount, timeout, event));
+                                        retryCount, timeout, circuitBreakerTimeout, event));
     }
 
-    private static void createObjectSupplierAndExecute(String methodId,String id, Object message, DeliveryOptions options,
+    private static void createObjectSupplierAndExecute(String methodId, String id, Object message, DeliveryOptions options,
                                                        ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
                                                        Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                        Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
-                                                       int httpStatusCode, int retryCount, long timeout, AsyncResult<Message<Object>> event) {
-        final ThrowableFutureConsumer<Serializable> objectSupplier = createObjectSupplier(methodId,id, message, options, objectFunction, vertx, t,
-                errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, event);
+                                                       int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
+        final ThrowableFutureConsumer<Serializable> objectSupplier = createObjectSupplier(methodId, id, message, options, objectFunction, vertx, t,
+                errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event);
 
 
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
-            new ExecuteRSBasicObjectResponse(methodId,vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout).execute();
+            new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout).execute();
         } else if (event.failed() && retryCount > 0) {
-            retryObjectOperation(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+            retryObjectOperation(methodId, id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         }
     }
 
-    private static void retryObjectOperation(String methodId,String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
+    private static void retryObjectOperation(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
                                              Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
-                                             Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout) {
-        mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount - 1, timeout).
+                                             Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+        mapToObjectResponse(methodId, id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount - 1, timeout, circuitBreakerTimeout).
                 execute();
     }
 
-    private static ThrowableFutureConsumer<Serializable> createObjectSupplier(String methodId,String id, Object message, DeliveryOptions options,
+    private static ThrowableFutureConsumer<Serializable> createObjectSupplier(String methodId, String id, Object message, DeliveryOptions options,
                                                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Vertx vertx, Throwable t,
                                                                               Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                                                               Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
-                                                                              int httpStatusCode, int retryCount, long timeout, AsyncResult<Message<Object>> event) {
+                                                                              int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
         return (future) -> {
             Serializable resp = null;
             if (event.failed()) {
                 if (retryCount > 0) {
-                    retryObjectOperation(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout);
+                    retryObjectOperation(methodId, id, message, options, objectFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
                 } else {
                     // handle default error chain
                     throw event.cause();
                 }
             } else {
-               objectFunction.accept(event,future);
+                objectFunction.accept(event, future);
             }
 
 
