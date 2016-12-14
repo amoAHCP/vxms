@@ -26,10 +26,9 @@ import java.util.function.Consumer;
 public class EventbusStringExecutionUtil {
 
 
-    public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId, String _id, Object _message, DeliveryOptions _options,
-                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction, Vertx _vertx, Throwable _t,
-                                                                   Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
-                                                                   ThrowableFutureConsumer<String> _stringConsumer, Encoder _encoder, Consumer<Throwable> _errorHandler,
+    public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId, String _id, Object _message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
+                                                                   DeliveryOptions _options, Vertx _vertx, Throwable _t, Consumer<Throwable> _errorMethodHandler, RoutingContext _context,
+                                                                   Map<String, String> _headers, ThrowableFutureConsumer<String> _stringConsumer, Encoder _encoder, Consumer<Throwable> _errorHandler,
                                                                    ThrowableErrorConsumer<Throwable, String> _onFailureRespond, int _httpStatusCode, int _retryCount, long _timeout, long _circuitBreakerTimeout) {
 
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_options).orElse(new DeliveryOptions());
@@ -48,13 +47,18 @@ public class EventbusStringExecutionUtil {
                                                           Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
                                                           ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         if (circuitBreakerTimeout == 0l) {
-            executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, null);
+            executeDefaultState(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler,
+                    onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, null);
         } else {
-            executeStateful(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+            executeStateful(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler,
+                    onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         }
     }
 
-    private static void executeStateful(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+    private static void executeStateful(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                        DeliveryOptions deliveryOptions, Vertx vertx, Throwable t,
+                                        Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                                        ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
 
         executeLocked(((lock, counter) ->
                 counter.get(counterHandler -> {
@@ -101,27 +105,27 @@ public class EventbusStringExecutionUtil {
                 eventBus().
                 send(id, message, deliveryOptions,
                         event ->
-                                createStringSupplierAndExecute(methodId, id, message, deliveryOptions, stringFunction,
+                                createStringSupplierAndExecute(methodId, id, message, stringFunction, deliveryOptions,
                                         vertx, t, errorMethodHandler,
                                         context, headers, encoder,
                                         errorHandler, onFailureRespond, httpStatusCode,
                                         retryCount, timeout, circuitBreakerTimeout, event));
     }
 
-    private static void createStringSupplierAndExecute(String methodId, String id, Object message, DeliveryOptions options,
-                                                       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
-                                                       Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-                                                       Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+    private static void createStringSupplierAndExecute(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                                       DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                                                       Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
                                                        int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
         final ThrowableFutureConsumer<String> stringSupplier = createStringSupplier(stringFunction, event);
         if (circuitBreakerTimeout == 0l) {
-            statelessExecution(methodId, id, message, options, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, stringSupplier);
+            statelessExecution(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, stringSupplier);
         } else {
-            statefulExecution(methodId, id, message, options, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, stringSupplier);
+            statefulExecution(methodId, id, message, stringFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, stringSupplier);
         }
     }
 
-    private static void statefulExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<String> stringSupplier) {
+    private static void statefulExecution(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                          DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<String> stringSupplier) {
         // TODO check if retry set... otherwise it makes no sense... throw exception
         if (event.succeeded()) {
             new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
@@ -129,13 +133,14 @@ public class EventbusStringExecutionUtil {
                     httpStatusCode, retryCount, timeout, circuitBreakerTimeout).
                     execute();
         } else {
-            statefulErrorHandling(methodId, id, message, options, stringFunction,
+            statefulErrorHandling(methodId, id, message, stringFunction, deliveryOptions,
                     vertx, errorMethodHandler, context, headers, encoder, errorHandler,
                     onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event);
         }
     }
 
-    private static void statelessExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<String> stringSupplier) {
+    private static void statelessExecution(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                           DeliveryOptions options, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<String> stringSupplier) {
         if (event.succeeded() || (event.failed() && retryCount <= 0)) {
             new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers,
                     stringSupplier, null, encoder, errorHandler, onFailureRespond,
@@ -143,15 +148,14 @@ public class EventbusStringExecutionUtil {
                     execute();
         } else if (event.failed() && retryCount > 0) {
             // retry operation
-            retryStringOperation(methodId, id, message, options, stringFunction, vertx,
+            retryStringOperation(methodId, id, message, stringFunction, options, vertx,
                     event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
                     onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         }
     }
 
-    private static void statefulErrorHandling(String methodId, String id, Object message, DeliveryOptions options,
-                                              ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx,
-                                              Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+    private static void statefulErrorHandling(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, DeliveryOptions deliveryOptions,
+                                              Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                               Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
                                               int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event) {
 
@@ -164,7 +168,7 @@ public class EventbusStringExecutionUtil {
                                     onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, lock, counter);
                         } else {
                             lock.release();
-                            retryStringOperation(methodId, id, message, options, stringFunction, vertx,
+                            retryStringOperation(methodId, id, message, stringFunction, deliveryOptions, vertx,
                                     event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
                                     onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
                         }
@@ -234,13 +238,12 @@ public class EventbusStringExecutionUtil {
     }
 
 
-    private static void retryStringOperation(String methodId, String id, Object message, DeliveryOptions options,
-                                             ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction, Vertx vertx, Throwable t,
-                                             Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-                                             Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+    private static void retryStringOperation(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
+                                             DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                                             Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
                                              int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         ResponseUtil.handleError(errorHandler, t);
-        mapToStringResponse(methodId, id, message, options, stringFunction, vertx, t,
+        mapToStringResponse(methodId, id, message, stringFunction, deliveryOptions, vertx, t,
                 errorMethodHandler, context, headers, null, encoder, errorHandler,
                 onFailureRespond, httpStatusCode, retryCount - 1, timeout, circuitBreakerTimeout).
                 execute();

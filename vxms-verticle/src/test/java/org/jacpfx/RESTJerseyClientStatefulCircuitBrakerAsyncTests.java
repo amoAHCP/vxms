@@ -39,24 +39,11 @@ public class RESTJerseyClientStatefulCircuitBrakerAsyncTests extends VertxTestBa
         return 1;
     }
 
-    protected Vertx getVertx() {
-        return vertices[0];
-    }
-
-    @Override
-    protected ClusterManager getClusterManager() {
-        return new FakeClusterManager();
-    }
 
 
     private HttpClient client;
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        startNodes(getNumNodes());
 
-    }
 
     @Before
     public void startVerticles() throws InterruptedException {
@@ -68,7 +55,7 @@ public class RESTJerseyClientStatefulCircuitBrakerAsyncTests extends VertxTestBa
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
         // don't have to hardecode it in your tests
 
-        getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
+        vertx.deployVerticle(new WsServiceOne(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
             assertTrue(asyncResult.succeeded());
@@ -80,7 +67,7 @@ public class RESTJerseyClientStatefulCircuitBrakerAsyncTests extends VertxTestBa
 
         });
 
-        client = getVertx().
+        client = vertx.
                 createHttpClient(new HttpClientOptions());
         awaitLatch(latch2);
 

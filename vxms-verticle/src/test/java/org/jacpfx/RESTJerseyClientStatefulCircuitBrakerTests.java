@@ -499,7 +499,8 @@ public class RESTJerseyClientStatefulCircuitBrakerTests extends VertxTestBase {
                             throw new NullPointerException("test-123");
                         }
                         future.complete(Serializer.serialize(new Payload<>(val)));
-                    }).onError(e -> System.out.println(e.getMessage())).
+                    }).
+                    onError(e -> System.out.println(e.getMessage())).
                     retry(3).
                     closeCircuitBreaker(2000).
                     onFailureRespond((error, future) -> future.complete(Serializer.serialize(new Payload<>("failure")))).
