@@ -36,7 +36,8 @@ public class ResponseUtil {
         }
     }
 
-    private static <T> void executeStateless(String _methodId, int _retry, long _timeout, long _release, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer) {
+    private static <T> void executeStateless(String _methodId, int _retry, long _timeout, long _release, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler,
+                                             ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer) {
         final Future<T> operationResult = Future.future();
         operationResult.setHandler(event -> {
             if (event.failed()) {
@@ -76,7 +77,9 @@ public class ResponseUtil {
         }
     }
 
-    private static <T> void executeStateful(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Throwable t, Consumer<ExecutionResult<T>> resultConsumer) {
+    private static <T> void executeStateful(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation,
+                                            Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler,
+                                            Vertx vertx, Throwable t, Consumer<ExecutionResult<T>> resultConsumer) {
         final Future<T> operationResult = Future.future();
         operationResult.setHandler(event -> {
             if (event.failed()) {
@@ -96,7 +99,7 @@ public class ResponseUtil {
                         executeDefaultState(_timeout, _userOperation, vertx, operationResult, lock);
                     } else {
                         releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lock,
-                                t != null ? t : Future.failedFuture("circuit open").cause());
+                                Optional.ofNullable(t).orElse(Future.failedFuture("circuit open").cause()));
                     }
                 }), _methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, resultConsumer);
 

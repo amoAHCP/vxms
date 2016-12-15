@@ -21,7 +21,7 @@ import java.util.function.Function;
 public class ResponseAsyncUtil {
 
     public static <T> void executeRetryAndCatchAsync(String _methodId, ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> _errorHandler,
-                                                     Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx,
+                                                     Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx, Throwable _t,
                                                      int _retry, long _timeout, long _circuitBreakerTimeout, long _delay) {
         if (_circuitBreakerTimeout > 0) {
             executeLocked((lock, counter) -> {
@@ -29,13 +29,12 @@ public class ResponseAsyncUtil {
                     long currentVal = counterHandler.result();
                     if (currentVal == 0) {
                         executeInitialState(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
-                                _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay, lock, counter);
+                                _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, lock, counter);
                     } else if (currentVal > 0) {
                         executeDefault(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
-                                _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay, lock);
+                                _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, lock);
                     } else {
-                        // TODO add throwable in method signature to pass execption from eventbus execution
-                        executeErrorState(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, lock);
+                        executeErrorState(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, _t, lock);
                     }
                 });
             }, _methodId, vertx, _blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, null);
@@ -44,13 +43,13 @@ public class ResponseAsyncUtil {
         }
     }
 
-    public static <T> void executeErrorState(Future<T> _blockingHandler, Consumer<Throwable> _errorHandler, Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Lock lock) {
+    public static <T> void executeErrorState(Future<T> _blockingHandler, Consumer<Throwable> _errorHandler, Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Throwable t, Lock lock) {
         Optional.ofNullable(lock).ifPresent(lck -> lck.release());
-        handleErrorExecution(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, Future.failedFuture("circuit open").cause());
+        handleErrorExecution(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, Optional.ofNullable(t).orElse(Future.failedFuture("circuit open").cause()));
     }
 
     public static <T> void executeDefault(String _methodId, ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> _errorHandler,
-                                          Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx,
+                                          Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx, Throwable _t,
                                           int _retry, long _timeout, long _circuitBreakerTimeout, long _delay, Lock lock) {
         Optional.ofNullable(lock).ifPresent(lck -> lck.release());
         vertx.executeBlocking(bhandler -> {
@@ -62,7 +61,7 @@ public class ResponseAsyncUtil {
                         counter.decrementAndGet(valHandler -> {
                             if (valHandler.succeeded()) {
                                 handleStatefulError(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
-                                        _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay, e, lck, counter, valHandler);
+                                        _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, e, lck, counter, valHandler);
                                 bhandler.complete();
                             } else {
                                 releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, valHandler.cause(), lck);
@@ -77,10 +76,10 @@ public class ResponseAsyncUtil {
 
 
     public static <T> void executeInitialState(String _methodId, ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> _errorHandler, Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler,
-                                               Vertx vertx, int _retry, long _timeout, long _circuitBreakerTimeout, long _delay, Lock lock, Counter counter) {
+                                               Vertx vertx, Throwable _t, int _retry, long _timeout, long _circuitBreakerTimeout, long _delay, Lock lock, Counter counter) {
         counter.addAndGet(Integer.valueOf(_retry + 1).longValue(), rHandler -> {
             executeDefault(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
-                    _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay, lock);
+                    _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, lock);
         });
     }
 
@@ -96,7 +95,8 @@ public class ResponseAsyncUtil {
         if (!_blockingHandler.isComplete()) _blockingHandler.complete(result);
     }
 
-    public static <T> void handleStatefulError(String _methodId, ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> _errorHandler, Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx, int _retry, long _timeout, long _circuitBreakerTimeout, long _delay, Throwable e, Lock lck, Counter counter, AsyncResult<Long> valHandler) {
+    public static <T> void handleStatefulError(String _methodId, ThrowableSupplier<T> _supplier, Future<T> _blockingHandler, Consumer<Throwable> _errorHandler,
+                                               Function<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx, Throwable _t, int _retry, long _timeout, long _circuitBreakerTimeout, long _delay, Throwable e, Lock lck, Counter counter, AsyncResult<Long> valHandler) {
         //////////////////////////////////////////
         long count = valHandler.result();
         if (count <= 0) {
@@ -107,7 +107,7 @@ public class ResponseAsyncUtil {
             ResponseUtil.handleError(_errorHandler, e);
             handleDelay(_delay);
             executeRetryAndCatchAsync(_methodId, _supplier, _blockingHandler, _errorHandler,
-                    _onFailureRespond, _errorMethodHandler, vertx, _retry, _timeout, _circuitBreakerTimeout, _delay);
+                    _onFailureRespond, _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay);
         }
         ////////////////////////////////////////
     }

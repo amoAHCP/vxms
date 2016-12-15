@@ -81,7 +81,6 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
                 // TODO update executeEventBusAndReply !!
                 evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
             } catch (Exception e) {
-                System.out.println("EXCEPTION ::::::");
                 e.printStackTrace();
             }
 
@@ -98,7 +97,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     }
 
     public void executeAsync(ThrowableSupplier<Serializable> supplier, int retry, Future<Serializable> handler) {
-        ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, 0l,delay);
+        ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, 0l,delay);
     }
 
     public Handler<AsyncResult<Serializable>> getAsyncResultHandler(int retry) {

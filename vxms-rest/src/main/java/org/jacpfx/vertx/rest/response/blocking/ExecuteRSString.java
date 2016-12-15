@@ -26,6 +26,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
     protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<String> stringSupplier;
+    // TODO switch to Throwable Function
     protected final Function<Throwable, String> onFailureRespond;
 
     public ExecuteRSString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
@@ -93,7 +94,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
     private void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<String> blockingHandler) {
-        ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, retry, timeout, circuitBreakerTimeout, delay);
+        ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<String>> getAsyncResultHandler(int retry) {
