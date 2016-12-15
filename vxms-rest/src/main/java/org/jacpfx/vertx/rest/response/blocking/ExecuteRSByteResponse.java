@@ -49,8 +49,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @param retryCount
      * @return the createResponse chain
      */
-    public ExecuteRSByteResponse retry(int retryCount) {
-        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
+    public ExecuteRSByteCircuitBreaker retry(int retryCount) {
+        return new ExecuteRSByteCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**

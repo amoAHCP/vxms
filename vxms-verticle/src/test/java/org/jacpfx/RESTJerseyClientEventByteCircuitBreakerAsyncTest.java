@@ -295,17 +295,25 @@ public class RESTJerseyClientEventByteCircuitBreakerAsyncTest extends VertxTestB
         public void simpleSyncNoConnectionErrorResponseStateful(RestHandler reply) {
             System.out.println("-------1");
             reply.eventBusRequest().
+                    async().
                     send("hello1", "welt").
-                    mapToByteResponse((handler, future) -> {
+                    mapToByteResponse((handler) -> {
                         System.out.println("value from event  ");
-                        future.complete(Serializer.serialize(new Payload<>(handler.result().body().toString())));
+                        return Serializer.serialize(new Payload<>(handler.result().body().toString()));
                     }).
                     onError(error -> {
                         System.out.println(":::" + error.getMessage());
                     }).
                     retry(3).
                     closeCircuitBreaker(2000).
-                    onFailureRespond((t, c) -> c.complete(Serializer.serialize(new Payload<>(t.getMessage())))).
+                    onFailureRespond((t) -> {
+                        try {
+                            return Serializer.serialize(new Payload<>(t.getMessage()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return new byte[0];
+                    }).
                     execute();
             System.out.println("-------2");
         }
