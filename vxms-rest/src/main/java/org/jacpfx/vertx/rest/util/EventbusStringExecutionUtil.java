@@ -112,8 +112,6 @@ public class EventbusStringExecutionUtil {
     }
 
 
-
-
     private static void createStringSupplierAndExecute(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction,
                                                        DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
                                                        Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
@@ -166,7 +164,6 @@ public class EventbusStringExecutionUtil {
                 counter.decrementAndGet(valHandler -> {
                     if (valHandler.succeeded()) {
                         long count = valHandler.result();
-                        System.out.println("count: "+count);
                         if (count <= 0) {
                             openCircuitAndHandleError(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler,
                                     onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, lock, counter);
