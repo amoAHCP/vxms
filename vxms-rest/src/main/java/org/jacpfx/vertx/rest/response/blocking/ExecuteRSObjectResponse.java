@@ -50,8 +50,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @param retryCount
      * @return the createResponse chain
      */
-    public ExecuteRSObjectResponse retry(int retryCount) {
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
+    public ExecuteRSObjectCircuitBreaker retry(int retryCount) {
+        return new ExecuteRSObjectCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**

@@ -97,7 +97,6 @@ public class ExecuteRSBasicByte {
      */
     public void execute() {
         vertx.runOnContext(action -> {
-            // excecuteEventBusAndReply & stringSupplier never non null at the same time
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
                     evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
@@ -106,7 +105,6 @@ public class ExecuteRSBasicByte {
                 }
 
             });
-
 
             ofNullable(byteConsumer).
                     ifPresent(userOperation -> {

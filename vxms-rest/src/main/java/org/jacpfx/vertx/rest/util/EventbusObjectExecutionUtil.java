@@ -138,13 +138,13 @@ public class EventbusObjectExecutionUtil {
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
             new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout).execute();
         } else if (event.failed() && retryCount > 0) {
-            retryObjectOperation(methodId, id, message, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+            retryObjectOperation(methodId, id, message, objectFunction, deliveryOptions, vertx, event.cause(), errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         }
     }
 
     private static void statefulExecution(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<Serializable> objectSupplier) {
         if (event.succeeded()) {
-            new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout).execute();
+            new ExecuteRSBasicObjectResponse(methodId, vertx,  event.cause(), errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout).execute();
         } else {
             statefulErrorHandling(methodId, id, message, objectFunction, deliveryOptions,
                     vertx, errorMethodHandler, context, headers, encoder, errorHandler,

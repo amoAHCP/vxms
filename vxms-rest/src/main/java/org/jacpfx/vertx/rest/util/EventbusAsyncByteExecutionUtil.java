@@ -80,15 +80,6 @@ public class EventbusAsyncByteExecutionUtil {
                 })), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
-    private static void executeErrorState(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context,
-                                          Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                                          Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout,
-                                          Lock lock) {
-        final Throwable cause = Future.failedFuture("circuit open").cause();
-        handleError(methodId, vertx, errorMethodHandler, context, headers,
-                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,
-                timeout, delay, circuitBreakerTimeout, lock, cause);
-    }
 
     private static void executeInitialState(String methodId, String id, Object message, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction,
                                             DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
@@ -117,6 +108,15 @@ public class EventbusAsyncByteExecutionUtil {
                                         errorHandler, onFailureRespond, httpStatusCode,
                                         retryCount, timeout, delay, circuitBreakerTimeout, event));
     }
+    private static void executeErrorState(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context,
+                                          Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                                          Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout,
+                                          Lock lock) {
+        final Throwable cause = Future.failedFuture("circuit open").cause();
+        handleError(methodId, vertx, errorMethodHandler, context, headers,
+                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount,
+                timeout, delay, circuitBreakerTimeout, lock, cause);
+    }
 
     private static void createByteSupplierAndExecute(String methodId, String id, Object message, DeliveryOptions deliveryOptions, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t,
                                                      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
@@ -126,9 +126,17 @@ public class EventbusAsyncByteExecutionUtil {
 
         if (circuitBreakerTimeout == 0l) {
             statelessExecution(methodId, id, message, deliveryOptions, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, byteSupplier);
-
         } else {
             statefulExecution(methodId, id, message,  byteFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, byteSupplier);
+        }
+    }
+
+    private static void statelessExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableSupplier<byte[]> byteSupplier) {
+        if (!event.failed() || (event.failed() && retryCount <= 0)) {
+            new ExecuteRSByteResponse(methodId, vertx,  event.cause(), errorMethodHandler, context, headers, byteSupplier, null, encoder, errorHandler,
+                    onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout).execute();
+        } else if (event.failed() && retryCount > 0) {
+            retryByteOperation(methodId, id, message, options, byteFunction, vertx, event.cause(), errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
         }
     }
 
@@ -136,7 +144,6 @@ public class EventbusAsyncByteExecutionUtil {
                                           Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
                                           Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout,long delay, long circuitBreakerTimeout,
                                           AsyncResult<Message<Object>> event, ThrowableSupplier<byte[]> byteSupplier) {
-        // TODO check if retry set... otherwise it makes no sense... throw exception
         if (event.succeeded()) {
             new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, null, encoder,
                     errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout).execute();
@@ -191,13 +198,14 @@ public class EventbusAsyncByteExecutionUtil {
         });
     }
 
-    private static void statelessExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableSupplier<byte[]> byteSupplier) {
-        if (!event.failed() || (event.failed() && retryCount <= 0)) {
-            new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, null, encoder, errorHandler,
-                    onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout).execute();
-        } else if (event.failed() && retryCount > 0) {
-            retryByteOperation(methodId, id, message, options, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
-        }
+    private static void handleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
+                                    Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, Lock lock, Throwable cause) {
+        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
+        ThrowableSupplier<byte[]> failConsumer = () -> {
+            throw cause;
+        };
+        new ExecuteRSByteResponse(methodId, vertx, cause, errorMethodHandler, context, headers, failConsumer, null,
+                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout).execute();
     }
 
     private static void retryByteOperation(String methodId, String id, Object message, DeliveryOptions options,
@@ -255,15 +263,6 @@ public class EventbusAsyncByteExecutionUtil {
         });
     }
 
-    private static void handleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                                    Function<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, Lock lock, Throwable cause) {
-        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
-        ThrowableSupplier<byte[]> failConsumer = () -> {
-            throw cause;
-        };
-        new ExecuteRSByteResponse(methodId, vertx, cause, errorMethodHandler, context, headers, failConsumer, null,
-                encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout).execute();
-    }
 
     private interface LockedConsumer {
         void execute(Lock lock, Counter counter);
