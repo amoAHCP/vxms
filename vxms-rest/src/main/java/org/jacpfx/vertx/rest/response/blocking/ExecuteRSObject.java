@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
@@ -28,10 +29,10 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     protected final long timeout;
     protected final ExecuteEventBusObjectCallAsync excecuteEventBusAndReply;
     protected final ThrowableSupplier<Serializable> objectSupplier;
-    protected final Function<Throwable, Serializable> onFailureRespond;
+    protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
 
     public ExecuteRSObject(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder,
-                           Consumer<Throwable> errorHandler, Function<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+                           Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
         this.delay = delay;
         this.timeout = timeout;
@@ -96,11 +97,11 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
 
     }
 
-    public void executeAsync(ThrowableSupplier<Serializable> supplier, int retry, Future<Serializable> handler) {
+    private void executeAsync(ThrowableSupplier<Serializable> supplier, int retry, Future<Serializable> handler) {
         ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, 0l,delay);
     }
 
-    public Handler<AsyncResult<Serializable>> getAsyncResultHandler(int retry) {
+    private Handler<AsyncResult<Serializable>> getAsyncResultHandler(int retry) {
         return value -> {
             if (!value.failed()) {
                 respond(value.result());

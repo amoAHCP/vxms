@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
@@ -26,11 +27,10 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
     protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<String> stringSupplier;
-    // TODO switch to Throwable Function
-    protected final Function<Throwable, String> onFailureRespond;
+    protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
     public ExecuteRSString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
-                           Consumer<Throwable> errorHandler, Function<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay,long circuitBreakerTimeout) {
+                           Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout, circuitBreakerTimeout); // TODO define circuitBreakerTimout!!
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;

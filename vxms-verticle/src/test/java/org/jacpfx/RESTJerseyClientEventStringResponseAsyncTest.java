@@ -269,7 +269,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         @GET
         public void complexResponse(RestHandler reply) {
             reply.
-                    eventBusRequest().async().
+                    eventBusRequest().blocking().
                     send("hello", "welt").
                     mapToStringResponse(handler ->
                             handler.
@@ -282,7 +282,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         @Path("/complexErrorResponse")
         @GET
         public void complexErrorResponse(RestHandler reply) {
-            reply.eventBusRequest().async().
+            reply.eventBusRequest().blocking().
                     send("hello", "welt").
                     mapToStringResponse(handler -> {
                         throw new NullPointerException("test exception");
@@ -295,7 +295,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         @Path("/complexChainErrorResponse")
         @GET
         public void complexChainErrorResponse(RestHandler reply) {
-            reply.eventBusRequest().async().
+            reply.eventBusRequest().blocking().
                     send("hello", "welt").
                     mapToStringResponse(handler -> {
                         throw new NullPointerException("test exception");
@@ -310,7 +310,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         public void onErrorResponse(RestHandler reply) {
             reply.
                     eventBusRequest().
-                    async().
+                    blocking().
                     send("hello1", "welt").
                     mapToStringResponse(handler -> handler.result().body().toString()).
                     onFailureRespond(handler -> {
@@ -324,7 +324,7 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         public void onFailurePassError(RestHandler reply) {
             reply.
                     eventBusRequest().
-                    async().
+                    blocking().
                     send("hello1", "welt").
                     mapToStringResponse(handler -> handler.result().body().toString()).
                     onFailureRespond(handler -> {

@@ -83,18 +83,15 @@ public class EventbusObjectExecutionUtil {
                                             DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
                                             Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
                                             int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, Lock lock, Counter counter) {
-        counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), rHandler -> {
-            executeDefaultState(methodId, id, message, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context,
-                    headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock);
-
-        });
+        counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), rHandler -> executeDefaultState(methodId, id, message, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context,
+                headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, lock));
     }
 
     private static void executeDefaultState(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
                                             DeliveryOptions deliveryOptions, Vertx vertx, Throwable t,
                                             Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
                                             ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, Lock lock) {
-        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
+        Optional.ofNullable(lock).ifPresent(Lock::release);
         vertx.
                 eventBus().
                 send(id, message, deliveryOptions,
@@ -229,7 +226,7 @@ public class EventbusObjectExecutionUtil {
 
     private static void handleError(String methodId, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
                                     ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, Lock lock, Throwable cause) {
-        Optional.ofNullable(lock).ifPresent(lck -> lck.release());
+        Optional.ofNullable(lock).ifPresent(Lock::release);
         final ThrowableFutureConsumer<Serializable> failConsumer = (future) -> future.fail(cause);
         new ExecuteRSBasicObjectResponse(methodId, vertx, cause, errorMethodHandler, context, headers,
                 failConsumer, null, encoder, errorHandler, onFailureRespond,

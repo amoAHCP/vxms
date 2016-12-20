@@ -63,7 +63,7 @@ public class EventBusRequest {
         }
     }
 
-    public EventBusAsyncRequest async() {
+    public EventBusAsyncRequest blocking() {
         return new EventBusAsyncRequest(methodId,vertx, t, errorMethodHandler, context);
     }
 }

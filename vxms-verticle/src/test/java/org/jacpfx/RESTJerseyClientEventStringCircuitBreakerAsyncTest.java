@@ -246,7 +246,7 @@ public class RESTJerseyClientEventStringCircuitBreakerAsyncTest extends VertxTes
         @GET
         public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
             System.out.println("-------1");
-            reply.eventBusRequest().async().
+            reply.eventBusRequest().blocking().
                     send("hello1", "welt").
                     mapToStringResponse((handler) -> {
                         System.out.println("value from event  ");
@@ -265,7 +265,7 @@ public class RESTJerseyClientEventStringCircuitBreakerAsyncTest extends VertxTes
         @GET
         public void simpleSyncNoConnectionErrorResponseStateful(RestHandler reply) {
             System.out.println("-------1");
-            reply.eventBusRequest().async().
+            reply.eventBusRequest().blocking().
                     send("hello1", "welt").
                     mapToStringResponse((handler) -> {
                         System.out.println("value from event  ");

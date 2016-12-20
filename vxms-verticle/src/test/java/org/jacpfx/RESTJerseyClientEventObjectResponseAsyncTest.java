@@ -308,7 +308,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
             System.out.println("CALL");
             reply.
                     eventBusRequest().
-                    async().
+                    blocking().
                     send("hello", "welt").
                     mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
                     execute();
@@ -319,7 +319,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         @GET
         public void complexByteErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("hello", "welt").
                     mapToObjectResponse(handler -> {
                         throw new NullPointerException("test exception");
@@ -332,7 +332,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         @GET
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("hello1", "welt").
                     mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString()),new ExampleByteEncoder()).
                     onFailureRespond(handler -> new Payload<>("no connection"),new ExampleByteEncoder()).
@@ -343,7 +343,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         @GET
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("error", "1").
                     mapToObjectResponse(handler -> new Payload<>(handler.result().body().toString() + "1"),new ExampleByteEncoder()).
                     retry(3).
@@ -355,7 +355,7 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
         public void simpleByteNoConnectionExceptionRetryErrorResponse(RestHandler reply) {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("hello", "welt").
                     mapToObjectResponse(handler -> {
                         System.out.println("retry: " + count.get());

@@ -136,9 +136,8 @@ public class RESTInitializer {
     }
 
     private static boolean filterRESTMethods(final Method method, final String methodName) {
-        if (method.isAnnotationPresent(Path.class) && method.getAnnotation(Path.class).value().equalsIgnoreCase(methodName))
-            return true;
-        return method.isAnnotationPresent(OnRestError.class) && method.getAnnotation(OnRestError.class).value().equalsIgnoreCase(methodName);
+        return method.isAnnotationPresent(Path.class) && method.getAnnotation(Path.class).value().equalsIgnoreCase(methodName) ||
+                method.isAnnotationPresent(OnRestError.class) && method.getAnnotation(OnRestError.class).value().equalsIgnoreCase(methodName);
 
     }
 

@@ -13,6 +13,7 @@ import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.entity.Payload;
+import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Before;
@@ -155,6 +156,147 @@ public class RESTJerseyClientEventByteCircuitBreakerAsyncTest extends VertxTestB
 
     }
 
+
+
+
+    @Test
+
+    public void simpleSyncNoConnectionAndExceptionErrorResponse() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponse");
+        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+
+            @Override
+            public void completed(byte[] response) {
+                System.out.println("Response entity '" + response + "' received.");
+
+                vertx.runOnContext(h -> {
+                    Payload<String> pp = null;
+                    try {
+                        pp = (Payload<String>) Serializer.deserialize(response);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    assertEquals( "fallback response nullpointer in onFailureRespond",pp.getValue());
+                });
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+    @Test
+
+    public void simpleSyncNoConnectionAndExceptionErrorResponseStateful() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponse");
+        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+
+            @Override
+            public void completed(byte[] response) {
+                System.out.println("Response entity '" + response + "' received.");
+
+                vertx.runOnContext(h -> {
+                    Payload<String> pp = null;
+                    try {
+                        pp = (Payload<String>) Serializer.deserialize(response);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    assertEquals( "fallback response nullpointer in onFailureRespond",pp.getValue());
+                });
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+    @Test
+
+    public void simpleSyncNoConnectionAndExceptionErrorResponseFail() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponseFail");
+        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+
+            @Override
+            public void completed(byte[] response) {
+
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+                vertx.runOnContext(h -> {
+                            assertEquals("javax.ws.rs.InternalServerErrorException: HTTP 500 nullpointer in onFailureRespond", throwable.getMessage());
+                        });
+                latch.countDown();
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
+
+    @Test
+
+    public void simpleSyncNoConnectionAndExceptionErrorResponseStatefulFail() throws InterruptedException {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponseStatefulFail");
+        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+
+            @Override
+            public void completed(byte[] response) {
+
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+                vertx.runOnContext(h -> {
+                    assertEquals("javax.ws.rs.InternalServerErrorException: HTTP 500 nullpointer in onFailureRespond", throwable.getMessage());
+                });
+                latch.countDown();
+                throwable.printStackTrace();
+            }
+        });
+
+        latch.await();
+        testComplete();
+
+    }
+
     @Test
 
     public void simpleSyncNoConnectionErrorResponseStateful() throws InterruptedException {
@@ -268,7 +410,27 @@ public class RESTJerseyClientEventByteCircuitBreakerAsyncTest extends VertxTestB
         public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
             System.out.println("-------1");
             reply.eventBusRequest().
-                    async().
+                    blocking().
+                    send("hello1", "welt").
+                    mapToByteResponse((handler) -> {
+                        System.out.println("value from event  ");
+                        return Serializer.serialize(new Payload<>(handler.result().body().toString()));
+                    }).
+                    onError(error -> {
+                        System.out.println(":::" + error.getMessage());
+                    }).
+                    retry(3).
+                    onFailureRespond((t) -> Serializer.serialize(new Payload<>(t.getMessage()))).
+                    execute();
+            System.out.println("-------2");
+        }
+
+        @Path("/simpleSyncNoConnectionAndExceptionErrorResponse")
+        @GET
+        public void simpleSyncNoConnectionAndExceptionErrorResponse(RestHandler reply) {
+            System.out.println("-------1");
+            reply.eventBusRequest().
+                    blocking().
                     send("hello1", "welt").
                     mapToByteResponse((handler) -> {
                         System.out.println("value from event  ");
@@ -279,12 +441,48 @@ public class RESTJerseyClientEventByteCircuitBreakerAsyncTest extends VertxTestB
                     }).
                     retry(3).
                     onFailureRespond((t) -> {
-                        try {
-                            return Serializer.serialize(new Payload<>(t.getMessage()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
+                        throw new NullPointerException("nullpointer in onFailureRespond");
+                    }).
+                    execute();
+            System.out.println("-------2");
+        }
+
+        @OnRestError("/simpleSyncNoConnectionAndExceptionErrorResponse")
+        @GET
+        public void simpleSyncNoConnectionAndExceptionErrorResponseOnFail(RestHandler reply, Throwable tt) {
+            System.out.println("-------1");
+            reply.response().
+                    blocking().
+                    byteResponse(() -> {
+                        System.out.println("value from event  ");
+                        return Serializer.serialize(new Payload<>("fallback response "+tt.getMessage()));
+                    }).
+                    onError(error -> {
+                        System.out.println(":::" + error.getMessage());
+                    }).
+                    retry(3).
+                    onFailureRespond((t) -> Serializer.serialize(new Payload<>(t.getMessage()))).
+                    execute();
+            System.out.println("-------2");
+        }
+
+        @Path("/simpleSyncNoConnectionAndExceptionErrorResponseFail")
+        @GET
+        public void simpleSyncNoConnectionAndExceptionErrorResponseFail(RestHandler reply) {
+            System.out.println("-------1");
+            reply.eventBusRequest().
+                    blocking().
+                    send("hello1", "welt").
+                    mapToByteResponse((handler) -> {
+                        System.out.println("value from event  ");
+                        return Serializer.serialize(new Payload<>(handler.result().body().toString()));
+                    }).
+                    onError(error -> {
+                        System.out.println(":::" + error.getMessage());
+                    }).
+                    retry(3).
+                    onFailureRespond((t) -> {
+                        throw new NullPointerException("nullpointer in onFailureRespond");
                     }).
                     execute();
             System.out.println("-------2");
@@ -295,7 +493,28 @@ public class RESTJerseyClientEventByteCircuitBreakerAsyncTest extends VertxTestB
         public void simpleSyncNoConnectionErrorResponseStateful(RestHandler reply) {
             System.out.println("-------1");
             reply.eventBusRequest().
-                    async().
+                    blocking().
+                    send("hello1", "welt").
+                    mapToByteResponse((handler) -> {
+                        System.out.println("value from event  ");
+                        return Serializer.serialize(new Payload<>(handler.result().body().toString()));
+                    }).
+                    onError(error -> {
+                        System.out.println(":::" + error.getMessage());
+                    }).
+                    retry(3).
+                    closeCircuitBreaker(2000).
+                    onFailureRespond((t) -> Serializer.serialize(new Payload<>(t.getMessage()))).
+                    execute();
+            System.out.println("-------2");
+        }
+
+        @Path("/simpleSyncNoConnectionAndExceptionErrorResponseStatefulFail")
+        @GET
+        public void simpleSyncNoConnectionAndExceptionErrorResponseStatefulFail(RestHandler reply) {
+            System.out.println("-------1");
+            reply.eventBusRequest().
+                    blocking().
                     send("hello1", "welt").
                     mapToByteResponse((handler) -> {
                         System.out.println("value from event  ");
@@ -307,13 +526,52 @@ public class RESTJerseyClientEventByteCircuitBreakerAsyncTest extends VertxTestB
                     retry(3).
                     closeCircuitBreaker(2000).
                     onFailureRespond((t) -> {
-                        try {
-                            return Serializer.serialize(new Payload<>(t.getMessage()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return new byte[0];
+                        throw new NullPointerException("nullpointer in onFailureRespond");
                     }).
+                    execute();
+            System.out.println("-------2");
+        }
+
+
+
+        @Path("/simpleSyncNoConnectionAndExceptionErrorResponseStateful")
+        @GET
+        public void simpleSyncNoConnectionAndExceptionErrorResponseStateful(RestHandler reply) {
+            System.out.println("-------1");
+            reply.eventBusRequest().
+                    blocking().
+                    send("hello1", "welt").
+                    mapToByteResponse((handler) -> {
+                        System.out.println("value from event  ");
+                        return Serializer.serialize(new Payload<>(handler.result().body().toString()));
+                    }).
+                    onError(error -> {
+                        System.out.println(":::" + error.getMessage());
+                    }).
+                    retry(3).
+                    closeCircuitBreaker(2000).
+                    onFailureRespond((t) -> {
+                        throw new NullPointerException("nullpointer in onFailureRespond");
+                    }).
+                    execute();
+            System.out.println("-------2");
+        }
+
+        @OnRestError("/simpleSyncNoConnectionAndExceptionErrorResponseStateful")
+        @GET
+        public void simpleSyncNoConnectionAndExceptionErrorResponseStatefulOnFail(RestHandler reply, Throwable tt) {
+            System.out.println("-------1");
+            reply.response().
+                    blocking().
+                    byteResponse(() -> {
+                        System.out.println("value from event  ");
+                        return Serializer.serialize(new Payload<>("fallback response "+tt.getMessage()));
+                    }).
+                    onError(error -> {
+                        System.out.println(":::" + error.getMessage());
+                    }).
+                    retry(3).
+                    onFailureRespond((t) -> Serializer.serialize(new Payload<>(t.getMessage()))).
                     execute();
             System.out.println("-------2");
         }

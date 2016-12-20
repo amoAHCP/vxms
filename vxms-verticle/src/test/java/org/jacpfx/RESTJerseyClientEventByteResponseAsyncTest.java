@@ -307,7 +307,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
             System.out.println("CALL");
             reply.
                     eventBusRequest().
-                    async().
+                    blocking().
                     send("hello", "welt").
                     mapToByteResponse(handler -> {
                         Payload<String> p = new Payload<>(handler.
@@ -323,7 +323,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         @GET
         public void complexByteErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("hello", "welt").
                     mapToByteResponse(handler -> {
                         throw new NullPointerException("test exception");
@@ -344,7 +344,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         @GET
         public void simpleByteNoConnectionErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("hello1", "welt").
                     mapToByteResponse(handler -> (byte[]) handler.result().body()).
                     onFailureRespond(handler -> {
@@ -363,7 +363,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         @GET
         public void simpleByteNoConnectionRetryErrorResponse(RestHandler reply) {
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("error", "1").
                     mapToByteResponse(handler -> {
                         Payload<String> p = new Payload<>(handler.result().body().toString() + "1");
@@ -378,7 +378,7 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
         public void simpleByteNoConnectionExceptionRetryErrorResponse(RestHandler reply) {
             AtomicInteger count = new AtomicInteger(0);
             reply.eventBusRequest().
-                    async().
+                    blocking().
                     send("hello", "welt").
                     mapToByteResponse(handler -> {
                         System.out.println("retry: " + count.get());

@@ -183,7 +183,7 @@ public class ResponseUtil {
             final Future<T> errorResult = Future.future();
             errorResult.setHandler(resultHandler -> {
                 if (resultHandler.succeeded()) {
-                    resultConsumer.accept(new ExecutionResult(resultHandler.result(), true, null));
+                    resultConsumer.accept(new ExecutionResult<>(resultHandler.result(), true, null));
                 } else {
                     handleExecutionError(null, errorHandler, null, errorMethodHandler, resultHandler.cause());
                 }
