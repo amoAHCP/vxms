@@ -12,13 +12,11 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.*;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
-import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSStringResponse;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
@@ -120,7 +118,7 @@ public class EventbusAsyncStringExecutionUtil {
         final ThrowableSupplier<String> stringSupplier = createStringSupplier(methodId, id, message, deliveryOptions, stringFunction,
                 vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event);
         if (circuitBreakerTimeout == 0l) {
-            statelessExecution(methodId, id, message, deliveryOptions, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, stringSupplier);
+            statelessExecution(methodId, id, message, deliveryOptions, stringFunction, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, stringSupplier);
         } else {
             statefulExecution(methodId, id, message, deliveryOptions, stringFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, stringSupplier);
         }
@@ -129,7 +127,7 @@ public class EventbusAsyncStringExecutionUtil {
     }
 
     private static void statelessExecution(String methodId, String id, Object message, DeliveryOptions deliveryOptions, ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction,
-                                           Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                           Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                            Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, String> onFailureRespond,
                                            int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableSupplier<String> stringSupplier) {
         if (event.succeeded() || (event.failed() && retryCount <= 0)) {

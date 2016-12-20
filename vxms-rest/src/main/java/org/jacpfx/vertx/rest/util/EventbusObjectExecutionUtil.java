@@ -14,7 +14,6 @@ import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
-import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
 
 import java.io.Serializable;
@@ -124,7 +123,7 @@ public class EventbusObjectExecutionUtil {
         if (circuitBreakerTimeout == 0l) {
             statelessExecution(methodId, id, message, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, objectSupplier);
         } else {
-            statefulExecution(methodId, id, message, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, objectSupplier);
+            statefulExecution(methodId, id, message, objectFunction, deliveryOptions, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout, event, objectSupplier);
 
         }
 
@@ -139,7 +138,7 @@ public class EventbusObjectExecutionUtil {
         }
     }
 
-    private static void statefulExecution(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, DeliveryOptions deliveryOptions, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<Serializable> objectSupplier) {
+    private static void statefulExecution(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, DeliveryOptions deliveryOptions, Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<Serializable> objectSupplier) {
         if (event.succeeded()) {
             new ExecuteRSBasicObjectResponse(methodId, vertx,  event.cause(), errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout).execute();
         } else {

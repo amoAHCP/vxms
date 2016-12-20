@@ -37,18 +37,17 @@ public class RESTInitializer {
     public static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
-                forEach(restMethod -> initRestMethod(vertx, router, config, service, restMethod));
+                forEach(restMethod -> initRestMethod(vertx, router, service, restMethod));
     }
 
     /**
      * Initialize a specific REST method from Service
      * @param vertx The Vertx instance
      * @param router The Router object
-     * @param config The Vertx configuration
      * @param service The Service itself
      * @param restMethod the REST Method
      */
-    public static void initRestMethod(Vertx vertx, Router router, JsonObject config, Object service, Method restMethod) {
+    public static void initRestMethod(Vertx vertx, Router router, Object service, Method restMethod) {
         final Path path = restMethod.getAnnotation(Path.class);
         final Stream<Method> errorMethodStream = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class));
         final Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);

@@ -12,14 +12,11 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.*;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCallAsync;
-import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
-import org.jacpfx.vertx.rest.response.blocking.ExecuteRSStringResponse;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
@@ -123,14 +120,14 @@ public class EventbusAsyncByteExecutionUtil {
                 context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event);
 
         if (circuitBreakerTimeout == 0l) {
-            statelessExecution(methodId, id, message, deliveryOptions, byteFunction, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, byteSupplier);
+            statelessExecution(methodId, id, message, deliveryOptions, byteFunction, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, byteSupplier);
         } else {
             statefulExecution(methodId, id, message,  byteFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout, event, byteSupplier);
         }
     }
 
     private static void statelessExecution(String methodId, String id, Object message, DeliveryOptions options, ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction,
-                                           Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
+                                           Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder,
                                            Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableSupplier<byte[]> byteSupplier) {
         if (event.succeeded() || (event.failed() && retryCount <= 0)) {
             new ExecuteRSByteResponse(methodId, vertx,  event.cause(), errorMethodHandler, context, headers, byteSupplier, null, encoder, errorHandler,
