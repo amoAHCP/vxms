@@ -19,8 +19,8 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
 
 
     public ExecuteRSBasicByteCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
-                                            Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+                                            Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
 
@@ -34,7 +34,8 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
      * @return the response chain
      */
     public ExecuteRSBasicByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler,
+                onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
 

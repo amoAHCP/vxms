@@ -40,7 +40,7 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSByteResponse(methodId,vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0, 0l, 0l,0l);
+        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0,0, 0l, 0l, 0l);
     }
 
     /**
@@ -50,7 +50,7 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSStringResponse(methodId,vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0l, 0l,0l);
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, null, null, null, null, 0, 0, 0, 0l, 0l, 0l);
     }
 
     /**
@@ -60,6 +60,6 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSObjectResponse(methodId,vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, null, null, 0, 0, 0l, 0l, 0l);
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, null, encoder, null, null, 0, 0, 0, 0l, 0l, 0l);
     }
 }

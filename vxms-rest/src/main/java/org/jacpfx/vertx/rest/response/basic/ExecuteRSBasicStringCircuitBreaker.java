@@ -19,11 +19,9 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
 
     public ExecuteRSBasicStringCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<String> stringConsumer,
                                               ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-                                              int httpStatusCode, int retryCount, long timeout,long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+                                              int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
-
-
 
 
     /**
@@ -33,7 +31,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
      * @return the response chain
      */
     public ExecuteRSBasicStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteRSBasicStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
 

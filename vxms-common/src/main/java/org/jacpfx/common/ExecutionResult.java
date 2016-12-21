@@ -10,18 +10,31 @@ public class ExecutionResult<T> {
     private final T result;
     private final boolean succeeded;
     private final Throwable cause;
+    private final boolean errorHandling;
 
 
     /**
      * The default constructor
      *
      * @param result
-     * @param succeeded         the connection status
-     * @param cause             The failure caus
+     * @param succeeded the connection status
+     * @param cause     The failure caus
      */
     public ExecutionResult(T result, boolean succeeded, Throwable cause) {
+        this(result, succeeded, false, cause);
+    }
+
+    /**
+     * The default constructor
+     *
+     * @param result
+     * @param succeeded the connection status
+     * @param cause     The failure caus
+     */
+    public ExecutionResult(T result, boolean succeeded, boolean errorHandling, Throwable cause) {
         this.result = result;
         this.succeeded = succeeded;
+        this.errorHandling = errorHandling;
         this.cause = cause;
     }
 
@@ -33,7 +46,6 @@ public class ExecutionResult<T> {
     public T getResult() {
         return result;
     }
-
 
 
     /**
@@ -61,6 +73,14 @@ public class ExecutionResult<T> {
      */
     public Throwable getCause() {
         return cause;
+    }
+
+    /**
+     * Returns true if result was created during error handling
+     * @return true if error occured
+     */
+    public boolean handledError() {
+        return errorHandling;
     }
 
 }

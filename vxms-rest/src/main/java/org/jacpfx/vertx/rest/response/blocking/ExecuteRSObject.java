@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
@@ -32,8 +33,8 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
 
     public ExecuteRSObject(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply, Encoder encoder,
-                           Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, Serializable> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+                           Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, Serializable> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode,httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
         this.delay = delay;
         this.timeout = timeout;
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
@@ -44,7 +45,8 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, delay, timeout, circuitBreakerTimeout);
+        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler,
+                onFailureRespond, status.code(),httpErrorCode, retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -58,7 +60,8 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), retryCount, delay, timeout, circuitBreakerTimeout);
+        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply,
+                encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -70,7 +73,8 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     @Override
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, delay, timeout, circuitBreakerTimeout);
+        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), objectSupplier, excecuteEventBusAndReply,
+                encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -80,7 +84,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
         Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {
                 // TODO update executeEventBusAndReply !!
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -97,14 +101,14 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
 
     }
 
-    private void executeAsync(ThrowableSupplier<Serializable> supplier, int retry, Future<Serializable> handler) {
+    private void executeAsync(ThrowableSupplier<Serializable> supplier, int retry, Future<ExecutionResult<Serializable>> handler) {
         ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, 0l,delay);
     }
 
-    private Handler<AsyncResult<Serializable>> getAsyncResultHandler(int retry) {
+    private Handler<AsyncResult<ExecutionResult<Serializable>>> getAsyncResultHandler(int retry) {
         return value -> {
             if (!value.failed()) {
-                respond(value.result());
+                respond(value.result().getResult());
             } else {
                 checkAndCloseResponse(retry);
             }

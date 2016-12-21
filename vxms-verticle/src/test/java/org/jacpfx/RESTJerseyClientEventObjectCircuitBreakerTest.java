@@ -270,15 +270,13 @@ public class RESTJerseyClientEventObjectCircuitBreakerTest extends VertxTestBase
             System.out.println("-------1");
             reply.eventBusRequest().
                     send("hello1", "welt").
-                    mapToObjectResponse((handler, future) -> {
-                        System.out.println("value from event  ");
-                        future.complete(new Payload<>(handler.result().body().toString()));
-                    },new ExampleByteEncoder()).
-                    onError(error -> {
-                        System.out.println(":::" + error.getMessage());
-                    }).
+                    mapToObjectResponse((handler, future) ->
+                            future.complete(new Payload<>(handler.result().body().toString())),new ExampleByteEncoder()).
+                    onError(error ->
+                            System.out.println(":::" + error.getMessage())).
                     retry(3).
-                    onFailureRespond((t, c) -> c.complete(new Payload<>(t.getMessage())),new ExampleByteEncoder()).
+                    onFailureRespond((t, c) ->
+                            c.complete(new Payload<>(t.getMessage())),new ExampleByteEncoder()).
                     execute();
             System.out.println("-------2");
         }

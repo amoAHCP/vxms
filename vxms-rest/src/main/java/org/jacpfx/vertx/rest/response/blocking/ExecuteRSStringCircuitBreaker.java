@@ -18,8 +18,8 @@ public class ExecuteRSStringCircuitBreaker extends ExecuteRSStringResponse {
 
 
     public ExecuteRSStringCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler,
-                                         ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
+                                         ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int httpErrorCode,int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
 
@@ -30,7 +30,7 @@ public class ExecuteRSStringCircuitBreaker extends ExecuteRSStringResponse {
      * @return the response chain
      */
     public ExecuteRSStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
 

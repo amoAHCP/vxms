@@ -44,17 +44,17 @@ public class EventBusAsyncResponse {
 
 
     public ExecuteRSStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-        return EventbusAsyncStringExecutionUtil.mapToStringResponse(methodId,id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0l, 0l,0l);
+        return EventbusAsyncStringExecutionUtil.mapToStringResponse(methodId,id, message, options, stringFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0,0, 0, 0l, 0l,0l);
     }
 
     public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusAsyncByteExecutionUtil.mapToByteResponse(methodId,id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0l, 0l, 0l);
+        return EventbusAsyncByteExecutionUtil.mapToByteResponse(methodId,id, message, options, byteFunction, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0,0, 0l, 0l, 0l);
     }
 
     public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0l, 0l, 0l);
+        return EventbusAsyncObjectExecutionUtil.mapToObjectResponse(methodId,id, message, options, objectFunction, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0,0, 0, 0l, 0l, 0l);
     }
 
 

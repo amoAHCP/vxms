@@ -33,12 +33,13 @@ public class ExecuteRSBasicByte {
     protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
     protected final Encoder encoder;
     protected final int httpStatusCode;
+    protected final int httpErrorCode;
     protected final int retryCount;
     protected final long timeout;
     protected final long circuitBreakerTimeout;
 
     public ExecuteRSBasicByte(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
-                              Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+                              Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -51,6 +52,7 @@ public class ExecuteRSBasicByte {
         this.onFailureRespond = onFailureRespond;
         this.retryCount = retryCount;
         this.httpStatusCode = httpStatusCode;
+        this.httpErrorCode = httpErrorCode;
         this.excecuteEventBusAndReply = excecuteEventBusAndReply;
         this.timeout = timeout;
         this.circuitBreakerTimeout = circuitBreakerTimeout;
@@ -64,7 +66,7 @@ public class ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, status.code(), retryCount, timeout, circuitBreakerTimeout).execute();
+                errorHandler, onFailureRespond, status.code(),httpErrorCode, retryCount, timeout, circuitBreakerTimeout).execute();
     }
 
     /**
@@ -76,8 +78,8 @@ public class ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, status.code(), retryCount, timeout, circuitBreakerTimeout).execute();
+        new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer,
+                excecuteEventBusAndReply, encoder,errorHandler, onFailureRespond, status.code(), httpErrorCode,retryCount, timeout, circuitBreakerTimeout).execute();
     }
 
     /**
@@ -88,7 +90,7 @@ public class ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), byteConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout).execute();
+                errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, circuitBreakerTimeout).execute();
     }
 
 
@@ -99,7 +101,7 @@ public class ExecuteRSBasicByte {
         vertx.runOnContext(action -> {
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, circuitBreakerTimeout);
+                    evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -111,7 +113,12 @@ public class ExecuteRSBasicByte {
                                 int retry = retryCount;
                                 ResponseUtil.createResponse(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
                                     if (value.succeeded()) {
-                                        respond(value.getResult());
+                                        if (!value.handledError()) {
+                                            respond(value.getResult());
+                                        } else {
+                                            respond(value.getResult(),httpErrorCode);
+                                        }
+
                                     } else {
                                         respond(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                                     }

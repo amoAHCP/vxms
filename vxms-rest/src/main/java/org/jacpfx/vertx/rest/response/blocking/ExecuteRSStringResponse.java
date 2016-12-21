@@ -19,8 +19,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
 
 
     public ExecuteRSStringResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler,
-                                   ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+                                   ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+        super(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
 
@@ -31,12 +31,12 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the createResponse chain
      */
     public ExecuteRSString onFailureRespond(ThrowableFunction<Throwable, String> onFailureRespond) {
-        return new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        return new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
 
     public ExecuteRSStringResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
     /**
@@ -46,7 +46,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the createResponse chain
      */
     public ExecuteRSStringCircuitBreaker retry(int retryCount) {
-        return new ExecuteRSStringCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        return new ExecuteRSStringCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
     /**
@@ -56,7 +56,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the createResponse chain
      */
     public ExecuteRSStringResponse timeout(long timeout) {
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
     /**
@@ -66,7 +66,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @return the createResponse chain
      */
     public ExecuteRSStringResponse delay(long delay) {
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
     /**
@@ -79,7 +79,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
     public ExecuteRSStringResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, context, headerMap, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
     }
 
 }
