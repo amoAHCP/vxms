@@ -251,6 +251,7 @@ public class ResponseUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static Optional<?> encode(Serializable value, Encoder encoder) {
         try {
             if (encoder instanceof Encoder.ByteEncoder) {

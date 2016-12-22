@@ -15,7 +15,6 @@ import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusByteCall;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
-import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
 
 import java.util.Map;
 import java.util.Optional;

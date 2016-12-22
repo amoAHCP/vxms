@@ -30,8 +30,8 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
-    public ExecuteRSBasicObject onFailureRespond(ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-        return new ExecuteRSBasicObject(methodId, vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
+    public ExecuteRSBasicObjectOnFailureCode onFailureRespond(ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
+        return new ExecuteRSBasicObjectOnFailureCode(methodId, vertx, t, errorMethodHandler, context, headers, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
     /**

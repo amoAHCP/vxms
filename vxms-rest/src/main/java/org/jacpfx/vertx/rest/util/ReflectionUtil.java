@@ -7,8 +7,6 @@ import org.jacpfx.vertx.rest.response.RestHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Created by Andy Moncsek on 25.11.15.

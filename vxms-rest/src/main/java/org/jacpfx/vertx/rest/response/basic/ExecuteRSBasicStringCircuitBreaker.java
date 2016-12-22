@@ -7,7 +7,6 @@ import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 

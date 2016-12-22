@@ -130,7 +130,7 @@ public class ResponseAsyncUtil {
     }
 
     public static <T> void executeDefaultState(ThrowableSupplier<T> _supplier, Future<ExecutionResult<T>> _blockingHandler, Vertx vertx, long _timeout) throws Throwable {
-        T result = null;
+        T result;
         if (_timeout > 0L) {
             result = executeWithTimeout(_supplier, vertx, _timeout);
         } else {

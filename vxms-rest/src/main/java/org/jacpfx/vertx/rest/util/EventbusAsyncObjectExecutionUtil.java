@@ -12,7 +12,6 @@ import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
-import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSObjectResponse;
 
 import java.io.Serializable;
@@ -22,7 +21,6 @@ import java.util.Optional;
 import io.vertx.core.shareddata.Lock;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 05.04.16.

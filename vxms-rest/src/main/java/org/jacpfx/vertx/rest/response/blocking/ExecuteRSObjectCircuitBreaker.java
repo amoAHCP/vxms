@@ -8,10 +8,8 @@ import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 12.01.16.

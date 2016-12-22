@@ -61,8 +61,8 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the response chain
      */
-    public ExecuteRSBasicString onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
-        return new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
+    public ExecuteRSBasicStringOnFailureCode onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
+        return new ExecuteRSBasicStringOnFailureCode(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
     /**

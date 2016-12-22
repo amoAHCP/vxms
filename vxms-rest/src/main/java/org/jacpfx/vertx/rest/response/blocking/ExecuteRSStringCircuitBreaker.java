@@ -9,7 +9,6 @@ import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
 
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Created by Andy Moncsek on 12.01.16.

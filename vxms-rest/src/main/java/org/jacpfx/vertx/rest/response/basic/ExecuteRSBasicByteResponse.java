@@ -28,8 +28,8 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
-    public ExecuteRSBasicByte onFailureRespond(ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond) {
-        return new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler,
+    public ExecuteRSBasicByteOnFailureCode onFailureRespond(ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond) {
+        return new ExecuteRSBasicByteOnFailureCode(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
