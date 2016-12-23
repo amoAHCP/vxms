@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 public @interface ServiceEndpoint {
 
     /**
-     *
+     * The port number to listen
      * @return The Endpoint Port
      */
     int port() default 8080;
@@ -22,7 +22,6 @@ public @interface ServiceEndpoint {
      * The service name as identifier in distributed environments
      * @return the service name
      */
-    // TODO currently the name will be used as url prefix : http://host:port/name/methodPath the name should be kept but not used in URL
     String name() default "";
 
 

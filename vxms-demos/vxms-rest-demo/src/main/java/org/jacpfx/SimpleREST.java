@@ -1,5 +1,6 @@
 package org.jacpfx;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -31,7 +32,13 @@ public class SimpleREST extends VxmsEndpoint {
     public void simpleRESTHelloWithParameter(RestHandler handler) {
         handler.
                 response().
-                stringResponse((response)->response.complete("hello World "+handler.request().param("name"))).
+                stringResponse((response)->
+                        response.complete("hello World "+handler.request().param("name"))).
+                timeout(2000).
+                onFailureRespond((error, future) -> future.complete("error")).
+                httpErrorCode(HttpResponseStatus.BAD_REQUEST).
+                retry(3).
+                closeCircuitBreaker(2000).
                 execute();
     }
 

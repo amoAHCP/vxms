@@ -5,6 +5,35 @@ Vxms is a modular micro service framework, based 100% on Vert.x 3. While Vert.x 
 Currently vxms consists of 1 base module and 4 extension modules, helping the developer to write Jax-RX like REST services, WebSocket endpoints and handling service registration/discovery using etcd. Since the *core module* is using Java SPIs to handle REST, WebSocket and service registration you can adopt the API easily for your needs.
 Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any other Vert.x extension will work in vxms out of the box.
     
+
+## vxms-rest example
+
+```java
+@ServiceEndpoint
+public class SimpleREST extends VxmsEndpoint {
+
+   
+    @Path("/hello/:name")
+    @GET
+    public void simpleRESTHelloWithParameter(RestHandler handler) {
+      handler.
+                      response().
+                      stringResponse((response)->
+                              response.complete("hello World "+handler.request().param("name"))). // define non-blocking response
+                      timeout(2000). // timeout for stringResponse handling
+                      onFailureRespond((error, future) -> future.complete("error")). // define response when stringResponse fails and retry won't work
+                      httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
+                      retry(3). // amount of retries before onFailureRespond will be executed
+                      closeCircuitBreaker(2000). // time after circuit breaker will be closed again, when opend only onFailureRespond will be executed
+                      execute(); // execute non blocking
+    }
+
+    public static void main(String[] args) {
+        Vertx.vertx().deployVerticle(SimpleREST.class.getName());
+    }
+}
+``` 
+
 ## vxms-core
 The vxms-core module contains the *abstract VxmsEndpoint* class which extends *AbstractVerticle" class (from Vert.x). This class must be extended by every vxms service, to be able to use all other modules. The core module didn't add much extra functionality, but it provides some convenience function over a plain Verticle. A minimal vxms (core) endpoint looks like this:
 ```java
@@ -30,6 +59,7 @@ Using the *@ServiceEndpoint* annotation you can specify following:
 - the port number
 - the host configuration
 - the name of the service
+- the context root of your service
 - the endpoint options, using io.vertx.core.http.HttpServerOptions
 The port, host and name configuration can also be specified through Vert.x json configuration using the same names.
 
@@ -48,6 +78,6 @@ The *@EndpointConfig* annotation takes a class, implementing the *EndpointConfig
 - *void cookieHandler(Router router)*: set the cookie handler; a cookie handler is always set by default, if you don't want this overwrite this method with an empty implementation
 - *void staticHandler(Router router)*: specify a static content handler
 - *void sessionHandler(Vertx vertx, Router router)*: specify the session handler
-- *void customRouteConfiguration(Vertx vertx, Router router)*: define some custom route configurations like security for your service
+- *void customRouteConfiguration(Vertx vertx, Router router, boolean secure, String host, int port)*: define some custom route configurations like security for your service
 
 
