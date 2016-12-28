@@ -25,34 +25,29 @@ import java.util.function.Consumer;
 public class DiscoveryClientEtcd implements DiscoveryClient {
     private static final String CACHE_KEY = "local";
     private static final String MAP_KEY = "cache";
-    private final HttpClient httpClient;
+    private final HttpClientOptions options;
     private final SharedData data;
     private final Vertx vertx;
     private final String domainname;
     private final URI fetchAll;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
-    public DiscoveryClientEtcd(HttpClient httpClient, Vertx vertx, String domainname, URI fetchAll) {
-        this.httpClient = httpClient;
+
+    public DiscoveryClientEtcd(Vertx vertx, HttpClientOptions options, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort) {
         this.vertx = vertx;
         this.data = vertx.sharedData();
         this.domainname = domainname;
         this.fetchAll = fetchAll;
-    }
-
-
-    public DiscoveryClientEtcd(Vertx vertx, HttpClientOptions options, String domainname, URI fetchAll, String discoveryServerHost, int discoveryServerPort) {
-        this(vertx.createHttpClient(options
+        this.options = (discoveryServerHost != null && discoveryServerPort > 0) ? options
                 .setDefaultHost(discoveryServerHost)
-                .setDefaultPort(discoveryServerPort)
-        ), vertx, domainname, fetchAll);
-
+                .setDefaultPort(discoveryServerPort) : options;
     }
 
     public DiscoveryClientEtcd(Vertx vertx, HttpClientOptions options, String domainname, URI fetchAll) {
-        this(vertx.createHttpClient(options), vertx, domainname, fetchAll);
+        this(vertx, options, domainname, fetchAll, null, 0);
 
     }
+
     /**
      * find service by name
      *
@@ -84,8 +79,6 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
 
-
-
     /**
      * @param serviceName the service name to find
      * @param consumer    the consumer to execute
@@ -110,8 +103,8 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             final String key = "/" + domainname + service;
             final Node serviceNode = findNode(root.getNode(), key);
             if (serviceNode.getNodes() != null && serviceNode.getKey().equals(key)) {
-                boolean isEmpty =serviceNode.getNodes().isEmpty();
-                consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, !isEmpty, isEmpty?new NodeNotFoundException("no active node found"):null));
+                boolean isEmpty = serviceNode.getNodes().isEmpty();
+                consumer.accept(new NodeResponse(serviceNode.getNodes(), domainname, !isEmpty, isEmpty ? new NodeNotFoundException("no active node found") : null));
             } else {
                 consumer.accept(new NodeResponse(Collections.emptyList(), domainname, false, new NodeNotFoundException("service not found")));
             }
@@ -121,10 +114,11 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
 
     @Override
     public boolean isConnected() {
+        // TODO handle this by using non blocking API and get rid of CompletableFuture
         try {
             CompletableFuture<Boolean> statusConnected = new CompletableFuture<>();
             try {
-                httpClient.get(fetchAll.toString()).
+                vertx.createHttpClient(options).get(fetchAll.toString()).
                         exceptionHandler(ex -> statusConnected.complete(false)).
                         handler(handler -> statusConnected.complete(true)).end();
             } catch (Exception s) {
@@ -140,7 +134,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
     private void retrieveKeys(Consumer<Root> consumer) {
-        httpClient.getAbs(fetchAll.toString(), handler -> handler.
+        vertx.createHttpClient(options).getAbs(fetchAll.toString(), handler -> handler.
                 exceptionHandler(error -> consumer.accept(new Root())).
                 bodyHandler(body -> consumer.accept(decodeRoot(body)))
         ).end();
@@ -173,7 +167,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
             final Node n2 = n1.isDir() ? findNode(n1, key) : n1;
             return n2.getKey().equals(key);
         }).findFirst().orElse(Node.emptyNode());
-        return  Node.emptyNode();
+        return Node.emptyNode();
     }
 
     private void putRootToCache(Root root) {

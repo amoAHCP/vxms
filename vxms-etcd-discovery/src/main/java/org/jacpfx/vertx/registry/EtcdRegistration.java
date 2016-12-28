@@ -48,9 +48,6 @@ public class EtcdRegistration {
     private final SharedData data;
     private final URI fetchAll;
     private final HttpClientOptions options;
-    private final HttpClient httpClient;
-
-
     private static final String ETCD_BASE_PATH = "/v2/keys/";
     private static final String HTTPS = "https://";
     private static final String HTTP = "http://";
@@ -88,8 +85,6 @@ public class EtcdRegistration {
         this.options = clientOptions
                 .setDefaultHost(etcdHost)
                 .setDefaultPort(etcdPort);
-        httpClient = vertx.createHttpClient(options);
-
 
     }
 
@@ -102,7 +97,7 @@ public class EtcdRegistration {
 
 
     public void retrieveKeys(Consumer<Root> consumer) {
-        httpClient.getAbs(fetchAll.toString(), handler -> handler.
+        vertx.createHttpClient(options).getAbs(fetchAll.toString(), handler -> handler.
                 exceptionHandler(error -> {
                     error.printStackTrace();
                     consumer.accept(new Root());
@@ -179,7 +174,7 @@ public class EtcdRegistration {
 
 
     private void createServiceNode(String serviceName, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        httpClient
+        vertx.createHttpClient(options)
                 .put(ETCD_BASE_PATH + domainname + serviceName)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
@@ -192,7 +187,8 @@ public class EtcdRegistration {
     }
 
     private void createInstanceNode(String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        httpClient
+        LOG.info("create {0}",serviceName);
+        vertx.createHttpClient(options)
                 .put(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
@@ -206,6 +202,7 @@ public class EtcdRegistration {
 
     private void deleteInstanceNode(String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         // create new Vert.x instance to be sure that connection is still possible, even when the service verticle is currently shuts down and Vert.x instance is closed
+        LOG.info("delete {0}",serviceName);
         Vertx.vertx().createHttpClient(options)
                 .delete(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .handler(handler -> responseHandler.handle(handler))
