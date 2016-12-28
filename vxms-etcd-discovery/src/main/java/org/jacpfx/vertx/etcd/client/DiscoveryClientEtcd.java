@@ -30,6 +30,8 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     private final Vertx vertx;
     private final String domainname;
     private final URI fetchAll;
+    private final String discoveryServerHost;
+    private final int discoveryServerPort;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
 
@@ -38,7 +40,14 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         this.data = vertx.sharedData();
         this.domainname = domainname;
         this.fetchAll = fetchAll;
-        this.options = (discoveryServerHost != null && discoveryServerPort > 0) ? options
+        this.discoveryServerHost = discoveryServerHost;
+        this.discoveryServerPort = discoveryServerPort;
+        this.options = options;
+    }
+
+
+    private  HttpClientOptions getOptions() {
+        return (discoveryServerHost != null && discoveryServerPort > 0) ? options
                 .setDefaultHost(discoveryServerHost)
                 .setDefaultPort(discoveryServerPort) : options;
     }
@@ -118,7 +127,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
         try {
             CompletableFuture<Boolean> statusConnected = new CompletableFuture<>();
             try {
-                vertx.createHttpClient(options).get(fetchAll.toString()).
+                vertx.createHttpClient(getOptions()).get(fetchAll.toString()).
                         exceptionHandler(ex -> statusConnected.complete(false)).
                         handler(handler -> statusConnected.complete(true)).end();
             } catch (Exception s) {
@@ -134,7 +143,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
     }
 
     private void retrieveKeys(Consumer<Root> consumer) {
-        vertx.createHttpClient(options).getAbs(fetchAll.toString(), handler -> handler.
+        vertx.createHttpClient(getOptions()).getAbs(fetchAll.toString(), handler -> handler.
                 exceptionHandler(error -> consumer.accept(new Root())).
                 bodyHandler(body -> consumer.accept(decodeRoot(body)))
         ).end();

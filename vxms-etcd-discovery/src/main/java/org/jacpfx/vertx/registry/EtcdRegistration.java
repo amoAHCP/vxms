@@ -41,7 +41,9 @@ public class EtcdRegistration {
     private final String domainname;
     private final String servicename;
     private final String host;
+    private final String etcdhost;
     private final int port;
+    private final int etcdport;
     private final String nodename;
     private final String contextRoot;
     private final boolean secure;
@@ -52,7 +54,6 @@ public class EtcdRegistration {
     private static final String HTTPS = "https://";
     private static final String HTTP = "http://";
 
-    // TODO add HttpClientOptions see:DiscoveryClientBuilder
 
     /**
      * @param vertx         the Vert.x instance
@@ -78,14 +79,18 @@ public class EtcdRegistration {
         this.host = host;
         this.port = port;
         this.secure = secure;
-
-
+        this.etcdhost = etcdHost;
+        this.etcdport = etcdPort;
         this.fetchAll = URI.create(clientOptions.isSsl() ? HTTPS : HTTP + etcdHost + ":" + etcdPort + ETCD_BASE_PATH + domainname + "/?recursive=true");
-        data = vertx.sharedData();
-        this.options = clientOptions
-                .setDefaultHost(etcdHost)
-                .setDefaultPort(etcdPort);
+        this.data = vertx.sharedData();
+        this.options = clientOptions;
 
+    }
+
+    private  HttpClientOptions getOptions() {
+        return options
+                .setDefaultHost(etcdhost)
+                .setDefaultPort(etcdport);
     }
 
     private static String cleanPath(String path) {
@@ -97,7 +102,7 @@ public class EtcdRegistration {
 
 
     public void retrieveKeys(Consumer<Root> consumer) {
-        vertx.createHttpClient(options).getAbs(fetchAll.toString(), handler -> handler.
+        vertx.createHttpClient(getOptions()).getAbs(fetchAll.toString(), handler -> handler.
                 exceptionHandler(error -> {
                     error.printStackTrace();
                     consumer.accept(new Root());
@@ -165,7 +170,7 @@ public class EtcdRegistration {
         vertx.setPeriodic((ttl * 1000) - 900,
                 refresh -> createInstanceNode(_domainname, _servicename, _nodename, "value=" + Json.encode(new NodeMetadata(_contextRoot, _host, _port, _secure)) + "&ttl=" + ttl, refreshed -> {
                     if (refreshed.statusCode() != 200) {
-                        LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage());
+                        LOG.error("Unable to refresh node (" + refreshed.statusCode() + ") " + refreshed.statusMessage()+"  HOST: "+getOptions().getDefaultHost()+" PORT: "+getOptions().getDefaultPort());
                     } else {
                         retrieveKeys(this::putRootToCache);
                     }
@@ -174,7 +179,7 @@ public class EtcdRegistration {
 
 
     private void createServiceNode(String serviceName, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
-        vertx.createHttpClient(options)
+        vertx.createHttpClient(getOptions())
                 .put(ETCD_BASE_PATH + domainname + serviceName)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
@@ -188,7 +193,7 @@ public class EtcdRegistration {
 
     private void createInstanceNode(String domainname, String serviceName, String name, String data, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         LOG.info("create {0}",serviceName);
-        vertx.createHttpClient(options)
+        vertx.createHttpClient(getOptions())
                 .put(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .putHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                 .handler(responseHandler)
@@ -203,7 +208,7 @@ public class EtcdRegistration {
     private void deleteInstanceNode(String domainname, String serviceName, String name, Handler<HttpClientResponse> responseHandler, AsyncResultHandler<DiscoveryClient> asyncResultHandler) {
         // create new Vert.x instance to be sure that connection is still possible, even when the service verticle is currently shuts down and Vert.x instance is closed
         LOG.info("delete {0}",serviceName);
-        Vertx.vertx().createHttpClient(options)
+        Vertx.vertx().createHttpClient(getOptions())
                 .delete(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
                 .handler(handler -> responseHandler.handle(handler))
                 .exceptionHandler(error -> {
