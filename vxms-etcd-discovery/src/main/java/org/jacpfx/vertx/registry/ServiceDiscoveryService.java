@@ -10,8 +10,6 @@ import org.jacpfx.vertx.etcd.client.CustomConnectionOptions;
 import org.jacpfx.vertx.etcd.client.DefaultConnectionOptions;
 import org.jacpfx.vertx.etcd.client.EtcdClient;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.function.Consumer;
 

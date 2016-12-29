@@ -25,18 +25,18 @@ public class JSONTool {
                 put("connectionPort",op.getConnectionPort());
         if(op.getProduces()!=null) {
             final JsonArray types = new JsonArray();
-            Stream.of(op.getProduces()).map(m -> new JsonObject().put("produces", m)).forEach(jso -> types.add(jso));
+            Stream.of(op.getProduces()).map(m -> new JsonObject().put("produces", m)).forEach(types::add);
             result.put("produces", types);
         }
         if(op.getConsumes()!=null) {
             final JsonArray types = new JsonArray();
-            Stream.of(op.getConsumes()).map(m -> new JsonObject().put("consumes", m)).forEach(jso -> types.add(jso));
+            Stream.of(op.getConsumes()).map(m -> new JsonObject().put("consumes", m)).forEach(types::add);
             result.put("consumes", types);
         }
 
         if(op.getParameter()!=null) {
             final JsonArray params = new JsonArray();
-            Stream.of(op.getParameter()).map(m -> new JsonObject().put("param", m)).forEach(jso -> params.add(jso));
+            Stream.of(op.getParameter()).map(m -> new JsonObject().put("param", m)).forEach(params::add);
             result.put("param", params);
         }
 

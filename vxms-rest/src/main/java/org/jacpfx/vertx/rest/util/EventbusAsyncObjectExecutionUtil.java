@@ -207,6 +207,7 @@ public class EventbusAsyncObjectExecutionUtil {
                                     ThrowableFunction<Throwable, Serializable> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, Lock lock, Throwable cause) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
         ThrowableSupplier<Serializable> failConsumer = () -> {
+            assert cause != null;
             throw cause;
         };
         new ExecuteRSObjectResponse(methodId, vertx, cause, errorMethodHandler, context, headers, failConsumer, null,

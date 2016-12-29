@@ -23,9 +23,7 @@ public class ServiceInfoDecoder implements MessageCodec<ServiceInfo, ServiceInfo
     public ServiceInfo decodeFromWire(int pos, Buffer buffer) {
         try {
             return (ServiceInfo) Serializer.deserialize(buffer.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;

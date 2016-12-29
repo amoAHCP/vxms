@@ -152,7 +152,7 @@ public class ServiceInfo implements Serializable {
                 consumesTypes.toArray(new String[consumesTypes.size()]),
                 serviceName1,
                 connectionHost,
-                Integer.valueOf(connectionPort).intValue(),
+                Integer.valueOf(connectionPort),
                 vertx,
                 paramsList.toArray(new String[paramsList.size()]));
     }

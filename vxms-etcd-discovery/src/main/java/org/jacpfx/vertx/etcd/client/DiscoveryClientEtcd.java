@@ -2,7 +2,6 @@ package org.jacpfx.vertx.etcd.client;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.Json;
 import io.vertx.core.shareddata.LocalMap;

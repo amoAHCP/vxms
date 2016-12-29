@@ -29,8 +29,7 @@ public class ServiceInfoHolder implements Serializable {
 
     public void remove(final ServiceInfo info) {
         final Optional<ServiceInfo> first = infos.stream().filter(i -> i.getServiceName().equals(info.getServiceName())).findFirst();
-        first.ifPresent(present ->
-                        infos.remove(present)
+        first.ifPresent(infos::remove
         );
     }
 

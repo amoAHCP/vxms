@@ -205,6 +205,7 @@ public class EventbusAsyncByteExecutionUtil {
                                     ThrowableFunction<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout, Lock lock, Throwable cause) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
         ThrowableSupplier<byte[]> failConsumer = () -> {
+            assert cause != null;
             throw cause;
         };
         new ExecuteRSByteResponse(methodId, vertx, cause, errorMethodHandler, context, headers, failConsumer, null,

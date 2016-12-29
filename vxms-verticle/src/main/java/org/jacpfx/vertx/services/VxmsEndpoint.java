@@ -10,22 +10,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
-import or.jacpfx.spi.RESThandlerSPI;
 import or.jacpfx.spi.ServiceDiscoverySpi;
-import or.jacpfx.spi.WebSockethandlerSPI;
 import org.jacpfx.common.CustomServerOptions;
-import org.jacpfx.common.configuration.DefaultEndpointConfiguration;
-import org.jacpfx.common.configuration.EndpointConfig;
 import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
-import org.jacpfx.vertx.util.ServiceUtil;
 
 import java.util.Optional;
-import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 import static org.jacpfx.vertx.util.ServiceUtil.*;
-import static org.jacpfx.vertx.util.ServiceUtil.SLASH;
 
 /**
  * Extend a service verticle to provide pluggable sevices for vet.x microservice project

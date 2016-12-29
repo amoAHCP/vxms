@@ -10,6 +10,7 @@ import org.jacpfx.common.configuration.EndpointConfiguration;
 import java.util.ServiceLoader;
 
 /**
+ * General Utility cvlass
  * Created by amo on 24.10.16.
  */
 public class ServiceUtil {

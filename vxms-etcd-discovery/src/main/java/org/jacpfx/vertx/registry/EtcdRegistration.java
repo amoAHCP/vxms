@@ -6,7 +6,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
@@ -210,7 +209,7 @@ public class EtcdRegistration {
         LOG.info("delete {0}",serviceName);
         Vertx.vertx().createHttpClient(getOptions())
                 .delete(ETCD_BASE_PATH + domainname + serviceName + "/" + name)
-                .handler(handler -> responseHandler.handle(handler))
+                .handler(responseHandler::handle)
                 .exceptionHandler(error -> {
                     error.printStackTrace();
                     if (asyncResultHandler != null) asyncResultHandler.handle(Future.factory.failedFuture(error));
