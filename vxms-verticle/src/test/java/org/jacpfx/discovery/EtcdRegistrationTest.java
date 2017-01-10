@@ -148,25 +148,32 @@ public class EtcdRegistrationTest extends VertxTestBase
         EtcdAwareService service = new EtcdAwareService();
         service.init(vertx, vertx.getOrCreateContext());
         final DiscoveryClient client = DiscoveryClient.createClient(service);
-        if (client.isConnected()) {
-            client.find(SERVICE_REST_GET).onSuccess(val -> {
-                System.out.println(" found node : " + val.getServiceNode());
-                System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
+        client.isConnected(connected -> {
+            if (connected.succeeded()) {
+
+                vertx.executeBlocking(blocking -> {
+                client.find(SERVICE_REST_GET).onSuccess(val -> {
+                    System.out.println(" found node : " + val.getServiceNode());
+                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
+                    testComplete();
+
+                }).onError(error -> {
+                    System.out.println("error: " + error.getThrowable().getMessage());
+                }).onFailure(node -> {
+                    System.out.println("not found");
+                    testComplete();
+                }).retry(2).execute();
+
+
+                //  reg.disconnect(Future.factory.future());
+                await();
+
+                }, result -> {});
+
+            } else {
                 testComplete();
-
-            }).onError(error -> {
-                System.out.println("error: " + error.getThrowable().getMessage());
-            }).onFailure(node -> {
-                System.out.println("not found");
-                testComplete();
-            }).retry(2).execute();
-
-
-            //  reg.disconnect(Future.factory.future());
-            await();
-        } else {
-            testComplete();
-        }
+            }
+        });
 
     }
 
@@ -178,85 +185,99 @@ public class EtcdRegistrationTest extends VertxTestBase
         service.init(vertx, vertx.getOrCreateContext());
         final DiscoveryClient client = DiscoveryClient.createClient(vertx, new HttpClientOptions(), new JsonObject().put("etcd-host", "127.0.0.1").put("etcd-port", "4001").put("etcd-domain", "etcdAwareTest"));
 
-        //  final DiscoveryClient client = DiscoveryClient.createClient(service);
-        if (client.isConnected()) {
-            client.find(SERVICE_REST_GET).onSuccess(val -> {
-                HttpClientOptions options = new HttpClientOptions();
-                HttpClient httpclient = this.vertx.createHttpClient(options);
-                HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/", resp -> {
-                    if (resp.statusCode() == 200) {
-                        resp.bodyHandler(body -> {
+        client.isConnected(connected -> {
+            if (connected.succeeded()) {
 
-                            System.out.println("Got a createResponse: " + body.toString());
-                            assertTrue("test-123".equals(body.toString()));
+                vertx.executeBlocking(blocking -> {
+                client.find(SERVICE_REST_GET).onSuccess(val -> {
+                    HttpClientOptions options = new HttpClientOptions();
+                    HttpClient httpclient = this.vertx.createHttpClient(options);
+                    HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/", resp -> {
+                        if (resp.statusCode() == 200) {
+                            resp.bodyHandler(body -> {
 
+                                System.out.println("Got a createResponse: " + body.toString());
+                                assertTrue("test-123".equals(body.toString()));
+
+                                testComplete();
+                            });
+                        } else {
                             testComplete();
-                        });
-                    } else {
-                        testComplete();
-                    }
-                });
+                        }
+                    });
 
-                request.end();
+                    request.end();
 
-            }).onError(error -> {
-                System.out.println("error: " + error.getThrowable().getMessage());
-            }).onFailure(node -> {
-                System.out.println("not found");
+                }).onError(error -> {
+                    System.out.println("error: " + error.getThrowable().getMessage());
+                }).onFailure(node -> {
+                    System.out.println("not found");
+                    testComplete();
+                }).retry(2).execute();
+
+
+                //  reg.disconnect(Future.factory.future());
+                await();
+
+                }, result -> {});
+
+
+            } else {
                 testComplete();
-            }).retry(2).execute();
+            }
+        });
 
-
-            //  reg.disconnect(Future.factory.future());
-            await();
-        } else {
-            testComplete();
-        }
 
     }
 
     @Test
     public void testEtcdDiscoveryClientRequestChain() {
         final DiscoveryClient client = DiscoveryClient.createClient(vertx, new HttpClientOptions(), new JsonObject().put("etcd-host", "127.0.0.1").put("etcd-port", "4001").put("etcd-domain", "etcdAwareTest"));
-        if (client.isConnected()) {
-            client.find(SERVICE_REST_GET_2).onSuccess(val -> {
-                HttpClientOptions options = new HttpClientOptions();
-                HttpClient httpclient = vertx.
-                        createHttpClient(options);
+        client.isConnected(connected -> {
+            if (connected.succeeded()) {
+                vertx.executeBlocking(blocking -> {
+                client.find(SERVICE_REST_GET_2).onSuccess(val -> {
+                    HttpClientOptions options = new HttpClientOptions();
+                    HttpClient httpclient = vertx.
+                            createHttpClient(options);
 
-                HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/hello", resp -> {
-                    if (resp.statusCode() == 200) {
-                        resp.bodyHandler(body -> {
-                            System.out.println("Got a createResponse: " + body.toString());
-                            assertTrue("test-123hello".equals(body.toString()));
+                    HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/hello", resp -> {
+                        if (resp.statusCode() == 200) {
+                            resp.bodyHandler(body -> {
+                                System.out.println("Got a createResponse: " + body.toString());
+                                assertTrue("test-123hello".equals(body.toString()));
+                                testComplete();
+                            });
+                        } else {
                             testComplete();
-                        });
-                    } else {
-                        testComplete();
-                    }
-                });
+                        }
+                    });
 
-                request.end();
+                    request.end();
 
-            }).onError(error -> {
-                System.out.println("error: " + error.getThrowable().getMessage());
-            }).onFailure(node -> {
-                System.out.println("not found");
+                }).onError(error -> {
+                    System.out.println("error: " + error.getThrowable().getMessage());
+                }).onFailure(node -> {
+                    System.out.println("not found");
+                    testComplete();
+                }).retry(2).execute();
+
+
+                //  reg.disconnect(Future.factory.future());
+                await();
+
+                }, result -> {});
+
+            } else {
                 testComplete();
-            }).retry(2).execute();
-
-
-            //  reg.disconnect(Future.factory.future());
-            await();
-        } else {
-            testComplete();
-        }
+            }
+        });
 
     }
 
 
     @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = HOST , exportedPort = PORT)
+    @EtcdClient(domain = "etcdAwareTest", host = "127.0.0.1", port = 4001, ttl = 10, exportedHost = HOST, exportedPort = PORT)
     public class EtcdAwareService extends VxmsEndpoint {
 
         public void postConstruct(final Future<Void> startFuture) {
@@ -284,11 +305,13 @@ public class EtcdRegistrationTest extends VertxTestBase
             HttpClientOptions options = new HttpClientOptions();
             httpclient = vertx.
                     createHttpClient(options);
-            if (client.isConnected()) {
-                startFuture.complete();
-            } else {
-                startFuture.fail("no connection to discovery service");
-            }
+            client.isConnected(connected -> {
+                if (connected.succeeded()) {
+                    startFuture.complete();
+                } else {
+                    startFuture.fail("no connection to discovery service");
+                }
+            });
         }
 
         @Path("/simpleRESTEndpoint/:value")
@@ -324,11 +347,13 @@ public class EtcdRegistrationTest extends VertxTestBase
 
         public void postConstruct(final Future<Void> startFuture) {
             client = DiscoveryClient.createClient(this);
-            if (client.isConnected()) {
-                startFuture.complete();
-            } else {
-                startFuture.fail("no connection to discovery service");
-            }
+            client.isConnected(connected -> {
+                if (connected.succeeded()) {
+                    startFuture.complete();
+                } else {
+                    startFuture.fail("no connection to discovery service");
+                }
+            });
 
         }
 

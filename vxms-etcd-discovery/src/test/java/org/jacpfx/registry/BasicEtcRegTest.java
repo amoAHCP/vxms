@@ -100,8 +100,6 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
 
-
-
     @Test
 
     public void basicServiceRegistration() throws InterruptedException {
@@ -174,7 +172,6 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
 
-
     @Test
 
     public void findNodes() throws InterruptedException {
@@ -194,14 +191,12 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
 
-                final DiscoveryClient client= result.result();
+                final DiscoveryClient client = result.result();
                 client.findNode("/myService", node -> {
-                    System.out.println(" found node : "+node.getNode());
+                    System.out.println(" found node : " + node.getNode());
                     testComplete();
                 });
             } else {
@@ -234,15 +229,13 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
                 final DiscoveryClient client = result.result();
 
                 client.findNode("/myService", node -> {
-                    System.out.println(" found node : "+node.getServiceNode());
-                    System.out.println(" found URI : "+node.getServiceNode().getUri().toString());
+                    System.out.println(" found node : " + node.getServiceNode());
+                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
                     testComplete();
                 });
             } else {
@@ -296,11 +289,11 @@ public class BasicEtcRegTest extends VertxTestBase {
                 final DiscoveryClient client = result.result();
 
                 client.findNode("/myService", node -> {
-                    System.out.println(" found node : "+node.getServiceNode());
-                    System.out.println(" found URI : "+node.getServiceNode().getUri().toString());
+                    System.out.println(" found node : " + node.getServiceNode());
+                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
                     reg.disconnect(handler -> {
-                        System.out.println("status code: "+handler.statusCode());
-                        if(handler.statusCode() == 200) {
+                        System.out.println("status code: " + handler.statusCode());
+                        if (handler.statusCode() == 200) {
                             reg2.connect(result2 -> {
                                 final DiscoveryClient client2 = result2.result();
                                 client2.findNode("/myService", node2 -> {
@@ -329,7 +322,6 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
 
-
     @Test
 
     public void connectServiceNode() throws InterruptedException {
@@ -349,21 +341,19 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
 
                 final DiscoveryClient discoveryClient = result.result();
                 discoveryClient.findNode(SERVICE_REST_GET, node -> {
-                    assertTrue("did not find node",node.succeeded());
-                    System.out.println(" found node : "+node.getServiceNode());
-                    System.out.println(" found URI : "+node.getServiceNode().getUri().toString());
+                    assertTrue("did not find node", node.succeeded());
+                    System.out.println(" found node : " + node.getServiceNode());
+                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
                     HttpClientOptions options = new HttpClientOptions();
                     HttpClient client = vertx.
                             createHttpClient(options);
 
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointOne", resp -> resp.bodyHandler(body -> {
+                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointOne", resp -> resp.bodyHandler(body -> {
                         System.out.println("Got a response: " + body.toString());
                         Assert.assertEquals(body.toString(), "test");
                         testComplete();
@@ -401,21 +391,19 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
 
-                final DiscoveryClient discoveryClient  = result.result();
+                final DiscoveryClient discoveryClient = result.result();
                 discoveryClient.findNode(SERVICE_REST_GET, node -> {
-                    assertTrue("did not find node",node.succeeded());
-                    System.out.println(" found node : "+node.getServiceNode());
-                    System.out.println(" found URI : "+node.getServiceNode().getUri().toString());
+                    assertTrue("did not find node", node.succeeded());
+                    System.out.println(" found node : " + node.getServiceNode());
+                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
                     HttpClientOptions options = new HttpClientOptions();
                     HttpClient client = vertx.
                             createHttpClient(options);
 
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointTwo/123", resp -> {
+                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointTwo/123", resp -> {
                         resp.bodyHandler(body -> {
                             System.out.println("Got.. a response: " + body.toString());
                             assertEquals(body.toString(), "123");
@@ -456,21 +444,19 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
 
-                final DiscoveryClient discoveryClient  = result.result();
+                final DiscoveryClient discoveryClient = result.result();
                 discoveryClient.findNode(SERVICE_REST_GET, node -> {
-                    assertTrue("did not find node",node.succeeded());
-                    System.out.println(" found node : "+node.getServiceNode());
-                    System.out.println(" found URI : "+node.getServiceNode().getUri().toString());
+                    assertTrue("did not find node", node.succeeded());
+                    System.out.println(" found node : " + node.getServiceNode());
+                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
                     HttpClientOptions options = new HttpClientOptions();
                     HttpClient client = vertx.
                             createHttpClient(options);
 
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointThree/123", resp -> {
+                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointThree/123", resp -> {
                         resp.bodyHandler(body -> {
                             System.out.println("Got.. a response: " + body.toString());
                             assertEquals(body.toString(), "WsServiceTwo:123");
@@ -511,17 +497,16 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
                 final DiscoveryClient client = result.result();
-                client.find("/myService").onSuccess(val->{
-                    System.out.println(" found node : "+val.getServiceNode());
-                    System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+                client.find("/myService").onSuccess(val -> {
+                    System.out.println(" found node : " + val.getServiceNode());
+                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
                     testComplete();
 
-                }).onFailure(node->{}).retry(2).execute();
+                }).onFailure(node -> {
+                }).retry(2).execute();
 
             } else {
                 assertTrue("connection failed", true);
@@ -553,18 +538,16 @@ public class BasicEtcRegTest extends VertxTestBase {
                 nodeName("instance");
 
 
-
-
         reg.connect(result -> {
             if (result.succeeded()) {
                 final DiscoveryClient client = result.result();
-                client.find("/myServicexsd").onSuccess(val->{
-                    System.out.println(" found node : "+val.getServiceNode());
-                    System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
+                client.find("/myServicexsd").onSuccess(val -> {
+                    System.out.println(" found node : " + val.getServiceNode());
+                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
                     testComplete();
 
-                }).onFailure(node->{
-                    System.out.println("error: "+node.getThrowable().getMessage());
+                }).onFailure(node -> {
+                    System.out.println("error: " + node.getThrowable().getMessage());
                     testComplete();
 
                 }).retry(2).execute();
@@ -584,37 +567,40 @@ public class BasicEtcRegTest extends VertxTestBase {
     public void findServiceWithDiscoveryClient() throws InterruptedException {
         DiscoveryClientBuilder builder = new DiscoveryClientBuilder();
         WsServiceOne service = new WsServiceOne();
-        service.init(vertx,vertx.getOrCreateContext());
+        service.init(vertx, vertx.getOrCreateContext());
         final DiscoveryClientEtcd client = builder.getClient(service);
-        if(client.isConnected()) {
-            client.find("/wsService").onSuccess(val->{
-                System.out.println(" found node : "+val.getServiceNode());
-                System.out.println(" found URI : "+val.getServiceNode().getUri().toString());
-                testComplete();
+        client.isConnected(future -> {
+            if (future.succeeded()) {
+                client.find("/wsService").onSuccess(val -> {
+                    System.out.println(" found node : " + val.getServiceNode());
+                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
+                    testComplete();
 
-            }).onError(error->{
-                System.out.println("error: "+error.getThrowable().getMessage());
-            }).onFailure(node->{
-                System.out.println("not found");
-                testComplete();
-            }).retry(2).execute();
+                }).onError(error -> {
+                    System.out.println("error: " + error.getThrowable().getMessage());
+                }).onFailure(node -> {
+                    System.out.println("not found");
+                    testComplete();
+                }).retry(2).execute();
 
-            System.out.println("await");
-            //  reg.disconnect(Future.factory.future());
-            await();
-        }
+                System.out.println("await");
+                //  reg.disconnect(Future.factory.future());
+                await();
+            }
+        });
+
 
     }
 
     @Test
     public void testContext() {
-        System.out.println("Current: "+Thread.currentThread());
+        System.out.println("Current: " + Thread.currentThread());
         vertx.executeBlocking(handler -> {
-            System.out.println("Current in executeBlocking: "+Thread.currentThread());
+            System.out.println("Current in executeBlocking: " + Thread.currentThread());
             vertx.getOrCreateContext().runOnContext(hanlder -> {
-                System.out.println("Current in runOnContext: "+Thread.currentThread());
+                System.out.println("Current in runOnContext: " + Thread.currentThread());
             });
-        },result-> {
+        }, result -> {
 
         });
     }
@@ -628,11 +614,10 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
 
-
     private org.jacpfx.vertx.registry.Node findNode(org.jacpfx.vertx.registry.Node node, String value) {
         System.out.println("find: " + node.getKey() + "  value:" + value);
         if (node.getKey() != null && node.getKey().equals(value)) return node;
-        if (node.isDir() && node.getNodes()!=null) return node.getNodes().stream().filter(n1 -> {
+        if (node.isDir() && node.getNodes() != null) return node.getNodes().stream().filter(n1 -> {
             org.jacpfx.vertx.registry.Node n2 = n1.isDir() ? findNode(n1, value) : n1;
             return n2.getKey().equals(value);
         }).findFirst().orElse(new org.jacpfx.vertx.registry.Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
@@ -645,33 +630,35 @@ public class BasicEtcRegTest extends VertxTestBase {
                 createHttpClient(new HttpClientOptions());
     }
 
-    @org.jacpfx.vertx.etcd.client.EtcdClient(domain = "testdomain")  // this annotation does nothing on an AbstractVerticle but is needed vor client init test
+    @org.jacpfx.vertx.etcd.client.EtcdClient(domain = "testdomain")
+    // this annotation does nothing on an AbstractVerticle but is needed vor client init test
     @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
     public class WsServiceOne extends AbstractVerticle {
-         DiscoveryClient client;
+        DiscoveryClient client;
+
         public void start(Future<Void> startFuture) throws Exception {
 
             Router router = Router.router(vertx);
             // define some REST API
 
-            router.get(SERVICE_REST_GET+"/endpointOne").handler(handler -> {
+            router.get(SERVICE_REST_GET + "/endpointOne").handler(handler -> {
                 handler.request().response().end("test");
             });
 
-            router.get(SERVICE_REST_GET+"/endpointTwo/:help").handler(handler -> {
+            router.get(SERVICE_REST_GET + "/endpointTwo/:help").handler(handler -> {
                 String productType = handler.request().getParam("help");
                 handler.request().response().end(productType);
             });
 
-            router.get(SERVICE_REST_GET+"/endpointThree/:help").handler(handler -> {
+            router.get(SERVICE_REST_GET + "/endpointThree/:help").handler(handler -> {
 
                 client.findNode(SERVICE2_REST_GET, node -> {
-                    if(node.succeeded()) {
+                    if (node.succeeded()) {
                         HttpClientOptions options = new HttpClientOptions();
                         HttpClient client = vertx.
                                 createHttpClient(options);
 
-                        HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString()+"/endpointTwo/"+handler.request().getParam("help"), resp -> {
+                        HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointTwo/" + handler.request().getParam("help"), resp -> {
                             resp.bodyHandler(body -> {
                                 System.out.println("Got a response: " + body.toString());
                                 handler.request().response().end(new String(body.getBytes()));
@@ -679,13 +666,13 @@ public class BasicEtcRegTest extends VertxTestBase {
 
                         });
                         request.end();
-                    }else {
+                    } else {
                         String productType = handler.request().getParam("help");
                         handler.request().response().end(productType);
                     }
                 });
             });
-            vertx.createHttpServer().requestHandler(router::accept).listen(PORT,HOST);
+            vertx.createHttpServer().requestHandler(router::accept).listen(PORT, HOST);
             postConstruct(startFuture);
         }
 
@@ -706,12 +693,13 @@ public class BasicEtcRegTest extends VertxTestBase {
                     nodeName(this.toString());
             reg.connect(result -> {
                 client = result.result();
-                if(!startFuture.isComplete())startFuture.complete();
+                if (!startFuture.isComplete()) startFuture.complete();
             });
         }
 
 
     }
+
     public class WsServiceTwo extends AbstractVerticle {
 
         public void start(Future<Void> startFuture) throws Exception {
@@ -719,15 +707,15 @@ public class BasicEtcRegTest extends VertxTestBase {
             Router router = Router.router(vertx);
             // define some REST API
 
-            router.get(SERVICE2_REST_GET+"/endpointOne").handler(handler -> {
+            router.get(SERVICE2_REST_GET + "/endpointOne").handler(handler -> {
                 handler.request().response().end("test");
             });
 
-            router.get(SERVICE2_REST_GET+"/endpointTwo/:help").handler(handler -> {
-                String productType = "WsServiceTwo:"+handler.request().getParam("help");
+            router.get(SERVICE2_REST_GET + "/endpointTwo/:help").handler(handler -> {
+                String productType = "WsServiceTwo:" + handler.request().getParam("help");
                 handler.request().response().end(productType);
             });
-            vertx.createHttpServer().requestHandler(router::accept).listen(PORT2,HOST);
+            vertx.createHttpServer().requestHandler(router::accept).listen(PORT2, HOST);
             postConstruct(startFuture);
         }
 
@@ -747,12 +735,9 @@ public class BasicEtcRegTest extends VertxTestBase {
                     secure(false).
                     nodeName(this.toString());
             reg.connect(result -> {
-                if(!startFuture.isComplete())startFuture.complete();
+                if (!startFuture.isComplete()) startFuture.complete();
             });
         }
-
-
-
 
 
     }

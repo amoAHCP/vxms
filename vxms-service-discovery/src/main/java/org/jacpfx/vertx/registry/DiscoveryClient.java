@@ -1,6 +1,7 @@
 package org.jacpfx.vertx.registry;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
@@ -59,9 +60,9 @@ public interface DiscoveryClient {
     }
 
     /**
-     * check if client is connected to discovery server
+     * check if client is connected to discovery server, accepts consumer and should not block the thread
      *
-     * @return true if it is connected
+     * @param  connected, provide Lambda expression to check if connection was successful
      */
-    boolean isConnected();
+    void isConnected(Consumer<Future<?>> connected);
 }

@@ -1,5 +1,6 @@
 package org.jacpfx.vertx.etcd.client;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
@@ -121,22 +122,13 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
 
 
     @Override
-    public boolean isConnected() {
-        // TODO handle this by using non blocking API and get rid of CompletableFuture
+    public void isConnected(Consumer<Future<?>> connected) {
         try {
-            CompletableFuture<Boolean> statusConnected = new CompletableFuture<>();
-            try {
-                vertx.createHttpClient(getOptions()).get(fetchAll.toString()).
-                        exceptionHandler(ex -> statusConnected.complete(false)).
-                        handler(handler -> statusConnected.complete(true)).end();
-            } catch (Exception s) {
-                s.printStackTrace();
-                statusConnected.complete(false);
-            }
-
-            return statusConnected.get();
-        } catch (Exception e) {
-            return false;
+            vertx.createHttpClient(getOptions()).get(fetchAll.toString()).
+                    exceptionHandler(ex -> connected.accept(Future.failedFuture(ex))).
+                    handler(handler -> connected.accept(Future.succeededFuture(true))).end();
+        } catch (Exception s) {
+            connected.accept(Future.failedFuture(s));
         }
 
     }

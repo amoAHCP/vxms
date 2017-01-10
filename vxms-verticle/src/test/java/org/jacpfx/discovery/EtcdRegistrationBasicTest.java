@@ -103,40 +103,46 @@ public class EtcdRegistrationBasicTest extends VertxTestBase
         final DiscoveryClient client = DiscoveryClient.createClient(vertx,new HttpClientOptions(),
                 new JsonObject().put("etcd-host","127.0.0.1").put("etcd-port","4001").put("etcd-domain","etcdAwareTest"));
 
-        if (client.isConnected()) {
-            client.find(SERVICE_REST_GET).onSuccess(val -> {
-                HttpClientOptions options = new HttpClientOptions();
-                HttpClient httpclient = vertx.
-                        createHttpClient(options);
+        client.isConnected(future -> {
+            if(future.succeeded()) {
+                vertx.executeBlocking(blocking -> {
 
-                HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/", resp -> {
-                    if(resp.statusCode()==200) {
-                        resp.bodyHandler(body -> {
+                client.find(SERVICE_REST_GET).onSuccess(val -> {
+                    HttpClientOptions options = new HttpClientOptions();
+                    HttpClient httpclient = vertx.
+                            createHttpClient(options);
 
-                            System.out.println("Got a createResponse: " + body.toString());
-                            assertTrue("test-123".equals(body.toString()));
+                    HttpClientRequest request = httpclient.getAbs(val.getServiceNode().getUri().toString() + "/simpleRESTEndpoint/", resp -> {
+                        if(resp.statusCode()==200) {
+                            resp.bodyHandler(body -> {
+
+                                System.out.println("Got a createResponse: " + body.toString());
+                                assertTrue("test-123".equals(body.toString()));
+                                testComplete();
+                            });
+                        } else {
                             testComplete();
-                        });
-                    } else {
-                        testComplete();
-                    }
-                });
+                        }
+                    });
 
-                request.end();
+                    request.end();
 
-            }).onError(error -> {
-                System.out.println("error: " + error.getThrowable().getMessage());
-            }).onFailure(node -> {
-                System.out.println("not found");
+                }).onError(error -> {
+                    System.out.println("error: " + error.getThrowable().getMessage());
+                }).onFailure(node -> {
+                    System.out.println("not found");
+                    testComplete();
+                }).retry(2).execute();
+
+
+                //  reg.disconnect(Future.factory.future());
+                await();
+                }, result -> {});
+            } else {
                 testComplete();
-            }).retry(2).execute();
+            }
+        });
 
-
-            //  reg.disconnect(Future.factory.future());
-            await();
-        } else {
-            testComplete();
-        }
 
     }
 

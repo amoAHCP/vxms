@@ -35,7 +35,7 @@ public class RESTServiceByteExceptionFallbackTest extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "127.0.0.1";
-    public static final int PORT = 9998;
+    public static final int PORT = 9977;
 
     protected int getNumNodes() {
         return 1;
@@ -73,6 +73,7 @@ public class RESTServiceByteExceptionFallbackTest extends VertxTestBase {
         getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
+            System.out.println("start service: " + asyncResult.cause());
             assertTrue(asyncResult.succeeded());
             assertNotNull("deploymentID should not be null", asyncResult.result());
             // If deployed correctly then start the tests!
