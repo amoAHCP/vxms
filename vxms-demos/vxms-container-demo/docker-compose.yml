@@ -1,0 +1,21 @@
+mongodb:
+  image: mongo
+  ports:
+    - "27017:27017"
+read:
+  image: gcr.io/kubernetestests/read-verticle-dns:vertxPlugin16
+  hostname: read
+  links:
+  - mongodb:mongodb
+write:
+  image: gcr.io/kubernetestests/write-verticle-dns:vertxPlugin16
+  hostname: write
+  links:
+  - mongodb:mongodb
+frontend-verticle:
+  image: gcr.io/kubernetestests/frontend-verticle-dns:vertxPlugin16
+  hostname: frontend-verticle
+  links:
+  - mongodb:mongodb
+  ports:
+   - "8181:8181"
