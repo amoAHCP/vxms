@@ -41,6 +41,12 @@ public class ConfigurationUtil {
     }
 
 
+    /**
+     * Returns the service name defined in {@link ServiceEndpoint} annotation or passed by configuration
+     * @param config, the configuration object
+     * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
+     * @return
+     */
     public static String getServiceName(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             final org.jacpfx.common.ServiceEndpoint name = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
@@ -66,6 +72,7 @@ public class ConfigurationUtil {
         return getStringConfiguration(config, "host", getHostName());
     }
 
+
     public static String getContextRoot(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             final org.jacpfx.common.ServiceEndpoint endpoint = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
@@ -78,7 +85,7 @@ public class ConfigurationUtil {
      * Returns the Method id's Postfix. This Id is used for the stateful circuit breaker as key in a shared map. The consequence is: If value is "unique" you get a random UUID, so for each method an unique shared state will be maintained.
      * If value is "local" the process PID will be returned, so all instances in one JVM will share on lock. In case of global, the postfix ist an empty String, so all instances (the same method signature) in the cluster will share this lock.
      * @param config
-     * @return
+     * @return the correct POSTFIX for method id's
      */
     public static String getCircuitBreakerIDPostfix(final JsonObject config) {
         final String configValue = getStringConfiguration(config, "circuit-breaker-scope", "unique");
@@ -115,7 +122,7 @@ public class ConfigurationUtil {
     /**
      * Returns the endpoint configuration object, defined in ServerEndoint annotation. If no definition is present a DefaultServerOptions instance will be created.
      * @param clazz
-     * @return @link{CustomServerOptions} the Endpoint configuration
+     * @return {@link CustomServerOptions} the Endpoint configuration
      */
     public static CustomServerOptions getEndpointOptions(Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
