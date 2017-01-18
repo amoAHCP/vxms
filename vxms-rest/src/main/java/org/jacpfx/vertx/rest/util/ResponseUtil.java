@@ -25,6 +25,9 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 21.07.16.
  */
 public class ResponseUtil {
+
+    public static final long DEFAULT_TIMEOUT = 0L;
+
     public static <T> void createResponse(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation,
                                           Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                           Consumer<Throwable> errorMethodHandler, Vertx vertx, Throwable t, Consumer<ExecutionResult<T>> resultConsumer) {
@@ -47,7 +50,7 @@ public class ResponseUtil {
                 resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
             }
         });
-        if (_timeout > 0L) {
+        if (_timeout > DEFAULT_TIMEOUT) {
             addTimeoutHandler(_timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));
@@ -115,7 +118,7 @@ public class ResponseUtil {
 
     private static <T> void executeDefaultState(long _timeout, ThrowableFutureConsumer<T> _userOperation, Vertx vertx, Future<T> operationResult, Lock lock) {
         lock.release();
-        if (_timeout > 0L) {
+        if (_timeout > DEFAULT_TIMEOUT) {
             addTimeoutHandler(_timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));

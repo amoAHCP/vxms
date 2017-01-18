@@ -69,7 +69,7 @@ public class RESTJerseyClientStatefulCircuitBrakerTests extends VertxTestBase {
 
         CountDownLatch latch2 = new CountDownLatch(1);
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
-        options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
+        options.setConfig(new JsonObject().put("clustered", false).put("host", HOST).put("circuit-breaker-scope","local"));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
         // don't have to hardecode it in your tests
 

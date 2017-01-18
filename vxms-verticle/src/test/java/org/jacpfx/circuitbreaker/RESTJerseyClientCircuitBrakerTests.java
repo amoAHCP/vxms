@@ -92,6 +92,7 @@ public class RESTJerseyClientCircuitBrakerTests extends VertxTestBase {
 
     @Test
     @Ignore
+    // TODO implement basic test for String, Byte and Object...
     public void stringGETResponseCircuitBaseTest() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Client client = ClientBuilder.newClient();
