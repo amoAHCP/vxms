@@ -29,6 +29,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
+    // TODO create OnFailureRespond Class to set httpError code like basic operations can do
     public ExecuteRSString onFailureRespond(ThrowableFunction<Throwable, String> onFailureRespond) {
         return new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
     }

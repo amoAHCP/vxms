@@ -29,6 +29,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
+    // TODO create OnFailureRespond Class to set httpError code like basic operations can do
     public ExecuteRSByte onFailureRespond(ThrowableFunction<Throwable, byte[]> onFailureRespond) {
         return new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);

@@ -26,11 +26,19 @@ import java.util.function.Consumer;
  */
 public class EventbusObjectExecutionUtil {
 
-    public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId, String _id, Object _message, DeliveryOptions _options,
-                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction, Vertx _vertx, Throwable _t,
-                                                                   Consumer<Throwable> _errorMethodHandler, RoutingContext _context, Map<String, String> _headers,
-                                                                   ThrowableFutureConsumer<Serializable> _objectConsumer, Encoder _encoder, Consumer<Throwable> _errorHandler,
-                                                                   ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond, int _httpStatusCode, int _httpErrorCode,int _retryCount, long _timeout, long _circuitBreakerTimeout) {
+    public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,
+                                                                   String _id,
+                                                                   Object _message,
+                                                                   DeliveryOptions _options,
+                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
+                                                                   Vertx _vertx, Throwable _t,
+                                                                   Consumer<Throwable> _errorMethodHandler,
+                                                                   RoutingContext _context, Map<String, String> _headers,
+                                                                   ThrowableFutureConsumer<Serializable> _objectConsumer,
+                                                                   Encoder _encoder, Consumer<Throwable> _errorHandler,
+                                                                   ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond,
+                                                                   int _httpStatusCode, int _httpErrorCode, int _retryCount,
+                                                                   long _timeout, long _circuitBreakerTimeout) {
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_options).orElse(new DeliveryOptions());
         final ExecuteEventBusObjectCall excecuteEventBusAndReply = (vertx, t, errorMethodHandler,
                                                                     context, headers,
@@ -39,7 +47,7 @@ public class EventbusObjectExecutionUtil {
                 sendMessageAndSupplyObjectHandler(_methodId, _id, _message, _objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
 
 
-        return new ExecuteRSBasicObjectResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode,_retryCount, _timeout, _circuitBreakerTimeout);
+        return new ExecuteRSBasicObjectResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _circuitBreakerTimeout);
     }
 
     private static void sendMessageAndSupplyObjectHandler(String methodId, String id, Object message, ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
@@ -70,7 +78,7 @@ public class EventbusObjectExecutionUtil {
                                 errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, lock, counter);
                     } else if (currentVal > 0) {
                         executeDefaultState(methodId, id, message, objectFunction, deliveryOptions, vertx, t, errorMethodHandler, context, headers, encoder,
-                                errorHandler, onFailureRespond, httpStatusCode,httpErrorCode,  retryCount, timeout, circuitBreakerTimeout, lock);
+                                errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, lock);
                     } else {
                         executeErrorState(methodId, vertx, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, lock);
                     }
@@ -98,7 +106,7 @@ public class EventbusObjectExecutionUtil {
                                 createObjectSupplierAndExecute(methodId, id, message, objectFunction,
                                         deliveryOptions, vertx, t, errorMethodHandler,
                                         context, headers, encoder,
-                                        errorHandler, onFailureRespond, httpStatusCode,httpErrorCode,
+                                        errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,
                                         retryCount, timeout, circuitBreakerTimeout, event));
     }
 
@@ -144,7 +152,7 @@ public class EventbusObjectExecutionUtil {
                                           Vertx vertx, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
                                           ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<Serializable> objectSupplier) {
         if (event.succeeded()) {
-            new ExecuteRSBasicObjectResponse(methodId, vertx,  event.cause(), errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode,  retryCount, timeout, circuitBreakerTimeout).execute();
+            new ExecuteRSBasicObjectResponse(methodId, vertx, event.cause(), errorMethodHandler, context, headers, objectSupplier, null, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout).execute();
         } else {
             statefulErrorHandling(methodId, id, message, objectFunction, deliveryOptions,
                     vertx, errorMethodHandler, context, headers, encoder, errorHandler,
@@ -168,12 +176,12 @@ public class EventbusObjectExecutionUtil {
                             lock.release();
                             retryObjectOperation(methodId, id, message, objectFunction, options, vertx,
                                     event.cause(), errorMethodHandler, context, headers, encoder, errorHandler,
-                                    onFailureRespond, httpStatusCode,httpErrorCode,  retryCount, timeout, circuitBreakerTimeout);
+                                    onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
                         }
                     } else {
                         final Throwable cause = valHandler.cause();
                         handleError(methodId, vertx, errorMethodHandler, context, headers, encoder,
-                                errorHandler, onFailureRespond, httpStatusCode,httpErrorCode,  retryCount, timeout,
+                                errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout,
                                 circuitBreakerTimeout, lock, cause);
                     }
                 }), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);

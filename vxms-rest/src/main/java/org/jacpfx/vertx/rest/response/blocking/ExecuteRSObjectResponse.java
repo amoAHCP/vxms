@@ -30,6 +30,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
+    // TODO create OnFailureRespond Class to set httpError code like basic operations can do
     public ExecuteRSObject onFailureRespond(ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {
         return new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }

@@ -17,9 +17,19 @@ import java.util.function.Consumer;
 public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
 
-    public ExecuteRSBasicStringResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-                                        ThrowableFutureConsumer<String> stringConsumer, ExecuteEventBusStringCall excecuteEventBusAndReply, Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-                                        int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+    public ExecuteRSBasicStringResponse(String methodId,
+                                        Vertx vertx,
+                                        Throwable t,
+                                        Consumer<Throwable> errorMethodHandler,
+                                        RoutingContext context,
+                                        Map<String, String> headers,
+                                        ThrowableFutureConsumer<String> stringConsumer,
+                                        ExecuteEventBusStringCall excecuteEventBusAndReply,
+                                        Encoder encoder,
+                                        Consumer<Throwable> errorHandler,
+                                        ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+                                        int httpStatusCode, int httpErrorCode,
+                                        int retryCount, long timeout, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -51,8 +61,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
      * @return the response chain
      */
     public ExecuteRSBasicStringCircuitBreaker retry(int retryCount) {
-        return new ExecuteRSBasicStringCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond,
-                httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteRSBasicStringCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, stringConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
     /**

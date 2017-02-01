@@ -82,7 +82,6 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     public void execute() {
         Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {
-                // TODO update executeEventBusAndReply !!
                 evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
             } catch (Exception e) {
                 e.printStackTrace();
