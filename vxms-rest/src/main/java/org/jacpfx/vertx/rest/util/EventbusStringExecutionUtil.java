@@ -27,7 +27,19 @@ public class EventbusStringExecutionUtil {
 
 
     public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId,
-                                                                   String _id,
+                                                                   String _targetId,
+                                                                   Object _message,
+                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
+                                                                   DeliveryOptions _options,
+                                                                   Vertx _vertx, Throwable _t,
+                                                                   Consumer<Throwable> _errorMethodHandler,
+                                                                   RoutingContext _context) {
+        return mapToStringResponse(_methodId, _targetId, _message, _stringFunction, _options, _vertx, _t, _errorMethodHandler, _context,null,null,null,null,null,0,0,0,0,0);
+    }
+
+
+    public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId,
+                                                                   String _targetId,
                                                                    Object _message,
                                                                    ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
                                                                    DeliveryOptions _options,
@@ -58,24 +70,26 @@ public class EventbusStringExecutionUtil {
                                      onFailureRespond,
                                      httpStatusCode,
                                      httpErrorCode, retryCount,
-                                     timeout, circuitBreakerTimeout) ->
-                mapToStringResponse(methodId,
-                        id, message,
-                        stringFunction,
-                        deliveryOptions,
-                        vertx, t,
-                        errorMethodHandler,
-                        context, headers,
-                        null,
-                        encoder,
-                        errorHandler,
-                        onFailureRespond,
-                        httpStatusCode,
-                        httpErrorCode,
-                        retryCount - 1,
-                        timeout,
-                        circuitBreakerTimeout).
-                        execute();
+                                     timeout, circuitBreakerTimeout) -> {
+            final int decrementedCount = retryCount - 1;
+            mapToStringResponse(methodId,
+                    id, message,
+                    stringFunction,
+                    deliveryOptions,
+                    vertx, t,
+                    errorMethodHandler,
+                    context, headers,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    httpStatusCode,
+                    httpErrorCode,
+                    decrementedCount,
+                    timeout,
+                    circuitBreakerTimeout).
+                    execute();
+        };
         final RecursiveExecutor executor = (methodId,
                                             vertx,
                                             t,
@@ -111,7 +125,7 @@ public class EventbusStringExecutionUtil {
                                                                     httpStatusCode, httpErrorCode,
                                                                     retryCount, timeout, circuitBreakerTimeout) ->
                 EventbusExecutionUtil.sendMessageAndSupplyStringHandler(_methodId,
-                        _id,
+                        _targetId,
                         _message,
                         _stringFunction,
                         _deliveryOptions,
