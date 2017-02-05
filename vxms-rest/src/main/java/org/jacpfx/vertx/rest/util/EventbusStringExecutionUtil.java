@@ -64,7 +64,6 @@ public class EventbusStringExecutionUtil {
                                      errorMethodHandler,
                                      context,
                                      headers,
-                                     consumer,
                                      encoder,
                                      errorHandler,
                                      onFailureRespond,

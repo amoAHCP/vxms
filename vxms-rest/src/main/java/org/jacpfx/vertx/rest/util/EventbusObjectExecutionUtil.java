@@ -55,7 +55,6 @@ public class EventbusObjectExecutionUtil {
                                      errorMethodHandler,
                                      context,
                                      headers,
-                                     consumer,
                                      encoder,
                                      errorHandler,
                                      onFailureRespond,

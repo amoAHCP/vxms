@@ -62,7 +62,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, options, vertx, t, errorMethodHandler, context, null, null, null, null, null, 0, 0, 0, 0l, 0l);
+        return EventbusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, options, vertx, t, errorMethodHandler, context);
     }
 
     /**

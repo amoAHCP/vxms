@@ -17,9 +17,16 @@ import java.util.function.Consumer;
 public class ExecuteRSByteResponse extends ExecuteRSByte {
 
 
-    public ExecuteRSByteResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
-                                 Map<String, String> headers, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply,
-                                 Encoder encoder, Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+    public ExecuteRSByteResponse(String methodId,
+                                 Vertx vertx,
+                                 Throwable t,
+                                 Consumer<Throwable> errorMethodHandler,
+                                 RoutingContext context,
+                                 Map<String, String> headers,
+                                 ThrowableSupplier<byte[]> byteSupplier,
+                                 ExecuteEventBusByteCallAsync excecuteAsyncEventBusAndReply,
+                                 Encoder encoder, Consumer<Throwable> errorHandler,
+                                 ThrowableFunction<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 

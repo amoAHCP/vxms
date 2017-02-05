@@ -14,7 +14,15 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface ExecuteEventBusByteCallAsync {
 
-    void execute(Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
-                 Map<String, String> headers, Encoder encoder, Consumer<Throwable> errorHandler,
-                 ThrowableFunction<Throwable, byte[]> errorHandlerByte, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout);
+    void execute(Vertx vertx,
+                 Throwable t,
+                 Consumer<Throwable> errorMethodHandler,
+                 RoutingContext context,
+                 Map<String, String> headers,
+                 Encoder encoder,
+                 Consumer<Throwable> errorHandler,
+                 ThrowableFunction<Throwable, byte[]> errorHandlerByte,
+                 int httpStatusCode, int httpErrorCode,
+                 int retryCount, long timeout,
+                 long delay, long circuitBreakerTimeout);
 }

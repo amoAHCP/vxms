@@ -29,6 +29,17 @@ public class EventbusByteExecutionUtil {
     public static ExecuteRSBasicByteResponse mapToByteResponse(String _methodId,
                                                                String _targetId,
                                                                Object _message,
+                                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> _byteConsumer,
+                                                               DeliveryOptions _options,
+                                                               Vertx _vertx, Throwable _t,
+                                                               Consumer<Throwable> _errorMethodHandler,
+                                                               RoutingContext _context) {
+        return mapToByteResponse(_methodId, _targetId, _message, _byteConsumer, _options, _vertx, _t, _errorMethodHandler, _context,null,null,null,null,null,0,0,0,0,0);
+    }
+
+    public static ExecuteRSBasicByteResponse mapToByteResponse(String _methodId,
+                                                               String _targetId,
+                                                               Object _message,
                                                                ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> _byteFunction,
                                                                DeliveryOptions _options,
                                                                Vertx _vertx, Throwable _t,
@@ -54,7 +65,6 @@ public class EventbusByteExecutionUtil {
                                      errorMethodHandler,
                                      context,
                                      headers,
-                                     consumer,
                                      encoder,
                                      errorHandler,
                                      onFailureRespond,
