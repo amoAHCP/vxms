@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.util;
+package org.jacpfx.vertx.rest.response.basic;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 21.07.16.
  */
-public class ResponseUtil {
+public class ResponseExecution {
 
     public static final long DEFAULT_TIMEOUT = 0L;
 
@@ -200,12 +200,12 @@ public class ResponseUtil {
 
     private static <T> void retry(String _methodId, int retryTemp, long _timeout, long _release, ThrowableFutureConsumer<T> _userOperation, Consumer<Throwable> errorHandler,
                                   ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event) {
-        ResponseUtil.handleError(errorHandler, event.cause());
+        ResponseExecution.handleError(errorHandler, event.cause());
         createResponse(_methodId, retryTemp, _timeout, _release, _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, null, resultConsumer);
     }
 
     private static <T> void handleExecutionError(Future<T> errorResult, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Throwable e) {
-        ResponseUtil.handleError(errorHandler, e);
+        ResponseExecution.handleError(errorHandler, e);
         try {
             if (onFailureRespond != null) {
                 onFailureRespond.accept(e, errorResult);

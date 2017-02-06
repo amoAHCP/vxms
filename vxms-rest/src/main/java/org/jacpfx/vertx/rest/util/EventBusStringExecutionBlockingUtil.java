@@ -1,18 +1,16 @@
 package org.jacpfx.vertx.rest.util;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.shareddata.Counter;
-import io.vertx.core.shareddata.Lock;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.*;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
-import org.jacpfx.vertx.rest.response.blocking.ExecuteRSObjectResponse;
+import org.jacpfx.vertx.rest.eventbus.blocking.EventBusBlockingExecution;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusStringCallBlocking;
+import org.jacpfx.vertx.rest.interfaces.blocking.RecursiveBlockingExecutor;
+import org.jacpfx.vertx.rest.interfaces.blocking.RetryBlockingExecutor;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSStringResponse;
 
 import java.util.Map;
@@ -22,7 +20,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 05.04.16.
  */
-public class EventbusAsyncStringExecutionUtil {
+public class EventBusStringExecutionBlockingUtil {
 
 
     public static ExecuteRSStringResponse mapToStringResponse(String _methodId,
@@ -105,15 +103,15 @@ public class EventbusAsyncStringExecutionUtil {
                         execute();
 
 
-        final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply = (vertx, t,
-                                                                              errorMethodHandler,
-                                                                              context, headers,
-                                                                              encoder, errorHandler,
-                                                                              onFailureRespond,
-                                                                              httpStatusCode, httpErrorCode,
-                                                                              retryCount, timeout,
-                                                                              delay, circuitBreakerTimeout) ->
-                EventbusBlockingExecutionUtil.sendMessageAndSupplyHandler(_methodId,
+        final ExecuteEventBusStringCallBlocking excecuteAsyncEventBusAndReply = (vertx, t,
+                                                                                 errorMethodHandler,
+                                                                                 context, headers,
+                                                                                 encoder, errorHandler,
+                                                                                 onFailureRespond,
+                                                                                 httpStatusCode, httpErrorCode,
+                                                                                 retryCount, timeout,
+                                                                                 delay, circuitBreakerTimeout) ->
+                EventBusBlockingExecution.sendMessageAndSupplyHandler(_methodId,
                         _targetId, _message,
                         _stringFunction,
                         _deliveryOptions,

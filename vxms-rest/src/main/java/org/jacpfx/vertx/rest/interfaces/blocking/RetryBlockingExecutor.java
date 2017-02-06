@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.util;
+package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;

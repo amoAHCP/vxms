@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.util;
+package org.jacpfx.vertx.rest.eventbus.basic;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -10,9 +10,13 @@ import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.*;
+import org.jacpfx.common.ThrowableErrorConsumer;
+import org.jacpfx.common.ThrowableFutureBiConsumer;
+import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
+import org.jacpfx.vertx.rest.interfaces.basic.RecursiveExecutor;
+import org.jacpfx.vertx.rest.interfaces.basic.RetryExecutor;
+import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,32 +25,30 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 05.04.16.
  */
-public class EventbusBlockingExecutionUtil {
+public class EventBusExecution {
 
 
     public static final long LOCK_VALUE = -1l;
     public static final int DEFAULT_LOCK_TIMEOUT = 2000;
     public static final long NO_TIMEOUT = 0l;
 
-    public static <T> void sendMessageAndSupplyHandler(String methodId,
-                                                       String id, Object message,
-                                                       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
-                                                       DeliveryOptions deliveryOptions,
-                                                       Vertx vertx, Throwable t,
-                                                       Consumer<Throwable> errorMethodHandler,
-                                                       RoutingContext context, Map<String, String> headers,
-                                                       Encoder encoder,
-                                                       Consumer<Throwable> errorHandler,
-                                                       ThrowableFunction<Throwable, T> onFailureRespond,
-                                                       int httpStatusCode, int httpErrorCode,
-                                                       int retryCount, long timeout, long delay,
-                                                       long circuitBreakerTimeout,
-                                                       RecursiveBlockingExecutor executor,
-                                                       RetryBlockingExecutor retry) {
+    public static <T> void sendMessageAndSupplyStringHandler(String methodId,
+                                                             String id, Object message,
+                                                             ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
+                                                             DeliveryOptions deliveryOptions,
+                                                             Vertx vertx, Throwable t,
+                                                             Consumer<Throwable> errorMethodHandler,
+                                                             RoutingContext context, Map<String, String> headers,
+                                                             Encoder encoder, Consumer<Throwable> errorHandler,
+                                                             ThrowableErrorConsumer<Throwable, T> onFailureRespond,
+                                                             int httpStatusCode, int httpErrorCode,
+                                                             int retryCount, long timeout,
+                                                             long circuitBreakerTimeout,
+                                                             RecursiveExecutor executor, RetryExecutor retry) {
         if (circuitBreakerTimeout == 0l) {
             executeDefaultState(methodId,
                     id, message,
-                    function,
+                    stringFunction,
                     deliveryOptions,
                     vertx, t,
                     errorMethodHandler,
@@ -56,12 +58,12 @@ public class EventbusBlockingExecutionUtil {
                     httpStatusCode,
                     httpErrorCode,
                     retryCount, timeout,
-                    delay, circuitBreakerTimeout,
+                    circuitBreakerTimeout,
                     executor, retry, null);
         } else {
             executeStateful(methodId,
                     id, message,
-                    function,
+                    stringFunction,
                     deliveryOptions,
                     vertx, t,
                     errorMethodHandler,
@@ -74,26 +76,27 @@ public class EventbusBlockingExecutionUtil {
                     httpErrorCode,
                     retryCount,
                     timeout,
-                    delay, circuitBreakerTimeout,
+                    circuitBreakerTimeout,
                     executor, retry);
         }
     }
 
     private static <T> void executeStateful(String methodId,
                                             String id, Object message,
-                                            ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                            ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                                             DeliveryOptions deliveryOptions,
                                             Vertx vertx, Throwable t,
                                             Consumer<Throwable> errorMethodHandler,
-                                            RoutingContext context, Map<String, String> headers,
+                                            RoutingContext context,
+                                            Map<String, String> headers,
                                             Encoder encoder,
                                             Consumer<Throwable> errorHandler,
-                                            ThrowableFunction<Throwable, T> onFailureRespond,
+                                            ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                             int httpStatusCode, int httpErrorCode,
-                                            int retryCount, long timeout, long delay,
+                                            int retryCount, long timeout,
                                             long circuitBreakerTimeout,
-                                            RecursiveBlockingExecutor executor,
-                                            RetryBlockingExecutor retry) {
+                                            RecursiveExecutor executor,
+                                            RetryExecutor retry) {
 
         executeLocked(((lock, counter) ->
                 counter.get(counterHandler -> {
@@ -112,7 +115,6 @@ public class EventbusBlockingExecutionUtil {
                                 httpErrorCode,
                                 retryCount,
                                 timeout,
-                                delay,
                                 circuitBreakerTimeout,
                                 executor, retry, lock, counter);
                     } else if (currentVal > 0) {
@@ -129,7 +131,7 @@ public class EventbusBlockingExecutionUtil {
                                 httpErrorCode,
                                 retryCount,
                                 timeout,
-                                delay, circuitBreakerTimeout,
+                                circuitBreakerTimeout,
                                 executor, retry, lock);
                     } else {
                         executeErrorState(methodId,
@@ -144,32 +146,34 @@ public class EventbusBlockingExecutionUtil {
                                 httpErrorCode,
                                 retryCount,
                                 timeout,
-                                delay, circuitBreakerTimeout,
+                                circuitBreakerTimeout,
                                 executor, lock);
                     }
-                })), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout, executor);
+                })), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, executor);
     }
 
     private static <T> void executeInitialState(String methodId,
-                                                String id, Object message,
-                                                ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                                String id,
+                                                Object message,
+                                                ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                 DeliveryOptions deliveryOptions,
                                                 Vertx vertx, Throwable t,
                                                 Consumer<Throwable> errorMethodHandler,
-                                                RoutingContext context, Map<String, String> headers,
+                                                RoutingContext context,
+                                                Map<String, String> headers,
                                                 Encoder encoder,
                                                 Consumer<Throwable> errorHandler,
-                                                ThrowableFunction<Throwable, T> onFailureRespond,
+                                                ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                                 int httpStatusCode, int httpErrorCode,
-                                                int retryCount, long timeout, long delay,
+                                                int retryCount, long timeout,
                                                 long circuitBreakerTimeout,
-                                                RecursiveBlockingExecutor executor,
-                                                RetryBlockingExecutor retry,
+                                                RecursiveExecutor executor,
+                                                RetryExecutor retry,
                                                 Lock lock, Counter counter) {
         counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), rHandler ->
                 executeDefaultState(methodId,
                         id, message,
-                        function,
+                        stringFunction,
                         deliveryOptions,
                         vertx, t,
                         errorMethodHandler,
@@ -181,26 +185,26 @@ public class EventbusBlockingExecutionUtil {
                         httpStatusCode,
                         httpErrorCode,
                         retryCount, timeout,
-                        delay,
                         circuitBreakerTimeout,
                         executor, retry, lock));
     }
 
     private static <T> void executeDefaultState(String methodId,
                                                 String id, Object message,
-                                                ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                                ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                 DeliveryOptions deliveryOptions,
                                                 Vertx vertx, Throwable t,
                                                 Consumer<Throwable> errorMethodHandler,
-                                                RoutingContext context, Map<String, String> headers,
+                                                RoutingContext context,
+                                                Map<String, String> headers,
                                                 Encoder encoder,
                                                 Consumer<Throwable> errorHandler,
-                                                ThrowableFunction<Throwable, T> onFailureRespond,
+                                                ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                                 int httpStatusCode, int httpErrorCode,
-                                                int retryCount, long timeout, long delay,
+                                                int retryCount, long timeout,
                                                 long circuitBreakerTimeout,
-                                                RecursiveBlockingExecutor executor,
-                                                RetryBlockingExecutor retry,
+                                                RecursiveExecutor executor,
+                                                RetryExecutor retry,
                                                 Lock lock) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
         vertx.
@@ -209,7 +213,7 @@ public class EventbusBlockingExecutionUtil {
                         event ->
                                 createStringSupplierAndExecute(methodId,
                                         id, message,
-                                        function,
+                                        stringFunction,
                                         deliveryOptions,
                                         vertx, t,
                                         errorMethodHandler,
@@ -221,21 +225,22 @@ public class EventbusBlockingExecutionUtil {
                                         httpStatusCode,
                                         httpErrorCode,
                                         retryCount, timeout,
-                                        delay, circuitBreakerTimeout,
+                                        circuitBreakerTimeout,
                                         executor, retry, event));
     }
 
     private static <T> void executeErrorState(String methodId,
                                               Vertx vertx,
                                               Consumer<Throwable> errorMethodHandler,
-                                              RoutingContext context, Map<String, String> headers,
+                                              RoutingContext context,
+                                              Map<String, String> headers,
                                               Encoder encoder,
                                               Consumer<Throwable> errorHandler,
-                                              ThrowableFunction<Throwable, T> onFailureRespond,
+                                              ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                               int httpStatusCode, int httpErrorCode,
-                                              int retryCount, long timeout, long delay,
+                                              int retryCount, long timeout,
                                               long circuitBreakerTimeout,
-                                              RecursiveBlockingExecutor executor,
+                                              RecursiveExecutor executor,
                                               Lock lock) {
         final Throwable cause = Future.failedFuture("circuit open").cause();
         handleError(methodId,
@@ -246,7 +251,6 @@ public class EventbusBlockingExecutionUtil {
                 encoder,
                 errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount,
                 timeout,
-                delay,
                 circuitBreakerTimeout,
                 executor,
                 lock, cause);
@@ -254,44 +258,28 @@ public class EventbusBlockingExecutionUtil {
 
 
     private static <T> void createStringSupplierAndExecute(String methodId,
-                                                           String targetId, Object message,
-                                                           ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                                           String id, Object message,
+                                                           ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                            DeliveryOptions deliveryOptions,
                                                            Vertx vertx, Throwable t,
                                                            Consumer<Throwable> errorMethodHandler,
-                                                           RoutingContext context, Map<String, String> headers,
+                                                           RoutingContext context,
+                                                           Map<String, String> headers,
                                                            Encoder encoder,
                                                            Consumer<Throwable> errorHandler,
-                                                           ThrowableFunction<Throwable, T> onFailureRespond,
+                                                           ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                                            int httpStatusCode, int httpErrorCode,
-                                                           int retryCount, long timeout, long delay,
+                                                           int retryCount, long timeout,
                                                            long circuitBreakerTimeout,
-                                                           RecursiveBlockingExecutor executor,
-                                                           RetryBlockingExecutor retry,
+                                                           RecursiveExecutor executor,
+                                                           RetryExecutor retry,
                                                            AsyncResult<Message<Object>> event) {
-        final ThrowableSupplier<T> supplier = createSupplier(methodId,
-                targetId,
-                message,
-                function,
-                deliveryOptions,
-                vertx, t,
-                errorMethodHandler,
-                context,
-                headers,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                httpStatusCode,
-                httpErrorCode,
-                retryCount, timeout,
-                delay,
-                circuitBreakerTimeout,
-                retry, event);
+        final ThrowableFutureConsumer<T> stringSupplier = createSupplier(stringFunction, event);
         if (circuitBreakerTimeout == NO_TIMEOUT) {
             statelessExecution(methodId,
-                    targetId,
+                    id,
                     message,
-                    function,
+                    stringFunction,
                     deliveryOptions,
                     vertx, t,
                     errorMethodHandler,
@@ -301,14 +289,13 @@ public class EventbusBlockingExecutionUtil {
                     httpStatusCode,
                     httpErrorCode,
                     retryCount, timeout,
-                    delay,
                     circuitBreakerTimeout,
                     executor, retry,
-                    event, supplier);
+                    event, stringSupplier);
         } else {
             statefulExecution(methodId,
-                    targetId, message,
-                    function,
+                    id, message,
+                    stringFunction,
                     deliveryOptions,
                     vertx, t,
                     errorMethodHandler,
@@ -318,48 +305,46 @@ public class EventbusBlockingExecutionUtil {
                     httpStatusCode,
                     httpErrorCode,
                     retryCount, timeout,
-                    delay,
                     circuitBreakerTimeout,
                     executor, retry,
-                    event, supplier);
+                    event, stringSupplier);
         }
     }
 
     private static <T> void statelessExecution(String methodId,
                                                String id, Object message,
-                                               ThrowableFunction<AsyncResult<Message<Object>>, T> function,
-                                               DeliveryOptions deliveryOptions,
+                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
+                                               DeliveryOptions options,
                                                Vertx vertx, Throwable t,
                                                Consumer<Throwable> errorMethodHandler,
                                                RoutingContext context, Map<String, String> headers,
-                                               Encoder encoder,
-                                               Consumer<Throwable> errorHandler,
-                                               ThrowableFunction<Throwable, T> onFailureRespond,
+                                               Encoder encoder, Consumer<Throwable> errorHandler,
+                                               ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                                int httpStatusCode, int httpErrorCode,
-                                               int retryCount, long timeout, long delay,
-                                               long circuitBreakerTimeout,
-                                               RecursiveBlockingExecutor executor,
-                                               RetryBlockingExecutor retry,
-                                               AsyncResult<Message<Object>> event, ThrowableSupplier<T> supplier) {
+                                               int retryCount, long timeout,
+                                               long circuitBreakerTimeout, RecursiveExecutor executor,
+                                               RetryExecutor retry,
+                                               AsyncResult<Message<Object>> event, ThrowableFutureConsumer<T> stringSupplier) {
         if (event.succeeded() || (event.failed() && retryCount <= 0)) {
             executor.execute(methodId,
                     vertx, t,
                     errorMethodHandler,
                     context, headers,
-                    supplier,
+                    stringSupplier,
+                    null,
                     encoder, errorHandler,
                     onFailureRespond,
                     httpStatusCode,
                     httpErrorCode,
                     retryCount,
-                    timeout, delay, circuitBreakerTimeout);
+                    timeout, circuitBreakerTimeout);
         } else if (event.failed() && retryCount > 0) {
             // retry operation
             final Throwable cause = event.cause();
             retryOperation(methodId,
                     id, message,
-                    function,
-                    deliveryOptions, vertx,
+                    stringFunction,
+                    options, vertx,
                     cause,
                     errorMethodHandler,
                     context, headers,
@@ -369,45 +354,45 @@ public class EventbusBlockingExecutionUtil {
                     httpErrorCode,
                     retryCount,
                     timeout,
-                    delay,
                     circuitBreakerTimeout, retry);
         }
     }
 
     private static <T> void statefulExecution(String methodId,
                                               String id, Object message,
-                                              ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                              ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                               DeliveryOptions deliveryOptions,
                                               Vertx vertx, Throwable t,
                                               Consumer<Throwable> errorMethodHandler,
-                                              RoutingContext context, Map<String, String> headers,
+                                              RoutingContext context,
+                                              Map<String, String> headers,
                                               Encoder encoder,
                                               Consumer<Throwable> errorHandler,
-                                              ThrowableFunction<Throwable, T> onFailureRespond,
+                                              ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                               int httpStatusCode, int httpErrorCode,
-                                              int retryCount, long timeout, long delay,
-                                              long circuitBreakerTimeout, RecursiveBlockingExecutor executor,
-                                              RetryBlockingExecutor retry,
+                                              int retryCount, long timeout,
+                                              long circuitBreakerTimeout, RecursiveExecutor executor,
+                                              RetryExecutor retry,
                                               AsyncResult<Message<Object>> event,
-                                              ThrowableSupplier<T> supplier) {
+                                              ThrowableFutureConsumer<T> stringSupplier) {
         if (event.succeeded()) {
             executor.execute(methodId,
                     vertx, t,
                     errorMethodHandler,
                     context, headers,
-                    supplier,
-                    encoder,
-                    errorHandler,
+                    stringSupplier,
+                    null,
+                    encoder, errorHandler,
                     onFailureRespond,
                     httpStatusCode,
                     httpErrorCode,
                     retryCount,
-                    timeout, delay, circuitBreakerTimeout);
+                    timeout, circuitBreakerTimeout);
         } else {
             statefulErrorHandling(methodId,
                     id,
                     message,
-                    function,
+                    stringFunction,
                     deliveryOptions,
                     vertx,
                     errorMethodHandler,
@@ -418,29 +403,25 @@ public class EventbusBlockingExecutionUtil {
                     onFailureRespond,
                     httpStatusCode,
                     httpErrorCode, retryCount,
-                    timeout, delay,
-                    circuitBreakerTimeout,
+                    timeout, circuitBreakerTimeout,
                     executor, retry, event);
         }
     }
 
 
     private static <T> void statefulErrorHandling(String methodId,
-                                                  String id,
-                                                  Object message,
-                                                  ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                                  String id, Object message,
+                                                  ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                   DeliveryOptions deliveryOptions,
-                                                  Vertx vertx,
-                                                  Consumer<Throwable> errorMethodHandler,
+                                                  Vertx vertx, Consumer<Throwable> errorMethodHandler,
                                                   RoutingContext context, Map<String, String> headers,
-                                                  Encoder encoder,
-                                                  Consumer<Throwable> errorHandler,
-                                                  ThrowableFunction<Throwable, T> onFailureRespond,
+                                                  Encoder encoder, Consumer<Throwable> errorHandler,
+                                                  ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                                   int httpStatusCode, int httpErrorCode,
-                                                  int retryCount, long timeout, long delay,
+                                                  int retryCount, long timeout,
                                                   long circuitBreakerTimeout,
-                                                  RecursiveBlockingExecutor executor,
-                                                  RetryBlockingExecutor retry,
+                                                  RecursiveExecutor executor,
+                                                  RetryExecutor retry,
                                                   AsyncResult<Message<Object>> event) {
 
         executeLocked((lock, counter) ->
@@ -457,7 +438,6 @@ public class EventbusBlockingExecutionUtil {
                                     httpStatusCode,
                                     httpErrorCode,
                                     retryCount, timeout,
-                                    delay,
                                     circuitBreakerTimeout,
                                     executor, event,
                                     lock, counter);
@@ -466,7 +446,7 @@ public class EventbusBlockingExecutionUtil {
                             retryOperation(methodId,
                                     id,
                                     message,
-                                    function,
+                                    stringFunction,
                                     deliveryOptions,
                                     vertx,
                                     event.cause(),
@@ -476,7 +456,6 @@ public class EventbusBlockingExecutionUtil {
                                     onFailureRespond,
                                     httpStatusCode, httpErrorCode,
                                     retryCount, timeout,
-                                    delay,
                                     circuitBreakerTimeout, retry);
                         }
                     } else {
@@ -492,10 +471,9 @@ public class EventbusBlockingExecutionUtil {
                                 httpErrorCode,
                                 retryCount, timeout,
                                 circuitBreakerTimeout,
-                                delay,
                                 executor, lock, cause);
                     }
-                }), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout, executor);
+                }), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, executor);
 
 
     }
@@ -509,15 +487,14 @@ public class EventbusBlockingExecutionUtil {
                                           String _methodId,
                                           Vertx vertx,
                                           Consumer<Throwable> errorHandler,
-                                          ThrowableFunction<Throwable, T> onFailureRespond,
+                                          ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                           Consumer<Throwable> errorMethodHandler,
                                           RoutingContext context,
                                           Map<String, String> headers,
                                           Encoder encoder,
                                           int httpStatusCode, int httpErrorCode,
                                           int retryCount, long timeout,
-                                          long delay,
-                                          long circuitBreakerTimeout, RecursiveBlockingExecutor executor) {
+                                          long circuitBreakerTimeout, RecursiveExecutor executor) {
         final SharedData sharedData = vertx.sharedData();
         sharedData.getLockWithTimeout(_methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
             if (lockHandler.succeeded()) {
@@ -539,7 +516,6 @@ public class EventbusBlockingExecutionUtil {
                                 httpErrorCode,
                                 retryCount,
                                 timeout,
-                                delay,
                                 circuitBreakerTimeout,
                                 executor, lock, cause);
                     }
@@ -556,7 +532,6 @@ public class EventbusBlockingExecutionUtil {
                         httpErrorCode,
                         retryCount,
                         timeout,
-                        delay,
                         circuitBreakerTimeout,
                         executor, null, cause);
             }
@@ -574,11 +549,10 @@ public class EventbusBlockingExecutionUtil {
                                                       Consumer<Throwable> errorMethodHandler,
                                                       RoutingContext context, Map<String, String> headers,
                                                       Encoder encoder, Consumer<Throwable> errorHandler,
-                                                      ThrowableFunction<Throwable, T> onFailureRespond,
+                                                      ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                                       int httpStatusCode, int httpErrorCode,
                                                       int retryCount, long timeout,
-                                                      long delay,
-                                                      long circuitBreakerTimeout, RecursiveBlockingExecutor executor,
+                                                      long circuitBreakerTimeout, RecursiveExecutor executor,
                                                       AsyncResult<Message<Object>> event, Lock lock, Counter counter) {
         vertx.setTimer(circuitBreakerTimeout, timer -> counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), val -> {
         }));
@@ -592,7 +566,7 @@ public class EventbusBlockingExecutionUtil {
                     onFailureRespond,
                     httpStatusCode,
                     httpErrorCode, retryCount,
-                    timeout, delay, circuitBreakerTimeout,
+                    timeout, circuitBreakerTimeout,
                     executor, lock, cause);
 
         });
@@ -604,28 +578,25 @@ public class EventbusBlockingExecutionUtil {
                                         RoutingContext context, Map<String, String> headers,
                                         Encoder encoder,
                                         Consumer<Throwable> errorHandler,
-                                        ThrowableFunction<Throwable, T> onFailureRespond,
+                                        ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                         int httpStatusCode, int httpErrorCode,
                                         int retryCount, long timeout,
-                                        long delay,
-                                        long circuitBreakerTimeout, RecursiveBlockingExecutor executor,
+                                        long circuitBreakerTimeout, RecursiveExecutor executor,
                                         Lock lock, Throwable cause) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
-        ThrowableSupplier<byte[]> failConsumer = () -> {
-            assert cause != null;
-            throw cause;
-        };
+        final ThrowableFutureConsumer<T> failConsumer = (future) -> future.fail(cause);
         executor.execute(methodId,
                 vertx, cause,
                 errorMethodHandler,
                 context, headers,
                 failConsumer,
+                null,
                 encoder, errorHandler,
                 onFailureRespond,
                 httpStatusCode,
                 httpErrorCode,
                 retryCount,
-                timeout, delay, circuitBreakerTimeout);
+                timeout, circuitBreakerTimeout);
 
     }
 
@@ -633,7 +604,7 @@ public class EventbusBlockingExecutionUtil {
     private static <T> void retryOperation(String methodId,
                                            String id,
                                            Object message,
-                                           ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+                                           ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                                            DeliveryOptions deliveryOptions,
                                            Vertx vertx, Throwable t,
                                            Consumer<Throwable> errorMethodHandler,
@@ -641,12 +612,11 @@ public class EventbusBlockingExecutionUtil {
                                            Map<String, String> headers,
                                            Encoder encoder,
                                            Consumer<Throwable> errorHandler,
-                                           ThrowableFunction<Throwable, T> onFailureRespond,
+                                           ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                            int httpStatusCode, int httpErrorCode,
                                            int retryCount, long timeout,
-                                           long delay,
-                                           long circuitBreakerTimeout, RetryBlockingExecutor retry) {
-        ResponseUtil.handleError(errorHandler, t);
+                                           long circuitBreakerTimeout, RetryExecutor retry) {
+        ResponseExecution.handleError(errorHandler, t);
         retry.execute(methodId,
                 id, message,
                 function,
@@ -660,57 +630,17 @@ public class EventbusBlockingExecutionUtil {
                 httpStatusCode,
                 httpErrorCode,
                 retryCount,
-                timeout, delay, circuitBreakerTimeout);
+                timeout, circuitBreakerTimeout);
     }
 
 
-    private static <T> ThrowableSupplier<T> createSupplier(String methodId,
-                                                           String targetId,
-                                                           Object message,
-                                                           ThrowableFunction<AsyncResult<Message<Object>>, T> function,
-                                                           DeliveryOptions deliveryOptions,
-                                                           Vertx vertx, Throwable t,
-                                                           Consumer<Throwable> errorMethodHandler,
-                                                           RoutingContext context,
-                                                           Map<String, String> headers,
-                                                           Encoder encoder,
-                                                           Consumer<Throwable> errorHandler,
-                                                           ThrowableFunction<Throwable, T> onFailureRespond,
-                                                           int httpStatusCode, int httpErrorCode,
-                                                           int retryCount, long timeout,
-                                                           long delay,
-                                                           long circuitBreakerTimeout,
-                                                           RetryBlockingExecutor retry,
-                                                           AsyncResult<Message<Object>> event) {
-        return () -> {
-            T resp = null;
+    private static <T> ThrowableFutureConsumer<T> createSupplier(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function, AsyncResult<Message<Object>> event) {
+        return (future) -> {
             if (event.failed()) {
-                if (retryCount > 0) {
-                    retryOperation(methodId,
-                            targetId,
-                            message,
-                            function,
-                            deliveryOptions,
-                            vertx, t,
-                            errorMethodHandler,
-                            context,
-                            headers,
-                            encoder,
-                            errorHandler,
-                            onFailureRespond,
-                            httpStatusCode,
-                            httpErrorCode,
-                            retryCount, timeout,
-                            delay,
-                            circuitBreakerTimeout, retry);
-                } else {
-                    throw event.cause();
-                }
+                future.fail(event.cause());
             } else {
-                resp = function.apply(event);
+                function.accept(event, future);
             }
-
-            return resp;
         };
     }
 

@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.eventbus;
+package org.jacpfx.vertx.rest.eventbus.basic;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -6,6 +6,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.vertx.rest.eventbus.blocking.EventBusBlockingRequest;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -59,11 +60,11 @@ public class EventBusRequest {
             response.end(Buffer.buffer((byte[]) resp));
         } else {
             // TODO implement object Response
-            // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> ResponseAsyncUtil.sendObjectResult(value, context.createResponse()));
+            // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> ResponseBlockingExecution.sendObjectResult(value, context.createResponse()));
         }
     }
 
-    public EventBusAsyncRequest blocking() {
-        return new EventBusAsyncRequest(methodId,vertx, t, errorMethodHandler, context);
+    public EventBusBlockingRequest blocking() {
+        return new EventBusBlockingRequest(methodId,vertx, t, errorMethodHandler, context);
     }
 }

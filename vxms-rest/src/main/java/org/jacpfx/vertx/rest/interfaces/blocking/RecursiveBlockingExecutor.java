@@ -1,13 +1,9 @@
-package org.jacpfx.vertx.rest.util;
+package org.jacpfx.vertx.rest.interfaces.blocking;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.*;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
 
 import java.util.Map;
 import java.util.function.Consumer;

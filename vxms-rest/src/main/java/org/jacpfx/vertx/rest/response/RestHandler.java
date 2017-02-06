@@ -2,7 +2,7 @@ package org.jacpfx.vertx.rest.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.vertx.rest.eventbus.EventBusRequest;
+import org.jacpfx.vertx.rest.eventbus.basic.EventBusRequest;
 
 import java.util.HashMap;
 import java.util.function.Consumer;

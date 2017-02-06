@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.util;
+package org.jacpfx.vertx.rest;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Context;
@@ -10,6 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
+import org.jacpfx.vertx.rest.util.ReflectionUtil;
 
 import javax.ws.rs.*;
 import java.lang.annotation.Annotation;

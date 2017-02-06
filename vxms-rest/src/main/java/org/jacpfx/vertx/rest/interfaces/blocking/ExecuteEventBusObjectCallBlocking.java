@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.interfaces;
+package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 21.03.16.
  */
 @FunctionalInterface
-public interface ExecuteEventBusObjectCallAsync {
+public interface ExecuteEventBusObjectCallBlocking {
 
     void execute(Vertx vertx,
                  Throwable t,

@@ -6,7 +6,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusStringCall;
 
 import java.util.Map;
 import java.util.function.Consumer;

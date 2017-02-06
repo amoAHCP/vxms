@@ -5,7 +5,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCallAsync;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusObjectCallBlocking;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
 
-    public ExecuteRSObjectResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallAsync excecuteEventBusAndReply,
+    public ExecuteRSObjectResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<Serializable> objectSupplier, ExecuteEventBusObjectCallBlocking excecuteEventBusAndReply,
                                    Encoder encoder, Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, Serializable> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }

@@ -1,21 +1,19 @@
 package org.jacpfx.vertx.rest.util;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.shareddata.Counter;
-import io.vertx.core.shareddata.Lock;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusObjectCall;
+import org.jacpfx.vertx.rest.eventbus.basic.EventBusExecution;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusObjectCall;
+import org.jacpfx.vertx.rest.interfaces.basic.RecursiveExecutor;
+import org.jacpfx.vertx.rest.interfaces.basic.RetryExecutor;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
-import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -114,7 +112,7 @@ public class EventbusObjectExecutionUtil {
                                                                     onFailureRespond, httpStatusCode,
                                                                     httpErrorCode, retryCount,
                                                                     timeout, circuitBreakerTimeout) ->
-                EventbusExecutionUtil.sendMessageAndSupplyStringHandler(_methodId,
+                EventBusExecution.sendMessageAndSupplyStringHandler(_methodId,
                         _targetId,
                         _message,
                         _objectFunction,

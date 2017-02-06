@@ -7,8 +7,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCall;
-import org.jacpfx.vertx.rest.util.ResponseUtil;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusStringCall;
 
 import java.util.Map;
 import java.util.Objects;
@@ -79,7 +78,7 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType),
+        new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType),
                 stringConsumer, excecuteEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, circuitBreakerTimeout).execute();
     }
@@ -92,7 +91,7 @@ public class ExecuteRSBasicString {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicString(methodId, vertx, t, errorMethodHandler, context,
-                ResponseUtil.updateContentType(headers, contentType), stringConsumer, excecuteEventBusAndReply,
+                ResponseExecution.updateContentType(headers, contentType), stringConsumer, excecuteEventBusAndReply,
                 encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout).execute();
     }
 
@@ -113,7 +112,7 @@ public class ExecuteRSBasicString {
             ofNullable(stringConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseUtil.createResponse(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
+                                ResponseExecution.createResponse(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
                                     if (value.succeeded()) {
                                         if (!value.handledError()) {
                                             respond(value.getResult());
@@ -150,7 +149,7 @@ public class ExecuteRSBasicString {
     protected void respond(String result, int statuscode) {
         final HttpServerResponse response = context.response();
         if (!response.ended()) {
-            ResponseUtil.updateHeaderAndStatuscode(headers, statuscode, response);
+            ResponseExecution.updateHeaderAndStatuscode(headers, statuscode, response);
             if (result != null) {
                 response.end(result);
             } else {

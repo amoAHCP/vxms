@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.eventbus;
+package org.jacpfx.vertx.rest.eventbus.basic;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
@@ -10,7 +10,7 @@ import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
-import org.jacpfx.vertx.rest.util.EventbusByteExecutionUtil;
+import org.jacpfx.vertx.rest.util.EventBusByteExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusStringExecutionUtil;
 
@@ -62,7 +62,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, options, vertx, t, errorMethodHandler, context);
+        return EventBusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, options, vertx, t, errorMethodHandler, context);
     }
 
     /**

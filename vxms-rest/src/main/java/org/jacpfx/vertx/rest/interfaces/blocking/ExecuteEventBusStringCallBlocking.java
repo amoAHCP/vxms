@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.interfaces;
+package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
@@ -12,16 +12,15 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 21.03.16.
  */
 @FunctionalInterface
-public interface ExecuteEventBusByteCallAsync {
+public interface ExecuteEventBusStringCallBlocking {
 
     void execute(Vertx vertx,
                  Throwable t,
                  Consumer<Throwable> errorMethodHandler,
                  RoutingContext context,
-                 Map<String, String> headers,
-                 Encoder encoder,
+                 Map<String, String> headers, Encoder encoder,
                  Consumer<Throwable> errorHandler,
-                 ThrowableFunction<Throwable, byte[]> onFailureRespond,
+                 ThrowableFunction<Throwable, String> onFailureRespond,
                  int httpStatusCode, int httpErrorCode,
                  int retryCount, long timeout,
                  long delay, long circuitBreakerTimeout);

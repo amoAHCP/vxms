@@ -1,4 +1,4 @@
-package org.jacpfx.vertx.rest.util;
+package org.jacpfx.vertx.rest.response.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -9,6 +9,7 @@ import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +20,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 19.01.16.
  */
-public class ResponseAsyncUtil {
+public class ResponseBlockingExecution {
 
     public static <T> void executeRetryAndCatchAsync(String _methodId, ThrowableSupplier<T> _supplier, Future<ExecutionResult<T>> _blockingHandler, Consumer<Throwable> _errorHandler,
                                                      ThrowableFunction<Throwable, T> _onFailureRespond, Consumer<Throwable> _errorMethodHandler, Vertx vertx, Throwable _t,
@@ -101,7 +102,7 @@ public class ResponseAsyncUtil {
             openCircuitBreakerAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vertx, e, lck, counter);
         } else {
             lck.release();
-            ResponseUtil.handleError(_errorHandler, e);
+            ResponseExecution.handleError(_errorHandler, e);
             handleDelay(_delay);
             executeRetryAndCatchAsync(_methodId, _supplier, _blockingHandler, _errorHandler,
                     _onFailureRespond, _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay);
@@ -186,7 +187,7 @@ public class ResponseAsyncUtil {
                     }
 
                 } else {
-                    ResponseUtil.handleError(errorHandler, e);
+                    ResponseExecution.handleError(errorHandler, e);
                     handleDelay(delay);
                 }
             }

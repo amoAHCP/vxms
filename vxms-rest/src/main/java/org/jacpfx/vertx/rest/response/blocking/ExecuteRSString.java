@@ -10,10 +10,9 @@ import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.ExecuteEventBusStringCallAsync;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusStringCallBlocking;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
-import org.jacpfx.vertx.rest.util.ResponseAsyncUtil;
-import org.jacpfx.vertx.rest.util.ResponseUtil;
+import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
 import java.util.Map;
 import java.util.Objects;
@@ -25,12 +24,12 @@ import java.util.function.Consumer;
  */
 public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
-    protected final ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply;
+    protected final ExecuteEventBusStringCallBlocking excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<String> stringSupplier;
     protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
-    public ExecuteRSString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallAsync excecuteAsyncEventBusAndReply, Encoder encoder,
-                           Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int httpErrorCode,int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+    public ExecuteRSString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallBlocking excecuteAsyncEventBusAndReply, Encoder encoder,
+                           Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout); // TODO define circuitBreakerTimout!!
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
@@ -49,7 +48,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -57,7 +56,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseUtil.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -81,7 +80,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
     private void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<ExecutionResult<String>> blockingHandler) {
-        ResponseAsyncUtil.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
+        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<ExecutionResult<String>>> getAsyncResultHandler(int retry) {
