@@ -21,7 +21,7 @@ public interface ExecuteEventBusByteCallAsync {
                  Map<String, String> headers,
                  Encoder encoder,
                  Consumer<Throwable> errorHandler,
-                 ThrowableFunction<Throwable, byte[]> errorHandlerByte,
+                 ThrowableFunction<Throwable, byte[]> onFailureRespond,
                  int httpStatusCode, int httpErrorCode,
                  int retryCount, long timeout,
                  long delay, long circuitBreakerTimeout);
