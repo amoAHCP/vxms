@@ -38,7 +38,7 @@ public class RESTInitializer {
      * @param config  the Configuration provided by the Vert.x instance
      * @param service the Vxms service object itself
      */
-    public static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
+    static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
                 forEach(restMethod -> initRestMethod(vertx, router, service, restMethod));
@@ -52,7 +52,7 @@ public class RESTInitializer {
      * @param service    The Service itself
      * @param restMethod the REST Method
      */
-    public static void initRestMethod(Vertx vertx, Router router, Object service, Method restMethod) {
+    private static void initRestMethod(Vertx vertx, Router router, Object service, Method restMethod) {
         final Path path = restMethod.getAnnotation(Path.class);
         final Stream<Method> errorMethodStream = getRESTMethods(service, path.value()).stream().filter(method -> method.isAnnotationPresent(OnRestError.class));
         final Optional<Consumes> consumes = Optional.ofNullable(restMethod.isAnnotationPresent(Consumes.class) ? restMethod.getAnnotation(Consumes.class) : null);
@@ -173,6 +173,7 @@ public class RESTInitializer {
         if (onErrorMethod.isPresent()) {
             invokeOnErrorMethod(methodId, vertx, service, onErrorMethod, routingContext, throwable);
         } else {
+            // TODO add SPI for custom failure handling
             failRequest(routingContext, throwable);
         }
     }

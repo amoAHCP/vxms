@@ -27,6 +27,8 @@ import java.util.function.Consumer;
 public class ResponseExecution {
 
     public static final long DEFAULT_TIMEOUT = 0L;
+    public static final int DEFAULT_LOCK_TIMEOUT = 2000;
+    public static final long LOCK_VALUE = -1l;
 
     public static <T> void createResponse(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation,
                                           Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond,
@@ -138,7 +140,7 @@ public class ResponseExecution {
                                                   Vertx vertx, Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event) {
 
         executeLocked((lock, counter) ->
-                counter.decrementAndGet(valHandler -> {
+                decrementAndExecute(counter, valHandler -> {
                     if (valHandler.succeeded()) {
                         handleStatefulError(_methodId, _retry, _timeout, _circuitBreakerTimeout,
                                 _userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer, event, lock, counter, valHandler);
@@ -146,6 +148,10 @@ public class ResponseExecution {
                         releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, lock, valHandler.cause());
                     }
                 }), _methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, resultConsumer);
+    }
+
+    private static void decrementAndExecute(Counter counter, Handler<AsyncResult<Long>> asyncResultHandler) {
+        counter.decrementAndGet(asyncResultHandler);
     }
 
     private static <T> void handleStatefulError(String _methodId, int _retry, long _timeout, long _circuitBreakerTimeout, ThrowableFutureConsumer<T> _userOperation,
@@ -164,7 +170,7 @@ public class ResponseExecution {
 
     private static <T> void openCircuitBreakerAndHandleError(Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler,
                                                              Consumer<ExecutionResult<T>> resultConsumer, AsyncResult<T> event, Lock lock, Counter counter) {
-        counter.addAndGet(-1l, val -> {
+        counter.addAndGet(LOCK_VALUE, val -> {
             lock.release();
             errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, Future.failedFuture(event.cause()));
         });
@@ -273,7 +279,7 @@ public class ResponseExecution {
 
     private static <T> void executeLocked(LockedConsumer consumer, String _methodId, Vertx vertx, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler, Consumer<ExecutionResult<T>> resultConsumer) {
         final SharedData sharedData = vertx.sharedData();
-        sharedData.getLockWithTimeout(_methodId, 2000, lockHandler -> {
+        sharedData.getLockWithTimeout(_methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
             final Lock lock = lockHandler.result();
             if (lockHandler.succeeded()) {
                 sharedData.getCounter(_methodId, resultHandler -> {

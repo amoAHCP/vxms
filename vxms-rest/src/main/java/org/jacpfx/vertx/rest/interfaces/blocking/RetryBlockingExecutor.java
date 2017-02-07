@@ -5,10 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableFutureBiConsumer;
-import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;

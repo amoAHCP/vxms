@@ -5,8 +5,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.vertx.rest.eventbus.blocking.EventBusBlockingRequest;
+import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -56,11 +59,11 @@ public class EventBusRequest {
         if (resp instanceof String) {
             response.end((String) resp);
         } else if (resp instanceof byte[]) {
-
             response.end(Buffer.buffer((byte[]) resp));
-        } else {
-            // TODO implement object Response
-            // WebSocketExecutionUtil.encode(resp, encoder).ifPresent(value -> ResponseBlockingExecution.sendObjectResult(value, context.createResponse()));
+        } else if (resp instanceof JsonObject) {
+            response.end(JsonObject.class.cast(resp).encode());
+        }else if (resp instanceof JsonArray) {
+            response.end(JsonArray.class.cast(resp).encode());
         }
     }
 

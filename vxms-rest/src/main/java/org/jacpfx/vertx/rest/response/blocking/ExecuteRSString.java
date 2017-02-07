@@ -30,7 +30,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
 
     public ExecuteRSString(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableSupplier<String> stringSupplier, ExecuteEventBusStringCallBlocking excecuteAsyncEventBusAndReply, Encoder encoder,
                            Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, String> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout); // TODO define circuitBreakerTimout!!
+        super(methodId, vertx, t, errorMethodHandler, context, headers, null, null, encoder, errorHandler, null, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
         this.stringSupplier = stringSupplier;
