@@ -12,12 +12,13 @@ import org.junit.Test;
  * Created by amo on 15.08.16.
  */
 public class AtomicCounterTest extends VertxTestBase {
-    private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     public static final String SERVICE2_REST_GET = "/wsService2";
-    private static final String HOST = "localhost";
     public static final int PORT = 9998;
     public static final int PORT2 = 9988;
+    private final static int MAX_RESPONSE_ELEMENTS = 4;
+    private static final String HOST = "localhost";
+    private HttpClient client;
 
     protected int getNumNodes() {
         return 1;
@@ -31,9 +32,6 @@ public class AtomicCounterTest extends VertxTestBase {
     protected ClusterManager getClusterManager() {
         return new FakeClusterManager();
     }
-
-
-    private HttpClient client;
 
     @Override
     public void setUp() throws Exception {
@@ -100,8 +98,8 @@ public class AtomicCounterTest extends VertxTestBase {
             counter.get(handler -> {
                 long val = handler.result();
                 if (val == 0) {
-                    counter.addAndGet(max, hhh-> {
-                        System.out.println("::::"+hhh.result());
+                    counter.addAndGet(max, hhh -> {
+                        System.out.println("::::" + hhh.result());
                     });
                 } else {
 

@@ -9,7 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.vertx.rest.eventbus.blocking.EventBusBlockingRequest;
-import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -24,7 +23,7 @@ public class EventBusRequest {
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
 
-    public EventBusRequest(String methodId,Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context) {
+    public EventBusRequest(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -33,11 +32,11 @@ public class EventBusRequest {
     }
 
     public EventBusResponse send(String id, Object message) {
-        return new EventBusResponse(methodId,vertx, t, errorMethodHandler, context, id, message, null);
+        return new EventBusResponse(methodId, vertx, t, errorMethodHandler, context, id, message, null);
     }
 
     public EventBusResponse send(String id, Object message, DeliveryOptions options) {
-        return new EventBusResponse(methodId,vertx, t, errorMethodHandler, context, id, message, options);
+        return new EventBusResponse(methodId, vertx, t, errorMethodHandler, context, id, message, options);
     }
 
 
@@ -62,12 +61,12 @@ public class EventBusRequest {
             response.end(Buffer.buffer((byte[]) resp));
         } else if (resp instanceof JsonObject) {
             response.end(JsonObject.class.cast(resp).encode());
-        }else if (resp instanceof JsonArray) {
+        } else if (resp instanceof JsonArray) {
             response.end(JsonArray.class.cast(resp).encode());
         }
     }
 
     public EventBusBlockingRequest blocking() {
-        return new EventBusBlockingRequest(methodId,vertx, t, errorMethodHandler, context);
+        return new EventBusBlockingRequest(methodId, vertx, t, errorMethodHandler, context);
     }
 }

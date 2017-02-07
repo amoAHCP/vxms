@@ -114,18 +114,18 @@ public class ExecuteRSBasicObject {
             ofNullable(objectConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
-                                ResponseExecution.createResponse(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
+                                ResponseExecution.createResponse(methodId, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, value -> {
                                     if (value.succeeded()) {
                                         if (!value.handledError()) {
                                             respond(value.getResult());
                                         } else {
-                                            respond(value.getResult(),httpErrorCode);
+                                            respond(value.getResult(), httpErrorCode);
                                         }
                                     } else {
                                         respond(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                                     }
                                     checkAndCloseResponse(retry);
-                                });
+                                }, retry, timeout, circuitBreakerTimeout);
                             }
                     );
         });

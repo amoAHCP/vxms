@@ -18,7 +18,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
 
 
     public ExecuteRSBasicByteResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventBusByteCall excecuteEventBusAndReply, Encoder encoder,
-                                      Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode,int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
+                                      Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -64,7 +64,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      */
     public ExecuteRSBasicByteCircuitBreaker retry(int retryCount) {
         return new ExecuteRSBasicByteCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, byteConsumer, excecuteEventBusAndReply, encoder, errorHandler,
-                onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout,circuitBreakerTimeout);
+                onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout);
     }
 
     /**

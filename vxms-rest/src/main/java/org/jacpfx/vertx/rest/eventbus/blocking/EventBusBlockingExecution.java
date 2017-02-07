@@ -10,7 +10,8 @@ import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.*;
+import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.RecursiveBlockingExecutor;
 import org.jacpfx.vertx.rest.interfaces.blocking.RetryBlockingExecutor;
@@ -566,11 +567,6 @@ public class EventBusBlockingExecution {
         });
     }
 
-    private interface LockedConsumer {
-        void execute(Lock lock, Counter counter);
-    }
-
-
     private static <T> void openCircuitAndHandleError(String methodId,
                                                       Vertx vertx,
                                                       Consumer<Throwable> errorMethodHandler,
@@ -631,7 +627,6 @@ public class EventBusBlockingExecution {
 
     }
 
-
     private static <T> void retryOperation(String methodId,
                                            String id,
                                            Object message,
@@ -664,7 +659,6 @@ public class EventBusBlockingExecution {
                 retryCount,
                 timeout, delay, circuitBreakerTimeout);
     }
-
 
     private static <T> ThrowableSupplier<T> createSupplier(String methodId,
                                                            String targetId,
@@ -714,6 +708,11 @@ public class EventBusBlockingExecution {
 
             return resp;
         };
+    }
+
+
+    private interface LockedConsumer {
+        void execute(Lock lock, Counter counter);
     }
 
 

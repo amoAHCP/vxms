@@ -23,9 +23,6 @@ public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse 
     }
 
 
-
-
-
     /**
      * Define the HTTP Code in case of onFailure execution
      *

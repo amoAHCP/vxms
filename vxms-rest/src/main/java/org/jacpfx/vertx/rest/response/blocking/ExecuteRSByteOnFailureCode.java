@@ -8,7 +8,6 @@ import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusByteCallBlocking;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -37,7 +36,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
      * @param httpErrorCode the http error code to set for response, in case of error
      * @return the response chain
      */
-    public ExecuteRSByte httpErrorCode(HttpResponseStatus httpErrorCode){
+    public ExecuteRSByte httpErrorCode(HttpResponseStatus httpErrorCode) {
         return new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, httpStatusCode, httpErrorCode.code(), retryCount, timeout, delay, circuitBreakerTimeout);
     }

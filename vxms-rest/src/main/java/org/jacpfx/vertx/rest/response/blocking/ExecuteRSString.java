@@ -40,7 +40,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
-        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(),httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, headers, stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -48,7 +48,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -56,7 +56,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
-        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode,retryCount, timeout, delay,circuitBreakerTimeout);
+        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler, context, ResponseExecution.updateContentType(headers, contentType), stringSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -64,7 +64,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay,circuitBreakerTimeout);
+                evFunction.execute(vertx, t, errorMethodHandler, context, headers, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -80,17 +80,17 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
     private void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<ExecutionResult<String>> blockingHandler) {
-        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
+        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<ExecutionResult<String>>> getAsyncResultHandler(int retry) {
         return value -> {
             if (!value.failed()) {
                 ExecutionResult<String> result = value.result();
-                if(!result.handledError()){
+                if (!result.handledError()) {
                     respond(result.getResult());
                 } else {
-                    respond(result.getResult(),httpErrorCode);
+                    respond(result.getResult(), httpErrorCode);
                 }
 
             } else {

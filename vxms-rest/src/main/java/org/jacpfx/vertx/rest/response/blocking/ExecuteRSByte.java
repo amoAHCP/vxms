@@ -42,7 +42,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context,
-                headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(),httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+                headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -57,7 +57,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context,
-                ResponseExecution.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode,retryCount, timeout, delay, circuitBreakerTimeout);
+                ResponseExecution.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, status.code(), httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -70,7 +70,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context,
-                ResponseExecution.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode,httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+                ResponseExecution.updateContentType(headers, contentType), byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
         lastStep.execute();
     }
 
@@ -96,8 +96,8 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
 
     }
 
-    private void executeAsync(ThrowableSupplier<byte[]> supplier, int retry, Future<ExecutionResult<byte[]>> handler) {
-        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, handler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
+    private void executeAsync(ThrowableSupplier<byte[]> supplier, int retry, Future<ExecutionResult<byte[]>> resultHandler) {
+        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, resultHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<ExecutionResult<byte[]>>> getAsyncResultHandler(int retry) {

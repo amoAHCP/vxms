@@ -33,7 +33,7 @@ public class EventbusStringExecutionUtil {
                                                                    Vertx _vertx, Throwable _t,
                                                                    Consumer<Throwable> _errorMethodHandler,
                                                                    RoutingContext _context) {
-        return mapToStringResponse(_methodId, _targetId, _message, _stringFunction, _options, _vertx, _t, _errorMethodHandler, _context,null,null,null,null,null,0,0,0,0,0);
+        return mapToStringResponse(_methodId, _targetId, _message, _stringFunction, _options, _vertx, _t, _errorMethodHandler, _context, null, null, null, null, null, 0, 0, 0, 0, 0);
     }
 
 
@@ -136,7 +136,7 @@ public class EventbusStringExecutionUtil {
                         httpErrorCode,
                         retryCount,
                         timeout,
-                        circuitBreakerTimeout, executor,retry);
+                        circuitBreakerTimeout, executor, retry);
 
         return new ExecuteRSBasicStringResponse(_methodId,
                 _vertx, _t,

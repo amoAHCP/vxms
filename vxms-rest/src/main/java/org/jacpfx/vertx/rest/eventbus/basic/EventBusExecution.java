@@ -30,7 +30,7 @@ public class EventBusExecution {
 
     public static final long LOCK_VALUE = -1l;
     public static final int DEFAULT_LOCK_TIMEOUT = 2000;
-    public static final long NO_TIMEOUT = 0l;
+    public static final long DEFAULT_VALUE = 0l;
 
     public static <T> void sendMessageAndSupplyStringHandler(String methodId,
                                                              String id, Object message,
@@ -45,7 +45,7 @@ public class EventBusExecution {
                                                              int retryCount, long timeout,
                                                              long circuitBreakerTimeout,
                                                              RecursiveExecutor executor, RetryExecutor retry) {
-        if (circuitBreakerTimeout == 0l) {
+        if (circuitBreakerTimeout == DEFAULT_VALUE) {
             executeDefaultState(methodId,
                     id, message,
                     stringFunction,
@@ -101,7 +101,7 @@ public class EventBusExecution {
         executeLocked(((lock, counter) ->
                 counter.get(counterHandler -> {
                     long currentVal = counterHandler.result();
-                    if (currentVal == 0) {
+                    if (currentVal == DEFAULT_VALUE) {
                         executeInitialState(methodId,
                                 id, message,
                                 function,
@@ -275,7 +275,7 @@ public class EventBusExecution {
                                                            RetryExecutor retry,
                                                            AsyncResult<Message<Object>> event) {
         final ThrowableFutureConsumer<T> stringSupplier = createSupplier(stringFunction, event);
-        if (circuitBreakerTimeout == NO_TIMEOUT) {
+        if (circuitBreakerTimeout == DEFAULT_VALUE) {
             statelessExecution(methodId,
                     id,
                     message,
@@ -428,7 +428,7 @@ public class EventBusExecution {
                 decrementAndExecute(counter, valHandler -> {
                     if (valHandler.succeeded()) {
                         long count = valHandler.result();
-                        if (count <= 0) {
+                        if (count <= DEFAULT_VALUE) {
                             openCircuitAndHandleError(methodId,
                                     vertx,
                                     errorMethodHandler,
@@ -539,11 +539,6 @@ public class EventBusExecution {
         });
     }
 
-    private interface LockedConsumer {
-        void execute(Lock lock, Counter counter);
-    }
-
-
     private static <T> void openCircuitAndHandleError(String methodId,
                                                       Vertx vertx,
                                                       Consumer<Throwable> errorMethodHandler,
@@ -600,7 +595,6 @@ public class EventBusExecution {
 
     }
 
-
     private static <T> void retryOperation(String methodId,
                                            String id,
                                            Object message,
@@ -633,7 +627,6 @@ public class EventBusExecution {
                 timeout, circuitBreakerTimeout);
     }
 
-
     private static <T> ThrowableFutureConsumer<T> createSupplier(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function, AsyncResult<Message<Object>> event) {
         return (future) -> {
             if (event.failed()) {
@@ -642,6 +635,11 @@ public class EventBusExecution {
                 function.accept(event, future);
             }
         };
+    }
+
+
+    private interface LockedConsumer {
+        void execute(Lock lock, Counter counter);
     }
 
 

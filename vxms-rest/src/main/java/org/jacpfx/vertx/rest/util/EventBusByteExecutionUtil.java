@@ -32,7 +32,7 @@ public class EventBusByteExecutionUtil {
                                                                Vertx _vertx, Throwable _t,
                                                                Consumer<Throwable> _errorMethodHandler,
                                                                RoutingContext _context) {
-        return mapToByteResponse(_methodId, _targetId, _message, _byteConsumer, _options, _vertx, _t, _errorMethodHandler, _context,null,null,null,null,null,0,0,0,0,0);
+        return mapToByteResponse(_methodId, _targetId, _message, _byteConsumer, _options, _vertx, _t, _errorMethodHandler, _context, null, null, null, null, null, 0, 0, 0, 0, 0);
     }
 
     public static ExecuteRSBasicByteResponse mapToByteResponse(String _methodId,
@@ -142,7 +142,7 @@ public class EventBusByteExecutionUtil {
                         httpErrorCode,
                         retryCount,
                         timeout,
-                        circuitBreakerTimeout, executor,retry);
+                        circuitBreakerTimeout, executor, retry);
 
         return new ExecuteRSBasicByteResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _byteConsumer, excecuteEventBusAndReply, _encoder, _errorHandler,
                 _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _circuitBreakerTimeout);

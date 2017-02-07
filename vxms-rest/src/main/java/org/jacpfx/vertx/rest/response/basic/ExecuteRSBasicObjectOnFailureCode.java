@@ -24,9 +24,6 @@ public class ExecuteRSBasicObjectOnFailureCode extends ExecuteRSBasicObjectRespo
     }
 
 
-
-
-
     /**
      * Define the HTTP Code in case of onFailure execution
      *

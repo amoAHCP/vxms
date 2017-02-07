@@ -17,7 +17,6 @@ import org.jacpfx.vertx.rest.response.blocking.ExecuteRSObjectResponse;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
-
 import java.util.function.Consumer;
 
 /**
@@ -128,7 +127,6 @@ public class EventBusObjectExecutionBlockingUtil {
         return new ExecuteRSObjectResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _objectSupplier, excecuteEventBusAndReply,
                 _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _delay, _circuitBreakerTimeout);
     }
-
 
 
 }

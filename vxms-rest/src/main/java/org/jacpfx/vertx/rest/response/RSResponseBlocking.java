@@ -40,7 +40,7 @@ public class RSResponseBlocking {
      * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
      */
     public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0,0, 0l, 0l, 0l);
+        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, null, null, null, null, 0, 0, 0, 0l, 0l, 0l);
     }
 
     /**

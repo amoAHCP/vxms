@@ -23,9 +23,6 @@ public class ExecuteRSBasicObjectCircuitBreaker extends ExecuteRSBasicObjectResp
     }
 
 
-
-
-
     /**
      * Define a timeout to release the stateful circuit breaker. Depending on your configuration the CircuitBreaker locks either cluster wide, jvm wide or only for the instance
      *

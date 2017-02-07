@@ -126,7 +126,7 @@ public class EventbusObjectExecutionUtil {
                         httpErrorCode,
                         retryCount,
                         timeout,
-                        circuitBreakerTimeout, executor,retry);
+                        circuitBreakerTimeout, executor, retry);
 
         return new ExecuteRSBasicObjectResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _circuitBreakerTimeout);
     }

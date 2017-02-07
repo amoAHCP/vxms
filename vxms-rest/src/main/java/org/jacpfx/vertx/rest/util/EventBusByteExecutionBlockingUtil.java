@@ -5,7 +5,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.*;
+import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.eventbus.blocking.EventBusBlockingExecution;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusByteCallBlocking;
@@ -129,7 +130,7 @@ public class EventBusByteExecutionBlockingUtil {
                         executor, retry);
 
 
-        return new ExecuteRSByteResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _byteSupplier,excecuteEventBusAndReply,
+        return new ExecuteRSByteResponse(_methodId, _vertx, _t, _errorMethodHandler, _context, _headers, _byteSupplier, excecuteEventBusAndReply,
                 _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _delay, _circuitBreakerTimeout);
     }
 

@@ -9,7 +9,6 @@ import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusObjectCallBlocking;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
