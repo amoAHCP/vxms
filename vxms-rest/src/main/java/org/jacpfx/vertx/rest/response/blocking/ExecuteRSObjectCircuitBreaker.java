@@ -29,7 +29,7 @@ public class ExecuteRSObjectCircuitBreaker extends ExecuteRSObjectResponse {
      * @return the response chain
      */
     public ExecuteRSObjectResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectResponse(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
 

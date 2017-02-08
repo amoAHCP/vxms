@@ -31,7 +31,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectOnFailureCode onFailureRespond(ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-        return new ExecuteRSObjectOnFailureCode(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectOnFailureCode(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**
@@ -41,7 +41,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectResponse(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**
@@ -51,7 +51,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectCircuitBreaker retry(int retryCount) {
-        return new ExecuteRSObjectCircuitBreaker(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectCircuitBreaker(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**
@@ -61,7 +61,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse timeout(long timeout) {
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectResponse(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**
@@ -71,7 +71,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse delay(long delay) {
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectResponse(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
     /**
@@ -84,6 +84,6 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
     public ExecuteRSObjectResponse putHeader(String key, String value) {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObjectResponse(methodId, vertx, failure, errorMethodHandler, context, headerMap, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 }

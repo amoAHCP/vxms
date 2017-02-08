@@ -31,7 +31,7 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
      * @return the response chain
      */
     public ExecuteRSObject httpErrorCode(HttpResponseStatus httpErrorCode) {
-        return new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode.code(), retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSObject(methodId, vertx, failure, errorMethodHandler, context, headers, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode.code(), retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
 

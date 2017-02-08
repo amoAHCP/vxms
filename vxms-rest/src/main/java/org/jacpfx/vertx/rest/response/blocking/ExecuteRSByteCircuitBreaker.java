@@ -30,7 +30,7 @@ public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
      * @return the response chain
      */
     public ExecuteRSByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
+        return new ExecuteRSByteResponse(methodId, vertx, failure, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 

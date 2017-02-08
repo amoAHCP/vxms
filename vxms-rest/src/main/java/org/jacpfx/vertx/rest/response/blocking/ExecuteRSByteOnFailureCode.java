@@ -37,7 +37,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
      * @return the response chain
      */
     public ExecuteRSByte httpErrorCode(HttpResponseStatus httpErrorCode) {
-        return new ExecuteRSByte(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
+        return new ExecuteRSByte(methodId, vertx, failure, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, httpStatusCode, httpErrorCode.code(), retryCount, timeout, delay, circuitBreakerTimeout);
     }
 
