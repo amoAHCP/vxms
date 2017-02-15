@@ -12,14 +12,65 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * This class defines the fluid API part to define the amount of time after the circuit breaker will be closed again
  */
 public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
 
-
-    public ExecuteRSByteCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context,
-                                       Map<String, String> headers, ThrowableSupplier<byte[]> byteSupplier, ExecuteEventBusByteCallBlocking excecuteAsyncEventBusAndReply,
-                                       Encoder encoder, Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, byte[]> onFailureRespond, int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler, onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId                      the method identifier
+     * @param vertx                         the vertx instance
+     * @param failure                       the failure thrown while task execution
+     * @param errorMethodHandler            the error handler
+     * @param context                       the vertx routing context
+     * @param headers                       the headers to pass to the response
+     * @param byteSupplier                  the supplier, producing the byte response
+     * @param excecuteAsyncEventBusAndReply the response of an event-bus call which is passed to the fluent API
+     * @param encoder                       the encoder to encode your objects
+     * @param errorHandler                  the error handler
+     * @param onFailureRespond              the consumer that takes a Future with the alternate response value in case of failure
+     * @param httpStatusCode                the http status code to set for response
+     * @param httpErrorCode                 the http error code to set in case of failure handling
+     * @param retryCount                    the amount of retries before failure execution is triggered
+     * @param timeout                       the amount of time before the execution will be aborted
+     * @param delay                         the delay time in ms between an execution error and the retry
+     * @param circuitBreakerTimeout         the amount of time before the circuit breaker closed again
+     */
+    public ExecuteRSByteCircuitBreaker(String methodId,
+                                       Vertx vertx,
+                                       Throwable failure,
+                                       Consumer<Throwable> errorMethodHandler,
+                                       RoutingContext context,
+                                       Map<String, String> headers,
+                                       ThrowableSupplier<byte[]> byteSupplier,
+                                       ExecuteEventBusByteCallBlocking excecuteAsyncEventBusAndReply,
+                                       Encoder encoder,
+                                       Consumer<Throwable> errorHandler,
+                                       ThrowableFunction<Throwable, byte[]> onFailureRespond,
+                                       int httpStatusCode,
+                                       int httpErrorCode,
+                                       int retryCount,
+                                       long timeout,
+                                       long delay,
+                                       long circuitBreakerTimeout) {
+        super(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context,
+                headers,
+                byteSupplier,
+                excecuteAsyncEventBusAndReply,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                httpStatusCode,
+                httpErrorCode,
+                retryCount,
+                timeout,
+                delay,
+                circuitBreakerTimeout);
     }
 
 
@@ -30,8 +81,23 @@ public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
      * @return the response chain
      */
     public ExecuteRSByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSByteResponse(methodId, vertx, failure, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
-                onFailureRespond, httpStatusCode, httpErrorCode, retryCount, timeout, delay, circuitBreakerTimeout);
+        return new ExecuteRSByteResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context,
+                headers,
+                byteSupplier,
+                excecuteAsyncEventBusAndReply,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                httpStatusCode,
+                httpErrorCode,
+                retryCount,
+                timeout,
+                delay,
+                circuitBreakerTimeout);
     }
 
 }

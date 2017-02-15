@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * Defines the fluent API to set the http error code in case of the onFailure method is executed
  */
 public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
 
@@ -34,7 +35,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
      * Define the HTTP Code in case of onFailure execution
      *
      * @param httpErrorCode the http error code to set for response, in case of error
-     * @return the response chain
+     * @return the response chain {@link ExecuteRSByte}
      */
     public ExecuteRSByte httpErrorCode(HttpResponseStatus httpErrorCode) {
         return new ExecuteRSByte(methodId, vertx, failure, errorMethodHandler, context, headers, byteSupplier, excecuteAsyncEventBusAndReply, encoder, errorHandler,
