@@ -90,11 +90,6 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
     @Override
-    /**
-     * Execute the reply chain with given http status code
-     *
-     * @param status, the http status code
-     */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSString(methodId,
@@ -118,12 +113,6 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
     @Override
-    /**
-     * Execute the reply chain with given http status code and content-type
-     *
-     * @param status,     the http status code
-     * @param contentType , the html content-type
-     */
     public void execute(HttpResponseStatus status, String contentType) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
@@ -149,11 +138,6 @@ public class ExecuteRSString extends ExecuteRSBasicString {
 
 
     @Override
-    /**
-     * Executes the reply chain whith given html content-type
-     *
-     * @param contentType, the html content-type
-     */
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSString(methodId,
@@ -177,9 +161,6 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     }
 
     @Override
-    /**
-     * Execute the reply chain
-     */
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {

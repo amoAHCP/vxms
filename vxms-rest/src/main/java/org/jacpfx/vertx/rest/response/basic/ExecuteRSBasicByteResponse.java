@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16.
+ * Fluent API for byte responses, defines access to failure handling, timeouts,...
  */
 public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
 

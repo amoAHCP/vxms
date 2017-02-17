@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 import static org.jacpfx.vertx.util.ServiceUtil.*;
 
 /**
- * Extend a service verticle to provide pluggable sevices for vet.x microservice project
- * Created by amo on 28.10.15.
+ * Extend a service verticle to provide pluggable sevices for vet.x microservice project. This class can be extended to create a vxms service
+ * Created by Andy Moncsek
  */
 public abstract class VxmsEndpoint extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(VxmsEndpoint.class);
@@ -31,24 +31,26 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     @Override
     public final void start(final Future<Void> startFuture) {
-        long startTime = System.currentTimeMillis();
         // register info (keepAlive) handler
         vertx.eventBus().consumer(ConfigurationUtil.getServiceName(getConfig(), this.getClass()) + "-info", this::info);
         initEndpoint(startFuture);
-        long endTime = System.currentTimeMillis();
-        log.info("start time: " + (endTime - startTime) + "ms");
     }
 
 
+    /**
+     * initiate Endpoint  and all Plugins
+     * @param startFuture, the Vertx start feature
+     */
     private void initEndpoint(final Future<Void> startFuture) {
-        final int port = ConfigurationUtil.getEndpointPort(getConfig(), this.getClass());
-        final String host = ConfigurationUtil.getEndpointHost(getConfig(), this.getClass());
-        final String contexRoot = ConfigurationUtil.getContextRoot(getConfig(), this.getClass());
-        final CustomServerOptions endpointConfig = ConfigurationUtil.getEndpointOptions(this.getClass());
+        final Class<? extends VxmsEndpoint> serviceClass = this.getClass();
+        final int port = ConfigurationUtil.getEndpointPort(getConfig(), serviceClass);
+        final String host = ConfigurationUtil.getEndpointHost(getConfig(), serviceClass);
+        final String contexRoot = ConfigurationUtil.getContextRoot(getConfig(), serviceClass);
+        final CustomServerOptions endpointConfig = ConfigurationUtil.getEndpointOptions(serviceClass);
         final HttpServerOptions options = endpointConfig.getServerOptions(this.getConfig());
         final HttpServer server = vertx.createHttpServer(options.setHost(host).setPort(port));
 
-        log.info("create http server: "+options.getHost()+":"+options.getPort());
+        log("create http server: "+options.getHost()+":"+options.getPort());
         final boolean secure = options.isSsl();
         final boolean contextRootSet = isContextRootSet(Optional.ofNullable(contexRoot).orElse(""));
         final Router topRouter = Router.router(vertx);
@@ -59,27 +61,33 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         getConfig().put("secure", secure);
 
         initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
-        // check for websocket extension
-        Optional.
-                ofNullable(getWebSocketSPI()).
-                ifPresent(webSockethandlerSPI -> webSockethandlerSPI.registerWebSocketHandler(server, vertx, getConfig(), this));
-        // check for REST extension
-        Optional.
-                ofNullable(getRESTSPI()).
-                ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vertx, router, getConfig(), this));
+        initWebSocketExtensions(server);
+        initRESTExtensions(router);
 
         postEndoitConfiguration(endpointConfiguration, router);
 
         if (contextRootSet)
             topRouter.mountSubRouter(getCleanContextRoot(Optional.ofNullable(contexRoot).orElse("")), subRouter);
 
+        initHTTPEndpoint(startFuture, port, host, server, topRouter);
+    }
+
+    /**
+     * starts the HTTP Endpoint
+     * @param startFuture the vertx start future
+     * @param port the port to listen
+     * @param host the host to bind
+     * @param server the vertx server
+     * @param topRouter the router object
+     */
+    private void initHTTPEndpoint(Future<Void> startFuture, int port, String host, HttpServer server, Router topRouter) {
         server.requestHandler(topRouter::accept).listen(status -> {
             if (status.succeeded()) {
                 log("started on PORT: " + port + " host: " + host);
                 // check for Service discovery extension
                 final ServiceDiscoverySpi serviceDiscovery = getServiceDiscoverySPI();
                 if (serviceDiscovery != null) {
-                    handleServiceRegistration(serviceDiscovery,startFuture);
+                    initServiceDiscovery(serviceDiscovery,startFuture);
                 } else {
                     postConstruct(topRouter, startFuture);
                 }
@@ -91,11 +99,25 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         });
     }
 
+    private void initRESTExtensions(Router router) {
+        // check for REST extension
+        Optional.
+                ofNullable(getRESTSPI()).
+                ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vertx, router,  this));
+    }
+
+    private void initWebSocketExtensions(HttpServer server) {
+        // check for websocket extension
+        Optional.
+                ofNullable(getWebSocketSPI()).
+                ifPresent(webSockethandlerSPI -> webSockethandlerSPI.registerWebSocketHandler(server, vertx, getConfig(), this));
+    }
+
     private boolean isContextRootSet(String cRoot) {
         return !cRoot.trim().equals(SLASH) && cRoot.length() > 1;
     }
 
-    private void handleServiceRegistration(ServiceDiscoverySpi serviceDiscovery, final Future<Void> startFuture) {
+    private void initServiceDiscovery(ServiceDiscoverySpi serviceDiscovery, final Future<Void> startFuture) {
         final AbstractVerticle current = this;
         Optional.ofNullable(serviceDiscovery).ifPresent(sDicovery -> {
             sDicovery.registerService(() -> postConstruct(startFuture), ex -> {
@@ -107,11 +129,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     /**
      * Stop the service.<p>
-     * This is called by Vert.x when the service instance is un-deployed. Don't call it yourself.<p>
+     * This is called by Vert.x when the service instance is un-deployed. Don'failure call it yourself.<p>
      * If your verticle does things in it's shut-down which take some time then you can override this method
      * and call the stopFuture some time later when clean-up is complete.
      * @param stopFuture  a future which should be called when verticle clean-up is complete.
-     * @throws Exception
+     * @throws Exception exception while stopping the verticle
      */
     public final void stop(Future<Void> stopFuture) throws Exception {
         Optional.ofNullable(onStop).ifPresent(stop -> stop.accept(stopFuture));
@@ -134,7 +156,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     /**
      * Overwrite this method to handle your own initialisation after all vxms init is done
      *
-     * @param startFuture
+     * @param startFuture the start future
      */
     protected void postConstruct(final Future<Void> startFuture) {
         startFuture.complete();

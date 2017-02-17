@@ -69,7 +69,7 @@ public class RESTJerseyClientEventStringCircuitBreakerAsyncTest extends VertxTes
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don't have to hardecode it in your tests
+        // don'failure have to hardecode it in your tests
 
 
         getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {

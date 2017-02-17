@@ -130,7 +130,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
     /**
      * retry operation on error
      *
-     * @param retryCount
+     * @param retryCount the amount of retries before failure
      * @return the createResponse chain {@link ExecuteRSStringCircuitBreaker}
      */
     public ExecuteRSStringCircuitBreaker retry(int retryCount) {
@@ -182,7 +182,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
     /**
      * Defines the delay (in ms) between the createResponse retries (on error).
      *
-     * @param delay
+     * @param delay the amount of time in ms between an error and the retry
      * @return the createResponse chain {@link ExecuteRSStringResponse}
      */
     public ExecuteRSStringResponse delay(long delay) {

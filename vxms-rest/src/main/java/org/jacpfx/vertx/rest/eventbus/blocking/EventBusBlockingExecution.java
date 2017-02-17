@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
+ * Handles event-bus call and blocking execution of the message to create a rest response
  */
 public class EventBusBlockingExecution {
 
@@ -31,27 +32,58 @@ public class EventBusBlockingExecution {
     public static final int DEFAULT_LOCK_TIMEOUT = 2000;
     public static final long NO_TIMEOUT = 0l;
 
+    /**
+     * Send event-bus message and process the result in the passed function for blocking execution chain
+     *
+     * @param methodId              the method identifier
+     * @param targetId              the event-bus target id
+     * @param message               the message to send
+     * @param function              the function to process the result message
+     * @param deliveryOptions       the event-bus delivery options
+     * @param vertx                 the vertx instance
+     * @param failure               the failure thrown while task execution
+     * @param errorMethodHandler    the error handler
+     * @param context               the vertx routing context
+     * @param headers               the headers to pass to the response
+     * @param encoder               the encoder to encode your objects
+     * @param errorHandler          the error handler
+     * @param onFailureRespond      the consumer that takes a Future with the alternate response value in case of failure
+     * @param httpStatusCode        the http status code to set for response
+     * @param httpErrorCode         the http error code to set in case of failure handling
+     * @param retryCount            the amount of retries before failure execution is triggered
+     * @param timeout               the amount of time before the execution will be aborted
+     * @param delay                 the delay time in ms between an execution error and the retry
+     * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+     * @param executor              the typed executor to process the chain
+     * @param retryExecutor         the typed retry executor of the chain
+     * @param <T>                   the type of response
+     */
     public static <T> void sendMessageAndSupplyHandler(String methodId,
-                                                       String id, Object message,
+                                                       String targetId,
+                                                       Object message,
                                                        ThrowableFunction<AsyncResult<Message<Object>>, T> function,
                                                        DeliveryOptions deliveryOptions,
-                                                       Vertx vertx, Throwable t,
+                                                       Vertx vertx,
+                                                       Throwable failure,
                                                        Consumer<Throwable> errorMethodHandler,
                                                        RoutingContext context, Map<String, String> headers,
                                                        Encoder encoder,
                                                        Consumer<Throwable> errorHandler,
                                                        ThrowableFunction<Throwable, T> onFailureRespond,
-                                                       int httpStatusCode, int httpErrorCode,
-                                                       int retryCount, long timeout, long delay,
+                                                       int httpStatusCode,
+                                                       int httpErrorCode,
+                                                       int retryCount,
+                                                       long timeout,
+                                                       long delay,
                                                        long circuitBreakerTimeout,
                                                        RecursiveBlockingExecutor executor,
-                                                       RetryBlockingExecutor retry) {
+                                                       RetryBlockingExecutor retryExecutor) {
         if (circuitBreakerTimeout == 0l) {
             executeDefaultState(methodId,
-                    id, message,
+                    targetId, message,
                     function,
                     deliveryOptions,
-                    vertx, t,
+                    vertx, failure,
                     errorMethodHandler,
                     context, headers,
                     encoder, errorHandler,
@@ -60,13 +92,13 @@ public class EventBusBlockingExecution {
                     httpErrorCode,
                     retryCount, timeout,
                     delay, circuitBreakerTimeout,
-                    executor, retry, null);
+                    executor, retryExecutor, null);
         } else {
             executeStateful(methodId,
-                    id, message,
+                    targetId, message,
                     function,
                     deliveryOptions,
-                    vertx, t,
+                    vertx, failure,
                     errorMethodHandler,
                     context,
                     headers,
@@ -78,7 +110,7 @@ public class EventBusBlockingExecution {
                     retryCount,
                     timeout,
                     delay, circuitBreakerTimeout,
-                    executor, retry);
+                    executor, retryExecutor);
         }
     }
 

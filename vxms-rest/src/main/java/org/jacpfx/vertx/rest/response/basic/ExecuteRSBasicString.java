@@ -16,7 +16,8 @@ import java.util.function.Consumer;
 import static java.util.Optional.ofNullable;
 
 /**
- * Created by Andy Moncsek on 12.01.16. This class is the end of the fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16.
+ * This class is the end of the fluent API, all data collected to execute the chain.
  */
 public class ExecuteRSBasicString {
     protected final String methodId;

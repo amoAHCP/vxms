@@ -3,7 +3,6 @@ package org.jacpfx.vertx.rest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -23,6 +22,7 @@ import java.util.stream.Stream;
 
 /**
  * Created by Andy Moncsek on 09.03.16.
+ * Handles initialization of vxms rest module implementation
  */
 public class RESTInitializer {
 
@@ -35,10 +35,9 @@ public class RESTInitializer {
      *
      * @param vertx   the Vert.x instance
      * @param router  the Router instance
-     * @param config  the Configuration provided by the Vert.x instance
      * @param service the Vxms service object itself
      */
-    static void initRESTHandler(Vertx vertx, Router router, JsonObject config, Object service) {
+    static void initRESTHandler(Vertx vertx, Router router, Object service) {
         Stream.of(service.getClass().getDeclaredMethods()).
                 filter(m -> m.isAnnotationPresent(Path.class)).
                 forEach(restMethod -> initRestMethod(vertx, router, service, restMethod));

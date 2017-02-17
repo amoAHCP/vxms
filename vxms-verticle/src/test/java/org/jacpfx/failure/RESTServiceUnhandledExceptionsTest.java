@@ -65,7 +65,7 @@ public class RESTServiceUnhandledExceptionsTest extends VertxTestBase {
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don't have to hardecode it in your tests
+        // don'failure have to hardecode it in your tests
 
         getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
@@ -149,7 +149,7 @@ public class RESTServiceUnhandledExceptionsTest extends VertxTestBase {
             public void handle(HttpClientResponse resp) {
                 resp.bodyHandler(body -> {
                     String val = body.getString(0, body.length());
-                    System.out.println("--------exceptionInStringResponse: " + val+"  CODE: "+resp.statusCode());
+                    System.out.println("--------exceptionInStringResponse: " + resp.statusMessage()+"  CODE: "+resp.statusCode());
                     //assertEquals(key, "val");
                     testComplete();
                 });

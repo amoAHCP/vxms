@@ -93,11 +93,6 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     }
 
     @Override
-    /**
-     * Execute the reply chain with given http status code
-     *
-     * @param status, the http status code
-     */
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSObject(methodId,
@@ -180,9 +175,6 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
 
 
     @Override
-    /**
-     * Execute the reply chain
-     */
     public void execute() {
         Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
             try {

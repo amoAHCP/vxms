@@ -238,7 +238,7 @@ public class ResponseExecution {
                                                 Future<T> operationResult,
                                                 Lock lock,
                                                 Counter counter) {
-        final long initialRetryCounterValue = Long.valueOf(retry + 1).longValue();
+        final long initialRetryCounterValue = (long) (retry + 1);
         counter.addAndGet(initialRetryCounterValue, rHandler -> executeDefaultState(timeout, _userOperation, vertx, operationResult, lock));
     }
 

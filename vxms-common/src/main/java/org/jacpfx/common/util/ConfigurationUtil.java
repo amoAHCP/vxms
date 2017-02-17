@@ -45,7 +45,7 @@ public class ConfigurationUtil {
      * Returns the service name defined in {@link ServiceEndpoint} annotation or passed by configuration
      * @param config, the configuration object
      * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
-     * @return
+     * @return the Service name
      */
     public static String getServiceName(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
@@ -56,6 +56,12 @@ public class ConfigurationUtil {
     }
 
 
+    /**
+     * Returns the defined PORT to listen to
+     * @param config, the configuration object
+     * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
+     * @return the defined PORT number
+     */
     public static Integer getEndpointPort(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             org.jacpfx.common.ServiceEndpoint endpoint = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
@@ -64,6 +70,12 @@ public class ConfigurationUtil {
         return getIntegerConfiguration(config, "port", 8080);
     }
 
+    /**
+     * Returns the defined HOST name to use for HTTP listening
+     * @param config, the configuration object
+     * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
+     * @return the defined HOST name
+     */
     public static String getEndpointHost(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             org.jacpfx.common.ServiceEndpoint selfHosted = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
@@ -72,7 +84,12 @@ public class ConfigurationUtil {
         return getStringConfiguration(config, "host", getHostName());
     }
 
-
+    /**
+     * Returns the http Root context defined in {@link ServiceEndpoint} or in configuration
+     * @param config, the configuration object
+     * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
+     * @return tzhe defined Root context of your service
+     */
     public static String getContextRoot(final JsonObject config, Class clazz) {
         if (clazz.isAnnotationPresent(org.jacpfx.common.ServiceEndpoint.class)) {
             final org.jacpfx.common.ServiceEndpoint endpoint = (ServiceEndpoint) clazz.getAnnotation(ServiceEndpoint.class);
@@ -84,7 +101,7 @@ public class ConfigurationUtil {
     /**
      * Returns the Method id's Postfix. This Id is used for the stateful circuit breaker as key in a shared map. The consequence is: If value is "unique" you get a random UUID, so for each method an unique shared state will be maintained.
      * If value is "local" the process PID will be returned, so all instances in one JVM will share on lock. In case of global, the postfix ist an empty String, so all instances (the same method signature) in the cluster will share this lock.
-     * @param config
+     * @param config, the configuration object
      * @return the correct POSTFIX for method id's
      */
     public static String getCircuitBreakerIDPostfix(final JsonObject config) {
@@ -105,7 +122,7 @@ public class ConfigurationUtil {
      * Returns the current PID of your JVM instance.
      * @return the PID number as a String
      */
-    public static String getPID() {
+    private static String getPID() {
         String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
         if (processName != null && processName.length() > 0) {
             try {
@@ -121,7 +138,7 @@ public class ConfigurationUtil {
 
     /**
      * Returns the endpoint configuration object, defined in ServerEndoint annotation. If no definition is present a DefaultServerOptions instance will be created.
-     * @param clazz
+     * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
      * @return {@link CustomServerOptions} the Endpoint configuration
      */
     public static CustomServerOptions getEndpointOptions(Class clazz) {
@@ -136,7 +153,11 @@ public class ConfigurationUtil {
         return new DefaultServerOptions();
     }
 
-    public static String getHostName() {
+    /**
+     * Returns the current HOST name
+     * @return the HOST name
+     */
+    private static String getHostName() {
         String hostName = "";
         try {
             hostName = InetAddress.getLocalHost().getHostName();

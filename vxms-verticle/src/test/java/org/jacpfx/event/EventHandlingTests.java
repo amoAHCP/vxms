@@ -1,4 +1,4 @@
-package org.jacpfx;
+package org.jacpfx.event;
 
 
 import io.vertx.core.DeploymentOptions;
@@ -7,37 +7,27 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.ext.web.FileUpload;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.common.configuration.EndpointConfig;
-import org.jacpfx.entity.RestrictedBodyHandlingEndpointConfig;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
+import javax.ws.rs.*;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.MediaType;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
+public class EventHandlingTests extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "127.0.0.1";
@@ -74,7 +64,7 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don'failure have to hardecode it in your tests
+        // don't have to hardecode it in your tests
 
         getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
@@ -95,31 +85,32 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
     }
 
 
-
-
     @Test
-    /**
-     *   The default EndpointConfig returns a valid BodyHandler... if a custom EndpointConfig set this to null no body handling should be possible
-     */
-    public void noBodyHandling() throws InterruptedException, ExecutionException, IOException {
-        final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
-        File file = new File(getClass().getClassLoader().getResource("payload.xml").getFile());
-        final FileDataBodyPart filePart = new FileDataBodyPart("file", file);
-        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-        final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar").field("hello","world").bodyPart(filePart);
 
-        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/noBodyHandling");
-        final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
+    public void stringGETResponse() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://" + HOST + ":" +PORT).path("/wsService/stringGETResponse");
+        Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
 
-        //Use createResponse object to verify upload success
-        final String entity = response.readEntity(String.class);
-        System.out.println(entity);
-        assertTrue(entity.equals("no body"));
-        formDataMultiPart.close();
-        multipart.close();
+            @Override
+            public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                Assert.assertEquals(response,"test");
+                latch.countDown();
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+
+            }
+        });
+
+        latch.await();
         testComplete();
 
     }
+
 
 
     public HttpClient getClient() {
@@ -128,25 +119,13 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
 
 
     @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-    @EndpointConfig(RestrictedBodyHandlingEndpointConfig.class)
     public class WsServiceOne extends VxmsEndpoint {
 
 
-
-        @Path("/noBodyHandling")
-        @POST
-        public void noBodyHandling(RestHandler handler) {
-            handler.response().blocking().stringResponse(()-> {
-                Set<FileUpload> files = handler.request().fileUploads();
-                System.out.println("FILES: "+files+"   "+handler.request().param("foo"));
-               if(files.isEmpty()) {
-                   return "no body";
-               } else {
-                   return "body";
-               }
-            }).execute();
+        public void rsstringGETResponse(RestHandler reply) {
+            System.out.println("stringResponse: " + reply);
+            reply.response().stringResponse((future) -> future.complete("test")).execute();
         }
-
 
 
     }

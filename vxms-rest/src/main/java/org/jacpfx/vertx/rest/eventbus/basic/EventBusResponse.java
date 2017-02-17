@@ -19,23 +19,41 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
+ * Represents the start of a non-blocking execution chain
  */
 public class EventBusResponse {
     private final String methodId;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
     private final String targetId;
     private final Object message;
     private final DeliveryOptions options;
 
-
-    public EventBusResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context, String targetId,
-                            Object message, DeliveryOptions options) {
+    /**
+     * Pass all parameters to execute the chain
+     *
+     * @param methodId           the method identifier
+     * @param vertx              the vertx instance
+     * @param failure            the vertx instance
+     * @param errorMethodHandler the error-method handler
+     * @param context            the vertx routing context
+     * @param targetId           the event-bus message target-targetId
+     * @param message            the event-bus message
+     * @param options            the event-bus delivery options
+     */
+    public EventBusResponse(String methodId,
+                            Vertx vertx,
+                            Throwable failure,
+                            Consumer<Throwable> errorMethodHandler,
+                            RoutingContext context,
+                            String targetId,
+                            Object message,
+                            DeliveryOptions options) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.targetId = targetId;
@@ -47,22 +65,38 @@ public class EventBusResponse {
      * Map Response from event-bus call to REST response
      *
      * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
-     * @return the response chain
+     * @return the response chain {@link ExecuteRSBasicStringResponse}
      */
     public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-        return EventbusStringExecutionUtil.mapToStringResponse(methodId, targetId, message, stringFunction, options, vertx, t, errorMethodHandler, context);
+        return EventbusStringExecutionUtil.mapToStringResponse(methodId,
+                targetId,
+                message,
+                stringFunction,
+                options,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context);
     }
 
     /**
      * Map Response from event-bus call to REST response
      *
      * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
-     * @return the response chain
+     * @return the response chain {@link ExecuteRSBasicByteResponse}
      */
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventBusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, options, vertx, t, errorMethodHandler, context);
+        return EventBusByteExecutionUtil.mapToByteResponse(methodId,
+                targetId,
+                message,
+                byteFunction,
+                options,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context);
     }
 
     /**
@@ -70,11 +104,29 @@ public class EventBusResponse {
      *
      * @param objectFunction pass io.vertx.core.AsyncResult and future to complete with a Object
      * @param encoder        the Object encoder
-     * @return the response chain
+     * @return the response chain {@link ExecuteRSBasicObjectResponse}
      */
     public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusObjectExecutionUtil.mapToObjectResponse(methodId, targetId, message, objectFunction, options, vertx, t, errorMethodHandler, context, null, null, encoder, null, null, 0, 0, 0, 0l, 0l);
+        return EventbusObjectExecutionUtil.mapToObjectResponse(methodId,
+                targetId,
+                message,
+                objectFunction,
+                options,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context,
+                null,
+                null,
+                encoder,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0l,
+                0l);
     }
 
 

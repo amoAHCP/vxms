@@ -10,7 +10,6 @@ import java.io.IOException;
  * Created by Andy Moncsek on 25.11.15.
  */
 public class ExampleByteEncoder implements Encoder.ByteEncoder<Payload<String>> {
-    // TODO create a "more reactive" interface
     @Override
     public byte[] encode(Payload<String> input) {
         try {

@@ -8,18 +8,23 @@ import io.vertx.ext.web.RoutingContext;
 import java.util.Set;
 
 /**
- * Created by Andy Moncsek on 12.01.16. This class allows easy access to Request values like Cookies, parameters and attributes.
+ * Created by Andy Moncsek on 12.01.16.
+ * This class allows easy access to Request values like Cookies, parameters and attributes.
  */
 public class RSRequest {
 
     private final RoutingContext context;
 
+    /**
+     * @param context the Vert.x routing context
+     */
     public RSRequest(RoutingContext context) {
         this.context = context;
     }
 
     /**
      * Returns the parameter value for the given parameter name
+     *
      * @param paramName the http parameter name
      * @return the parameter value
      */
@@ -29,6 +34,7 @@ public class RSRequest {
 
     /**
      * Returns the header value for requested name
+     *
      * @param headerName the header name
      * @return the requested header value
      */
@@ -38,6 +44,7 @@ public class RSRequest {
 
     /**
      * Returns the form attribute for requested name
+     *
      * @param attributeName the name of the attribute
      * @return the attribute requested
      */
@@ -47,6 +54,7 @@ public class RSRequest {
 
     /**
      * Returns a set with uploaded files
+     *
      * @return the set of files
      */
     public Set<FileUpload> fileUploads() {
@@ -55,6 +63,7 @@ public class RSRequest {
 
     /**
      * Returns a set of cookies
+     *
      * @return the set of cookies
      */
     public Set<Cookie> cookies() {
@@ -63,6 +72,7 @@ public class RSRequest {
 
     /**
      * Returns a cookie by name
+     *
      * @param name the cookie name
      * @return the cookie
      */
@@ -72,6 +82,7 @@ public class RSRequest {
 
     /**
      * Returns the request body
+     *
      * @return the request body
      */
     public Buffer body() {

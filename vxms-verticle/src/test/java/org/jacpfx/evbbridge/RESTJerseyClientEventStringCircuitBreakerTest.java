@@ -72,7 +72,7 @@ public class RESTJerseyClientEventStringCircuitBreakerTest extends VertxTestBase
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don't have to hardecode it in your tests
+        // don'failure have to hardecode it in your tests
 
 
         getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
@@ -167,7 +167,7 @@ public class RESTJerseyClientEventStringCircuitBreakerTest extends VertxTestBase
                 String value = response;
                 vertx.runOnContext(h -> {
 
-                    assertEquals(value, "No handlers for address hello1");
+                    assertEquals("No handlers for address hello1",value);
 
                    vertx.setTimer(1000,val -> {
                        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
@@ -179,7 +179,7 @@ public class RESTJerseyClientEventStringCircuitBreakerTest extends VertxTestBase
                                String value = response;
                                vertx.runOnContext(h -> {
 
-                                   assertEquals(value, "circuit open");
+                                   assertEquals("circuit open", value);
 
                                    vertx.setTimer(2000,val -> {
                                        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
@@ -190,7 +190,7 @@ public class RESTJerseyClientEventStringCircuitBreakerTest extends VertxTestBase
                                                System.out.println("Response entity '" + response + "' received.");
                                                String value = response;
                                                vertx.runOnContext(h -> {
-                                                   assertEquals(value, "No handlers for address hello1");
+                                                   assertEquals("No handlers for address hello1",value);
                                                });
                                                latch.countDown();
                                            }

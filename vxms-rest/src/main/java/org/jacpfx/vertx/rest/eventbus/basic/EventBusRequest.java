@@ -15,37 +15,90 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
+ * Defines an event-bus request as the beginning of your (blocking) execution chain
  */
 public class EventBusRequest {
     private final String methodId;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
 
-    public EventBusRequest(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, RoutingContext context) {
+    /**
+     * Pass all members to execute the chain
+     *
+     * @param methodId           the method identifier
+     * @param vertx              the vertx instance
+     * @param failure            the vertx instance
+     * @param errorMethodHandler the error-method handler
+     * @param context            the vertx routing context
+     */
+    public EventBusRequest(String methodId,
+                           Vertx vertx,
+                           Throwable failure,
+                           Consumer<Throwable> errorMethodHandler,
+                           RoutingContext context) {
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.methodId = methodId;
     }
 
-    public EventBusResponse send(String id, Object message) {
-        return new EventBusResponse(methodId, vertx, t, errorMethodHandler, context, id, message, null);
+    /**
+     * Send message and perform (blocking) task on reply
+     *
+     * @param targetId the target id to send to
+     * @param message  the message to send
+     * @return the execution chain {@link EventBusResponse}
+     */
+    public EventBusResponse send(String targetId, Object message) {
+        return new EventBusResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context,
+                targetId,
+                message,
+                null);
     }
 
-    public EventBusResponse send(String id, Object message, DeliveryOptions options) {
-        return new EventBusResponse(methodId, vertx, t, errorMethodHandler, context, id, message, options);
+    /**
+     * @param targetId the target id to send to
+     * @param message  the message to send
+     * @param options  the delivery options for sending the message
+     * @return the execution chain {@link EventBusResponse}
+     */
+    public EventBusResponse send(String targetId, Object message, DeliveryOptions options) {
+        return new EventBusResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                context,
+                targetId,
+                message,
+                options);
     }
 
-
-    public void sendAndRespondRequest(String id, Object message) {
-        sendAndRespondRequest(id, message, new DeliveryOptions());
+    /**
+     * Quickreply, send message over event-bus and pass the result directly to rest response
+     *
+     * @param targetId the target id to send to
+     * @param message  the message to send
+     */
+    public void sendAndRespondRequest(String targetId, Object message) {
+        sendAndRespondRequest(targetId, message, new DeliveryOptions());
     }
 
-    public void sendAndRespondRequest(String id, Object message, DeliveryOptions options) {
-        vertx.eventBus().send(id, message, options != null ? options : new DeliveryOptions(), event -> {
+    /**
+     * Quickreply, send message over event-bus and pass the result directly to rest response
+     *
+     * @param targetId the target id to send to
+     * @param message  the message to send
+     * @param options  the event-bus delivery options
+     */
+    public void sendAndRespondRequest(String targetId, Object message, DeliveryOptions options) {
+        vertx.eventBus().send(targetId, message, options != null ? options : new DeliveryOptions(), event -> {
             final HttpServerResponse response = context.response();
             if (event.failed()) {
                 response.setStatusCode(HttpResponseStatus.SERVICE_UNAVAILABLE.code()).end();
@@ -66,7 +119,12 @@ public class EventBusRequest {
         }
     }
 
+    /**
+     * Switch to blocking API
+     *
+     * @return the blocking chain {@link EventBusBlockingRequest}
+     */
     public EventBusBlockingRequest blocking() {
-        return new EventBusBlockingRequest(methodId, vertx, t, errorMethodHandler, context);
+        return new EventBusBlockingRequest(methodId, vertx, failure, errorMethodHandler, context);
     }
 }

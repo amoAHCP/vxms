@@ -73,20 +73,21 @@ public class RESTJerseyClientEventObjectCircuitBreakerTest extends VertxTestBase
         DeploymentOptions options = new DeploymentOptions().setInstances(1);
         options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don't have to hardecode it in your tests
+        // don'failure have to hardecode it in your tests
 
 
-        getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
-            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
-            assertTrue(asyncResult.succeeded());
-            assertNotNull("deploymentID should not be null", asyncResult.result());
-            // If deployed correctly then start the tests!
-            //   latch2.countDown();
+        getVertx().
+                deployVerticle(new WsServiceTwo(), options, asyncResult -> {
+                    // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+                    System.out.println("start service: " + asyncResult.succeeded());
+                    assertTrue(asyncResult.succeeded());
+                    assertNotNull("deploymentID should not be null", asyncResult.result());
+                    // If deployed correctly then start the tests!
+                    //   latch2.countDown();
 
-            latch2.countDown();
+                    latch2.countDown();
 
-        });
+                });
         getVertx().deployVerticle(new TestVerticle(), options, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             System.out.println("start service: " + asyncResult.succeeded());
@@ -271,12 +272,12 @@ public class RESTJerseyClientEventObjectCircuitBreakerTest extends VertxTestBase
             reply.eventBusRequest().
                     send("hello1", "welt").
                     mapToObjectResponse((handler, future) ->
-                            future.complete(new Payload<>(handler.result().body().toString())),new ExampleByteEncoder()).
+                            future.complete(new Payload<>(handler.result().body().toString())), new ExampleByteEncoder()).
                     onError(error ->
                             System.out.println(":::" + error.getMessage())).
                     retry(3).
                     onFailureRespond((t, c) ->
-                            c.complete(new Payload<>(t.getMessage())),new ExampleByteEncoder()).
+                            c.complete(new Payload<>(t.getMessage())), new ExampleByteEncoder()).
                     execute();
             System.out.println("-------2");
         }
@@ -290,13 +291,13 @@ public class RESTJerseyClientEventObjectCircuitBreakerTest extends VertxTestBase
                     mapToObjectResponse((handler, future) -> {
                         System.out.println("value from event  ");
                         future.complete(new Payload<>(handler.result().body().toString()));
-                    },new ExampleByteEncoder()).
+                    }, new ExampleByteEncoder()).
                     onError(error -> {
                         System.out.println(":::" + error.getMessage());
                     }).
                     retry(3).
                     closeCircuitBreaker(2000).
-                    onFailureRespond((t, c) -> c.complete(new Payload<>(t.getMessage())),new ExampleByteEncoder()).
+                    onFailureRespond((t, c) -> c.complete(new Payload<>(t.getMessage())), new ExampleByteEncoder()).
                     execute();
             System.out.println("-------2");
         }

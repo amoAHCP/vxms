@@ -157,7 +157,7 @@ public class ResponseBlockingExecution {
                                                 Vertx vertx, Throwable _t, int _retry,
                                                 long _timeout, long _circuitBreakerTimeout,
                                                 long _delay, Lock lock, Counter counter) {
-        final long initialRetryCounterValue = Long.valueOf(_retry + 1).longValue();
+        final long initialRetryCounterValue = (long) (_retry + 1);
         counter.addAndGet(initialRetryCounterValue, rHandler -> executeDefault(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
                 _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, lock));
     }
@@ -227,7 +227,7 @@ public class ResponseBlockingExecution {
 
     private static void setCircuitBreakerReleaseTimer(Vertx vertx, int _retry, long _circuitBreakerTimeout, Counter counter) {
         vertx.setTimer(_circuitBreakerTimeout, timer -> {
-            final long initialRetryCounterValue = Long.valueOf(_retry + 1).longValue();
+            final long initialRetryCounterValue = (long) (_retry + 1);
             counter.addAndGet(initialRetryCounterValue, val -> {
             });
         });

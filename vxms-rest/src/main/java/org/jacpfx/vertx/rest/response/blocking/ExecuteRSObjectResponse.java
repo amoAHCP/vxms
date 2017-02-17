@@ -105,7 +105,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
     /**
      * Will be executed on each error
      *
-     * @param errorHandler
+     * @param errorHandler the error handler to execute on error event
      * @return the createResponse chain {@link ExecuteRSObjectResponse}
      */
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
@@ -131,7 +131,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
     /**
      * retry operation on error
      *
-     * @param retryCount
+     * @param retryCount the amount of retries
      * @return the createResponse chain {@link ExecuteRSObjectCircuitBreaker}
      */
     public ExecuteRSObjectCircuitBreaker retry(int retryCount) {
@@ -183,7 +183,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
     /**
      * Defines the delay (in ms) between the createResponse retries (on error).
      *
-     * @param delay
+     * @param delay the amount of time in ms between an error and the retry attempt
      * @return the createResponse chain
      */
     public ExecuteRSObjectResponse delay(long delay) {

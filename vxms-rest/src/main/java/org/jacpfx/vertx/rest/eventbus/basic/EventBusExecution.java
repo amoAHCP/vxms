@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
+ * Handles event-bus call and non-blocking execution of the message to create a rest response
  */
 public class EventBusExecution {
 
@@ -31,26 +32,54 @@ public class EventBusExecution {
     public static final long LOCK_VALUE = -1l;
     public static final int DEFAULT_LOCK_TIMEOUT = 2000;
     public static final long DEFAULT_VALUE = 0l;
-
-    public static <T> void sendMessageAndSupplyStringHandler(String methodId,
-                                                             String id, Object message,
-                                                             ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
-                                                             DeliveryOptions deliveryOptions,
-                                                             Vertx vertx, Throwable t,
-                                                             Consumer<Throwable> errorMethodHandler,
-                                                             RoutingContext context, Map<String, String> headers,
-                                                             Encoder encoder, Consumer<Throwable> errorHandler,
-                                                             ThrowableErrorConsumer<Throwable, T> onFailureRespond,
-                                                             int httpStatusCode, int httpErrorCode,
-                                                             int retryCount, long timeout,
-                                                             long circuitBreakerTimeout,
-                                                             RecursiveExecutor executor, RetryExecutor retry) {
+    /**
+     * Send event-bus message and process the result in the passed function for the execution chain
+     *
+     * @param methodId              the method identifier
+     * @param targetId              the event-bus target id
+     * @param message               the message to send
+     * @param function              the function to process the result message
+     * @param deliveryOptions       the event-bus delivery options
+     * @param vertx                 the vertx instance
+     * @param failure               the failure thrown while task execution
+     * @param errorMethodHandler    the error-method handler
+     * @param context               the vertx routing context
+     * @param headers               the headers to pass to the response
+     * @param encoder               the encoder to encode your objects
+     * @param errorHandler          the error handler
+     * @param onFailureRespond      the consumer that takes a Future with the alternate response value in case of failure
+     * @param httpStatusCode        the http status code to set for response
+     * @param httpErrorCode         the http error code to set in case of failure handling
+     * @param retryCount            the amount of retries before failure execution is triggered
+     * @param timeout               the amount of time before the execution will be aborted
+     * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+     * @param executor              the typed executor to process the chain
+     * @param retryExecutor         the typed retryExecutor executor of the chain
+     * @param <T>                   the type of response
+     */
+    public static <T> void sendMessageAndSupplyHandler(String methodId,
+                                                       String targetId,
+                                                       Object message,
+                                                       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
+                                                       DeliveryOptions deliveryOptions,
+                                                       Vertx vertx,
+                                                       Throwable failure,
+                                                       Consumer<Throwable> errorMethodHandler,
+                                                       RoutingContext context,
+                                                       Map<String, String> headers,
+                                                       Encoder encoder,
+                                                       Consumer<Throwable> errorHandler,
+                                                       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
+                                                       int httpStatusCode, int httpErrorCode,
+                                                       int retryCount, long timeout,
+                                                       long circuitBreakerTimeout,
+                                                       RecursiveExecutor executor, RetryExecutor retryExecutor) {
         if (circuitBreakerTimeout == DEFAULT_VALUE) {
             executeDefaultState(methodId,
-                    id, message,
-                    stringFunction,
+                    targetId, message,
+                    function,
                     deliveryOptions,
-                    vertx, t,
+                    vertx, failure,
                     errorMethodHandler,
                     context, headers,
                     encoder, errorHandler,
@@ -59,13 +88,13 @@ public class EventBusExecution {
                     httpErrorCode,
                     retryCount, timeout,
                     circuitBreakerTimeout,
-                    executor, retry, null);
+                    executor, retryExecutor, null);
         } else {
             executeStateful(methodId,
-                    id, message,
-                    stringFunction,
+                    targetId, message,
+                    function,
                     deliveryOptions,
-                    vertx, t,
+                    vertx, failure,
                     errorMethodHandler,
                     context,
                     headers,
@@ -77,7 +106,7 @@ public class EventBusExecution {
                     retryCount,
                     timeout,
                     circuitBreakerTimeout,
-                    executor, retry);
+                    executor, retryExecutor);
         }
     }
 

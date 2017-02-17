@@ -14,12 +14,13 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16.
+ * Fluent API to define a Task and to reply the request with the output of your task.
  */
 public class RSResponse {
     private final String methodId;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
     private final Map<String, String> headers;
@@ -34,10 +35,15 @@ public class RSResponse {
      * @param context            the vertx routing context
      * @param headers            the headers to pass to the response
      */
-    public RSResponse(String methodId, Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers) {
+    public RSResponse(String methodId,
+                      Vertx vertx,
+                      Throwable failure,
+                      Consumer<Throwable> errorMethodHandler,
+                      RoutingContext context,
+                      Map<String, String> headers) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = failure;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
         this.headers = headers;
@@ -49,7 +55,7 @@ public class RSResponse {
      * @return {@link RSResponseBlocking}
      */
     public RSResponseBlocking blocking() {
-        return new RSResponseBlocking(methodId, vertx, t, errorMethodHandler, context, headers);
+        return new RSResponseBlocking(methodId, vertx, failure, errorMethodHandler, context, headers);
     }
 
     /**
@@ -61,7 +67,7 @@ public class RSResponse {
     public ExecuteRSBasicByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
         return new ExecuteRSBasicByteResponse(methodId,
                 vertx,
-                t,
+                failure,
                 errorMethodHandler,
                 context,
                 headers,
@@ -86,7 +92,7 @@ public class RSResponse {
     public ExecuteRSBasicStringResponse stringResponse(ThrowableFutureConsumer<String> stringConsumer) {
         return new ExecuteRSBasicStringResponse(methodId,
                 vertx,
-                t,
+                failure,
                 errorMethodHandler,
                 context,
                 headers,
@@ -106,12 +112,13 @@ public class RSResponse {
      * Returns a Serializable to the target type
      *
      * @param objectConsumer consumes a io.vertx.core.Future to complete with a Serialized Object response
+     * @param encoder        the encoder to serialize the object response
      * @return {@link ExecuteRSBasicObjectResponse}
      */
     public ExecuteRSBasicObjectResponse objectResponse(ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
         return new ExecuteRSBasicObjectResponse(methodId,
                 vertx,
-                t,
+                failure,
                 errorMethodHandler,
                 context,
                 headers,

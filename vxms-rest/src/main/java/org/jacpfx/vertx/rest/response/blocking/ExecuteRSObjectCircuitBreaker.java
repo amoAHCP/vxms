@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * This class defines the fluid API part to define the amount of time after the circuit breaker will be closed again
  */
 public class ExecuteRSObjectCircuitBreaker extends ExecuteRSObjectResponse {
 

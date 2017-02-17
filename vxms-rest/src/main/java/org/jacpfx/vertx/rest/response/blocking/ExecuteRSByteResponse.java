@@ -103,7 +103,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
     /**
      * Will be executed on each error
      *
-     * @param errorHandler
+     * @param errorHandler the handler to execute on error event
      * @return the createResponse chain {@link ExecuteRSByteResponse}
      */
     public ExecuteRSByteResponse onError(Consumer<Throwable> errorHandler) {
@@ -129,7 +129,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
     /**
      * retry operation on error
      *
-     * @param retryCount
+     * @param retryCount the amount of retries before failure
      * @return the createResponse chain {@link ExecuteRSByteCircuitBreaker}
      */
     public ExecuteRSByteCircuitBreaker retry(int retryCount) {
@@ -181,7 +181,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
     /**
      * Defines the delay (in ms) between the createResponse retries.
      *
-     * @param delay
+     * @param delay the amount of delay in ms between an error and the retry attempt
      * @return the createResponse chain {@link ExecuteRSByteResponse}
      */
     public ExecuteRSByteResponse delay(long delay) {
