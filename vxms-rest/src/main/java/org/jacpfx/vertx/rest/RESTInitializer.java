@@ -7,6 +7,7 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.util.ConfigurationUtil;
+import org.jacpfx.common.util.URIUtil;
 import org.jacpfx.vertx.rest.annotation.OnRestError;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.rest.util.ReflectionUtil;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 public class RESTInitializer {
 
 
-    public static final String ROOT = "/";
+
     public static final String HTTP_ALL = "ALL";
 
     /**
@@ -79,42 +80,42 @@ public class RESTInitializer {
 
     private static void initHttpAll(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
         final Optional<Method> errorMethod = errorMethodStream.findFirst();
-        final Route route = router.route(cleanPath(path.value()));
+        final Route route = router.route(URIUtil.cleanPath(path.value()));
         final Context context = vertx.getOrCreateContext();
         final String methodId = path.value() + HTTP_ALL + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpRoute(methodId, vertx, service, restMethod, consumes, errorMethod, route);
     }
 
     private static void initHttpDelete(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.delete(cleanPath(path.value()));
+        final Route route = router.delete(URIUtil.cleanPath(path.value()));
         final Context context = vertx.getOrCreateContext();
         final String methodId = path.value() + DELETE.class.getName() + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, DELETE.class);
     }
 
     private static void initHttpPut(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.put(cleanPath(path.value()));
+        final Route route = router.put(URIUtil.cleanPath(path.value()));
         final Context context = vertx.getOrCreateContext();
         final String methodId = path.value() + PUT.class.getName() + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, PUT.class);
     }
 
     private static void initHttpOptions(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.options(cleanPath(path.value()));
+        final Route route = router.options(URIUtil.cleanPath(path.value()));
         final Context context = vertx.getOrCreateContext();
         final String methodId = path.value() + OPTIONS.class.getName() + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, OPTIONS.class);
     }
 
     private static void initHttpPost(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.post(cleanPath(path.value()));
+        final Route route = router.post(URIUtil.cleanPath(path.value()));
         final Context context = vertx.getOrCreateContext();
         final String methodId = path.value() + POST.class.getName() + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, POST.class);
     }
 
     protected static void initHttpGet(Vertx vertx, Router router, Object service, Method restMethod, Path path, Stream<Method> errorMethodStream, Optional<Consumes> consumes) {
-        final Route route = router.get(cleanPath(path.value()));
+        final Route route = router.get(URIUtil.cleanPath(path.value()));
         final Context context = vertx.getOrCreateContext();
         final String methodId = path.value() + GET.class.getName() + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vertx, service, restMethod, route, errorMethodStream, consumes, GET.class);
@@ -194,7 +195,5 @@ public class RESTInitializer {
         throwable.printStackTrace();
     }
 
-    private static String cleanPath(String path) {
-        return path.startsWith(ROOT) ? path : ROOT + path;
-    }
+
 }

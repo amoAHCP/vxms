@@ -14,6 +14,7 @@ import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
+import org.jacpfx.common.util.URIUtil;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -52,7 +53,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
         log("create http server: "+options.getHost()+":"+options.getPort());
         final boolean secure = options.isSsl();
-        final boolean contextRootSet = isContextRootSet(Optional.ofNullable(contexRoot).orElse(""));
+        final boolean contextRootSet = URIUtil.isContextRootSet(Optional.ofNullable(contexRoot).orElse(""));
         final Router topRouter = Router.router(vertx);
         final Router subRouter = contextRootSet ? Router.router(vertx) : null;
         final Router router = contextRootSet ? subRouter : topRouter;
@@ -61,15 +62,21 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         getConfig().put("secure", secure);
 
         initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
-        initWebSocketExtensions(server);
-        initRESTExtensions(router);
 
+        initHandlerSPIs(server, router);
+        System.out.println("registered SPI");
         postEndoitConfiguration(endpointConfiguration, router);
 
         if (contextRootSet)
-            topRouter.mountSubRouter(getCleanContextRoot(Optional.ofNullable(contexRoot).orElse("")), subRouter);
+            topRouter.mountSubRouter(URIUtil.getCleanContextRoot(Optional.ofNullable(contexRoot).orElse("")), subRouter);
 
         initHTTPEndpoint(startFuture, port, host, server, topRouter);
+    }
+
+    private void initHandlerSPIs(HttpServer server, Router router) {
+        initWebSocketExtensions(server);
+        initRESTExtensions(router);
+        initEventBusExtensions();
     }
 
     /**
@@ -106,6 +113,13 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vertx, router,  this));
     }
 
+    private void initEventBusExtensions() {
+        // check for REST extension
+        Optional.
+                ofNullable(getEventBusSPI()).
+                ifPresent(eventbusHandlerSPI -> eventbusHandlerSPI.initEventHandler(vertx, this));
+    }
+
     private void initWebSocketExtensions(HttpServer server) {
         // check for websocket extension
         Optional.
@@ -113,9 +127,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 ifPresent(webSockethandlerSPI -> webSockethandlerSPI.registerWebSocketHandler(server, vertx, getConfig(), this));
     }
 
-    private boolean isContextRootSet(String cRoot) {
-        return !cRoot.trim().equals(SLASH) && cRoot.length() > 1;
-    }
+
 
     private void initServiceDiscovery(ServiceDiscoverySpi serviceDiscovery, final Future<Void> startFuture) {
         final AbstractVerticle current = this;
