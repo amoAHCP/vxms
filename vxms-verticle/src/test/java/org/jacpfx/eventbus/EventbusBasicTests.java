@@ -86,6 +86,19 @@ public class EventbusBasicTests extends VertxTestBase {
 
     @Test
 
+    public void simpleBlockingStringResponse() throws InterruptedException {
+        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleBlockingStringResponse", "hello", res -> {
+            assertTrue(res.succeeded());
+            assertEquals("hello", res.result().body().toString());
+            System.out.println("out: " + res.result().body().toString());
+            testComplete();
+        });
+        await();
+
+    }
+
+    @Test
+
     public void simpleStringResponse() throws InterruptedException {
         getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponse", "hello", res -> {
             assertTrue(res.succeeded());
@@ -120,11 +133,53 @@ public class EventbusBasicTests extends VertxTestBase {
 
     }
 
-
     @Test
 
+    public void simpleBlockingByteResponse() throws InterruptedException {
+        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleBlockingByteResponse", "hello", res -> {
+            assertTrue(res.succeeded());
+            Payload<String> pp = null;
+            final Object body = res.result().body();
+            try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            String value = pp.getValue();
+            assertEquals("hello", value);
+            System.out.println("out: " + value);
+            testComplete();
+        });
+        await();
+
+    }
+    @Test
     public void simpleObjectResponse() throws InterruptedException {
         getVertx().eventBus().send(SERVICE_REST_GET + "/simpleObjectResponse", "hello", res -> {
+            assertTrue(res.succeeded());
+            Payload<String> pp = null;
+            final Object body = res.result().body();
+            try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            String value = pp.getValue();
+            assertEquals("hello", value);
+            System.out.println("out: " + value);
+            testComplete();
+        });
+        await();
+
+    }
+
+    @Test
+    public void simpleBlockingObjectResponse() throws InterruptedException {
+        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleBlockingObjectResponse", "hello", res -> {
             assertTrue(res.succeeded());
             Payload<String> pp = null;
             final Object body = res.result().body();
@@ -158,6 +213,12 @@ public class EventbusBasicTests extends VertxTestBase {
             reply.response().stringResponse((future) -> future.complete(reply.request().body().toString())).execute();
         }
 
+        @Consume("/simpleBlockingStringResponse")
+        public void simpleBlockingStringResponse(EventbusHandler reply) {
+            System.out.println("simpleStringResponse: " + reply);
+            reply.response().blocking().stringResponse(() -> reply.request().body().toString()).execute();
+        }
+
 
         @Consume("/simpleByteResponse")
         public void simpleByteResponse(EventbusHandler reply) {
@@ -166,11 +227,25 @@ public class EventbusBasicTests extends VertxTestBase {
             reply.response().byteResponse((future) -> future.complete(Serializer.serialize(p))).execute();
         }
 
+        @Consume("/simpleBlockingByteResponse")
+        public void simpleBlockingByteResponse(EventbusHandler reply) {
+            System.out.println("simpleByteResponse: " + reply);
+            Payload<String> p = new Payload<>(reply.request().body().toString());
+            reply.response().blocking().byteResponse(() -> Serializer.serialize(p)).execute();
+        }
+
         @Consume("/simpleObjectResponse")
         public void simpleObjectResponse(EventbusHandler reply) {
             System.out.println("simpleByteResponse: " + reply);
             Payload<String> p = new Payload<>(reply.request().body().toString());
             reply.response().objectResponse((future) -> future.complete(p), new ExampleByteEncoder()).execute();
+        }
+
+        @Consume("/simpleBlockingObjectResponse")
+        public void simpleBlockingObjectResponse(EventbusHandler reply) {
+            System.out.println("simpleByteResponse: " + reply);
+            Payload<String> p = new Payload<>(reply.request().body().toString());
+            reply.response().blocking().objectResponse(() -> p, new ExampleByteEncoder()).execute();
         }
 
     }
