@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 12.01.16.
  * Fluent API to define a Task and to reply the request with the output of your task.
  */
-public class RSResponse {
+public class RESTResponse {
     private final String methodId;
     private final Vertx vertx;
     private final Throwable failure;
@@ -35,12 +35,12 @@ public class RSResponse {
      * @param context            the vertx routing context
      * @param headers            the headers to pass to the response
      */
-    public RSResponse(String methodId,
-                      Vertx vertx,
-                      Throwable failure,
-                      Consumer<Throwable> errorMethodHandler,
-                      RoutingContext context,
-                      Map<String, String> headers) {
+    public RESTResponse(String methodId,
+                        Vertx vertx,
+                        Throwable failure,
+                        Consumer<Throwable> errorMethodHandler,
+                        RoutingContext context,
+                        Map<String, String> headers) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.failure = failure;
@@ -52,10 +52,10 @@ public class RSResponse {
     /**
      * Switch to blocking mode
      *
-     * @return {@link RSResponseBlocking}
+     * @return {@link RESTResponseBlocking}
      */
-    public RSResponseBlocking blocking() {
-        return new RSResponseBlocking(methodId, vertx, failure, errorMethodHandler, context, headers);
+    public RESTResponseBlocking blocking() {
+        return new RESTResponseBlocking(methodId, vertx, failure, errorMethodHandler, context, headers);
     }
 
     /**

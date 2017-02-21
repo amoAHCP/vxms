@@ -8,7 +8,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusByteCall;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusByteCall;
 
 import java.util.Map;
 import java.util.Objects;
@@ -30,7 +30,7 @@ public class ExecuteRSBasicByte {
     protected final Consumer<Throwable> errorMethodHandler;
     protected final ThrowableFutureConsumer<byte[]> byteConsumer;
     protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
-    protected final ExecuteEventBusByteCall excecuteEventBusAndReply;
+    protected final ExecuteEventbusByteCall excecuteEventBusAndReply;
     protected final Encoder encoder;
     protected final int httpStatusCode;
     protected final int httpErrorCode;
@@ -65,7 +65,7 @@ public class ExecuteRSBasicByte {
                               RoutingContext context,
                               Map<String, String> headers,
                               ThrowableFutureConsumer<byte[]> byteConsumer,
-                              ExecuteEventBusByteCall excecuteEventBusAndReply,
+                              ExecuteEventbusByteCall excecuteEventBusAndReply,
                               Encoder encoder,
                               Consumer<Throwable> errorHandler,
                               ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,

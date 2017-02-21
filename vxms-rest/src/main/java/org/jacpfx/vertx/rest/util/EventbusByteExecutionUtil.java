@@ -9,8 +9,8 @@ import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.eventbus.basic.EventBusExecution;
-import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusByteCall;
+import org.jacpfx.vertx.rest.eventbus.basic.EventbusExecution;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusByteCall;
 import org.jacpfx.vertx.rest.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vertx.rest.interfaces.basic.RetryExecutor;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 05.04.16.
  * Typed execution of event-bus calls and byte response
  */
-public class EventBusByteExecutionUtil {
+public class EventbusByteExecutionUtil {
     /**
      * create execution chain for event-bus request and reply to rest
      *
@@ -180,7 +180,7 @@ public class EventBusByteExecutionUtil {
                         execute();
 
 
-        final ExecuteEventBusByteCall excecuteEventBusAndReply = (vertx,
+        final ExecuteEventbusByteCall excecuteEventBusAndReply = (vertx,
                                                                   t,
                                                                   errorMethodHandler,
                                                                   context, headers,
@@ -190,7 +190,7 @@ public class EventBusByteExecutionUtil {
                                                                   httpErrorCode,
                                                                   retryCount,
                                                                   timeout, circuitBreakerTimeout) ->
-                EventBusExecution.sendMessageAndSupplyHandler(_methodId,
+                EventbusExecution.sendMessageAndSupplyHandler(_methodId,
                         _targetId,
                         _message,
                         _byteFunction,

@@ -10,7 +10,7 @@ import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicStringResponse;
-import org.jacpfx.vertx.rest.util.EventBusByteExecutionUtil;
+import org.jacpfx.vertx.rest.util.EventbusByteExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vertx.rest.util.EventbusStringExecutionUtil;
 
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 14.03.16.
  * Represents the start of a non-blocking execution chain
  */
-public class EventBusResponse {
+public class EventbusResponse {
     private final String methodId;
     private final Vertx vertx;
     private final Throwable failure;
@@ -43,7 +43,7 @@ public class EventBusResponse {
      * @param message            the event-bus message
      * @param options            the event-bus delivery options
      */
-    public EventBusResponse(String methodId,
+    public EventbusResponse(String methodId,
                             Vertx vertx,
                             Throwable failure,
                             Consumer<Throwable> errorMethodHandler,
@@ -88,7 +88,7 @@ public class EventBusResponse {
      */
     public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventBusByteExecutionUtil.mapToByteResponse(methodId,
+        return EventbusByteExecutionUtil.mapToByteResponse(methodId,
                 targetId,
                 message,
                 byteFunction,

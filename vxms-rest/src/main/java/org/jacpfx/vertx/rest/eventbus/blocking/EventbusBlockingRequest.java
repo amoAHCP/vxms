@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 14.03.16.
  * Defines an event-bus request as the beginning of your (blocking) execution chain
  */
-public class EventBusBlockingRequest {
+public class EventbusBlockingRequest {
     private final String methodId;
     private final Vertx vertx;
     private final Throwable failure;
@@ -26,7 +26,7 @@ public class EventBusBlockingRequest {
      * @param errorMethodHandler the error-method handler
      * @param context            the vertx routing context
      */
-    public EventBusBlockingRequest(String methodId,
+    public EventbusBlockingRequest(String methodId,
                                    Vertx vertx,
                                    Throwable failure,
                                    Consumer<Throwable> errorMethodHandler,
@@ -44,10 +44,10 @@ public class EventBusBlockingRequest {
      *
      * @param targetId the target id to send to
      * @param message  the message to send
-     * @return the execution chain {@link EventBusBlockingResponse}
+     * @return the execution chain {@link EventbusBlockingResponse}
      */
-    public EventBusBlockingResponse send(String targetId, Object message) {
-        return new EventBusBlockingResponse(methodId,
+    public EventbusBlockingResponse send(String targetId, Object message) {
+        return new EventbusBlockingResponse(methodId,
                 vertx,
                 failure,
                 errorMethodHandler,
@@ -63,10 +63,10 @@ public class EventBusBlockingRequest {
      * @param targetId the target id to send to
      * @param message  the message to send
      * @param options the delivery options for sending the message
-     * @return the execution chain {@link EventBusBlockingResponse}
+     * @return the execution chain {@link EventbusBlockingResponse}
      */
-    public EventBusBlockingResponse send(String targetId, Object message, DeliveryOptions options) {
-        return new EventBusBlockingResponse(methodId,
+    public EventbusBlockingResponse send(String targetId, Object message, DeliveryOptions options) {
+        return new EventbusBlockingResponse(methodId,
                 vertx,
                 failure,
                 errorMethodHandler,

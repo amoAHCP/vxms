@@ -2,14 +2,14 @@ package org.jacpfx.vertx.rest.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.vertx.rest.eventbus.basic.EventBusRequest;
+import org.jacpfx.vertx.rest.eventbus.basic.EventbusRequest;
 
 import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 07.01.16.
- * The RestHandler gives access to the {@link RoutingContext} , the {@link RSRequest} , the {@link RSResponse} and the {@link EventBusRequest}. It is the Entry point to the fluent API to perform tasks and create responses.
+ * The RestHandler gives access to the {@link RoutingContext} , the {@link RESTRequest} , the {@link RESTResponse} and the {@link EventbusRequest}. It is the Entry point to the fluent API to perform tasks and create responses.
  */
 public class RestHandler {
     private final Vertx vertx;
@@ -48,28 +48,28 @@ public class RestHandler {
     /**
      * Returns the data wrapper to access the http request, attributes and parameters.
      *
-     * @return {@link RSRequest}
+     * @return {@link RESTRequest}
      */
-    public RSRequest request() {
-        return new RSRequest(context);
+    public RESTRequest request() {
+        return new RESTRequest(context);
     }
 
     /**
      * Starts the fluent API handling to execute tasks and create a response
      *
-     * @return {@link RSResponse}
+     * @return {@link RESTResponse}
      */
-    public RSResponse response() {
-        return new RSResponse(methodId, vertx, failure, errorMethodHandler, context, new HashMap<>());
+    public RESTResponse response() {
+        return new RESTResponse(methodId, vertx, failure, errorMethodHandler, context, new HashMap<>());
     }
 
     /**
      * Starts the fluent API to create an Event bus request, to perform a task and to create a response
      *
-     * @return {@link EventBusRequest}
+     * @return {@link EventbusRequest}
      */
-    public EventBusRequest eventBusRequest() {
-        return new EventBusRequest(methodId, vertx, failure, errorMethodHandler, context);
+    public EventbusRequest eventBusRequest() {
+        return new EventbusRequest(methodId, vertx, failure, errorMethodHandler, context);
     }
 
 }

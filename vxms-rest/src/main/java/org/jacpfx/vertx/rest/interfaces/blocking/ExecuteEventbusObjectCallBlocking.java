@@ -1,19 +1,20 @@
-package org.jacpfx.vertx.rest.interfaces.basic;
+package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableErrorConsumer;
+import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.encoder.Encoder;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 21.03.16.
- * Typed functional interface called on event-bus response.
+ * Typed functional interface called on event-bus response.The execution will be handled as blocking code.
  */
 @FunctionalInterface
-public interface ExecuteEventBusByteCall {
+public interface ExecuteEventbusObjectCallBlocking {
     /**
      * Execute  chain when event-bus response handler is executed
      *
@@ -29,6 +30,7 @@ public interface ExecuteEventBusByteCall {
      * @param httpErrorCode         the http error code to set in case of failure handling
      * @param retryCount            the amount of retries before failure execution is triggered
      * @param timeout               the delay time in ms between an execution error and the retry
+     * @param delay                 the delay time in ms between an execution error and the retry
      * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
      */
     void execute(Vertx vertx,
@@ -38,7 +40,8 @@ public interface ExecuteEventBusByteCall {
                  Map<String, String> headers,
                  Encoder encoder,
                  Consumer<Throwable> errorHandler,
-                 ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
+                 ThrowableFunction<Throwable, Serializable> onFailureRespond,
                  int httpStatusCode, int httpErrorCode,
-                 int retryCount, long timeout, long circuitBreakerTimeout);
+                 int retryCount, long timeout,
+                 long delay, long circuitBreakerTimeout);
 }

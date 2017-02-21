@@ -5,7 +5,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusStringCallBlocking;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusStringCallBlocking;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -44,7 +44,7 @@ public class ExecuteRSStringCircuitBreaker extends ExecuteRSStringResponse {
                                          RoutingContext context,
                                          Map<String, String> headers,
                                          ThrowableSupplier<String> stringSupplier,
-                                         ExecuteEventBusStringCallBlocking excecuteAsyncEventBusAndReply,
+                                         ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
                                          Encoder encoder,
                                          Consumer<Throwable> errorHandler,
                                          ThrowableFunction<Throwable, String> onFailureRespond,

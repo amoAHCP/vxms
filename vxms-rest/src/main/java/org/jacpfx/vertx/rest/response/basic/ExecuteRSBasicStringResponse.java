@@ -5,7 +5,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusStringCall;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusStringCall;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
                                         RoutingContext context,
                                         Map<String, String> headers,
                                         ThrowableFutureConsumer<String> stringConsumer,
-                                        ExecuteEventBusStringCall excecuteEventBusAndReply,
+                                        ExecuteEventbusStringCall excecuteEventBusAndReply,
                                         Encoder encoder,
                                         Consumer<Throwable> errorHandler,
                                         ThrowableErrorConsumer<Throwable, String> onFailureRespond,

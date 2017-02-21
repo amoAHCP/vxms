@@ -40,7 +40,7 @@ public interface RecursiveExecutor<T> {
                  RoutingContext context,
                  Map<String, String> headers,
                  ThrowableFutureConsumer<T> consumer,
-                 ExecuteEventBusStringCall excecuteEventBusAndReply,
+                 ExecuteEventbusStringCall excecuteEventBusAndReply,
                  Encoder encoder,
                  Consumer<Throwable> errorHandler,
                  ThrowableErrorConsumer<Throwable, T> onFailureRespond,

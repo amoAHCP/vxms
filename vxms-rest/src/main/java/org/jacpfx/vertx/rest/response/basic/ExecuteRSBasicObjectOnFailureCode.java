@@ -6,7 +6,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusObjectCall;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class ExecuteRSBasicObjectOnFailureCode extends ExecuteRSBasicObjectRespo
                                              RoutingContext context,
                                              Map<String, String> headers,
                                              ThrowableFutureConsumer<Serializable> objectConsumer,
-                                             ExecuteEventBusObjectCall excecuteEventBusAndReply,
+                                             ExecuteEventbusObjectCall excecuteEventBusAndReply,
                                              Encoder encoder,
                                              Consumer<Throwable> errorHandler,
                                              ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,

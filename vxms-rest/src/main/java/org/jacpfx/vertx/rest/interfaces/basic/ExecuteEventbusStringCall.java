@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Typed functional interface called on event-bus response.
  */
 @FunctionalInterface
-public interface ExecuteEventBusStringCall {
+public interface ExecuteEventbusStringCall {
     /**
      * Execute  chain when event-bus response handler is executed
      *

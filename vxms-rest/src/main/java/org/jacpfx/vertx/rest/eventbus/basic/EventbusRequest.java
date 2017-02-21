@@ -8,7 +8,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.vertx.rest.eventbus.blocking.EventBusBlockingRequest;
+import org.jacpfx.vertx.rest.eventbus.blocking.EventbusBlockingRequest;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 14.03.16.
  * Defines an event-bus request as the beginning of your (blocking) execution chain
  */
-public class EventBusRequest {
+public class EventbusRequest {
     private final String methodId;
     private final Vertx vertx;
     private final Throwable failure;
@@ -33,7 +33,7 @@ public class EventBusRequest {
      * @param errorMethodHandler the error-method handler
      * @param context            the vertx routing context
      */
-    public EventBusRequest(String methodId,
+    public EventbusRequest(String methodId,
                            Vertx vertx,
                            Throwable failure,
                            Consumer<Throwable> errorMethodHandler,
@@ -50,10 +50,10 @@ public class EventBusRequest {
      *
      * @param targetId the target id to send to
      * @param message  the message to send
-     * @return the execution chain {@link EventBusResponse}
+     * @return the execution chain {@link EventbusResponse}
      */
-    public EventBusResponse send(String targetId, Object message) {
-        return new EventBusResponse(methodId,
+    public EventbusResponse send(String targetId, Object message) {
+        return new EventbusResponse(methodId,
                 vertx,
                 failure,
                 errorMethodHandler,
@@ -67,10 +67,10 @@ public class EventBusRequest {
      * @param targetId the target id to send to
      * @param message  the message to send
      * @param options  the delivery options for sending the message
-     * @return the execution chain {@link EventBusResponse}
+     * @return the execution chain {@link EventbusResponse}
      */
-    public EventBusResponse send(String targetId, Object message, DeliveryOptions options) {
-        return new EventBusResponse(methodId,
+    public EventbusResponse send(String targetId, Object message, DeliveryOptions options) {
+        return new EventbusResponse(methodId,
                 vertx,
                 failure,
                 errorMethodHandler,
@@ -122,9 +122,9 @@ public class EventBusRequest {
     /**
      * Switch to blocking API
      *
-     * @return the blocking chain {@link EventBusBlockingRequest}
+     * @return the blocking chain {@link EventbusBlockingRequest}
      */
-    public EventBusBlockingRequest blocking() {
-        return new EventBusBlockingRequest(methodId, vertx, failure, errorMethodHandler, context);
+    public EventbusBlockingRequest blocking() {
+        return new EventbusBlockingRequest(methodId, vertx, failure, errorMethodHandler, context);
     }
 }

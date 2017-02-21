@@ -9,8 +9,8 @@ import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.eventbus.basic.EventBusExecution;
-import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusObjectCall;
+import org.jacpfx.vertx.rest.eventbus.basic.EventbusExecution;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusObjectCall;
 import org.jacpfx.vertx.rest.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vertx.rest.interfaces.basic.RetryExecutor;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObjectResponse;
@@ -132,14 +132,14 @@ public class EventbusObjectExecutionUtil {
                         circuitBreakerTimeout).
                         execute();
 
-        final ExecuteEventBusObjectCall excecuteEventBusAndReply = (vertx, t,
+        final ExecuteEventbusObjectCall excecuteEventBusAndReply = (vertx, t,
                                                                     errorMethodHandler,
                                                                     context, headers,
                                                                     encoder, errorHandler,
                                                                     onFailureRespond, httpStatusCode,
                                                                     httpErrorCode, retryCount,
                                                                     timeout, circuitBreakerTimeout) ->
-                EventBusExecution.sendMessageAndSupplyHandler(_methodId,
+                EventbusExecution.sendMessageAndSupplyHandler(_methodId,
                         _targetId,
                         _message,
                         _objectFunction,

@@ -7,7 +7,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventBusObjectCall;
+import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class ExecuteRSBasicObject {
     protected final Consumer<Throwable> errorMethodHandler;
     protected final ThrowableFutureConsumer<Serializable> objectConsumer;
     protected final ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond;
-    protected final ExecuteEventBusObjectCall excecuteEventBusAndReply;
+    protected final ExecuteEventbusObjectCall excecuteEventBusAndReply;
     protected final Encoder encoder;
     protected final int httpStatusCode;
     protected final int httpErrorCode;
@@ -65,7 +65,7 @@ public class ExecuteRSBasicObject {
                                 RoutingContext context,
                                 Map<String, String> headers,
                                 ThrowableFutureConsumer<Serializable> objectConsumer,
-                                ExecuteEventBusObjectCall excecuteEventBusAndReply,
+                                ExecuteEventbusObjectCall excecuteEventBusAndReply,
                                 Encoder encoder,
                                 Consumer<Throwable> errorHandler,
                                 ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,

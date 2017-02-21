@@ -10,7 +10,7 @@ import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusByteCallBlocking;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusByteCallBlocking;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByte;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  */
 public class ExecuteRSByte extends ExecuteRSBasicByte {
     protected final long delay;
-    protected final ExecuteEventBusByteCallBlocking excecuteAsyncEventBusAndReply;
+    protected final ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<byte[]> byteSupplier;
     protected final ThrowableFunction<Throwable, byte[]> onFailureRespond;
 
@@ -56,7 +56,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
                          Consumer<Throwable> errorMethodHandler,
                          RoutingContext context, Map<String, String> headers,
                          ThrowableSupplier<byte[]> byteSupplier,
-                         ExecuteEventBusByteCallBlocking excecuteAsyncEventBusAndReply,
+                         ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply,
                          Encoder encoder,
                          Consumer<Throwable> errorHandler,
                          ThrowableFunction<Throwable, byte[]> onFailureRespond,

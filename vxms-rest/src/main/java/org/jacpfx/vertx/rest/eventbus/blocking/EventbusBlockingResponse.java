@@ -10,9 +10,9 @@ import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSObjectResponse;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSStringResponse;
-import org.jacpfx.vertx.rest.util.EventBusByteExecutionBlockingUtil;
-import org.jacpfx.vertx.rest.util.EventBusObjectExecutionBlockingUtil;
-import org.jacpfx.vertx.rest.util.EventBusStringExecutionBlockingUtil;
+import org.jacpfx.vertx.rest.util.EventbusByteExecutionBlockingUtil;
+import org.jacpfx.vertx.rest.util.EventbusObjectExecutionBlockingUtil;
+import org.jacpfx.vertx.rest.util.EventbusStringExecutionBlockingUtil;
 
 import java.io.Serializable;
 import java.util.function.Consumer;
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 14.03.16.
  * Represents the start of a blocking execution chain
  */
-public class EventBusBlockingResponse {
+public class EventbusBlockingResponse {
     private final String methodId;
     private final Vertx vertx;
     private final Throwable failure;
@@ -44,7 +44,7 @@ public class EventBusBlockingResponse {
      * @param message            the event-bus message
      * @param options            the event-bus delivery options
      */
-    public EventBusBlockingResponse(String methodId,
+    public EventbusBlockingResponse(String methodId,
                                     Vertx vertx,
                                     Throwable failure,
                                     Consumer<Throwable> errorMethodHandler,
@@ -70,7 +70,7 @@ public class EventBusBlockingResponse {
      * @return the execution chain {@link ExecuteRSStringResponse}
      */
     public ExecuteRSStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-        return EventBusStringExecutionBlockingUtil.mapToStringResponse(methodId,
+        return EventbusStringExecutionBlockingUtil.mapToStringResponse(methodId,
                 targetId,
                 message,
                 options,
@@ -100,7 +100,7 @@ public class EventBusBlockingResponse {
      */
     public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventBusByteExecutionBlockingUtil.mapToByteResponse(methodId,
+        return EventbusByteExecutionBlockingUtil.mapToByteResponse(methodId,
                 targetId,
                 message,
                 options,
@@ -131,7 +131,7 @@ public class EventBusBlockingResponse {
      */
     public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventBusObjectExecutionBlockingUtil.mapToObjectResponse(methodId,
+        return EventbusObjectExecutionBlockingUtil.mapToObjectResponse(methodId,
                 targetId,
                 message,
                 options,

@@ -10,7 +10,7 @@ import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusObjectCallBlocking;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicObject;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 public class ExecuteRSObject extends ExecuteRSBasicObject {
     protected final long delay;
     protected final long timeout;
-    protected final ExecuteEventBusObjectCallBlocking excecuteEventBusAndReply;
+    protected final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply;
     protected final ThrowableSupplier<Serializable> objectSupplier;
     protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
 
@@ -59,7 +59,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
                            RoutingContext context,
                            Map<String, String> headers,
                            ThrowableSupplier<Serializable> objectSupplier,
-                           ExecuteEventBusObjectCallBlocking excecuteBlockingEventBusAndReply,
+                           ExecuteEventbusObjectCallBlocking excecuteBlockingEventBusAndReply,
                            Encoder encoder,
                            Consumer<Throwable> errorHandler,
                            ThrowableFunction<Throwable, Serializable> onFailureRespond,

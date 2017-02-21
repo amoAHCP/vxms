@@ -10,7 +10,7 @@ import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventBusStringCallBlocking;
+import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusStringCallBlocking;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  */
 public class ExecuteRSString extends ExecuteRSBasicString {
     protected final long delay;
-    protected final ExecuteEventBusStringCallBlocking excecuteAsyncEventBusAndReply;
+    protected final ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<String> stringSupplier;
     protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
@@ -57,7 +57,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                            RoutingContext context,
                            Map<String, String> headers,
                            ThrowableSupplier<String> stringSupplier,
-                           ExecuteEventBusStringCallBlocking excecuteBlockingEventBusAndReply,
+                           ExecuteEventbusStringCallBlocking excecuteBlockingEventBusAndReply,
                            Encoder encoder,
                            Consumer<Throwable> errorHandler,
                            ThrowableFunction<Throwable, String> onFailureRespond,
