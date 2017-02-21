@@ -16,8 +16,9 @@ spec:
         visualize: "true"
     spec:
       containers:
-      - image: gcr.io/kubernetestests-147607/vxms-read:v05
+      - image: gcr.io/kubernetestests-147607/vxms-read:v13
         name: read-verticle
         ports:
-        - name: hazelcast
-          containerPort: 5701
+        - name: read-verticle
+          containerPort: 8282
+          hostPort: 8282

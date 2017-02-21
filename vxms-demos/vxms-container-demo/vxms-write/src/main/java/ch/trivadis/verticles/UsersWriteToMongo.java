@@ -22,7 +22,6 @@ import javax.ws.rs.Path;
 /**
  * Created by Andy Moncsek on 17.02.16.
  */
-@EtcdClient(domain = "userAdmin", host = "etcd-client", port = 2379, ttl = 30, exportedHost = "write-verticle")
 @ServiceEndpoint(name = "write-verticle", contextRoot = "/write", port = 8383)
 public class UsersWriteToMongo extends VxmsEndpoint {
     private MongoClient mongo;

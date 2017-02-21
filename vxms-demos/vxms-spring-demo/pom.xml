@@ -16,6 +16,7 @@
         <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
         <spring.version>4.2.1.RELEASE</spring.version>
         <main.verticle>java-spring:org.jacpfx.SimpleSpringREST</main.verticle>
+        <vertx.version>3.4.0.Beta1</vertx.version>
     </properties>
 
     <repositories>
@@ -36,7 +37,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-factory</artifactId>
-            <version>3.3.2</version>
+            <version>3.4.0.Beta1</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>

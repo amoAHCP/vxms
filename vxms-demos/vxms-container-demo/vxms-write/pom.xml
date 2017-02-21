@@ -12,7 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertx.version>3.3.0</vertx.version>
+        <vertx.version>3.4.0.Beta1</vertx.version>
         <junit.version>4.11</junit.version>
         <hazelcast.version>3.6.1</hazelcast.version>
         <slf4j-api.version>1.7.16</slf4j-api.version>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-mongo-client</artifactId>
-            <version>3.2.1</version>
+            <version>3.4.0.Beta1</version>
         </dependency>
         <!--Vertx provided dependencies-->
         <dependency>
@@ -162,7 +162,7 @@
     </build>
     <repositories>
         <repository>
-            <id>sonatype-nexus-snapshots</id>
+            <targetId>sonatype-nexus-snapshots</targetId>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>

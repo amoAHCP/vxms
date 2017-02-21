@@ -3,6 +3,7 @@ package org.jacpfx.vertx.registry;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpFrame;
 import io.vertx.core.http.HttpVersion;
@@ -103,6 +104,11 @@ public class HttpClientResponseError implements HttpClientResponse {
 
     @Override
     public NetSocket netSocket() {
+        return null;
+    }
+
+    @Override
+    public HttpClientRequest request() {
         return null;
     }
 

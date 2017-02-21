@@ -18,6 +18,10 @@ file-uploads
 vxms-demos/vxms-petshop-demo/*
 vxms-demos/vxms-petshop-demo/
 vxms-demos/vxms-stream-demo
+vxms-demos/vxms-test
+vxms-demos/vxms-test/*
+vxms-demos/gatling-sample-project/*
+
 out
 mod
 etcd-ca
@@ -27,5 +31,3 @@ vxms-demos/vxms-secure-spa-demo/securityConfPrivate.json
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-
-

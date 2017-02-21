@@ -16,8 +16,9 @@ spec:
         visualize: "true"
     spec:
       containers:
-      - image: gcr.io/kubernetestests-147607/vxms-write:v05
+      - image: gcr.io/kubernetestests-147607/vxms-write:v13
         name: write-verticle
         ports:
-        - name: hazelcast
-          containerPort: 5701
+        - name: write-verticle
+          containerPort: 8383
+          hostPort: 8383

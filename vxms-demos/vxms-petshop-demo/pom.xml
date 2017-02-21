@@ -33,7 +33,7 @@
     </licenses>
     <developers>
         <developer>
-            <id>amo</id>
+            <targetId>amo</targetId>
             <name>Andy Moncsek</name>
             <email>amo.ahcp@gmail.com</email>
         </developer>
@@ -50,7 +50,7 @@
 
     <repositories>
         <repository>
-            <id>sonatype-nexus-snapshots</id>
+            <targetId>sonatype-nexus-snapshots</targetId>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>

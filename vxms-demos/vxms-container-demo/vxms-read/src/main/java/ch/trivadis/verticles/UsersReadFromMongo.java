@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 /**
  * Created by Andy Moncsek on 17.02.16.
  */
-@EtcdClient(domain = "userAdmin", host = "etcd-client", port = 2379, ttl = 30, exportedHost = "read-verticle")
 @ServiceEndpoint(name = "read-verticle", contextRoot = "/read", port = 8282)
 public class UsersReadFromMongo extends VxmsEndpoint {
     private MongoClient mongo;

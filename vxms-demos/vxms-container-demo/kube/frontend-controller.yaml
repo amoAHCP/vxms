@@ -16,7 +16,7 @@ spec:
         visualize: "true"
     spec:
       containers:
-      - image: gcr.io/kubernetestests-147607/vxms-frontend:v05
+      - image: gcr.io/kubernetestests-147607/vxms-frontend:v13
         name: frontend-verticle
         ports:
         - name: frontend

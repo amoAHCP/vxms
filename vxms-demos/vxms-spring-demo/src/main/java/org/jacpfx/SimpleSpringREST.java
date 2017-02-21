@@ -28,7 +28,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @Path("/helloGET")
     @GET
     public void simpleRESTHello(RestHandler handler) {
-        handler.response().stringResponse(() -> bean.sayHallo()+"  ..... 1").execute();
+        handler.response().blocking().stringResponse(() -> bean.sayHallo()+"  ..... 1").execute();
     }
 
 
@@ -51,8 +51,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     @OnRestError("/simpleExceptionHandling/:name")
     @GET
     public void simpleExceptionHandlingOnError(Throwable t, RestHandler handler) {
-        //System.out.println("ERROR");
-        handler.response().stringResponse(() -> bean.sayHallo(handler.request().param("name")+" ::"+t.getMessage())).execute();
+        handler.response().stringResponse((future) -> future.complete("Hi "+handler.request().param("name")+" ::"+t.getMessage())).execute();
     }
 
     public static void main(String[] args) {
