@@ -1,0 +1,65 @@
+package org.jacpfx.vertx.event.response;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
+import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.encoder.Encoder;
+import org.jacpfx.vertx.event.response.blocking.ExecuteRSObjectResponse;
+import org.jacpfx.vertx.event.response.blocking.ExecuteRSByteResponse;
+import org.jacpfx.vertx.event.response.blocking.ExecuteRSStringResponse;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.function.Consumer;
+
+/**
+ * Created by Andy Moncsek on 12.01.16.
+ */
+public class EventbusResponseBlocking {
+    private final String methodId;
+    private final Vertx vertx;
+    private final Throwable t;
+    private final Consumer<Throwable> errorMethodHandler;
+    private final Message<Object> message;
+
+    public EventbusResponseBlocking(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, Message<Object> message) {
+        this.methodId = methodId;
+        this.vertx = vertx;
+        this.t = t;
+        this.errorMethodHandler = errorMethodHandler;
+        this.message = message;
+
+    }
+
+
+    /**
+     * Retunrs a byte array to the target type
+     *
+     * @param byteSupplier supplier which returns the createResponse value as byte array
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
+     */
+    public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
+        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, message, byteSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    }
+
+    /**
+     * Retunrs a String to the target type
+     *
+     * @param stringSupplier supplier which returns the createResponse value as String
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
+     */
+    public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
+        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, message, stringSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    }
+
+    /**
+     * Retunrs a Serializable to the target type
+     *
+     * @param objectSupplier supplier which returns the createResponse value as Serializable
+     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
+     */
+    public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, message, objectSupplier, null, encoder, null, null, null, 0, 0, 0l, 0l);
+    }
+}
