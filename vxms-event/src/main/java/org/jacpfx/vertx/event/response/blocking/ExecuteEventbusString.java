@@ -10,8 +10,8 @@ import io.vertx.core.eventbus.Message;
 import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicString;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicString;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -20,24 +20,24 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSString extends ExecuteRSBasicString {
+public class ExecuteEventbusString extends ExecuteEventbusBasicString {
     protected final long delay;
     protected final ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<String> stringSupplier;
     protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
-    public ExecuteRSString(String methodId,
-                           Vertx vertx,
-                           Throwable t,
-                           Consumer<Throwable> errorMethodHandler,
-                           Message<Object> message,
-                           ThrowableSupplier<String> stringSupplier,
-                           ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
-                           Consumer<Throwable> errorHandler,
-                           ThrowableFunction<Throwable, String> onFailureRespond,
-                           DeliveryOptions deliveryOptions,
-                           int retryCount,long timeout,
-                           long delay, long circuitBreakerTimeout) {
+    public ExecuteEventbusString(String methodId,
+                                 Vertx vertx,
+                                 Throwable t,
+                                 Consumer<Throwable> errorMethodHandler,
+                                 Message<Object> message,
+                                 ThrowableSupplier<String> stringSupplier,
+                                 ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
+                                 Consumer<Throwable> errorHandler,
+                                 ThrowableFunction<Throwable, String> onFailureRespond,
+                                 DeliveryOptions deliveryOptions,
+                                 int retryCount, long timeout,
+                                 long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, message, null, null, errorHandler, null,deliveryOptions, retryCount, timeout, circuitBreakerTimeout); // TODO define circuitBreakerTimout!!
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
@@ -48,7 +48,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     @Override
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        final ExecuteRSString lastStep = new ExecuteRSString(methodId, vertx, t, errorMethodHandler,message, stringSupplier, excecuteAsyncEventBusAndReply, errorHandler,
+        final ExecuteEventbusString lastStep = new ExecuteEventbusString(methodId, vertx, t, errorMethodHandler,message, stringSupplier, excecuteAsyncEventBusAndReply, errorHandler,
                 onFailureRespond, deliveryOptions, retryCount, timeout, delay,circuitBreakerTimeout);
         lastStep.execute();
     }
@@ -81,11 +81,13 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         return value -> {
             if (!value.failed()) {
                 ExecutionResult<String> result = value.result();
-                if(!result.handledError()){
+                respond(result.getResult());
+               /** TODO check if it makes sense
+                * if(!result.handledError()){
                     respond(result.getResult());
                 } else {
                     if(retry==0)fail(result.getResult(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                }
+                }**/
 
             } else {
                 if(retry==0)fail(value.cause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());

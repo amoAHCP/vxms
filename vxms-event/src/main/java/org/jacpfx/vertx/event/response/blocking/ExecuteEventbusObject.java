@@ -12,7 +12,7 @@ import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicObject;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicObject;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -22,24 +22,24 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSObject extends ExecuteRSBasicObject {
+public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
     protected final long delay;
     protected final long timeout;
     protected final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply;
     protected final ThrowableSupplier<Serializable> objectSupplier;
     protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
 
-    public ExecuteRSObject(String methodId,
-                           Vertx vertx, Throwable t,
-                           Consumer<Throwable> errorMethodHandler,
-                           Message<Object> message,
-                           ThrowableSupplier<Serializable> objectSupplier,
-                           ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
-                           Encoder encoder,
-                           Consumer<Throwable> errorHandler,
-                           ThrowableFunction<Throwable, Serializable> onFailureRespond,
-                           DeliveryOptions deliveryOptions, int retryCount,
-                           long timeout, long delay, long circuitBreakerTimeout) {
+    public ExecuteEventbusObject(String methodId,
+                                 Vertx vertx, Throwable t,
+                                 Consumer<Throwable> errorMethodHandler,
+                                 Message<Object> message,
+                                 ThrowableSupplier<Serializable> objectSupplier,
+                                 ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
+                                 Encoder encoder,
+                                 Consumer<Throwable> errorHandler,
+                                 ThrowableFunction<Throwable, Serializable> onFailureRespond,
+                                 DeliveryOptions deliveryOptions, int retryCount,
+                                 long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t,
                 errorMethodHandler,
                 message,
@@ -59,7 +59,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
     @Override
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        final ExecuteRSObject lastStep = new ExecuteRSObject(methodId, vertx, t, errorMethodHandler, message, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler,
+        final ExecuteEventbusObject lastStep = new ExecuteEventbusObject(methodId, vertx, t, errorMethodHandler, message, objectSupplier, excecuteEventBusAndReply, encoder, errorHandler,
                 onFailureRespond, deliveryOptions, retryCount, delay, timeout, circuitBreakerTimeout);
         lastStep.execute();
     }

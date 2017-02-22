@@ -14,20 +14,20 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
+public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObject {
 
 
-    public ExecuteRSBasicObjectResponse(String methodId,
-                                        Vertx vertx, Throwable t,
-                                        Consumer<Throwable> errorMethodHandler,
-                                        Message<Object> message,
-                                        ThrowableFutureConsumer<Serializable> objectConsumer,
-                                        ExecuteEventbusObjectCall excecuteEventBusAndReply,
-                                        Encoder encoder,
-                                        Consumer<Throwable> errorHandler,
-                                        ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
-                                        DeliveryOptions deliveryOptions,
-                                        int retryCount, long timeout, long circuitBreakerTimeout) {
+    public ExecuteEventbusBasicObjectResponse(String methodId,
+                                              Vertx vertx, Throwable t,
+                                              Consumer<Throwable> errorMethodHandler,
+                                              Message<Object> message,
+                                              ThrowableFutureConsumer<Serializable> objectConsumer,
+                                              ExecuteEventbusObjectCall excecuteEventBusAndReply,
+                                              Encoder encoder,
+                                              Consumer<Throwable> errorHandler,
+                                              ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
+                                              DeliveryOptions deliveryOptions,
+                                              int retryCount, long timeout, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
@@ -39,8 +39,8 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
      * @param onFailureRespond the handler (function) to execute on error
      * @return the createResponse chain
      */
-    public ExecuteRSBasicObjectResponse onFailureRespond(ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-        return new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
+    public ExecuteEventbusBasicObjectResponse onFailureRespond(ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
+        return new ExecuteEventbusBasicObjectResponse(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, deliveryOptions,retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -50,8 +50,8 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
      * @param errorHandler the handler to be executed on each error
      * @return the response chain
      */
-    public ExecuteRSBasicObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
+    public ExecuteEventbusBasicObjectResponse onError(Consumer<Throwable> errorHandler) {
+        return new ExecuteEventbusBasicObjectResponse(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, deliveryOptions,retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -61,8 +61,8 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
      * @param timeout the amount of timeout in ms
      * @return the response chain
      */
-    public ExecuteRSBasicObjectResponse timeout(long timeout) {
-        return new ExecuteRSBasicObjectResponse(methodId, vertx, t, errorMethodHandler, message,objectConsumer, excecuteEventBusAndReply, encoder,
+    public ExecuteEventbusBasicObjectResponse timeout(long timeout) {
+        return new ExecuteEventbusBasicObjectResponse(methodId, vertx, t, errorMethodHandler, message,objectConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, deliveryOptions,retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -72,8 +72,8 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
      * @param retryCount the amount of retries
      * @return the response chain
      */
-    public ExecuteRSBasicObjectCircuitBreaker retry(int retryCount) {
-        return new ExecuteRSBasicObjectCircuitBreaker(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
+    public ExecuteEventbusBasicObjectCircuitBreaker retry(int retryCount) {
+        return new ExecuteEventbusBasicObjectCircuitBreaker(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
                 errorHandler, onFailureRespond, deliveryOptions,retryCount, timeout, circuitBreakerTimeout);
     }
 

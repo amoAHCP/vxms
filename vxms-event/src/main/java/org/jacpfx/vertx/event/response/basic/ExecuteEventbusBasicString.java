@@ -6,10 +6,8 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
-import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusObjectCall;
+import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusStringCall;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -18,61 +16,57 @@ import static java.util.Optional.ofNullable;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSBasicObject {
+public class ExecuteEventbusBasicString {
     protected final String methodId;
     protected final Vertx vertx;
     protected final Throwable t;
-    protected final Message<Object> message;
-    protected final Consumer<Throwable> errorHandler;
     protected final Consumer<Throwable> errorMethodHandler;
-    protected final ThrowableFutureConsumer<Serializable> objectConsumer;
-    protected final ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond;
-    protected final ExecuteEventbusObjectCall excecuteEventBusAndReply;
-    protected final Encoder encoder;
+    protected final Message<Object> message;
+    protected final ThrowableFutureConsumer<String> stringConsumer;
+    protected final Consumer<Throwable> errorHandler;
+    protected final ThrowableErrorConsumer<Throwable, String> onFailureRespond;
+    protected final ExecuteEventbusStringCall excecuteEventBusAndReply;
     protected final DeliveryOptions deliveryOptions;
     protected final int retryCount;
     protected final long timeout;
     protected final long circuitBreakerTimeout;
 
-    public ExecuteRSBasicObject(String methodId,
-                                Vertx vertx,
-                                Throwable t,
-                                Consumer<Throwable> errorMethodHandler,
-                                Message<Object> message,
-                                ThrowableFutureConsumer<Serializable> objectConsumer,
-                                ExecuteEventbusObjectCall excecuteEventBusAndReply,
-                                Encoder encoder,
-                                Consumer<Throwable> errorHandler,
-                                ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
-                                DeliveryOptions deliveryOptions,
-                                int retryCount, long timeout, long circuitBreakerTimeout) {
+
+    public ExecuteEventbusBasicString(String methodId,
+                                      Vertx vertx, Throwable t,
+                                      Consumer<Throwable> errorMethodHandler,
+                                      Message<Object> message,
+                                      ThrowableFutureConsumer<String> stringConsumer,
+                                      ExecuteEventbusStringCall excecuteEventBusAndReply,
+                                      Consumer<Throwable> errorHandler,
+                                      ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+                                      DeliveryOptions deliveryOptions,
+                                      int retryCount, long timeout, long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
         this.message = message;
-        this.objectConsumer = objectConsumer;
-        this.encoder = encoder;
-        this.deliveryOptions = deliveryOptions;
+        this.stringConsumer = stringConsumer;
+        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
         this.errorHandler = errorHandler;
         this.onFailureRespond = onFailureRespond;
+        this.deliveryOptions = deliveryOptions;
         this.retryCount = retryCount;
-        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
         this.timeout = timeout;
         this.circuitBreakerTimeout = circuitBreakerTimeout;
+
     }
 
-
     /**
-     * Execute the reply chain with given http status code and content-type
+     * Execute the reply chain with given deliveryOptions
      *
-     * @param deliveryOptions, the eventbus delivery options
+     * @param deliveryOptions, the event bus Delivery Options
      */
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        final ExecuteRSBasicObject lastStep = new ExecuteRSBasicObject(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler,
-                onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
-        lastStep.execute();
+        new ExecuteEventbusBasicString(methodId, vertx, t, errorMethodHandler, message, stringConsumer,
+                excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout).execute();
     }
 
 
@@ -87,7 +81,6 @@ public class ExecuteRSBasicObject {
                             vertx,
                             errorMethodHandler,
                             message,
-                            encoder,
                             errorHandler,
                             onFailureRespond,
                             deliveryOptions,
@@ -99,7 +92,8 @@ public class ExecuteRSBasicObject {
                 }
 
             });
-            ofNullable(objectConsumer).
+
+            ofNullable(stringConsumer).
                     ifPresent(userOperation -> {
                                 int retry = retryCount;
                                 ResponseExecution.createResponse(methodId,
@@ -117,27 +111,28 @@ public class ExecuteRSBasicObject {
                                                 fail(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                                             }
                                         });
+
                             }
                     );
+
         });
+
+
     }
 
+
+    protected void respond(String result) {
+        if (result != null) {
+            if (deliveryOptions != null) {
+                message.reply(result, deliveryOptions);
+            } else {
+                message.reply(result);
+            }
+        }
+    }
 
     protected void fail(String result, int statuscode) {
         if (result != null) message.fail(statuscode, result);
-
-    }
-
-    protected void respond(Serializable result) {
-        if (result != null) {
-            ResponseExecution.encode(result, encoder).ifPresent(value -> {
-                if (deliveryOptions != null) {
-                    message.reply(value, deliveryOptions);
-                } else {
-                    message.reply(value);
-                }
-            });
-        }
     }
 
 

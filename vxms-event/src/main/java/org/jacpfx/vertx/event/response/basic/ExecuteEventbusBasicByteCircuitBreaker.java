@@ -12,11 +12,11 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse {
+public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasicByteResponse {
 
 
-    public ExecuteRSBasicByteCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, Message<Object> message, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventbusByteCall excecuteEventBusAndReply,
-                                            Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, DeliveryOptions deliveryOptions, int retryCount, long timeout, long circuitBreakerTimeout) {
+    public ExecuteEventbusBasicByteCircuitBreaker(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, Message<Object> message, ThrowableFutureConsumer<byte[]> byteConsumer, ExecuteEventbusByteCall excecuteEventBusAndReply,
+                                                  Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond, DeliveryOptions deliveryOptions, int retryCount, long timeout, long circuitBreakerTimeout) {
         super(methodId, vertx, t, errorMethodHandler, message, byteConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -30,8 +30,8 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
      * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs faster)
      * @return the response chain
      */
-    public ExecuteRSBasicByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSBasicByteResponse(methodId, vertx, t, errorMethodHandler, message, byteConsumer, excecuteEventBusAndReply,  errorHandler,
+    public ExecuteEventbusBasicByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+        return new ExecuteEventbusBasicByteResponse(methodId, vertx, t, errorMethodHandler, message, byteConsumer, excecuteEventBusAndReply,  errorHandler,
                 onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 

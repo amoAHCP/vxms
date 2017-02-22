@@ -12,21 +12,21 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSStringCircuitBreaker extends ExecuteRSStringResponse {
+public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringResponse {
 
 
-    public ExecuteRSStringCircuitBreaker(String methodId,
-                                         Vertx vertx,
-                                         Throwable t,
-                                         Consumer<Throwable> errorMethodHandler,
-                                         Message<Object> message,
-                                         ThrowableSupplier<String> stringSupplier,
-                                         ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
-                                         Consumer<Throwable> errorHandler,
-                                         ThrowableFunction<Throwable, String> onFailureRespond,
-                                         DeliveryOptions deliveryOptions,
-                                         int retryCount, long timeout,
-                                         long delay, long circuitBreakerTimeout) {
+    public ExecuteEventbusStringCircuitBreaker(String methodId,
+                                               Vertx vertx,
+                                               Throwable t,
+                                               Consumer<Throwable> errorMethodHandler,
+                                               Message<Object> message,
+                                               ThrowableSupplier<String> stringSupplier,
+                                               ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
+                                               Consumer<Throwable> errorHandler,
+                                               ThrowableFunction<Throwable, String> onFailureRespond,
+                                               DeliveryOptions deliveryOptions,
+                                               int retryCount, long timeout,
+                                               long delay, long circuitBreakerTimeout) {
         super(methodId, vertx, t,
                 errorMethodHandler,
                 message,
@@ -47,8 +47,8 @@ public class ExecuteRSStringCircuitBreaker extends ExecuteRSStringResponse {
      * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs faster)
      * @return the response chain
      */
-    public ExecuteRSStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, message, stringSupplier, excecuteAsyncEventBusAndReply, errorHandler,
+    public ExecuteEventbusStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+        return new ExecuteEventbusStringResponse(methodId, vertx, t, errorMethodHandler, message, stringSupplier, excecuteAsyncEventBusAndReply, errorHandler,
                 onFailureRespond, deliveryOptions, retryCount, timeout, delay, circuitBreakerTimeout);
     }
 

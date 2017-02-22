@@ -7,11 +7,11 @@ import io.vertx.core.eventbus.Message;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
-import org.jacpfx.vertx.event.eventbus.basic.EventbusExecution;
+import org.jacpfx.vertx.event.eventbus.basic.EventbusBridgeExecution;
 import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusByteCall;
 import org.jacpfx.vertx.event.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vertx.event.interfaces.basic.RetryExecutor;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicByteResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicByteResponse;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -41,24 +41,24 @@ public class EventbusByteExecutionUtil {
      * @param _retryCount              the amount of retries before failure execution is triggered
      * @param _timeout                 the amount of time before the execution will be aborted
      * @param _circuitBreakerTimeout   the amount of time before the circuit breaker closed again
-     * @return the execution chain {@link ExecuteRSBasicByteResponse}
+     * @return the execution chain {@link ExecuteEventbusBasicByteResponse}
      */
-    public static ExecuteRSBasicByteResponse mapToByteResponse(String _methodId,
-                                                               String _targetId,
-                                                               Object _message,
-                                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> _byteFunction,
-                                                               DeliveryOptions _requestOptions,
-                                                               Vertx _vertx,
-                                                               Throwable _failure,
-                                                               Consumer<Throwable> _errorMethodHandler,
-                                                               Message<Object> _requestMessage,
-                                                               ThrowableFutureConsumer<byte[]> _byteConsumer,
-                                                               Consumer<Throwable> _errorHandler,
-                                                               ThrowableErrorConsumer<Throwable, byte[]> _onFailureRespond,
-                                                               DeliveryOptions _responseDeliveryOptions,
-                                                               int _retryCount,
-                                                               long _timeout,
-                                                               long _circuitBreakerTimeout) {
+    public static ExecuteEventbusBasicByteResponse mapToByteResponse(String _methodId,
+                                                                     String _targetId,
+                                                                     Object _message,
+                                                                     ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> _byteFunction,
+                                                                     DeliveryOptions _requestOptions,
+                                                                     Vertx _vertx,
+                                                                     Throwable _failure,
+                                                                     Consumer<Throwable> _errorMethodHandler,
+                                                                     Message<Object> _requestMessage,
+                                                                     ThrowableFutureConsumer<byte[]> _byteConsumer,
+                                                                     Consumer<Throwable> _errorHandler,
+                                                                     ThrowableErrorConsumer<Throwable, byte[]> _onFailureRespond,
+                                                                     DeliveryOptions _responseDeliveryOptions,
+                                                                     int _retryCount,
+                                                                     long _timeout,
+                                                                     long _circuitBreakerTimeout) {
 
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_requestOptions).orElse(new DeliveryOptions());
         final RecursiveExecutor executor = (methodId,
@@ -74,7 +74,7 @@ public class EventbusByteExecutionUtil {
                                             retryCount,
                                             timeout,
                                             circuitBreakerTimeout) ->
-                new ExecuteRSBasicByteResponse(methodId,
+                new ExecuteEventbusBasicByteResponse(methodId,
                         vertx, t,
                         errorMethodHandler,
                         requestMessage,
@@ -127,7 +127,7 @@ public class EventbusByteExecutionUtil {
                  onFailureRespond,
                  responseDeliveryOptions,
                  retryCount, timeout, circuitBreakerTimeout) ->
-                        EventbusExecution.sendMessageAndSupplyHandler(
+                        EventbusBridgeExecution.sendMessageAndSupplyHandler(
                                 methodId,
                                 _targetId,
                                 _message,
@@ -145,7 +145,7 @@ public class EventbusByteExecutionUtil {
                                 circuitBreakerTimeout, executor, retry);
 
 
-        return new ExecuteRSBasicByteResponse(_methodId, _vertx, _failure, _errorMethodHandler, _requestMessage, _byteConsumer, excecuteEventBusAndReply, _errorHandler,
+        return new ExecuteEventbusBasicByteResponse(_methodId, _vertx, _failure, _errorMethodHandler, _requestMessage, _byteConsumer, excecuteEventBusAndReply, _errorHandler,
                 _onFailureRespond, _responseDeliveryOptions, _retryCount, _timeout, _circuitBreakerTimeout);
     }
 

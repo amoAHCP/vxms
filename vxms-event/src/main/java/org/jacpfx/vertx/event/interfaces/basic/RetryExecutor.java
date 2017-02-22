@@ -9,7 +9,6 @@ import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
-import java.io.Serializable;
 import java.util.function.Consumer;
 
 /**

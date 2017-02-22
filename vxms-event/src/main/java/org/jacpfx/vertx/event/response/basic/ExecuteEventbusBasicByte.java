@@ -16,7 +16,7 @@ import static java.util.Optional.ofNullable;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSBasicByte {
+public class ExecuteEventbusBasicByte {
     protected final String methodId;
     protected final Vertx vertx;
     protected final Throwable t;
@@ -31,19 +31,19 @@ public class ExecuteRSBasicByte {
     protected final long timeout;
     protected final long circuitBreakerTimeout;
 
-    public ExecuteRSBasicByte(String methodId,
-                              Vertx vertx,
-                              Throwable t,
-                              Consumer<Throwable> errorMethodHandler,
-                              Message<Object> message,
-                              ThrowableFutureConsumer<byte[]> byteConsumer,
-                              ExecuteEventbusByteCall excecuteEventBusAndReply,
-                              Consumer<Throwable> errorHandler,
-                              ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
-                              DeliveryOptions deliveryOptions,
-                              int retryCount,
-                              long timeout,
-                              long circuitBreakerTimeout) {
+    public ExecuteEventbusBasicByte(String methodId,
+                                    Vertx vertx,
+                                    Throwable t,
+                                    Consumer<Throwable> errorMethodHandler,
+                                    Message<Object> message,
+                                    ThrowableFutureConsumer<byte[]> byteConsumer,
+                                    ExecuteEventbusByteCall excecuteEventBusAndReply,
+                                    Consumer<Throwable> errorHandler,
+                                    ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
+                                    DeliveryOptions deliveryOptions,
+                                    int retryCount,
+                                    long timeout,
+                                    long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -66,7 +66,7 @@ public class ExecuteRSBasicByte {
      */
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        new ExecuteRSBasicByte(methodId, vertx, t, errorMethodHandler, message, byteConsumer, excecuteEventBusAndReply,
+        new ExecuteEventbusBasicByte(methodId, vertx, t, errorMethodHandler, message, byteConsumer, excecuteEventBusAndReply,
                 errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout).execute();
     }
 

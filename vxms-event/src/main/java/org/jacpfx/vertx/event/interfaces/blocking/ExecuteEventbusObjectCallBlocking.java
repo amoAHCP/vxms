@@ -3,12 +3,10 @@ package org.jacpfx.vertx.event.interfaces.blocking;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**

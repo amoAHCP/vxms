@@ -8,10 +8,19 @@ import java.util.function.Supplier;
 
 /**
  * Created by Andy Moncsek on 25.11.15.
+ * Utility class for handling invocation of vxms  methods
  */
 public class ReflectionUtil {
 
 
+    /**
+     * Invoke a vxms event-bus method parameters
+     * @param method
+     * @param t
+     * @param handler
+     * @param <T>
+     * @return
+     */
     public static <T> Object[] invokeParameters(Method method, Throwable t, T handler) {
         method.setAccessible(true);
         final java.lang.reflect.Parameter[] parameters = method.getParameters();

@@ -13,8 +13,8 @@ import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.interfaces.blocking.RecursiveBlockingExecutor;
-import org.jacpfx.vertx.event.response.basic.ResponseExecution;
 import org.jacpfx.vertx.event.interfaces.blocking.RetryBlockingExecutor;
+import org.jacpfx.vertx.event.response.basic.ResponseExecution;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -23,7 +23,7 @@ import java.util.function.Consumer;
  * Created by Andy Moncsek on 05.04.16.
  * Handles event-bus call and blocking execution of the message to create an event-bus response
  */
-public class EventbusBlockingExecution {
+public class EventbusBridgeBlockingExecution {
 
     public static final long LOCK_VALUE = -1l;
     public static final int DEFAULT_LOCK_TIMEOUT = 2000;

@@ -6,9 +6,9 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicByteResponse;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicObjectResponse;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicStringResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicByteResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicObjectResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicStringResponse;
 import org.jacpfx.vertx.event.util.EventbusByteExecutionUtil;
 import org.jacpfx.vertx.event.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vertx.event.util.EventbusStringExecutionUtil;
@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 14.03.16.
  */
-public class EventbusResponse {
+public class EventbusBridgeResponse {
     private final String methodId;
     private final Vertx vertx;
     private final Throwable t;
@@ -30,8 +30,8 @@ public class EventbusResponse {
     private final DeliveryOptions requestOptions;
 
 
-    public EventbusResponse(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, String targetId,
-                            Object message, DeliveryOptions requestOptions) {
+    public EventbusBridgeResponse(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, String targetId,
+                                  Object message, DeliveryOptions requestOptions) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.t = t;
@@ -48,7 +48,7 @@ public class EventbusResponse {
      * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
      * @return the response chain
      */
-    public ExecuteRSBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
+    public ExecuteEventbusBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
         return EventbusStringExecutionUtil.mapToStringResponse(methodId, targetId, message, stringFunction, requestOptions, vertx, t, errorMethodHandler, requestmessage,
                 null, null, null, null, 0, 0l, 0l);
@@ -60,7 +60,7 @@ public class EventbusResponse {
      * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
      * @return the response chain
      */
-    public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
+    public ExecuteEventbusBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
         return EventbusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, requestOptions, vertx, t, errorMethodHandler,
                 requestmessage, null, null, null, null, 0, 0l, 0l);
@@ -73,7 +73,7 @@ public class EventbusResponse {
      * @param encoder        the Object encoder
      * @return the response chain
      */
-    public ExecuteRSBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
+    public ExecuteEventbusBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
         return EventbusObjectExecutionUtil.mapToObjectResponse(methodId, targetId, message, objectFunction, requestOptions, vertx, t, errorMethodHandler,
                 requestmessage, null, encoder, null, null, null, 0, 0l, 0l);

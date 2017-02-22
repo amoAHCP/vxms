@@ -7,7 +7,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.jacpfx.vertx.event.eventbus.blocking.EventbusBlockingRequest;
+import org.jacpfx.vertx.event.eventbus.blocking.EventbusBridgeBlockingRequest;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -15,14 +15,14 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 14.03.16.
  */
-public class EventbusRequest {
+public class EventbusBridgeRequest {
     private final String methodId;
     private final Message<Object> requestmessage;
     private final Vertx vertx;
     private final Throwable t;
     private final Consumer<Throwable> errorMethodHandler;
 
-    public EventbusRequest(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
+    public EventbusBridgeRequest(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
         this.vertx = vertx;
         this.t = t;
         this.errorMethodHandler = errorMethodHandler;
@@ -30,12 +30,12 @@ public class EventbusRequest {
         this.methodId = methodId;
     }
 
-    public EventbusResponse send(String id, Object message) {
-        return new EventbusResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, null);
+    public EventbusBridgeResponse send(String id, Object message) {
+        return new EventbusBridgeResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, null);
     }
 
-    public EventbusResponse send(String id, Object message, DeliveryOptions requestOptions) {
-        return new EventbusResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, requestOptions);
+    public EventbusBridgeResponse send(String id, Object message, DeliveryOptions requestOptions) {
+        return new EventbusBridgeResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, requestOptions);
     }
 
 
@@ -80,7 +80,7 @@ public class EventbusRequest {
         }
     }
 
-    public EventbusBlockingRequest blocking() {
-        return new EventbusBlockingRequest(methodId, requestmessage, vertx, t, errorMethodHandler);
+    public EventbusBridgeBlockingRequest blocking() {
+        return new EventbusBridgeBlockingRequest(methodId, requestmessage, vertx, t, errorMethodHandler);
     }
 }

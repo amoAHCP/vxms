@@ -21,7 +21,7 @@ public class SimpleREST extends VxmsEndpoint {
                       stringResponse((response)->
                               response.complete("hello World "+handler.request().param("name"))). // define non-blocking response
                       timeout(2000). // timeout for stringResponse handling
-                      onFailureRespond((error, future) -> future.complete("error")). // define response when stringResponse fails and retry won't work
+                      onFailureRespond((error, future) -> future.complete("error")). // define response when stringResponse fails and retry won'failure work
                       httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
                       retry(3). // amount of retries before onFailureRespond will be executed
                       closeCircuitBreaker(2000). // time after circuit breaker will be closed again, when opend only onFailureRespond will be executed
@@ -35,7 +35,7 @@ public class SimpleREST extends VxmsEndpoint {
 ``` 
 
 ## vxms-core
-The vxms-core module contains the *abstract VxmsEndpoint* class which extends *AbstractVerticle" class (from Vert.x). This class must be extended by every vxms service, to be able to use all other modules. The core module didn't add much extra functionality, but it provides some convenience function over a plain Verticle. A minimal vxms (core) endpoint looks like this:
+The vxms-core module contains the *abstract VxmsEndpoint* class which extends *AbstractVerticle" class (from Vert.x). This class must be extended by every vxms service, to be able to use all other modules. The core module didn'failure add much extra functionality, but it provides some convenience function over a plain Verticle. A minimal vxms (core) endpoint looks like this:
 ```java
    @ServiceEndpoint
    public class SimpleService extends VxmsEndpoint {
@@ -74,8 +74,8 @@ The port, host and name configuration can also be specified through Vert.x json 
 
 The *@EndpointConfig* annotation takes a class, implementing the *EndpointConfiguration* interface, as value. This interface defines some default methods that can be overwritten to customize your Service. Following configuration can be done (methods to overwrite):
 - *void corsHandler(Router router)* : define a corse handler for your service
-- *void bodyHandler(Router router)* : set the body handler; a body handler is always set by default, if you don't want this overwrite this method with an empty implementation
-- *void cookieHandler(Router router)*: set the cookie handler; a cookie handler is always set by default, if you don't want this overwrite this method with an empty implementation
+- *void bodyHandler(Router router)* : set the body handler; a body handler is always set by default, if you don'failure want this overwrite this method with an empty implementation
+- *void cookieHandler(Router router)*: set the cookie handler; a cookie handler is always set by default, if you don'failure want this overwrite this method with an empty implementation
 - *void staticHandler(Router router)*: specify a static content handler
 - *void sessionHandler(Vertx vertx, Router router)*: specify the session handler
 - *void customRouteConfiguration(Vertx vertx, Router router, boolean secure, String host, int port)*: define some custom route configurations like security for your service

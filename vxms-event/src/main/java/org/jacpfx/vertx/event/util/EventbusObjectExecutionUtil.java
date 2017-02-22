@@ -8,11 +8,11 @@ import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.event.eventbus.basic.EventbusExecution;
+import org.jacpfx.vertx.event.eventbus.basic.EventbusBridgeExecution;
 import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusObjectCall;
 import org.jacpfx.vertx.event.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vertx.event.interfaces.basic.RetryExecutor;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicObjectResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicObjectResponse;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -44,26 +44,26 @@ public class EventbusObjectExecutionUtil {
      * @param _retryCount              the amount of retries before failure execution is triggered
      * @param _timeout                 the amount of time before the execution will be aborted
      * @param _circuitBreakerTimeout   the amount of time before the circuit breaker closed again
-     * @return the execution chain {@link ExecuteRSBasicObjectResponse}
+     * @return the execution chain {@link ExecuteEventbusBasicObjectResponse}
      */
-    public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,
-                                                                   String _targetId,
-                                                                   Object _message,
-                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
-                                                                   DeliveryOptions _requestOptions,
+    public static ExecuteEventbusBasicObjectResponse mapToObjectResponse(String _methodId,
+                                                                         String _targetId,
+                                                                         Object _message,
+                                                                         ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
+                                                                         DeliveryOptions _requestOptions,
 
-                                                                   Vertx _vertx,
-                                                                   Throwable _failure,
-                                                                   Consumer<Throwable> _errorMethodHandler,
-                                                                   Message<Object> _requestMessage,
-                                                                   ThrowableFutureConsumer<Serializable> _objectConsumer,
-                                                                   Encoder _encoder,
-                                                                   Consumer<Throwable> _errorHandler,
-                                                                   ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond,
-                                                                   DeliveryOptions _responseDeliveryOptions,
-                                                                   int _retryCount,
-                                                                   long _timeout,
-                                                                   long _circuitBreakerTimeout) {
+                                                                         Vertx _vertx,
+                                                                         Throwable _failure,
+                                                                         Consumer<Throwable> _errorMethodHandler,
+                                                                         Message<Object> _requestMessage,
+                                                                         ThrowableFutureConsumer<Serializable> _objectConsumer,
+                                                                         Encoder _encoder,
+                                                                         Consumer<Throwable> _errorHandler,
+                                                                         ThrowableErrorConsumer<Throwable, Serializable> _onFailureRespond,
+                                                                         DeliveryOptions _responseDeliveryOptions,
+                                                                         int _retryCount,
+                                                                         long _timeout,
+                                                                         long _circuitBreakerTimeout) {
         final DeliveryOptions _deliveryOptions = Optional.ofNullable(_requestOptions).orElse(new DeliveryOptions());
         final RecursiveExecutor executor = (methodId,
                                             vertx, t,
@@ -77,7 +77,7 @@ public class EventbusObjectExecutionUtil {
                                             retryCount,
                                             timeout,
                                             circuitBreakerTimeout) ->
-                new ExecuteRSBasicObjectResponse(methodId,
+                new ExecuteEventbusBasicObjectResponse(methodId,
                         vertx, t,
                         errorMethodHandler,
                         requestMessage,
@@ -131,7 +131,7 @@ public class EventbusObjectExecutionUtil {
                  errorHandler,
                  onFailureRespond,
                  responseDeliveryOptions,
-                 retryCount, timeout, circuitBreakerTimeout) -> EventbusExecution.sendMessageAndSupplyHandler(methodId,
+                 retryCount, timeout, circuitBreakerTimeout) -> EventbusBridgeExecution.sendMessageAndSupplyHandler(methodId,
                         _targetId,
                         _message,
                         _objectFunction,
@@ -148,7 +148,7 @@ public class EventbusObjectExecutionUtil {
                         circuitBreakerTimeout, executor, retry);
 
 
-        return new ExecuteRSBasicObjectResponse(_methodId, _vertx, _failure, _errorMethodHandler, _requestMessage, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler,
+        return new ExecuteEventbusBasicObjectResponse(_methodId, _vertx, _failure, _errorMethodHandler, _requestMessage, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler,
                 _onFailureRespond, _responseDeliveryOptions, _retryCount, _timeout, _circuitBreakerTimeout);
     }
 

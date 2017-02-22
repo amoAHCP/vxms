@@ -7,12 +7,12 @@ import io.vertx.core.eventbus.Message;
 import org.jacpfx.common.ThrowableErrorConsumer;
 import org.jacpfx.common.ThrowableFutureBiConsumer;
 import org.jacpfx.common.ThrowableFutureConsumer;
-import org.jacpfx.vertx.event.eventbus.basic.EventbusExecution;
+import org.jacpfx.vertx.event.eventbus.basic.EventbusBridgeExecution;
 import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusStringCall;
 import org.jacpfx.vertx.event.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vertx.event.interfaces.basic.RetryExecutor;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicByteResponse;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicStringResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicByteResponse;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicStringResponse;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -43,24 +43,24 @@ public class EventbusStringExecutionUtil {
      * @param _retryCount              the amount of retries before failure execution is triggered
      * @param _timeout                 the amount of time before the execution will be aborted
      * @param _circuitBreakerTimeout   the amount of time before the circuit breaker closed again
-     * @return the execution chain {@link ExecuteRSBasicStringResponse}
+     * @return the execution chain {@link ExecuteEventbusBasicStringResponse}
      */
-    public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId,
-                                                                   String _targetId,
-                                                                   Object _message,
-                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
-                                                                   DeliveryOptions _requestOptions,
-                                                                   Vertx _vertx,
-                                                                   Throwable _failure,
-                                                                   Consumer<Throwable> _errorMethodHandler,
-                                                                   Message<Object> _requestMessage,
-                                                                   ThrowableFutureConsumer<String> _stringConsumer,
-                                                                   Consumer<Throwable> _errorHandler,
-                                                                   ThrowableErrorConsumer<Throwable, String> _onFailureRespond,
-                                                                   DeliveryOptions _responseDeliveryOptions,
-                                                                   int _retryCount,
-                                                                   long _timeout,
-                                                                   long _circuitBreakerTimeout) {
+    public static ExecuteEventbusBasicStringResponse mapToStringResponse(String _methodId,
+                                                                         String _targetId,
+                                                                         Object _message,
+                                                                         ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
+                                                                         DeliveryOptions _requestOptions,
+                                                                         Vertx _vertx,
+                                                                         Throwable _failure,
+                                                                         Consumer<Throwable> _errorMethodHandler,
+                                                                         Message<Object> _requestMessage,
+                                                                         ThrowableFutureConsumer<String> _stringConsumer,
+                                                                         Consumer<Throwable> _errorHandler,
+                                                                         ThrowableErrorConsumer<Throwable, String> _onFailureRespond,
+                                                                         DeliveryOptions _responseDeliveryOptions,
+                                                                         int _retryCount,
+                                                                         long _timeout,
+                                                                         long _circuitBreakerTimeout) {
 
         final DeliveryOptions _deliveryOptions = Optional.ofNullable(_requestOptions).orElse(new DeliveryOptions());
         final RecursiveExecutor executor = (methodId,
@@ -76,7 +76,7 @@ public class EventbusStringExecutionUtil {
                                             retryCount,
                                             timeout,
                                             circuitBreakerTimeout) ->
-                new ExecuteRSBasicByteResponse(methodId,
+                new ExecuteEventbusBasicByteResponse(methodId,
                         vertx, t,
                         errorMethodHandler,
                         requestMessage,
@@ -133,7 +133,7 @@ public class EventbusStringExecutionUtil {
                  onFailureRespond,
                  responseDeliveryOptions, retryCount,
                  timeout, circuitBreakerTimeout) ->
-                        EventbusExecution.sendMessageAndSupplyHandler(methodId,_targetId,
+                        EventbusBridgeExecution.sendMessageAndSupplyHandler(methodId,_targetId,
                                 _message,
                                 _stringFunction,
                                 _deliveryOptions,
@@ -148,7 +148,7 @@ public class EventbusStringExecutionUtil {
                                 timeout,
                                 circuitBreakerTimeout, executor, retry);
 
-        return new ExecuteRSBasicStringResponse(_methodId,
+        return new ExecuteEventbusBasicStringResponse(_methodId,
                 _vertx,
                 _failure,
                 _errorMethodHandler,

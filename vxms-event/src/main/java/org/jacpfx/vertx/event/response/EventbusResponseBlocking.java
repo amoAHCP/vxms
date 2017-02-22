@@ -2,31 +2,39 @@ package org.jacpfx.vertx.event.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.event.response.blocking.ExecuteRSObjectResponse;
-import org.jacpfx.vertx.event.response.blocking.ExecuteRSByteResponse;
-import org.jacpfx.vertx.event.response.blocking.ExecuteRSStringResponse;
+import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusByteResponse;
+import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusObjectResponse;
+import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusStringResponse;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * Fluent API to define a Task and to reply the request with the output of your task.
  */
 public class EventbusResponseBlocking {
     private final String methodId;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final Message<Object> message;
 
-    public EventbusResponseBlocking(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, Message<Object> message) {
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId           the method identifier
+     * @param message            the event-bus message to respond to
+     * @param vertx              the vertx instance
+     * @param failure            the failure thrown while task execution
+     * @param errorMethodHandler the error handler
+     */
+    public EventbusResponseBlocking(String methodId, Message<Object> message,Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.message = message;
 
@@ -37,29 +45,29 @@ public class EventbusResponseBlocking {
      * Retunrs a byte array to the target type
      *
      * @param byteSupplier supplier which returns the createResponse value as byte array
-     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
+     * @return {@link ExecuteEventbusByteResponse}
      */
-    public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-        return new ExecuteRSByteResponse(methodId, vertx, t, errorMethodHandler, message, byteSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    public ExecuteEventbusByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
+        return new ExecuteEventbusByteResponse(methodId, vertx, failure, errorMethodHandler, message, byteSupplier, null, null, null, null, 0, 0l, 0l, 0l);
     }
 
     /**
      * Retunrs a String to the target type
      *
      * @param stringSupplier supplier which returns the createResponse value as String
-     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
+     * @return {@link ExecuteEventbusStringResponse}
      */
-    public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-        return new ExecuteRSStringResponse(methodId, vertx, t, errorMethodHandler, message, stringSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    public ExecuteEventbusStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
+        return new ExecuteEventbusStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringSupplier, null, null, null, null, 0, 0l, 0l, 0l);
     }
 
     /**
      * Retunrs a Serializable to the target type
      *
      * @param objectSupplier supplier which returns the createResponse value as Serializable
-     * @return @see{org.jacpfx.vertx.rest.createResponse.ExecuteRSBasicResponse}
+     * @return {@link ExecuteEventbusObjectResponse}
      */
-    public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-        return new ExecuteRSObjectResponse(methodId, vertx, t, errorMethodHandler, message, objectSupplier, null, encoder, null, null, null, 0, 0, 0l, 0l);
+    public ExecuteEventbusObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+        return new ExecuteEventbusObjectResponse(methodId, vertx, failure, errorMethodHandler, message, objectSupplier, null, encoder, null, null, null, 0, 0, 0l, 0l);
     }
 }

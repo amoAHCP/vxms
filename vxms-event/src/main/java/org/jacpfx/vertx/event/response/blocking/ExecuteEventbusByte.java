@@ -11,7 +11,7 @@ import org.jacpfx.common.ExecutionResult;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusByteCallBlocking;
-import org.jacpfx.vertx.event.response.basic.ExecuteRSBasicByte;
+import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicByte;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -20,22 +20,22 @@ import java.util.function.Consumer;
 /**
  * Created by Andy Moncsek on 12.01.16.
  */
-public class ExecuteRSByte extends ExecuteRSBasicByte {
+public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
     protected final long delay;
     protected final ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply;
     protected final ThrowableSupplier<byte[]> byteSupplier;
     protected final ThrowableFunction<Throwable, byte[]> onFailureRespond;
 
-    public ExecuteRSByte(String methodId,
-                         Vertx vertx,
-                         Throwable t,
-                         Consumer<Throwable> errorMethodHandler,
-                         Message<Object> message,
-                         ThrowableSupplier<byte[]> byteSupplier,
-                         ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply,
-                         Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, byte[]> onFailureRespond,
-                         DeliveryOptions deliveryOptions,
-                         int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
+    public ExecuteEventbusByte(String methodId,
+                               Vertx vertx,
+                               Throwable t,
+                               Consumer<Throwable> errorMethodHandler,
+                               Message<Object> message,
+                               ThrowableSupplier<byte[]> byteSupplier,
+                               ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply,
+                               Consumer<Throwable> errorHandler, ThrowableFunction<Throwable, byte[]> onFailureRespond,
+                               DeliveryOptions deliveryOptions,
+                               int retryCount, long timeout, long delay, long circuitBreakerTimeout) {
         super(methodId,
                 vertx, t,
                 errorMethodHandler, message,
@@ -53,7 +53,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     @Override
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        final ExecuteRSByte lastStep = new ExecuteRSByte(methodId, vertx, t,
+        final ExecuteEventbusByte lastStep = new ExecuteEventbusByte(methodId, vertx, t,
                 errorMethodHandler,
                 message,
                 byteSupplier,

@@ -6,11 +6,11 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import org.jacpfx.common.ThrowableFunction;
 import org.jacpfx.common.ThrowableSupplier;
-import org.jacpfx.vertx.event.eventbus.blocking.EventbusBlockingExecution;
+import org.jacpfx.vertx.event.eventbus.blocking.EventbusBridgeBlockingExecution;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
 import org.jacpfx.vertx.event.interfaces.blocking.RecursiveBlockingExecutor;
 import org.jacpfx.vertx.event.interfaces.blocking.RetryBlockingExecutor;
-import org.jacpfx.vertx.event.response.blocking.ExecuteRSStringResponse;
+import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusStringResponse;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -40,25 +40,25 @@ public class EventbusStringExecutionBlockingUtil {
      * @param _timeout                the amount of time before the execution will be aborted
      * @param _delay                  the delay between an error and the retry
      * @param _circuitBreakerTimeout  the amount of time before the circuit breaker closed again
-     * @return the execution chain {@link ExecuteRSStringResponse}
+     * @return the execution chain {@link ExecuteEventbusStringResponse}
      */
-    public static ExecuteRSStringResponse mapToStringResponse(String _methodId,
-                                                              String _targetId,
-                                                              Object _message,
-                                                              ThrowableFunction<AsyncResult<Message<Object>>, String> _stringFunction,
-                                                              DeliveryOptions _requestDeliveryOptions,
-                                                              Vertx _vertx,
-                                                              Throwable _failure,
-                                                              Consumer<Throwable> _errorMethodHandler,
-                                                              Message<Object> _requestMessage,
-                                                              ThrowableSupplier<String> _stringSupplier,
-                                                              Consumer<Throwable> _errorHandler,
-                                                              ThrowableFunction<Throwable, String> _onFailureRespond,
-                                                              DeliveryOptions _responseDeliveryOptions,
-                                                              int _retryCount,
-                                                              long _timeout,
-                                                              long _delay,
-                                                              long _circuitBreakerTimeout) {
+    public static ExecuteEventbusStringResponse mapToStringResponse(String _methodId,
+                                                                    String _targetId,
+                                                                    Object _message,
+                                                                    ThrowableFunction<AsyncResult<Message<Object>>, String> _stringFunction,
+                                                                    DeliveryOptions _requestDeliveryOptions,
+                                                                    Vertx _vertx,
+                                                                    Throwable _failure,
+                                                                    Consumer<Throwable> _errorMethodHandler,
+                                                                    Message<Object> _requestMessage,
+                                                                    ThrowableSupplier<String> _stringSupplier,
+                                                                    Consumer<Throwable> _errorHandler,
+                                                                    ThrowableFunction<Throwable, String> _onFailureRespond,
+                                                                    DeliveryOptions _responseDeliveryOptions,
+                                                                    int _retryCount,
+                                                                    long _timeout,
+                                                                    long _delay,
+                                                                    long _circuitBreakerTimeout) {
 
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
 
@@ -109,7 +109,7 @@ public class EventbusStringExecutionBlockingUtil {
                                                     responseDeliveryOptions,
                                                     retryCount,
                                                     timeout, delay, circuitBreakerTimeout) ->
-                new ExecuteRSStringResponse(methodId,
+                new ExecuteEventbusStringResponse(methodId,
                         vertx, t,
                         errorMethodHandler,
                         requestMessage,
@@ -131,7 +131,7 @@ public class EventbusStringExecutionBlockingUtil {
                                                                                  responseDeliveryOptions,
                                                                                  retryCount, timeout,
                                                                                  delay, circuitBreakerTimeout) ->
-                EventbusBlockingExecution.sendMessageAndSupplyHandler(
+                EventbusBridgeBlockingExecution.sendMessageAndSupplyHandler(
                         methodId,
                         _targetId,
                         _message,
@@ -150,7 +150,7 @@ public class EventbusStringExecutionBlockingUtil {
                         circuitBreakerTimeout,
                         executor, retry);
 
-        return new ExecuteRSStringResponse(_methodId,
+        return new ExecuteEventbusStringResponse(_methodId,
                 _vertx,
                 _failure,
                 _errorMethodHandler,
