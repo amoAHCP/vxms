@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * This class is the end of the blocking fluent API, all data collected to execute the chain.
  */
 public class ExecuteEventbusString extends ExecuteEventbusBasicString {
     protected final long delay;
@@ -26,9 +27,27 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
     protected final ThrowableSupplier<String> stringSupplier;
     protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId                      the method identifier
+     * @param vertx                         the vertx instance
+     * @param failure                       the failure thrown while task execution
+     * @param errorMethodHandler            the error handler
+     * @param message                       the message to respond to
+     * @param stringSupplier                the supplier, producing the byte response
+     * @param excecuteAsyncEventBusAndReply handles the response execution after event-bus bridge reply
+     * @param errorHandler                  the error handler
+     * @param onFailureRespond              the consumer that takes a Future with the alternate response value in case of failure
+     * @param deliveryOptions               the response deliver options
+     * @param retryCount                    the amount of retries before failure execution is triggered
+     * @param timeout                       the amount of time before the execution will be aborted
+     * @param delay                         the delay time in ms between an execution error and the retry
+     * @param circuitBreakerTimeout         the amount of time before the circuit breaker closed again
+     */
     public ExecuteEventbusString(String methodId,
                                  Vertx vertx,
-                                 Throwable t,
+                                 Throwable failure,
                                  Consumer<Throwable> errorMethodHandler,
                                  Message<Object> message,
                                  ThrowableSupplier<String> stringSupplier,
@@ -36,9 +55,23 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
                                  Consumer<Throwable> errorHandler,
                                  ThrowableFunction<Throwable, String> onFailureRespond,
                                  DeliveryOptions deliveryOptions,
-                                 int retryCount, long timeout,
-                                 long delay, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, message, null, null, errorHandler, null,deliveryOptions, retryCount, timeout, circuitBreakerTimeout); // TODO define circuitBreakerTimout!!
+                                 int retryCount,
+                                 long timeout,
+                                 long delay,
+                                 long circuitBreakerTimeout) {
+        super(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                null,
+                null,
+                errorHandler,
+                null,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
         this.delay = delay;
         this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
         this.stringSupplier = stringSupplier;
@@ -48,9 +81,20 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
     @Override
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        final ExecuteEventbusString lastStep = new ExecuteEventbusString(methodId, vertx, t, errorMethodHandler,message, stringSupplier, excecuteAsyncEventBusAndReply, errorHandler,
-                onFailureRespond, deliveryOptions, retryCount, timeout, delay,circuitBreakerTimeout);
-        lastStep.execute();
+        new ExecuteEventbusString(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                stringSupplier,
+                excecuteAsyncEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                delay,
+                circuitBreakerTimeout).execute();
     }
 
 
@@ -58,7 +102,17 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(methodId, vertx, errorMethodHandler, message, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, delay,circuitBreakerTimeout);
+                evFunction.execute(methodId,
+                        vertx,
+                        errorMethodHandler,
+                        message,
+                        errorHandler,
+                        onFailureRespond,
+                        deliveryOptions,
+                        retryCount,
+                        timeout,
+                        delay,
+                        circuitBreakerTimeout);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -74,7 +128,7 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
     }
 
     private void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<ExecutionResult<String>> blockingHandler) {
-        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId,supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, t, retry, timeout, circuitBreakerTimeout, delay);
+        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, failure, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<ExecutionResult<String>>> getAsyncResultHandler(int retry) {
@@ -82,15 +136,15 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
             if (!value.failed()) {
                 ExecutionResult<String> result = value.result();
                 respond(result.getResult());
-               /** TODO check if it makes sense
-                * if(!result.handledError()){
-                    respond(result.getResult());
-                } else {
-                    if(retry==0)fail(result.getResult(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                }**/
+                /** TODO check if it makes sense
+                 * if(!result.handledError()){
+                 respond(result.getResult());
+                 } else {
+                 if(retry==0)fail(result.getResult(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                 }**/
 
             } else {
-                if(retry==0)fail(value.cause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                if (retry == 0) fail(value.cause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
             }
         };
     }

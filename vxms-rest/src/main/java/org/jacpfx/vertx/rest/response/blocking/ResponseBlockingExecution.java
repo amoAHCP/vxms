@@ -70,7 +70,7 @@ public class ResponseBlockingExecution {
                             _retry, _timeout,
                             _circuitBreakerTimeout,
                             _delay, lock, counter);
-                } else if (currentVal > 0) {
+                } else if (currentVal > DEFAULT_VALUE) {
                     executeDefault(_methodId,
                             _supplier,
                             _resultHandler,
@@ -109,7 +109,7 @@ public class ResponseBlockingExecution {
                                            Consumer<Throwable> _errorHandler,
                                            ThrowableFunction<Throwable, T> _onFailureRespond,
                                            Consumer<Throwable> _errorMethodHandler,
-                                           Vertx vertx, Throwable _t,
+                                           Vertx vertx, Throwable _failure,
                                            int _retry, long _timeout,
                                            long _circuitBreakerTimeout,
                                            long _delay, Lock lock) {
@@ -128,7 +128,7 @@ public class ResponseBlockingExecution {
                                         _errorHandler,
                                         _onFailureRespond,
                                         _errorMethodHandler,
-                                        vertx, _t,
+                                        vertx, _failure,
                                         _retry,
                                         _timeout,
                                         _circuitBreakerTimeout,

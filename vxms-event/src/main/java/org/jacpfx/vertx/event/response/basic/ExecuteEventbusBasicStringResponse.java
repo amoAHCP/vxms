@@ -30,7 +30,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
      * @return the response chain
      */
     public ExecuteEventbusBasicStringResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, t, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply,  errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply,  errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 
     /**
@@ -40,7 +40,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
      * @return the response chain
      */
     public ExecuteEventbusBasicStringResponse timeout(long timeout) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, t, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply,  errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply,  errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
      * @return the response chain
      */
     public ExecuteEventbusBasicStringCircuitBreaker retry(int retryCount) {
-        return new ExecuteEventbusBasicStringCircuitBreaker(methodId, vertx, t, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond,
+        return new ExecuteEventbusBasicStringCircuitBreaker(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond,
                 deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 
@@ -61,7 +61,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
      * @return the response chain
      */
     public ExecuteEventbusBasicStringResponse onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, t, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 
 

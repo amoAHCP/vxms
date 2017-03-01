@@ -19,7 +19,7 @@ import static java.util.Optional.ofNullable;
 public class ExecuteEventbusBasicString {
     protected final String methodId;
     protected final Vertx vertx;
-    protected final Throwable t;
+    protected final Throwable failure;
     protected final Consumer<Throwable> errorMethodHandler;
     protected final Message<Object> message;
     protected final ThrowableFutureConsumer<String> stringConsumer;
@@ -33,7 +33,7 @@ public class ExecuteEventbusBasicString {
 
 
     public ExecuteEventbusBasicString(String methodId,
-                                      Vertx vertx, Throwable t,
+                                      Vertx vertx, Throwable failure,
                                       Consumer<Throwable> errorMethodHandler,
                                       Message<Object> message,
                                       ThrowableFutureConsumer<String> stringConsumer,
@@ -44,7 +44,7 @@ public class ExecuteEventbusBasicString {
                                       int retryCount, long timeout, long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.message = message;
         this.stringConsumer = stringConsumer;
@@ -65,7 +65,7 @@ public class ExecuteEventbusBasicString {
      */
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        new ExecuteEventbusBasicString(methodId, vertx, t, errorMethodHandler, message, stringConsumer,
+        new ExecuteEventbusBasicString(methodId, vertx, failure, errorMethodHandler, message, stringConsumer,
                 excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout).execute();
     }
 
@@ -104,7 +104,7 @@ public class ExecuteEventbusBasicString {
                                         errorHandler,
                                         onFailureRespond,
                                         errorMethodHandler,
-                                        vertx, t, value -> {
+                                        vertx, failure, value -> {
                                             if (value.succeeded()) {
                                                 respond(value.getResult());
                                             } else {

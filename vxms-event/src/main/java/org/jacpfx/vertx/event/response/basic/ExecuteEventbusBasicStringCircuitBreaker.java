@@ -29,7 +29,7 @@ public class ExecuteEventbusBasicStringCircuitBreaker extends ExecuteEventbusBas
      * @return the response chain
      */
     public ExecuteEventbusBasicStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, t, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
     }
 
 
