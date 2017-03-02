@@ -9,7 +9,7 @@ import io.vertx.ext.mongo.MongoClient;
  */
 public class InitMongoDB {
 
-    public static MongoClient initMongoData(Vertx vertx,JsonObject config) {
+    public static MongoClient initMongoData(Vertx vertx, JsonObject config) {
         MongoClient mongo;
         // Create a mongo client using all defaults (connect to localhost and default port) using the database name "demo".
         String connectionUrl = connectionURL();

@@ -3,19 +3,21 @@ mongodb:
   ports:
     - "27017:27017"
 read:
-  image: gcr.io/kubernetestests/read-verticle-dns:vertxPlugin16
+  build: vxms-read
   hostname: read
   links:
   - mongodb:mongodb
 write:
-  image: gcr.io/kubernetestests/write-verticle-dns:vertxPlugin16
+  build: vxms-write
   hostname: write
   links:
   - mongodb:mongodb
 frontend-verticle:
-  image: gcr.io/kubernetestests/frontend-verticle-dns:vertxPlugin16
+  build: vxms-frontend
   hostname: frontend-verticle
   links:
   - mongodb:mongodb
+  - read:read
+  - write:write
   ports:
    - "8181:8181"

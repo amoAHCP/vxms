@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class InitMongoDB {
 
-    public static void initMongoData(Vertx vertx,JsonObject config) {
+    public static void initMongoData(Vertx vertx, JsonObject config) {
         MongoClient mongo;
         // Create a mongo client using all defaults (connect to localhost and default port) using the database name "demo".
         String connectionUrl = connectionURL();
@@ -35,9 +35,9 @@ public class InitMongoDB {
                 return;
             }
 
-            if(lookup.result().isEmpty()){
+            if (lookup.result().isEmpty()) {
                 dropAndCreate(db);
-            }else {
+            } else {
                 System.out.println("users already exists");
             }
 

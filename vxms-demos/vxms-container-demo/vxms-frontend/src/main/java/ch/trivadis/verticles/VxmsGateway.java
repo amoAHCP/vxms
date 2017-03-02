@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -27,12 +28,25 @@ import java.util.logging.Logger;
 @EndpointConfig(CustomEndpointConfig.class)
 public class VxmsGateway extends VxmsEndpoint {
 
-    public static final String GET_USER = "http://read-verticle:8282/read/api/users";
-    public static final String GET_USERS = "http://read-verticle:8282/read/api/users/";
-    public static final String POST_USERS = "http://write-verticle:8383/write/api/users";
-    public static final String PUT_USERS = "http://write-verticle:8383/write/api/users/";
-    public static final String DELETE_USERS = "http://write-verticle:8383/write/api/users/";
     Logger log = Logger.getLogger(VxmsGateway.class.getName());
+
+    // Convenience method so you can run it in your IDE
+    public static void main(String[] args) {
+        VertxOptions vOpts = new VertxOptions();
+        DeploymentOptions options = new DeploymentOptions().setInstances(1).
+                setConfig(new JsonObject().put("local", true).put("etcdport", 4001).put("etcdhost", "127.0.0.1").put("exportedHost", "localhost").put("exportedPort", 8181));
+
+        vOpts.setClustered(true);
+        Vertx.clusteredVertx(vOpts, cluster -> {
+            if (cluster.succeeded()) {
+                final Vertx result = cluster.result();
+                result.deployVerticle(VxmsGateway.class.getName(), options, handle -> {
+
+                });
+            }
+        });
+
+    }
 
     @Override
     public void postConstruct(final Future<Void> startFuture) {
@@ -42,33 +56,27 @@ public class VxmsGateway extends VxmsEndpoint {
 
     }
 
-
-    @Path("/api/host1")
-    @GET
-    public void hostnameOne(RestHandler responseHandler) {
-        responseHandler.response().stringResponse(future ->
-                vertx.createHttpClient().getAbs("http://etcd-client:2379/v2/keys/userAdmin/?recursive=true", handler ->
-                        handler.bodyHandler(body -> future.complete(body.toString()))).
-                        exceptionHandler(ex -> future.fail(ex.getCause())).
-                        end()).execute();
-    }
-
-
     @Path("/api/users")
     @GET
     public void userGet(RestHandler handler) {
         handler.
-                response().
-                stringResponse(future ->
-                        vertx.createHttpClient().getAbs(GET_USER,
-                                resp -> resp.bodyHandler(body -> future.complete(body.toString()))).
-                                exceptionHandler(ex -> future.fail(ex.getCause())).
-                                end()
+                eventBusRequest().
+                send("/read/api/users-GET", "").
+                mapToStringResponse((message, future) ->
+                        {
+                            if (message.failed()) {
+                                future.fail(message.cause());
+                            } else {
+                                future.complete(message.result().body().toString());
+                            }
+                        }
                 ).
                 retry(2).
                 timeout(2000).
-                onError(error -> System.out.println("ERROR: "+error.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(new JsonArray().add(DefaultResponses.defaultErrorResponse(onError.getMessage())).encodePrettily())).
+                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) -> future.complete(new JsonArray().add(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage())).
+                        encodePrettily())).
                 execute();
     }
 
@@ -81,17 +89,23 @@ public class VxmsGateway extends VxmsEndpoint {
             return;
         }
         handler.
-                response().
-                stringResponse(future ->
-                        vertx.createHttpClient().getAbs(GET_USERS + id,
-                                resp -> resp.bodyHandler(body -> future.complete(body.toString()))).
-                                exceptionHandler(ex -> future.fail(ex.getCause())).
-                                end()
+                eventBusRequest().
+                send("/read/api/users/:id-GET", id).
+                mapToStringResponse((message, future) ->
+                        {
+                            if (message.failed()) {
+                                future.fail(message.cause());
+                            } else {
+                                future.complete(message.result().body().toString());
+                            }
+                        }
                 ).
                 retry(2).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL,"ERROR: "+error.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.defaultErrorResponse(onError.getMessage()).encodePrettily())).
+                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encodePrettily())).
                 execute();
     }
 
@@ -104,17 +118,23 @@ public class VxmsGateway extends VxmsEndpoint {
             return;
         }
         handler.
-                response().
-                stringResponse(future ->
-                        vertx.createHttpClient().postAbs(POST_USERS,
-                                resp -> resp.bodyHandler(bodyHandler -> future.complete(bodyHandler.toString()))).
-                                exceptionHandler(ex -> future.fail(ex.getCause())).
-                                end(body)
+                eventBusRequest().
+                send("/write/api/users-POST", body.toJsonObject()).
+                mapToStringResponse((message, future) ->
+                        {
+                            if (message.failed()) {
+                                future.fail(message.cause());
+                            } else {
+                                future.complete(message.result().body().toString());
+                            }
+                        }
                 ).
                 retry(2).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL,"ERROR: "+error.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.defaultErrorResponse(onError.getMessage()).encodePrettily())).
+                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encodePrettily())).
                 execute();
     }
 
@@ -127,18 +147,24 @@ public class VxmsGateway extends VxmsEndpoint {
             handler.response().end(HttpResponseStatus.BAD_REQUEST);
             return;
         }
-        final JsonObject message = DefaultResponses.mapToUser(body.toJsonObject(), id);
+        final JsonObject user = DefaultResponses.mapToUser(body.toJsonObject(), id);
         handler.
-                response().
-                stringResponse(future ->
-                        vertx.createHttpClient().putAbs(PUT_USERS + id,
-                                resp -> resp.bodyHandler(bodyHandler -> future.complete(bodyHandler.toString()))).
-                                exceptionHandler(ex -> future.fail(ex.getCause())).
-                                end(message.encode())
+                eventBusRequest().
+                send("/write/api/users/:id-PUT", user).
+                mapToStringResponse((message, future) ->
+                        {
+                            if (message.failed()) {
+                                future.fail(message.cause());
+                            } else {
+                                future.complete(message.result().body().toString());
+                            }
+                        }
                 ).
                 retry(2).
                 timeout(2000).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.defaultErrorResponse(onError.getMessage()).encodePrettily())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encodePrettily())).
                 execute();
     }
 
@@ -151,29 +177,23 @@ public class VxmsGateway extends VxmsEndpoint {
             return;
         }
         handler.
-                response().
-                stringResponse(future ->
-                        vertx.createHttpClient().putAbs(DELETE_USERS + id,
-                                resp -> resp.bodyHandler(bodyHandler -> future.complete(bodyHandler.toString()))).
-                                exceptionHandler(ex -> future.fail(ex.getCause())).
-                                end()
+                eventBusRequest().
+                send("/write/api/users/:id-DELETE", id).
+                mapToStringResponse((message, future) ->
+                        {
+                            if (message.failed()) {
+                                future.fail(message.cause());
+                            } else {
+                                future.complete(message.result().body().toString());
+                            }
+                        }
                 ).
                 retry(2).
                 timeout(2000).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.defaultErrorResponse(onError.getMessage()).encodePrettily())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encodePrettily())).
                 execute(HttpResponseStatus.NO_CONTENT);
-
-    }
-
-
-    // Convenience method so you can run it in your IDE
-    public static void main(String[] args) {
-        DeploymentOptions options = new DeploymentOptions().setInstances(1).
-                setConfig(new JsonObject().put("local", true).put("etcdport", 4001).put("etcdhost", "127.0.0.1").put("exportedHost", "localhost").put("exportedPort", 8181));
-
-        Vertx.vertx().deployVerticle(VxmsGateway.class.getName(), options, handle -> {
-
-        });
 
     }
 }

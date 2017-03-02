@@ -64,13 +64,30 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
 
         initHandlerSPIs(server, router);
-        System.out.println("registered SPI");
+
         postEndoitConfiguration(endpointConfiguration, router);
 
         if (contextRootSet)
             topRouter.mountSubRouter(URIUtil.getCleanContextRoot(Optional.ofNullable(contexRoot).orElse("")), subRouter);
 
-        initHTTPEndpoint(startFuture, port, host, server, topRouter);
+        if(port!=0){
+            initHTTPEndpoint(startFuture, port, host, server, topRouter);
+        } else {
+            initNoHTTPEndpoint(startFuture, topRouter);
+        }
+
+    }
+
+    private void initNoHTTPEndpoint(Future<Void> startFuture, Router topRouter) {
+        final ServiceDiscoverySpi serviceDiscovery = getServiceDiscoverySPI();
+        if (serviceDiscovery != null) {
+            initServiceDiscovery(serviceDiscovery,startFuture);
+        } else {
+            postConstruct(topRouter, startFuture);
+        }
+        final Throwable cause = startFuture.cause();
+        String causeMessage = cause!=null?cause.getMessage():"";
+        log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): " + startFuture.failed()+" message:"+causeMessage);
     }
 
     private void initHandlerSPIs(HttpServer server, Router router) {
@@ -98,11 +115,12 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 } else {
                     postConstruct(topRouter, startFuture);
                 }
-                log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): " + startFuture.failed());
             } else {
                 startFuture.fail(status.cause());
             }
-
+            final Throwable cause = startFuture.cause();
+            String causeMessage = cause!=null?cause.getMessage():"";
+            log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): " + startFuture.failed()+" message:"+causeMessage);
         });
     }
 

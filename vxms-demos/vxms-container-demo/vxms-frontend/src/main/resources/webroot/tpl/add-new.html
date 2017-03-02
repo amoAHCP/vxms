@@ -4,21 +4,23 @@
         <form novalidate name="AddNewForm" targetId="add-new-form" method="post" action="">
             <div class="form-group">
                 <label>Username:</label>
-                <input class="form-control" type="text" ng-model="user.username" required />
+                <input class="form-control" type="text" ng-model="user.username" required/>
             </div>
             <div class="form-group">
                 <label>First name:</label>
-                <input class="form-control" type="text" ng-model="user.firstName" required />
+                <input class="form-control" type="text" ng-model="user.firstName" required/>
             </div>
             <div class="form-group">
                 <label>Last name:</label>
-                <input class="form-control" type="text" ng-model="user.lastName" required />
+                <input class="form-control" type="text" ng-model="user.lastName" required/>
             </div>
             <div class="form-group">
                 <label>Address:</label>
-                <input class="form-control" type="text" ng-model="user.address" />
+                <input class="form-control" type="text" ng-model="user.address"/>
             </div>
-            <button class="btn btn-primary" ng-disabled="AddNewForm.$invalid || isUnchanged(user)" targetId="add-new-btn" ng-click="add_new(user)">Save!</button>
+            <button class="btn btn-primary" ng-disabled="AddNewForm.$invalid || isUnchanged(user)"
+                    targetId="add-new-btn" ng-click="add_new(user)">Save!
+            </button>
             <a href="#/" class="btn">Cancel</a>
         </form>
     </div>

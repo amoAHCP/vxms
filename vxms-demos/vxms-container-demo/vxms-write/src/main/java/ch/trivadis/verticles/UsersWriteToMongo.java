@@ -1,31 +1,46 @@
 package ch.trivadis.verticles;
 
+import ch.trivadis.util.DefaultResponses;
 import ch.trivadis.util.InitMongoDB;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.vertx.etcd.client.EtcdClient;
-import org.jacpfx.vertx.rest.response.RestHandler;
+import org.jacpfx.vertx.event.annotation.Consume;
+import org.jacpfx.vertx.event.response.EventbusHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  * Created by Andy Moncsek on 17.02.16.
  */
-@ServiceEndpoint(name = "write-verticle", contextRoot = "/write", port = 8383)
+@ServiceEndpoint(name = "write-verticle", contextRoot = "/write", port = 0)
 public class UsersWriteToMongo extends VxmsEndpoint {
+    Logger log = Logger.getLogger(UsersWriteToMongo.class.getName());
     private MongoClient mongo;
 
+    // Convenience method so you can run it in your IDE
+    public static void main(String[] args) {
+
+        VertxOptions vOpts = new VertxOptions();
+        DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("local", true).put("etcdport", 4001).put("etcdhost", "127.0.0.1").put("exportedHost", "localhost"));
+
+        vOpts.setClustered(true);
+        Vertx.clusteredVertx(vOpts, cluster -> {
+            if (cluster.succeeded()) {
+                final Vertx result = cluster.result();
+                result.deployVerticle(UsersWriteToMongo.class.getName(), options, handle -> {
+
+                });
+            }
+        });
+    }
 
     @Override
     public void postConstruct(final Future<Void> startFuture) {
@@ -33,12 +48,11 @@ public class UsersWriteToMongo extends VxmsEndpoint {
         startFuture.complete();
     }
 
-    @Path("/api/users")
-    @POST
-    public void inertUser(RestHandler handler) {
-        final Buffer body = handler.request().body();
-        if (body == null || body.toJsonObject().isEmpty()) {
-            handler.response().end(HttpResponseStatus.BAD_REQUEST);
+    @Consume("/api/users-POST")
+    public void inertUser(EventbusHandler handler) {
+        final JsonObject body = handler.request().body();
+        if (body == null || body.isEmpty()) {
+            handler.response().stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse("no content").encode())).execute();
             return;
         }
         handler.
@@ -46,12 +60,14 @@ public class UsersWriteToMongo extends VxmsEndpoint {
                 stringResponse(future -> handleInsert(body, future)).
                 retry(2).
                 timeout(1000).
-                onFailureRespond((onError, future) -> future.complete(onError.getMessage())).
+                onError(t -> log.log(Level.ALL, "ERROR: " + t.getMessage())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encode())).
                 execute();
     }
 
-    private void handleInsert(Buffer body, Future<String> future) {
-        final JsonObject newUser = body.toJsonObject();
+    private void handleInsert(final JsonObject newUser, Future<String> future) {
         mongo.findOne("users", new JsonObject().put("username", newUser.getString("username")), null, lookup -> {
             // error handling
             if (lookup.failed()) {
@@ -78,26 +94,27 @@ public class UsersWriteToMongo extends VxmsEndpoint {
         });
     }
 
-    @Path("/api/users/:id")
-    @PUT
-    public void updateUser(RestHandler handler) {
-        final String id = handler.request().param("id");
-        final Buffer body = handler.request().body();
-        if (id == null || id.isEmpty() || body == null || body.toJsonObject().isEmpty()) {
-            handler.response().end(HttpResponseStatus.BAD_REQUEST);
+    @Consume("/api/users/:id-PUT")
+    public void updateUser(EventbusHandler handler) {
+        final JsonObject user = handler.request().body();
+        if (user == null || user.isEmpty()) {
+            handler.response().stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse().encode())).execute();
             return;
         }
         handler.
                 response().
-                stringResponse(future -> handleUpdate(id, body, future)).
+                stringResponse(future -> handleUpdate(user, future)).
                 retry(2).
                 timeout(1000).
-                onFailureRespond((onError, future) -> future.complete(onError.getMessage())).
+                onError(t -> log.log(Level.ALL, "ERROR: " + t.getMessage())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encode())).
                 execute();
     }
 
-    private void handleUpdate(String id, Buffer body, Future<String> future) {
-        final JsonObject user = body.toJsonObject();
+    private void handleUpdate(final JsonObject user, Future<String> future) {
+        final String id = user.getString("id");
         mongo.findOne("users", new JsonObject().put("_id", id), null, lookup -> {
             // error handling
             if (lookup.failed()) {
@@ -128,12 +145,11 @@ public class UsersWriteToMongo extends VxmsEndpoint {
         });
     }
 
-    @Path("/api/users/:id")
-    @DELETE
-    public void deleteUser(RestHandler handler) {
-        final String id = handler.request().param("id");
+    @Consume("/api/users/:id-DELETE")
+    public void deleteUser(EventbusHandler handler) {
+        final String id = handler.request().body();
         if (id == null || id.isEmpty()) {
-            handler.response().end(HttpResponseStatus.BAD_REQUEST);
+            handler.response().stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse().encode())).execute();
             return;
         }
         handler.
@@ -141,7 +157,10 @@ public class UsersWriteToMongo extends VxmsEndpoint {
                 stringResponse(future -> handleDelete(id, future)).
                 retry(2).
                 timeout(1000).
-                onFailureRespond((onError, future) -> future.complete(onError.getMessage())).
+                onError(t -> log.log(Level.ALL, "ERROR: " + t.getMessage())).
+                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
+                        defaultErrorResponse(onError.getMessage()).
+                        encode())).
                 execute();
     }
 
@@ -167,19 +186,6 @@ public class UsersWriteToMongo extends VxmsEndpoint {
                 });
             }
         });
-    }
-
-
-    // Convenience method so you can run it in your IDE
-    public static void main(String[] args) {
-
-        VertxOptions vOpts = new VertxOptions();
-        DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("local", true).put("etcdport", 4001).put("etcdhost", "127.0.0.1").put("exportedHost", "localhost"));
-
-        Vertx.vertx().deployVerticle(UsersWriteToMongo.class.getName(), options, handle -> {
-
-        });
-
     }
 
 }

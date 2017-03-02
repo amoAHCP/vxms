@@ -26,8 +26,8 @@ public class DefaultResponses {
     }
 
 
-    public static  JsonObject mapToUser(JsonObject input, String id) {
-        return  new JsonObject().
+    public static JsonObject mapToUser(JsonObject input, String id) {
+        return new JsonObject().
                 put("username", input.getString("username")).
                 put("firstName", input.getString("firstName")).
                 put("lastName", input.getString("lastName")).
