@@ -66,10 +66,7 @@ public class EventInitializer {
 
 
     private static void registerCallback(String methodId, String route, Vertx vertx, Object service, Method eventBusMethod, Optional<Method> errorMethod) {
-
-        vertx.eventBus().consumer(route, eventbusHandler -> {
-            handleIncomingEvent(methodId, vertx, service, eventBusMethod, errorMethod, eventbusHandler);
-        });
+        vertx.eventBus().consumer(route, eventbusHandler -> handleIncomingEvent(methodId, vertx, service, eventBusMethod, errorMethod, eventbusHandler));
 
     }
 
