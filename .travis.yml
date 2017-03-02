@@ -17,6 +17,6 @@ before_script:
 
 script:
   - ./etcd/etcd --listen-client-urls 'http://0.0.0.0:4001' --advertise-client-urls 'http://127.0.0.1:4001' >/dev/null 2>&1 &
-  - mvn -q clean install -Dsun.net.http.allowRestrictedHeaders=true -X
+  - mvn -q clean install -Dsun.net.http.allowRestrictedHeaders=true
 
 # after_success: mvn versions:set -DnewVersion=1.0.2-SNAPSHOT
