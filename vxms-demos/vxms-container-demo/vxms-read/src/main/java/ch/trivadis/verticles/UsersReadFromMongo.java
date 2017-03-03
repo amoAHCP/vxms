@@ -68,10 +68,12 @@ public class UsersReadFromMongo extends VxmsEndpoint {
 
                 })).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
-                onFailureRespond((failure, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(failure.getMessage()).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((failure, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(failure.getMessage()).
+                                encodePrettily())
+                ).
                 execute();
     }
 
@@ -92,10 +94,12 @@ public class UsersReadFromMongo extends VxmsEndpoint {
 
                 })).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
-                onFailureRespond((failure, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(failure.getMessage()).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((failure, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(failure.getMessage()).
+                                encodePrettily())
+                ).
                 execute();
     }
 

@@ -60,10 +60,12 @@ public class UsersWriteToMongo extends VxmsEndpoint {
                 stringResponse(future -> handleInsert(body, future)).
                 retry(2).
                 timeout(1000).
-                onError(t -> log.log(Level.ALL, "ERROR: " + t.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encode())).
+                onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encode())
+                ).
                 execute();
     }
 
@@ -106,10 +108,12 @@ public class UsersWriteToMongo extends VxmsEndpoint {
                 stringResponse(future -> handleUpdate(user, future)).
                 retry(2).
                 timeout(1000).
-                onError(t -> log.log(Level.ALL, "ERROR: " + t.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encode())).
+                onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encode())
+                ).
                 execute();
     }
 
@@ -157,10 +161,12 @@ public class UsersWriteToMongo extends VxmsEndpoint {
                 stringResponse(future -> handleDelete(id, future)).
                 retry(2).
                 timeout(1000).
-                onError(t -> log.log(Level.ALL, "ERROR: " + t.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encode())).
+                onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encode())
+                ).
                 execute();
     }
 

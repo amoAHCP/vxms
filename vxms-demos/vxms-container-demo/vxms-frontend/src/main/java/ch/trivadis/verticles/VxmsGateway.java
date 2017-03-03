@@ -73,10 +73,12 @@ public class VxmsGateway extends VxmsEndpoint {
                 ).
                 retry(2).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(new JsonArray().add(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage())).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(new JsonArray().add(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage())).
+                                encodePrettily())
+                ).
                 execute();
     }
 
@@ -102,10 +104,12 @@ public class VxmsGateway extends VxmsEndpoint {
                 ).
                 retry(2).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encodePrettily())
+                ).
                 execute();
     }
 
@@ -131,10 +135,13 @@ public class VxmsGateway extends VxmsEndpoint {
                 ).
                 retry(2).
                 timeout(2000).
-                onError(error -> log.log(Level.ALL, "ERROR: " + error.getMessage())).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encodePrettily())
+                ).
+                httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE).
                 execute();
     }
 
@@ -162,9 +169,13 @@ public class VxmsGateway extends VxmsEndpoint {
                 ).
                 retry(2).
                 timeout(2000).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encodePrettily())
+                ).
+                httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE).
                 execute();
     }
 
@@ -190,9 +201,13 @@ public class VxmsGateway extends VxmsEndpoint {
                 ).
                 retry(2).
                 timeout(2000).
-                onFailureRespond((onError, future) -> future.complete(DefaultResponses.
-                        defaultErrorResponse(onError.getMessage()).
-                        encodePrettily())).
+                onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage())).
+                onFailureRespond((onError, future) ->
+                        future.complete(DefaultResponses.
+                                defaultErrorResponse(onError.getMessage()).
+                                encodePrettily())
+                ).
+                httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE).
                 execute(HttpResponseStatus.NO_CONTENT);
 
     }
