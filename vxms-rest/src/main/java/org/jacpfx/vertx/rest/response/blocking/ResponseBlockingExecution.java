@@ -229,10 +229,11 @@ import java.util.function.Consumer;
  */
 public class ResponseBlockingExecution {
 
-    private static final long LOCK_VALUE = -1l;
-    private static final int STOP_CONDITION = -1;
-    private static final long DEFAULT_VALUE = 0l;
+    private static final int DEFAULT_VALUE = 0;
+    private static final long DEFAULT_LONG_VALUE = 0;
     private static final int DEFAULT_LOCK_TIMEOUT = 2000;
+    private static final int STOP_CONDITION = -1;
+    private static final long LOCK_VALUE = -1l;
 
     /**
      * Creates the response value based on the flow defined in the fluent API. The resulting response will be passed to the resultHandler. This method should be executed in a  non blocking context. When defining a timeout a second execution context will be created.
@@ -262,10 +263,10 @@ public class ResponseBlockingExecution {
                                                      long _timeout,
                                                      long _circuitBreakerTimeout,
                                                      long _delay) {
-        if (_circuitBreakerTimeout > DEFAULT_VALUE) {
+        if (_circuitBreakerTimeout > DEFAULT_LONG_VALUE) {
             executeLocked((lock, counter) -> counter.get(counterHandler -> {
                 long currentVal = counterHandler.result();
-                if (currentVal == DEFAULT_VALUE) {
+                if (currentVal == DEFAULT_LONG_VALUE) {
                     executeInitialState(_methodId,
                             _supplier,
                             _resultHandler,
@@ -276,7 +277,7 @@ public class ResponseBlockingExecution {
                             _retry, _timeout,
                             _circuitBreakerTimeout,
                             _delay, lock, counter);
-                } else if (currentVal > DEFAULT_VALUE) {
+                } else if (currentVal > DEFAULT_LONG_VALUE) {
                     executeDefault(_methodId,
                             _supplier,
                             _resultHandler,
@@ -399,7 +400,7 @@ public class ResponseBlockingExecution {
                                                 Counter counter, AsyncResult<Long> valHandler) {
         //////////////////////////////////////////
         long count = valHandler.result();
-        if (count <= DEFAULT_VALUE) {
+        if (count <= DEFAULT_LONG_VALUE) {
             setCircuitBreakerReleaseTimer(vertx, _retry, _circuitBreakerTimeout, counter);
             openCircuitBreakerAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vertx, e, lck, counter);
         } else {
@@ -441,7 +442,7 @@ public class ResponseBlockingExecution {
 
     private static <T> void executeDefaultState(ThrowableSupplier<T> _supplier, Future<ExecutionResult<T>> _blockingHandler, Vertx vertx, long _timeout) throws Throwable {
         T result;
-        if (_timeout > DEFAULT_VALUE) {
+        if (_timeout > DEFAULT_LONG_VALUE) {
             result = executeWithTimeout(_supplier, vertx, _timeout);
         } else {
             result = _supplier.get();
@@ -479,10 +480,10 @@ public class ResponseBlockingExecution {
                                              long timeout, long delay) {
         T result = null;
         boolean errorHandling = false;
-        while (_retry >= DEFAULT_VALUE) {
+        while (_retry >= DEFAULT_LONG_VALUE) {
             errorHandling = false;
             try {
-                if (timeout > DEFAULT_VALUE) {
+                if (timeout > DEFAULT_LONG_VALUE) {
                     result = executeWithTimeout(_supplier, vertx, timeout);
                     _retry = STOP_CONDITION;
                 } else {
@@ -515,7 +516,7 @@ public class ResponseBlockingExecution {
 
     private static void handleDelay(long delay) {
         try {
-            if (delay > DEFAULT_VALUE) Thread.sleep(delay);
+            if (delay > DEFAULT_LONG_VALUE) Thread.sleep(delay);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }

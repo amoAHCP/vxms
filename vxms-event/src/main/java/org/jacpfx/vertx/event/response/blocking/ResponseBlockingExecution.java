@@ -230,7 +230,7 @@ import java.util.function.Consumer;
 public class ResponseBlockingExecution {
 
     private static final int DEFAULT_VALUE = 0;
-    private static final long DEFAULT__LONGVALUE = 0;
+    private static final long DEFAULT_LONG_VALUE = 0;
     private static final int DEFAULT_LOCK_TIMEOUT = 2000;
     private static final int STOP_CONDITION = -1;
     private static final long LOCK_VALUE = -1l;
@@ -264,10 +264,10 @@ public class ResponseBlockingExecution {
                                                   long timeout,
                                                   long circuitBreakerTimeout,
                                                   long delay) {
-        if (circuitBreakerTimeout > DEFAULT__LONGVALUE) {
+        if (circuitBreakerTimeout > DEFAULT_LONG_VALUE) {
             executeLocked((lock, counter) -> counter.get(counterHandler -> {
                         long currentVal = counterHandler.result();
-                        if (currentVal == DEFAULT_VALUE) {
+                        if (currentVal == DEFAULT_LONG_VALUE) {
                             executeInitialState(methodId,
                                     supplier,
                                     blockingHandler,
@@ -282,7 +282,7 @@ public class ResponseBlockingExecution {
                                     delay,
                                     lock,
                                     counter);
-                        } else if (currentVal > DEFAULT_VALUE) {
+                        } else if (currentVal > DEFAULT_LONG_VALUE) {
                             executeDefault(methodId,
                                     supplier,
                                     blockingHandler,
@@ -514,7 +514,7 @@ public class ResponseBlockingExecution {
                                                 Vertx vertx,
                                                 long _timeout) throws Throwable {
         T result;
-        if (_timeout > DEFAULT__LONGVALUE) {
+        if (_timeout > DEFAULT_LONG_VALUE) {
             result = executeWithTimeout(_supplier, vertx, _timeout);
         } else {
             result = _supplier.get();
@@ -557,7 +557,7 @@ public class ResponseBlockingExecution {
         while (_retry >= DEFAULT_VALUE) {
             errorHandling = false;
             try {
-                if (timeout > DEFAULT__LONGVALUE) {
+                if (timeout > DEFAULT_LONG_VALUE) {
                     result = executeWithTimeout(_supplier, vertx, timeout);
                     _retry = STOP_CONDITION;
                 } else {
@@ -590,7 +590,7 @@ public class ResponseBlockingExecution {
 
     private static void handleDelay(long delay) {
         try {
-            if (delay > DEFAULT_VALUE) Thread.sleep(delay);
+            if (delay > DEFAULT_LONG_VALUE) Thread.sleep(delay);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }

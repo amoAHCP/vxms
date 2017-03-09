@@ -9,30 +9,108 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
 ## vxms-rest example
 
 ```java
-@ServiceEndpoint
-public class SimpleREST extends VxmsEndpoint {
+@ServiceEndpoint(port=8090)
+public class RESTExample extends VxmsEndpoint {
 
    
     @Path("/hello/:name")
     @GET
-    public void simpleRESTHelloWithParameter(RestHandler handler) {
+    public void simpleNonBlocking(RestHandler handler) {
+      String name =   handler.request().param("name");
       handler.
                       response().
                       stringResponse((response)->
-                              response.complete("hello World "+handler.request().param("name"))). // define non-blocking response
-                      timeout(2000). // timeout for stringResponse handling
-                      onFailureRespond((error, future) -> future.complete("error")). // define response when stringResponse fails and retry won'failure work
+                              response.complete("hello World "+name)). // complete non-blocking response
+                      timeout(2000). // timeout for stringResponse handling. If timeout is reached, error handling will be executed
+                      onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
+                      onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
                       httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
                       retry(3). // amount of retries before onFailureRespond will be executed
-                      closeCircuitBreaker(2000). // time after circuit breaker will be closed again, when opend only onFailureRespond will be executed
+                      closeCircuitBreaker(2000). // time after circuit breaker will be closed again. While opened, onFailureRespond will be executed on request
                       execute(); // execute non blocking
     }
+    
+    
+    @Path("/helloBlocking/:name")
+    @GET
+    public void simpleBlocking(RestHandler handler) {
+       String name =   handler.request().param("name");
+       handler.
+                       response().
+                       blocking().
+                       stringResponse(()->{
+                            String val = blockingCall();
+                            return val+ "hello World "+name;
+                       }). // complete blocking response
+                       timeout(15000). // timeout for stringResponse handling. If timeout is reached, error handling will be executed
+                       onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
+                       onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
+                       httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
+                       retry(3). // amount of retries before onFailureRespond will be executed
+                       closeCircuitBreaker(2000). // time after circuit breaker will be closed again. While opened, onFailureRespond will be executed on request
+                       execute(); // execute non blocking
+          
+     }
+     
+     @Path("/helloEventbus/:name")
+     @GET
+     public void simpleEventbusCall(RestHandler handler) {
+        String name =   handler.request().param("name");
+        handler.
+                        eventBusRequest().
+                        send("/consumer.hello", name). // send message to eventbus consumer
+                        mapToStringResponse((handler, response)->
+                                     response.complete(handler.result().body()). // on message response, map message reply value to rest response                        ). // complete non-blocking response
+                        timeout(5000). // timeout for mapToStringResponse handling. If timeout is reached, error handling will be executed
+                        onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
+                        onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
+                        httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
+                        retry(3). // amount of retries before onFailureRespond will be executed
+                        closeCircuitBreaker(2000). // time after circuit breaker will be closed again. While opened, onFailureRespond will be executed on request
+                        execute(); // execute non blocking
+               
+          }
+     
+     private String blockingCall(){
+        // block
+        return "xyz";
+     } 
 
     public static void main(String[] args) {
-        Vertx.vertx().deployVerticle(SimpleREST.class.getName());
+        Vertx.vertx().deployVerticle(RESTExample.class.getName());
     }
 }
 ``` 
+
+## vxms-eventbus example
+
+```java
+@ServiceEndpoint
+public class EventbusExample extends VxmsEndpoint {
+
+   
+    @Consume("/consumer.hello")
+    public void simpleNonBlocking(EventbusHandler handler) {
+      String name =   handler.request().body();
+      handler.
+                      response().
+                      stringResponse((response)->
+                              response.complete("hello World "+name)). // complete non-blocking response
+                      timeout(2000). // timeout for stringResponse handling. If timeout is reached, error handling will be executed
+                      onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
+                      onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
+                      httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
+                      retry(3). // amount of retries before onFailureRespond will be executed
+                      closeCircuitBreaker(2000). // time after circuit breaker will be closed again. While opened, onFailureRespond will be executed on request
+                      execute(); // execute non blocking
+    }
+    
+   
+    public static void main(String[] args) {
+        Vertx.vertx().deployVerticle(EventbusExample.class.getName());
+    }
+}
+```
 
 ## vxms-core
 The vxms-core module contains the *abstract VxmsEndpoint* class which extends *AbstractVerticle" class (from Vert.x). This class must be extended by every vxms service, to be able to use all other modules. The core module didn'failure add much extra functionality, but it provides some convenience function over a plain Verticle. A minimal vxms (core) endpoint looks like this:

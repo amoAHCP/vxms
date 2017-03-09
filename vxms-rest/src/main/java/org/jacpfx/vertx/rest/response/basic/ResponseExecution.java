@@ -233,9 +233,10 @@ import java.util.function.Consumer;
  */
 public class ResponseExecution {
 
-    public static final long DEFAULT_VALUE = 0l;
-    public static final int DEFAULT_LOCK_TIMEOUT = 2000;
-    public static final long LOCK_VALUE = -1l;
+    private static final int DEFAULT_VALUE = 0;
+    private static final long DEFAULT_LONG_VALUE = 0l;
+    private static final int DEFAULT_LOCK_TIMEOUT = 2000;
+    private static final long LOCK_VALUE = -1l;
 
     /**
      * Creates the response value based on the flow defined in the fluent API.  The resulting response will be passed to an execution consumer.
@@ -265,7 +266,7 @@ public class ResponseExecution {
                                           long timeout,
                                           long circuitBreakerTimeout) {
 
-        if (circuitBreakerTimeout > DEFAULT_VALUE) {
+        if (circuitBreakerTimeout > DEFAULT_LONG_VALUE) {
             executeStateful(methodId,
                     retry, timeout,
                     circuitBreakerTimeout,
@@ -314,7 +315,7 @@ public class ResponseExecution {
                 resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
             }
         });
-        if (timeout > DEFAULT_VALUE) {
+        if (timeout > DEFAULT_LONG_VALUE) {
             addTimeoutHandler(timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));
@@ -345,7 +346,8 @@ public class ResponseExecution {
                                         Consumer<Throwable> errorMethodHandler,
                                         Vertx vertx,
                                         Consumer<ExecutionResult<T>> resultConsumer,
-                                        AsyncResult<T> event, int retryTemp) {
+                                        AsyncResult<T> event,
+                                        int retryTemp) {
         if (retryTemp < DEFAULT_VALUE) {
             errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, event);
         } else {
@@ -396,7 +398,7 @@ public class ResponseExecution {
         executeLocked((lock, counter) ->
                 counter.get(counterHandler -> {
                     long currentVal = counterHandler.result();
-                    if (currentVal == DEFAULT_VALUE) {
+                    if (currentVal == DEFAULT_LONG_VALUE) {
                         executeInitialState(retry,
                                 timeout,
                                 _userOperation,
@@ -427,7 +429,7 @@ public class ResponseExecution {
 
     private static <T> void executeDefaultState(long _timeout, ThrowableFutureConsumer<T> _userOperation, Vertx vertx, Future<T> operationResult, Lock lock) {
         lock.release();
-        if (_timeout > DEFAULT_VALUE) {
+        if (_timeout > DEFAULT_LONG_VALUE) {
             addTimeoutHandler(_timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));
@@ -500,7 +502,7 @@ public class ResponseExecution {
                                                 AsyncResult<T> event, Lock lock, Counter counter,
                                                 AsyncResult<Long> valHandler) {
         long count = valHandler.result();
-        if (count <= DEFAULT_VALUE) {
+        if (count <= DEFAULT_LONG_VALUE) {
             setCircuitBreakerReleaseTimer(retry, circuitBreakerTimeout, vertx, counter);
             openCircuitBreakerAndHandleError(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, event, lock, counter);
         } else {

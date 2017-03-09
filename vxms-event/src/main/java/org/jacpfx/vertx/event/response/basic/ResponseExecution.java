@@ -232,9 +232,8 @@ import java.util.function.Consumer;
 public class ResponseExecution {
 
     private static final int DEFAULT_VALUE = 0;
-    private static final long DEFAULT__LONGVALUE = 0;
+    private static final long DEFAULT_LONG_VALUE = 0l;
     private static final int DEFAULT_LOCK_TIMEOUT = 2000;
-    private static final int STOP_CONDITION = -1;
     private static final long LOCK_VALUE = -1l;
 
     /**
@@ -265,7 +264,7 @@ public class ResponseExecution {
                                           Throwable failure,
                                           Consumer<ExecutionResult<T>> resultConsumer) {
 
-        if (circuitBreakerTimeout > DEFAULT__LONGVALUE) {
+        if (circuitBreakerTimeout > DEFAULT_LONG_VALUE) {
             executeStateful(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, failure, resultConsumer);
         } else {
             executeStateless(methodId, retry, timeout, circuitBreakerTimeout, userOperation, errorHandler, onFailureRespond, errorMethodHandler, vertx, resultConsumer);
@@ -301,13 +300,12 @@ public class ResponseExecution {
                 resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
             }
         });
-        if (_timeout > DEFAULT__LONGVALUE) {
+        if (_timeout > DEFAULT_LONG_VALUE) {
             addTimeoutHandler(_timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));
                 }
             });
-
         }
         executeAndCompleate(_userOperation, operationResult);
 
@@ -384,7 +382,7 @@ public class ResponseExecution {
         executeLocked((lock, counter) ->
                         counter.get(counterHandler -> {
                             long currentVal = counterHandler.result();
-                            if (currentVal == DEFAULT__LONGVALUE) {
+                            if (currentVal == DEFAULT_LONG_VALUE) {
                                 executeInitialState(_retry,
                                         _timeout,
                                         _userOperation,
@@ -392,7 +390,7 @@ public class ResponseExecution {
                                         operationResult,
                                         lock,
                                         counter);
-                            } else if (currentVal > DEFAULT__LONGVALUE) {
+                            } else if (currentVal > DEFAULT_LONG_VALUE) {
                                 executeDefaultState(_timeout,
                                         _userOperation,
                                         vertx,
@@ -436,7 +434,7 @@ public class ResponseExecution {
                                                 Future<T> operationResult,
                                                 Lock lock) {
         lock.release();
-        if (_timeout > DEFAULT_VALUE) {
+        if (_timeout > DEFAULT_LONG_VALUE) {
             addTimeoutHandler(_timeout, vertx, (l) -> {
                 if (!operationResult.isComplete()) {
                     operationResult.fail(new TimeoutException("operation timeout"));
@@ -521,7 +519,7 @@ public class ResponseExecution {
                                                 Counter counter,
                                                 AsyncResult<Long> valHandler) {
         long count = valHandler.result();
-        if (count <= DEFAULT__LONGVALUE) {
+        if (count <= DEFAULT_LONG_VALUE) {
             setCircuitBreakerReleaseTimer(_retry, _circuitBreakerTimeout, vertx, counter);
             openCircuitBreakerAndHandleError(errorHandler,
                     onFailureRespond,
