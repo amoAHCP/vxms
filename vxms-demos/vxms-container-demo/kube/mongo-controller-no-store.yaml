@@ -3,7 +3,7 @@ kind: ReplicationController
 metadata:
   labels:
     name: mongo
-    visualize: "true"
+    visualize: "false"
   name: mongo-controller
 spec:
   replicas: 1
@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         name: mongo
-        visualize: "true"
+        visualize: "false"
     spec:
       containers:
       - image: mongo
