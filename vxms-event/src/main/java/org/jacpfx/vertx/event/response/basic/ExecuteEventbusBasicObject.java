@@ -223,6 +223,7 @@ import static java.util.Optional.ofNullable;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * This class is the end of the non blocking fluent API, all data collected to execute the chain.
  */
 public class ExecuteEventbusBasicObject {
     protected final String methodId;
@@ -240,6 +241,24 @@ public class ExecuteEventbusBasicObject {
     protected final long timeout;
     protected final long circuitBreakerTimeout;
 
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId                 the method identifier
+     * @param vertx                    the vertx instance
+     * @param failure                  the failure thrown while task execution
+     * @param errorMethodHandler       the error handler
+     * @param message                  the message to respond to
+     * @param objectConsumer           the consumer, producing the byte response
+     * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
+     * @param encoder                  the encoder to serialize the response object
+     * @param errorHandler             the error handler
+     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
+     * @param deliveryOptions          the response deliver options
+     * @param retryCount               the amount of retries before failure execution is triggered
+     * @param timeout                  the amount of time before the execution will be aborted
+     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
+     */
     public ExecuteEventbusBasicObject(String methodId,
                                       Vertx vertx,
                                       Throwable failure,
@@ -251,7 +270,9 @@ public class ExecuteEventbusBasicObject {
                                       Consumer<Throwable> errorHandler,
                                       ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
                                       DeliveryOptions deliveryOptions,
-                                      int retryCount, long timeout, long circuitBreakerTimeout) {
+                                      int retryCount,
+                                      long timeout,
+                                      long circuitBreakerTimeout) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.failure = failure;
@@ -276,9 +297,21 @@ public class ExecuteEventbusBasicObject {
      */
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        final ExecuteEventbusBasicObject lastStep = new ExecuteEventbusBasicObject(methodId, vertx, failure, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder, errorHandler,
-                onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
-        lastStep.execute();
+        new ExecuteEventbusBasicObject(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                objectConsumer,
+                excecuteEventBusAndReply,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout).
+                execute();
     }
 
 

@@ -219,12 +219,31 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * This class defines the fluid API part to define the amount of time after the circuit breaker will be closed again
  */
 public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBasicObjectResponse {
 
-
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId                 the method identifier
+     * @param vertx                    the vertx instance
+     * @param failure                  the failure thrown while task execution
+     * @param errorMethodHandler       the error handler
+     * @param message                  the message to respond to
+     * @param objectConsumer           the supplier, producing the byte response
+     * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent API
+     * @param encoder                  the encoder to serialize the response object
+     * @param errorHandler             the error handler
+     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
+     * @param deliveryOptions          the response deliver options
+     * @param retryCount               the amount of retries before failure execution is triggered
+     * @param timeout                  the amount of time before the execution will be aborted
+     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
+     */
     public ExecuteEventbusBasicObjectCircuitBreaker(String methodId,
-                                                    Vertx vertx, Throwable t,
+                                                    Vertx vertx,
+                                                    Throwable failure,
                                                     Consumer<Throwable> errorMethodHandler,
                                                     Message<Object> message,
                                                     ThrowableFutureConsumer<Serializable> objectConsumer,
@@ -233,9 +252,23 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
                                                     Consumer<Throwable> errorHandler,
                                                     ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
                                                     DeliveryOptions deliveryOptions,
-                                                    int retryCount, long timeout, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+                                                    int retryCount,
+                                                    long timeout,
+                                                    long circuitBreakerTimeout) {
+        super(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                objectConsumer,
+                excecuteEventBusAndReply,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
 
@@ -243,11 +276,23 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
      * Define a timeout to release the stateful circuit breaker. Depending on your configuration the CircuitBreaker locks either cluster wide, jvm wide or only for the instance
      *
      * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs faster)
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
      */
     public ExecuteEventbusBasicObjectResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteEventbusBasicObjectResponse(methodId, vertx, failure, errorMethodHandler, message, objectConsumer, excecuteEventBusAndReply, encoder,
-                errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicObjectResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                objectConsumer,
+                excecuteEventBusAndReply,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
 

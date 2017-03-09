@@ -217,15 +217,54 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * Fluent API for String responses, defines access to failure handling, timeouts,...
  */
 public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicString {
 
 
-    public ExecuteEventbusBasicStringResponse(String methodId, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, Message<Object> message,
-                                              ThrowableFutureConsumer<String> stringConsumer, ExecuteEventbusStringCall excecuteEventBusAndReply, Consumer<Throwable> errorHandler,
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId                 the method identifier
+     * @param vertx                    the vertx instance
+     * @param failure                  the failure thrown while task execution
+     * @param errorMethodHandler       the error handler
+     * @param message                  the message to responde to
+     * @param stringConsumer           the consumer, producing the byte response
+     * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent API
+     * @param errorHandler             the error handler
+     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
+     * @param deliveryOptions          the response delivery options
+     * @param retryCount               the amount of retries before failure execution is triggered
+     * @param timeout                  the amount of time before the execution will be aborted
+     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
+     */
+    public ExecuteEventbusBasicStringResponse(String methodId,
+                                              Vertx vertx,
+                                              Throwable failure,
+                                              Consumer<Throwable> errorMethodHandler,
+                                              Message<Object> message,
+                                              ThrowableFutureConsumer<String> stringConsumer,
+                                              ExecuteEventbusStringCall excecuteEventBusAndReply,
+                                              Consumer<Throwable> errorHandler,
                                               ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-                                              DeliveryOptions deliveryOptions, int retryCount, long timeout, long circuitBreakerTimeout) {
-        super(methodId, vertx, t, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+                                              DeliveryOptions deliveryOptions,
+                                              int retryCount,
+                                              long timeout,
+                                              long circuitBreakerTimeout) {
+        super(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                stringConsumer,
+                excecuteEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
 
@@ -233,41 +272,88 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
      * intermediate error handler which will be called on each error (at least 1 time, in case on N retries... up to N times)
      *
      * @param errorHandler the handler to be executed on each error
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicStringResponse}
      */
     public ExecuteEventbusBasicStringResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply,  errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                stringConsumer,
+                excecuteEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
     /**
      * Defines how long a method can be executed before aborted.
      *
      * @param timeout the amount of timeout in ms
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicStringResponse}
      */
     public ExecuteEventbusBasicStringResponse timeout(long timeout) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply,  errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                stringConsumer,
+                excecuteEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
     /**
      * retry execution N times before
      *
      * @param retryCount the amount of retries
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicStringCircuitBreaker}
      */
     public ExecuteEventbusBasicStringCircuitBreaker retry(int retryCount) {
-        return new ExecuteEventbusBasicStringCircuitBreaker(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond,
-                deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringCircuitBreaker(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                stringConsumer,
+                excecuteEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
     /**
      * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value, this handler is a terminal handler and will be executed only once
      *
      * @param onFailureRespond the handler (function) to execute on error
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicStringResponse}
      */
     public ExecuteEventbusBasicStringResponse onFailureRespond(ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
-        return new ExecuteEventbusBasicStringResponse(methodId, vertx, failure, errorMethodHandler, message, stringConsumer, excecuteEventBusAndReply, errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout);
+        return new ExecuteEventbusBasicStringResponse(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                stringConsumer,
+                excecuteEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout);
     }
 
 

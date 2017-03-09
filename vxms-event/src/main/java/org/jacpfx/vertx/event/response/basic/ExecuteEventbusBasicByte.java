@@ -221,6 +221,7 @@ import static java.util.Optional.ofNullable;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
+ * This class is the end of the non blocking fluent API, all data collected to execute the chain.
  */
 public class ExecuteEventbusBasicByte {
     protected final String methodId;
@@ -237,6 +238,23 @@ public class ExecuteEventbusBasicByte {
     protected final long timeout;
     protected final long circuitBreakerTimeout;
 
+    /**
+     * The constructor to pass all needed members
+     *
+     * @param methodId                 the method identifier
+     * @param vertx                    the vertx instance
+     * @param failure                  the failure thrown while task execution
+     * @param errorMethodHandler       the error handler
+     * @param message                  the message to respond to
+     * @param byteConsumer             the consumer, producing the byte response
+     * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
+     * @param errorHandler             the error handler
+     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
+     * @param deliveryOptions          the response deliver options
+     * @param retryCount               the amount of retries before failure execution is triggered
+     * @param timeout                  the amount of time before the execution will be aborted
+     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
+     */
     public ExecuteEventbusBasicByte(String methodId,
                                     Vertx vertx,
                                     Throwable failure,
@@ -272,8 +290,20 @@ public class ExecuteEventbusBasicByte {
      */
     public void execute(DeliveryOptions deliveryOptions) {
         Objects.requireNonNull(deliveryOptions);
-        new ExecuteEventbusBasicByte(methodId, vertx, failure, errorMethodHandler, message, byteConsumer, excecuteEventBusAndReply,
-                errorHandler, onFailureRespond, deliveryOptions, retryCount, timeout, circuitBreakerTimeout).execute();
+        new ExecuteEventbusBasicByte(methodId,
+                vertx,
+                failure,
+                errorMethodHandler,
+                message,
+                byteConsumer,
+                excecuteEventBusAndReply,
+                errorHandler,
+                onFailureRespond,
+                deliveryOptions,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout).
+                execute();
     }
 
 
