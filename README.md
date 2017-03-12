@@ -47,6 +47,7 @@ public class RESTExample extends VxmsEndpoint {
                        onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
                        httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
                        retry(3). // amount of retries before onFailureRespond will be executed
+                       delay(1000). // delay between retries
                        closeCircuitBreaker(2000). // time after circuit breaker will be closed again. While opened, onFailureRespond will be executed on request
                        execute(); // execute non blocking
           
@@ -59,8 +60,8 @@ public class RESTExample extends VxmsEndpoint {
         handler.
                         eventBusRequest().
                         send("/consumer.hello", name). // send message to eventbus consumer
-                        mapToStringResponse((handler, response)->
-                                     response.complete(handler.result().body()). // on message response, map message reply value to rest response                        ). // complete non-blocking response
+                        mapToStringResponse((message, response)->
+                                     response.complete(message.result().body()). // on message response, map message result value to the rest response                        ). // complete non-blocking response
                         timeout(5000). // timeout for mapToStringResponse handling. If timeout is reached, error handling will be executed
                         onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
                         onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)

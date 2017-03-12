@@ -207,7 +207,6 @@
 package org.jacpfx.vertx.registry;
 
 
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -220,6 +219,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
+import org.jacpfx.common.AsyncResultHandler;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
 
 import java.net.URI;

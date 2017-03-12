@@ -268,11 +268,12 @@ public class EventbusStringExecutionBlockingUtil {
 
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
 
-        final RetryBlockingExecutor retry = (targetId,
+        final RetryBlockingExecutor retry = (methodId,
+                                             targetId,
                                              message,
                                              function,
                                              requestDeliveryOptions,
-                                             methodId,
+
                                              vertx, t,
                                              errorMethodHandler,
                                              requestMessage,
@@ -284,7 +285,8 @@ public class EventbusStringExecutionBlockingUtil {
                                              retryCount,
                                              timeout, delay, circuitBreakerTimeout) -> {
             int retryValue = retryCount - 1;
-            mapToStringResponse(methodId, targetId,
+            mapToStringResponse(methodId,
+                    targetId,
                     message,
                     function,
                     requestDeliveryOptions,

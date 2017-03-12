@@ -679,7 +679,7 @@ public class EventbusBridgeBlockingExecution {
                                           DeliveryOptions requestDeliveryOptions,
                                           String methodId,
                                           Vertx vertx,
-                                          Throwable t,
+                                          Throwable failure,
                                           Consumer<Throwable> errorMethodHandler,
                                           Message<Object> requestMessage,
                                           Encoder encoder,
@@ -688,13 +688,14 @@ public class EventbusBridgeBlockingExecution {
                                           DeliveryOptions responseDeliveryOptions,
                                           int retryCount, long timeout, long delay,
                                           long circuitBreakerTimeout, RetryBlockingExecutor retry) {
-        ResponseExecution.handleError(errorHandler, t);
-        retry.execute(targetId,
+        ResponseExecution.handleError(errorHandler, failure);
+        retry.execute(methodId,
+                targetId,
                 message,
                 function,
                 requestDeliveryOptions,
-                methodId,
-                vertx, t,
+                vertx,
+                failure,
                 errorMethodHandler,
                 requestMessage,
                 null,

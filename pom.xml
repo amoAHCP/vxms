@@ -230,12 +230,12 @@
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
 
         <!--Dependency versions-->
-        <vertx.version>3.4.0.Beta1</vertx.version>
+        <vertx.version>3.4.0</vertx.version>
 
         <junit.version>4.11</junit.version>
 
         <!--Plugin versions-->
-        <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
     </properties>
     <licenses>
@@ -331,11 +331,11 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
+                    <version>${maven.compiler.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.7.2</version>
+                    <version>${maven.surefire.report.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>

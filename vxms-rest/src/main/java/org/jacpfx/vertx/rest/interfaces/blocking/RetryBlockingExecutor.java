@@ -260,8 +260,10 @@ public interface RetryBlockingExecutor<T> {
                  Encoder encoder,
                  Consumer<Throwable> errorHandler,
                  ThrowableFunction<Throwable, T> onFailureRespond,
-                 int httpStatusCode, int httpErrorCode,
-                 int retryCount, long timeout,
+                 int httpStatusCode,
+                 int httpErrorCode,
+                 int retryCount,
+                 long timeout,
                  long delay,
                  long circuitBreakerTimeout);
 }

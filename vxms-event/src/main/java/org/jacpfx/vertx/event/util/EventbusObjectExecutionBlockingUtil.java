@@ -269,11 +269,11 @@ public class EventbusObjectExecutionBlockingUtil {
                                                                     long _delay,
                                                                     long _circuitBreakerTimeout) {
         final DeliveryOptions deliveryOptions = Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
-        final RetryBlockingExecutor retry = (targetId,
+        final RetryBlockingExecutor retry = (methodId,
+                                             targetId,
                                              message,
                                              function,
                                              requestDeliveryOptions,
-                                             methodId,
                                              vertx, t,
                                              errorMethodHandler,
                                              requestMessage,
