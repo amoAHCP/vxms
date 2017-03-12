@@ -1,5 +1,6 @@
 package org.jacpfx.other;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -8,6 +9,7 @@ import org.junit.Test;
 public class GetPidTest {
 
     @Test
+    @Ignore
     public void testGetPid() {
         System.out.println("test: "+getPID());
     }

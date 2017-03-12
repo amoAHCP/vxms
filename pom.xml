@@ -336,6 +336,11 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.report.plugin.version}</version>
+                    <configuration>
+
+                        <argLine>-Xmx512m -XX:MaxPermSize=256m</argLine>
+
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
