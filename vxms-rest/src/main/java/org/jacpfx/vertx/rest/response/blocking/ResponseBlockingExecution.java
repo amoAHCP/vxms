@@ -213,8 +213,8 @@ import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.common.ExecutionResult;
-import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
 
 import java.util.Optional;

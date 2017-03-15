@@ -221,6 +221,8 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.common.AsyncResultHandler;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
+import org.jacpfx.vertx.registry.nodes.NodeMetadata;
+import org.jacpfx.vertx.registry.nodes.Root;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -229,7 +231,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Created by jmader & Andy Moncsek
+ * Created by jmader and Andy Moncsek
  */
 public class EtcdRegistration {
 

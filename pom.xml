@@ -183,7 +183,7 @@
   ~
   ~       To apply the Apache License to your work, attach the following
   ~       boilerplate notice, with the fields enclosed by brackets "[]"
-  ~       replaced with your own identifying information. (Don't include
+  ~       replaced with your own identifying information. (Don'failure include
   ~       the brackets!)  The text should be enclosed in the appropriate
   ~       comment syntax for the file format. We also recommend that a
   ~       file or class name and description of purpose be included on the
@@ -259,15 +259,33 @@
         <tag>vxms-parent</tag>
     </scm>
 
-    <modules>
-        <module>vxms-common</module>
-        <module>vxms-verticle</module>
-        <module>vxms-event</module>
-        <module>vxms-rest</module>
-        <module>vxms-websocket</module>
-        <module>vxms-etcd-discovery</module>
-        <module>vxms-service-discovery</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>all</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>vxms-common</module>
+                <module>vxms-verticle</module>
+                <module>vxms-event</module>
+                <module>vxms-rest</module>
+                <module>vxms-websocket</module>
+                <module>vxms-etcd-discovery</module>
+                <module>vxms-service-discovery</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>beta1</id>
+            <modules>
+                <module>vxms-common</module>
+                <module>vxms-verticle</module>
+                <module>vxms-event</module>
+                <module>vxms-rest</module>
+            </modules>
+        </profile>
+
+    </profiles>
 
     <repositories>
         <repository>
@@ -324,6 +342,34 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

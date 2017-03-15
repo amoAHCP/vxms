@@ -15,13 +15,12 @@ import org.jacpfx.vertx.etcd.client.DiscoveryClientBuilder;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
 import org.jacpfx.vertx.registry.DiscoveryClient;
 import org.jacpfx.vertx.registry.EtcdRegistration;
+import org.jacpfx.vertx.registry.nodes.Node;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
@@ -155,7 +154,7 @@ public class BasicEtcRegTest extends VertxTestBase {
         reg.connect(result -> {
             if (result.succeeded()) {
                 reg.retrieveKeys(root -> {
-                    org.jacpfx.vertx.registry.Node n1 = findNode(root.getNode(), "/petShop/myService");
+                    Node n1 = findNode(root.getNode(), "/petShop/myService");
                     System.out.println(n1);
                     assertEquals("/petShop/myService", n1.getKey());
                     testComplete();
@@ -614,14 +613,14 @@ public class BasicEtcRegTest extends VertxTestBase {
     }
 
 
-    private org.jacpfx.vertx.registry.Node findNode(org.jacpfx.vertx.registry.Node node, String value) {
+    private Node findNode(Node node, String value) {
         System.out.println("find: " + node.getKey() + "  value:" + value);
         if (node.getKey() != null && node.getKey().equals(value)) return node;
         if (node.isDir() && node.getNodes() != null) return node.getNodes().stream().filter(n1 -> {
-            org.jacpfx.vertx.registry.Node n2 = n1.isDir() ? findNode(n1, value) : n1;
+            Node n2 = n1.isDir() ? findNode(n1, value) : n1;
             return n2.getKey().equals(value);
-        }).findFirst().orElse(new org.jacpfx.vertx.registry.Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
-        return new org.jacpfx.vertx.registry.Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
+        }).findFirst().orElse(new Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
+        return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
     }
 
 

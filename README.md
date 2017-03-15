@@ -2,7 +2,7 @@
 
 # vxms
 Vxms is a modular micro service framework, based 100% on Vert.x 3. While Vert.x is a totally unopinionated framework/toolkit, vxms helps the developer to create (micro) services typically using REST and/or events. 
-Currently vxms consists of 1 base module and 4 extension modules, helping the developer to write Jax-RX like REST services, WebSocket endpoints and handling service registration/discovery using etcd. Since the *core module* is using Java SPIs to handle REST, WebSocket and service registration you can adopt the API easily for your needs.
+Currently vxms consists of 1 base module and 4 extension modules, helping the developer to write Jax-RX like REST services, EventBus endpoints and handling service registration/discovery using etcd. Since the *core module* is using Java SPIs to handle REST, EventBus and service registration you can adopt the API easily for your needs.
 Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any other Vert.x extension will work in vxms out of the box.
     
 
@@ -59,7 +59,7 @@ public class RESTExample extends VxmsEndpoint {
         String name =   handler.request().param("name");
         handler.
                         eventBusRequest().
-                        send("/consumer.hello", name). // send message to eventbus consumer
+                        send("/onSuccess.hello", name). // send message to eventbus onSuccess
                         mapToStringResponse((message, response)->
                                      response.complete(message.result().body()). // on message response, map message result value to the rest response                        ). // complete non-blocking response
                         timeout(5000). // timeout for mapToStringResponse handling. If timeout is reached, error handling will be executed
@@ -90,7 +90,7 @@ public class RESTExample extends VxmsEndpoint {
 public class EventbusExample extends VxmsEndpoint {
 
    
-    @Consume("/consumer.hello")
+    @Consume("/onSuccess.hello")
     public void simpleNonBlocking(EventbusHandler handler) {
       String name =   handler.request().body();
       handler.

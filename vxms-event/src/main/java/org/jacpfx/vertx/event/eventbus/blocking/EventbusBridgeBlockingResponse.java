@@ -210,7 +210,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusByteResponse;
 import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusObjectResponse;
@@ -224,6 +224,7 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
+ * Represents the start of a blocking execution chain
  */
 public class EventbusBridgeBlockingResponse {
     private final String methodId;
@@ -235,11 +236,29 @@ public class EventbusBridgeBlockingResponse {
     private final Object message;
     private final DeliveryOptions options;
 
-
-    public EventbusBridgeBlockingResponse(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, String targetId, Object message, DeliveryOptions options) {
+    /**
+     * Pass all parameters to execute the chain
+     *
+     * @param methodId           the method identifier
+     * @param requestmessage     the message to responde
+     * @param vertx              the vertx instance
+     * @param failure            the last failure
+     * @param errorMethodHandler the error-method handler
+     * @param targetId           the event-bus message target-targetId
+     * @param message            the event-bus message
+     * @param options            the event-bus delivery options
+     */
+    public EventbusBridgeBlockingResponse(String methodId,
+                                          Message<Object> requestmessage,
+                                          Vertx vertx,
+                                          Throwable failure,
+                                          Consumer<Throwable> errorMethodHandler,
+                                          String targetId,
+                                          Object message,
+                                          DeliveryOptions options) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = t;
+        this.t = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.requestmessage = requestmessage;
         this.targetId = targetId;
@@ -247,7 +266,12 @@ public class EventbusBridgeBlockingResponse {
         this.options = options;
     }
 
-
+    /**
+     * Maps the event-bus response to a String response for the REST request
+     *
+     * @param stringFunction the function, that takes the response message from the event bus and that maps it to a valid eventbus response
+     * @return the execution chain {@link ExecuteEventbusStringResponse}
+     */
     public ExecuteEventbusStringResponse mapToStringResponse(ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
         return EventbusStringExecutionBlockingUtil.mapToStringResponse(methodId,
                 targetId,
@@ -265,6 +289,12 @@ public class EventbusBridgeBlockingResponse {
                 0l, 0l);
     }
 
+    /**
+     * Maps the event-bus response to a byte response for the REST request
+     *
+     * @param byteFunction the function, that takes the response message from the event bus and that maps it to a valid eventbus response
+     * @return the execution chain {@link ExecuteEventbusByteResponse}
+     */
     public ExecuteEventbusByteResponse mapToByteResponse(ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
         return EventbusByteExecutionBlockingUtil.mapToByteResponse(methodId,
@@ -283,6 +313,13 @@ public class EventbusBridgeBlockingResponse {
                 0l, 0l);
     }
 
+    /**
+     * Maps the event-bus response to a byte response for the REST request
+     *
+     * @param objectFunction the function, that takes the response message from the event bus and that maps it to a valid eventbus response
+     * @param encoder        the encoder to serialize your object response
+     * @return the execution chain {@link ExecuteEventbusObjectResponse}
+     */
     public ExecuteEventbusObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
         return EventbusObjectExecutionBlockingUtil.mapToObjectResponse(methodId, targetId,

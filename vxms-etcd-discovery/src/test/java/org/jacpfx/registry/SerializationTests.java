@@ -8,8 +8,8 @@ import io.vertx.core.shareddata.SharedData;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
-import org.jacpfx.vertx.registry.Node;
-import org.jacpfx.vertx.registry.Root;
+import org.jacpfx.vertx.registry.nodes.Node;
+import org.jacpfx.vertx.registry.nodes.Root;
 import org.junit.Test;
 
 import java.util.Collections;

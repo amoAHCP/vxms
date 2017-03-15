@@ -208,8 +208,8 @@ package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;
@@ -230,6 +230,7 @@ public interface RecursiveBlockingExecutor<T> {
      * @param errorMethodHandler    the error-method handler
      * @param context               the vertx routing context
      * @param headers               the headers to pass to the response
+     * @param supplier              the suppliere to generate the response
      * @param encoder               the encoder to encode your objects
      * @param errorHandler          the error handler
      * @param onFailureRespond      the consumer that takes a Future with the alternate response value in case of failure

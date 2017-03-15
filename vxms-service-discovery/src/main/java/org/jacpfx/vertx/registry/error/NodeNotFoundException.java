@@ -204,93 +204,29 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
-
-import io.vertx.core.Vertx;
-
-import java.util.Optional;
-import java.util.function.Consumer;
+package org.jacpfx.vertx.registry.error;
 
 /**
- * Created by Andy Moncsek on 30.05.16.
- * Execute service discovery lookup
+ * Created by Andy Moncsek on 12.05.16.
  */
-public class ExecuteDiscovery {
-    protected final Vertx vertx;
-    protected final DiscoveryClient client;
-    protected final String serviceName;
-    protected final Consumer<NodeResponse> consumer;
-    protected final Consumer<NodeResponse> onFailure;
-    protected final Consumer<NodeResponse> onError;
-    protected final int amount;
-    protected final long delay;
+public class NodeNotFoundException extends RuntimeException {
 
-
-    public ExecuteDiscovery(Vertx vertx, DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, Consumer<NodeResponse> onError, int amount, long delay) {
-        this.vertx = vertx;
-        this.client = client;
-        this.serviceName = serviceName;
-        this.consumer = consumer;
-        this.onFailure = onFailure;
-        this.onError = onError;
-        this.amount = amount;
-        this.delay = delay;
+    public NodeNotFoundException() {
     }
 
-    /**
-     * Execute the lookup
-     */
-    public void execute() {
-        Optional.ofNullable(client).
-                ifPresent(client -> Optional.ofNullable(serviceName).
-                        ifPresent(name -> findAndHandle(client, name, consumer, onFailure, amount, delay)));
+    public NodeNotFoundException(String message) {
+        super(message);
     }
 
-
-
-
-
-    protected void findAndHandle(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {
-        vertx.runOnContext(handler ->
-                client.findNode(name, response -> {
-                    if (response.succeeded()) {
-                        consumer.accept(response);
-                    } else {
-                        handleError(client, name, consumer, onFailure, amount, delay, response);
-                    }
-                }));
-
+    public NodeNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    private void handleError(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay, NodeResponse response) {
-        if(onError!=null)onError.accept(response);
-        if (delay > 0 && amount > 0) {
-            retryAndDelay(client, name, consumer, onFailure, amount, delay);
-        } else if (delay == 0L && amount > 0) {
-            retry(client, name, consumer, onFailure, amount, delay);
-        } else {
-            if(onFailure!=null)onFailure.accept(response);
-        }
+    public NodeNotFoundException(Throwable cause) {
+        super(cause);
     }
 
-    private void retry(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {
-        findAndHandle(client, name, consumer, onFailure, amount - 1, delay);
+    public NodeNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
-
-    private void retryAndDelay(DiscoveryClient client, String name, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, int amount, long delay) {
-        vertx.executeBlocking(blocking -> {
-            sleep(delay);
-            blocking.complete();
-        }, result -> findAndHandle(client, name, consumer, onFailure, amount - 1, delay));
-    }
-
-    private void sleep(long delay) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-
 }

@@ -204,20 +204,18 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.common;
-
-import io.vertx.core.Future;
+package org.jacpfx.common.throwable;
 
 /**
- * Created by Andy Moncsek on 21.01.16.
+ * Created by Andy Moncsek on 12.04.16.
  */
-public interface ThrowableFutureBiConsumer<H,T> {
+public interface ThrowableFunction<T, R> {
 
     /**
-     * Performs this operation on the given argument.
+     * Applies this function to the given argument.
      *
-     * @param operationResult the input argument
-     * @param handler the input argument
+     * @param t the function argument
+     * @return the function result
      */
-    void accept(H handler, Future<T> operationResult) throws Throwable;
+    R apply(T t) throws Throwable;
 }

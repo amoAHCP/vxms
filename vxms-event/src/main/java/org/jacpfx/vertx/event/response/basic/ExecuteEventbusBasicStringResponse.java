@@ -209,8 +209,8 @@ package org.jacpfx.vertx.event.response.basic;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableErrorConsumer;
-import org.jacpfx.common.ThrowableFutureConsumer;
+import org.jacpfx.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusStringCall;
 
 import java.util.function.Consumer;

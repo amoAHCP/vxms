@@ -208,10 +208,10 @@ package org.jacpfx.common.configuration;
 
 /**
  * Created by Andy Moncsek on 27.01.16.
+ * Default endpoint configuration when none is defined
  */
 public class DefaultEndpointConfiguration implements EndpointConfiguration {
 
-    // TODO Session handling needs a session store which mus be initilized by a vertx instance!!!
 
 
 }

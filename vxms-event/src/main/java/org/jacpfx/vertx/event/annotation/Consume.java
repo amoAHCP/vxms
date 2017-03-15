@@ -212,6 +212,13 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+/**
+ * Defines an eventbus consumer id
+ */
 public @interface Consume {
+    /**
+     * The consumer ID
+     * @return the ID
+     */
     String value();
 }

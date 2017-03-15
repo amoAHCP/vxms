@@ -204,47 +204,84 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
+package org.jacpfx.vertx.registry.nodes;
 
-import java.io.Serializable;
+import io.vertx.core.json.Json;
+import org.jacpfx.vertx.registry.error.NodeNotFoundException;
+
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Created by Andy Moncsek on 29.05.16.
+ * Represents a response for a service lookup
+ * Created by Andy Moncsek on 12.05.16.
  */
-public class NodeMetadata implements Serializable{
-    private final String path;
-    private final String host;
-    private final int port;
-    private final String protocol;
-    private final boolean secure;
+public class NodeResponse {
+    public static final String PORT_DELIMITER = ":";
+    public static final String PROTOCOL_DELIMITER = "://";
+    private final List<Node> nodes;
+    private final String domain;
+    private final boolean succeeded;
+    private final Throwable throwable;
 
-    public NodeMetadata(String path, String host, int port,  boolean secure) {
-        this.path = path;
-        this.host = host;
-        this.port = port;
-        this.protocol = secure ? "https" : "http";
-        this.secure = secure;
-    }
-    public NodeMetadata() {
-        this(null,null,0,false);
-    }
-    public String getPath() {
-        return path;
+    public NodeResponse(List<Node> nodes, String domain, boolean succeeded, Throwable throwable) {
+        this.succeeded = succeeded;
+        this.throwable = throwable;
+        this.nodes = nodes;
+        this.domain = domain;
     }
 
-    public String getHost() {
-        return host;
+    /**
+     * The service node provides access to a node instance
+     *
+     * @return the service node {@link ServiceNode}
+     */
+    public ServiceNode getServiceNode() {
+        if (!succeeded) throw new NodeNotFoundException(throwable);
+        Collections.shuffle(nodes);
+        Node selectedNode = nodes.get(0);
+        NodeMetadata metadata = Json.decodeValue(selectedNode.getValue(), NodeMetadata.class);
+        // TODO check for context root correct format
+        URI uri = URI.create(metadata.getProtocol() + PROTOCOL_DELIMITER + metadata.getHost() + PORT_DELIMITER + metadata.getPort() + metadata.getPath());
+        return new ServiceNode(selectedNode.getKey(), metadata.getHost(), metadata.getPort(), metadata.isSecure(), uri, null);
     }
 
-    public int getPort() {
-        return port;
+    /**
+     * The node with all metadata to the service
+     *
+     * @return the {@link Node}
+     */
+    public Node getNode() {
+        if (!succeeded) throw new NodeNotFoundException(throwable);
+        return nodes.get(0);
     }
 
-    public String getProtocol() {
-        return protocol;
+    /**
+     * Check if discovery succeeded
+     *
+     * @return true if node was found
+     */
+    public boolean succeeded() {
+        return succeeded;
     }
 
-    public boolean isSecure() {
-        return secure;
+    /**
+     * in case of not succeeded you get the Throwable
+     *
+     * @return the error
+     */
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    /**
+     * The domain name where the service is registered
+     *
+     * @return the service domain name
+     */
+    public String getDomain() {
+        if (!succeeded) throw new NodeNotFoundException(throwable);
+        return domain;
     }
 }

@@ -208,7 +208,7 @@ package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;

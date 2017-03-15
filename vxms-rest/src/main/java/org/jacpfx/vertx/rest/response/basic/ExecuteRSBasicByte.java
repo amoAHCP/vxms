@@ -211,8 +211,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableErrorConsumer;
-import org.jacpfx.common.ThrowableFutureConsumer;
+import org.jacpfx.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusByteCall;
 

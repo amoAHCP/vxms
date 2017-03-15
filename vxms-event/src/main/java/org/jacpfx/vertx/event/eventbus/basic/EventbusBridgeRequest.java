@@ -214,41 +214,76 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.jacpfx.vertx.event.eventbus.blocking.EventbusBridgeBlockingRequest;
+import org.jacpfx.vertx.event.eventbus.blocking.EventbusBridgeBlockingResponse;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
+ * Defines an event-bus request as the beginning of your  execution chain
  */
 public class EventbusBridgeRequest {
     private final String methodId;
     private final Message<Object> requestmessage;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
 
-    public EventbusBridgeRequest(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
+    /**
+     * Pass all members to execute the chain
+     *
+     * @param methodId           the method identifier
+     * @param requestmessage     the message to responde
+     * @param vertx              the vertx instance
+     * @param failure            the vertx instance
+     * @param errorMethodHandler the error-method handler
+     */
+    public EventbusBridgeRequest(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler) {
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.requestmessage = requestmessage;
         this.methodId = methodId;
     }
-
+    /**
+     * Send message and perform task on reply
+     *
+     * @param id      the target id to send to
+     * @param message the message to send
+     * @return the execution chain {@link EventbusBridgeResponse}
+     */
     public EventbusBridgeResponse send(String id, Object message) {
-        return new EventbusBridgeResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, null);
+        return new EventbusBridgeResponse(methodId, requestmessage, vertx, failure, errorMethodHandler, id, message, null);
     }
-
+    /**
+     * Send message and perform  task on reply
+     *
+     * @param id             the target id to send to
+     * @param message        the message to send
+     * @param requestOptions the delivery options for the event bus request
+     * @return the execution chain {@link EventbusBridgeResponse}
+     */
     public EventbusBridgeResponse send(String id, Object message, DeliveryOptions requestOptions) {
-        return new EventbusBridgeResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, requestOptions);
+        return new EventbusBridgeResponse(methodId, requestmessage, vertx, failure, errorMethodHandler, id, message, requestOptions);
     }
 
-
+    /**
+     * Send message and redirect the event bus response directly to the initial request
+     *
+     * @param id      the target id to send to
+     * @param message the message to send
+     */
     public void sendAndRespondRequest(String id, Object message) {
         sendAndRespondRequest(id, message, new DeliveryOptions());
     }
-
+    /**
+     * Send message and redirect the event bus response directly to the initial request
+     *
+     * @param id             the target id to send to
+     * @param message        the message to send
+     * @param requestOptions the delivery options for the event bus request
+     */
     public void sendAndRespondRequest(String id, Object message, DeliveryOptions requestOptions) {
         vertx.eventBus().send(id, message, requestOptions != null ? requestOptions : new DeliveryOptions(), event -> {
             if (event.failed()) {
@@ -273,20 +308,24 @@ public class EventbusBridgeRequest {
             }
         } else if (resp instanceof JsonObject) {
             if (options != null) {
-                requestmessage.reply(JsonObject.class.cast(resp).encode(),options);
+                requestmessage.reply(JsonObject.class.cast(resp).encode(), options);
             } else {
                 requestmessage.reply(JsonObject.class.cast(resp).encode());
             }
         } else if (resp instanceof JsonArray) {
             if (options != null) {
-                requestmessage.reply(JsonArray.class.cast(resp).encode(),options);
+                requestmessage.reply(JsonArray.class.cast(resp).encode(), options);
             } else {
                 requestmessage.reply(JsonArray.class.cast(resp).encode());
             }
         }
     }
 
+    /**
+     * perform blocking task execution
+     * @return the blockingexecution chain {@link EventbusBridgeBlockingRequest}
+     */
     public EventbusBridgeBlockingRequest blocking() {
-        return new EventbusBridgeBlockingRequest(methodId, requestmessage, vertx, t, errorMethodHandler);
+        return new EventbusBridgeBlockingRequest(methodId, requestmessage, vertx, failure, errorMethodHandler);
     }
 }

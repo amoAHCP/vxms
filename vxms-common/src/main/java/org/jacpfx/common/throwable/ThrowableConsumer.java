@@ -204,20 +204,17 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.common;
-
-import io.vertx.core.Future;
+package org.jacpfx.common.throwable;
 
 /**
  * Created by Andy Moncsek on 21.01.16.
  */
-public interface ThrowableErrorConsumer<T, R> {
+public interface ThrowableConsumer<T> {
 
     /**
      * Performs this operation on the given argument.
      *
-     * @param error,          the error
-     * @param operationResult the input argument
+     * @param t the input argument
      */
-    void accept(T error, Future<R> operationResult) throws Throwable;
+    void accept(T t) throws Throwable;
 }

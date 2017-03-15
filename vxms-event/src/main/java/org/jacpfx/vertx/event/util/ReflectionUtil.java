@@ -221,11 +221,11 @@ public class ReflectionUtil {
 
     /**
      * Invoke a vxms event-bus method parameters
-     * @param method
-     * @param t
-     * @param handler
-     * @param <T>
-     * @return
+     * @param method the method identifier
+     * @param t the failure
+     * @param handler the handler
+     * @param <T> the type
+     * @return the array of parameters to pass to method invokation
      */
     public static <T> Object[] invokeParameters(Method method, Throwable t, T handler) {
         method.setAccessible(true);
@@ -244,7 +244,13 @@ public class ReflectionUtil {
         return parameterResult;
     }
 
-
+    /**
+     * invoke a method with given parameters
+     * @param method the method
+     * @param parameters the parameters
+     * @param invokeTo the target
+     * @throws Throwable the exception
+     */
     public static void genericMethodInvocation(Method method, Supplier<Object[]> parameters, Object invokeTo) throws Throwable {
         try {
             method.invoke(invokeTo, parameters.get());

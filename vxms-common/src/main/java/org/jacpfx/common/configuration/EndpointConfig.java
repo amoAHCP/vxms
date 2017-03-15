@@ -212,7 +212,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by Andy Moncsek on 18.02.16. Define additional configurations like session, CORS, body handling. The config class must be
+ * Created by Andy Moncsek on 18.02.16.
+ * Define additional configurations like session, CORS, body handling. The config class must be
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

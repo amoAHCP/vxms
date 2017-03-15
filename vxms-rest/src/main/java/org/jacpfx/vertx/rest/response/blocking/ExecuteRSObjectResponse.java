@@ -208,8 +208,8 @@ package org.jacpfx.vertx.rest.response.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
 
@@ -286,6 +286,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
      *
      * @param onFailureRespond the handler (function) to execute on error
+     * @param encoder          the encoder to serialize the response object
      * @return the createResponse chain {@link ExecuteRSObjectOnFailureCode}
      */
     public ExecuteRSObjectOnFailureCode onFailureRespond(ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {

@@ -204,68 +204,20 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
+package org.jacpfx.common.throwable;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.util.Map;
+import io.vertx.core.Future;
 
 /**
- * Created by Andy Moncsek on 13.05.16.
+ * Created by Andy Moncsek on 21.01.16.
  */
-public class ServiceNode implements Serializable {
+public interface ThrowableFutureBiConsumer<H,T> {
 
-    private final String serviceId;
-    private final String host;
-    private final int port;
-    private final boolean secure;
-    private final URI uri;
-    private final Map<String, String> metadata;
-
-
-    public ServiceNode(String serviceId, String host, int port, boolean secure, URI uri, Map<String, String> metadata) {
-        this.serviceId = serviceId;
-        this.host = host;
-        this.port = port;
-        this.secure = secure;
-        this.uri = uri;
-        this.metadata = metadata;
-    }
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public boolean isSecure() {
-        return secure;
-    }
-
-    public URI getUri() {
-        return uri;
-    }
-
-    public Map<String, String> getMetadata() {
-        return metadata;
-    }
-
-
-    @Override
-    public String toString() {
-        return "ServiceNode{" +
-                "serviceId='" + serviceId + '\'' +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                ", secure=" + secure +
-                ", uri=" + uri +
-                ", metadata=" + metadata +
-                '}';
-    }
+    /**
+     * Performs this operation on the given argument.
+     *
+     * @param operationResult the input argument
+     * @param handler the input argument
+     */
+    void accept(H handler, Future<T> operationResult) throws Throwable;
 }

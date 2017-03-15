@@ -214,6 +214,11 @@ import io.vertx.core.json.Json;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.vertx.registry.*;
+import org.jacpfx.vertx.registry.discovery.OnSuccessDiscovery;
+import org.jacpfx.vertx.registry.error.NodeNotFoundException;
+import org.jacpfx.vertx.registry.nodes.Node;
+import org.jacpfx.vertx.registry.nodes.NodeResponse;
+import org.jacpfx.vertx.registry.nodes.Root;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -222,7 +227,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -296,7 +300,7 @@ public class DiscoveryClientEtcd implements DiscoveryClient {
 
     /**
      * @param serviceName the service name to find
-     * @param consumer    the consumer to execute
+     * @param consumer    the onSuccess to execute
      * @param node        the first node found
      * @param serviceNode the parent node
      */

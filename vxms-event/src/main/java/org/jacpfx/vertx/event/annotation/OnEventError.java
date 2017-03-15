@@ -212,6 +212,13 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+/**
+ * makrs fallback methods to be executed wenn an exception in method occurred and not handled
+ */
 public @interface OnEventError {
+    /**
+     * the path name
+     * @return the name of the Consumes path
+     */
     String value();
 }

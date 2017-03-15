@@ -204,38 +204,20 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
+package org.jacpfx.common.throwable;
 
-import io.vertx.core.Vertx;
-
-import java.util.function.Consumer;
+import io.vertx.core.Future;
 
 /**
- * Created by Andy Moncsek on 30.05.16.
- * Defines a builder API for defining lookup operation for service discovery.
+ * Created by Andy Moncsek on 21.01.16.
  */
-public class OnSuccessDiscovery {
-
-    private final DiscoveryClient client;
-    private final String serviceName;
-    private final Vertx vertx;
-
-    public OnSuccessDiscovery(Vertx vertx, DiscoveryClient client, String serviceName) {
-        this.vertx = vertx;
-        this.client = client;
-        this.serviceName = serviceName;
-    }
-
+public interface ThrowableErrorConsumer<T, R> {
 
     /**
-     * define consumer for handling the NodeResponse if Client finds a valid entry
+     * Performs this operation on the given argument.
      *
-     * @param consumer
-     * @return {@link ErrorDiscovery} the next step, define onError or onFailure
+     * @param error,          the error
+     * @param operationResult the input argument
      */
-    public ErrorDiscovery onSuccess(Consumer<NodeResponse> consumer) {
-        return new ErrorDiscovery(vertx, client, serviceName, consumer, null, null, 0, 0);
-    }
-
-
+    void accept(T error, Future<R> operationResult) throws Throwable;
 }

@@ -209,8 +209,8 @@ package org.jacpfx.vertx.event.response.blocking;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
 
 import java.util.function.Consumer;
@@ -231,6 +231,7 @@ public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringRe
      * @param errorMethodHandler    the error handler
      * @param message               the message to respond to
      * @param stringSupplier        the supplier, producing the byte response
+     * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent API
      * @param errorHandler          the error handler
      * @param onFailureRespond      the consumer that takes a Future with the alternate response value in case of failure
      * @param deliveryOptions       the response deliver options
@@ -245,7 +246,7 @@ public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringRe
                                                Consumer<Throwable> errorMethodHandler,
                                                Message<Object> message,
                                                ThrowableSupplier<String> stringSupplier,
-                                               ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
+                                               ExecuteEventbusStringCallBlocking excecuteEventBusAndReply,
                                                Consumer<Throwable> errorHandler,
                                                ThrowableFunction<Throwable, String> onFailureRespond,
                                                DeliveryOptions deliveryOptions,
@@ -259,7 +260,7 @@ public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringRe
                 errorMethodHandler,
                 message,
                 stringSupplier,
-                excecuteAsyncEventBusAndReply,
+                excecuteEventBusAndReply,
                 errorHandler,
                 onFailureRespond,
                 deliveryOptions,

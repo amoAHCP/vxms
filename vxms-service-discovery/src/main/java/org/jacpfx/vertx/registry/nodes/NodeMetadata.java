@@ -204,136 +204,65 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
-
-import io.vertx.core.shareddata.Shareable;
+package org.jacpfx.vertx.registry.nodes;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 
 /**
- * Created by Andy Moncsek on 04.05.16.
- * Represents a service node with all metadata to connect the Service. Is used to register a service at the discovery server
+ * Created by Andy Moncsek on 29.05.16.
+ * The internal node metadata of the service, used for registration of the current instance
  */
-public class Node implements Serializable, Shareable {
-    private final boolean dir;
-    private final String key;
-    private final String value;
-    private final String expiration;
-    private final int ttl;
-    private final int modifiedIndex;
-    private final int createdIndex;
-    private final List<Node> nodes;
+public class NodeMetadata implements Serializable{
+    private final String path;
+    private final String host;
+    private final int port;
+    private final String protocol;
+    private final boolean secure;
 
-    public Node(boolean dir, String key, String value, String expiration, int ttl, int modifiedIndex, int createdIndex, List<Node> nodes) {
-        this.dir = dir;
-        this.key = key;
-        this.value = value;
-        this.expiration = expiration;
-        this.ttl = ttl;
-        this.modifiedIndex = modifiedIndex;
-        this.createdIndex = createdIndex;
-        this.nodes = nodes;
+    public NodeMetadata(String path, String host, int port,  boolean secure) {
+        this.path = path;
+        this.host = host;
+        this.port = port;
+        this.protocol = secure ? "https" : "http";
+        this.secure = secure;
+    }
+    public NodeMetadata() {
+        this(null,null,0,false);
     }
 
-    public Node() {
-        this(false, "", "", "", 0, 0, 0, Collections.emptyList());
+    /**
+     * the service path
+     * @return the service path
+     */
+    public String getPath() {
+        return path;
     }
 
-    public interface Nodes {
-        Node nodes(List<Node> nodes);
+    /**
+     * The host name/ ip of the service
+     * @return
+     */
+    public String getHost() {
+        return host;
     }
 
-    public interface CreateIndex {
-        Nodes createIndex(int createdIndex);
+    /**
+     * the port number of the service
+     * @return the port number
+     */
+    public int getPort() {
+        return port;
     }
 
-    public interface ModifyIndex {
-        CreateIndex modifiedIndex(int modifiedIndex);
+    /**
+     * returns the protocol prefix
+     * @return the protocol
+     */
+    public String getProtocol() {
+        return protocol;
     }
 
-    public interface TTL {
-        ModifyIndex ttl(int ttl);
-    }
-
-    public interface Expiration {
-        TTL expiration(String expiration);
-    }
-
-    public interface Value {
-        Expiration value(String value);
-    }
-
-    public interface Key {
-        Value key(String Key);
-    }
-
-    public interface Dir {
-        Key dir(boolean dir);
-    }
-
-    public static Dir create() {
-        return dirVal ->
-                keyVal ->
-                        valueVal ->
-                                expirationVal ->
-                                        ttlVal ->
-                                                modifiedIndexVal ->
-                                                        createdIndexVal ->
-                                                                nodesVal ->
-                                                                        new Node(dirVal, keyVal, valueVal, expirationVal, ttlVal, modifiedIndexVal, createdIndexVal, nodesVal);
-    }
-
-
-    public static Node emptyNode() {
-        return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
-    }
-
-
-    public boolean isDir() {
-        return dir;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public String getExpiration() {
-        return expiration;
-    }
-
-    public int getTtl() {
-        return ttl;
-    }
-
-    public int getModifiedIndex() {
-        return modifiedIndex;
-    }
-
-    public int getCreatedIndex() {
-        return createdIndex;
-    }
-
-    public List<Node> getNodes() {
-        return nodes;
-    }
-
-    @Override
-    public String toString() {
-        return "Node{" +
-                "dir=" + dir +
-                ", key='" + key + '\'' +
-                ", value='" + value + '\'' +
-                ", expiration='" + expiration + '\'' +
-                ", ttl=" + ttl +
-                ", modifiedIndex=" + modifiedIndex +
-                ", createdIndex=" + createdIndex +
-                ", nodes=" + nodes +
-                '}';
+    public boolean isSecure() {
+        return secure;
     }
 }

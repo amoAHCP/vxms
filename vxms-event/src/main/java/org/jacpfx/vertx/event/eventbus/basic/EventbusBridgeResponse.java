@@ -210,7 +210,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFutureBiConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicByteResponse;
 import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicObjectResponse;
@@ -224,11 +224,12 @@ import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
+ * Represents the start of a non- blocking execution chain
  */
 public class EventbusBridgeResponse {
     private final String methodId;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final Message<Object> requestmessage;
     private final String targetId;
@@ -236,11 +237,29 @@ public class EventbusBridgeResponse {
     private final DeliveryOptions requestOptions;
 
 
-    public EventbusBridgeResponse(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler, String targetId,
-                                  Object message, DeliveryOptions requestOptions) {
+    /**
+     * Pass all parameters to execute the chain
+     *
+     * @param methodId           the method identifier
+     * @param requestmessage     the message to responde
+     * @param vertx              the vertx instance
+     * @param failure            the last failure
+     * @param errorMethodHandler the error-method handler
+     * @param targetId           the event-bus message target-targetId
+     * @param message            the event-bus message
+     * @param requestOptions     the event-bus delivery options
+     */
+    public EventbusBridgeResponse(String methodId,
+                                  Message<Object> requestmessage,
+                                  Vertx vertx,
+                                  Throwable failure,
+                                  Consumer<Throwable> errorMethodHandler,
+                                  String targetId,
+                                  Object message,
+                                  DeliveryOptions requestOptions) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.requestmessage = requestmessage;
         this.targetId = targetId;
@@ -252,24 +271,52 @@ public class EventbusBridgeResponse {
      * Map Response from event-bus call to REST response
      *
      * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicStringResponse}
      */
     public ExecuteEventbusBasicStringResponse mapToStringResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-        return EventbusStringExecutionUtil.mapToStringResponse(methodId, targetId, message, stringFunction, requestOptions, vertx, t, errorMethodHandler, requestmessage,
-                null, null, null, null, 0, 0l, 0l);
+        return EventbusStringExecutionUtil.mapToStringResponse(methodId,
+                targetId,
+                message,
+                stringFunction,
+                requestOptions,
+                vertx,
+                failure,
+                errorMethodHandler,
+                requestmessage,
+                null,
+                null,
+                null,
+                null,
+                0,
+                0l,
+                0l);
     }
 
     /**
      * Map Response from event-bus call to REST response
      *
      * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicByteResponse}
      */
     public ExecuteEventbusBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-        return EventbusByteExecutionUtil.mapToByteResponse(methodId, targetId, message, byteFunction, requestOptions, vertx, t, errorMethodHandler,
-                requestmessage, null, null, null, null, 0, 0l, 0l);
+        return EventbusByteExecutionUtil.mapToByteResponse(methodId,
+                targetId,
+                message,
+                byteFunction,
+                requestOptions,
+                vertx,
+                failure,
+                errorMethodHandler,
+                requestmessage,
+                null,
+                null,
+                null,
+                null,
+                0,
+                0l,
+                0l);
     }
 
     /**
@@ -277,12 +324,27 @@ public class EventbusBridgeResponse {
      *
      * @param objectFunction pass io.vertx.core.AsyncResult and future to complete with a Object
      * @param encoder        the Object encoder
-     * @return the response chain
+     * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
      */
     public ExecuteEventbusBasicObjectResponse mapToObjectResponse(ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 
-        return EventbusObjectExecutionUtil.mapToObjectResponse(methodId, targetId, message, objectFunction, requestOptions, vertx, t, errorMethodHandler,
-                requestmessage, null, encoder, null, null, null, 0, 0l, 0l);
+        return EventbusObjectExecutionUtil.mapToObjectResponse(methodId,
+                targetId,
+                message,
+                objectFunction,
+                requestOptions,
+                vertx,
+                failure,
+                errorMethodHandler,
+                requestmessage,
+                null,
+                encoder,
+                null,
+                null,
+                null,
+                0,
+                0l,
+                0l);
     }
 
 

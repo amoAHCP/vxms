@@ -216,8 +216,8 @@ import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.common.ExecutionResult;
-import org.jacpfx.common.ThrowableErrorConsumer;
-import org.jacpfx.common.ThrowableFutureConsumer;
+import org.jacpfx.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.io.Serializable;

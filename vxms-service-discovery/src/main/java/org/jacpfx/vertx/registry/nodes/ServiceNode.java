@@ -204,33 +204,102 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
+package org.jacpfx.vertx.registry.nodes;
 
-import io.vertx.core.Vertx;
-
-import java.util.function.Consumer;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.Map;
 
 /**
- * Created by Andy Moncsek on 30.05.16.
- * Defines the delay time between retries
+ * Created by Andy Moncsek on 13.05.16.
+ * A service node entry
  */
-public class DelayDiscovery extends ExecuteDiscovery {
+public class ServiceNode implements Serializable {
 
-
-
-    public DelayDiscovery(Vertx vertx, DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, Consumer<NodeResponse> onError, int amount) {
-        super(vertx,client,serviceName,consumer,onFailure,onError,amount,0);
-    }
+    private final String serviceId;
+    private final String host;
+    private final int port;
+    private final boolean secure;
+    private final URI uri;
+    private final Map<String, String> metadata;
 
 
     /**
-     * The delay time in ms before a retry
-     * @param ms time in ms
-     * @return {@link ExecuteDiscovery} execute chain
+     * init the service node
+     * @param serviceId the service id
+     * @param host the hostname of the node
+     * @param port the port number
+     * @param secure true if secure
+     * @param uri the node URI
+     * @param metadata the additional node metadata
      */
-    public ExecuteDiscovery delay(long ms){
-        return new ExecuteDiscovery(vertx,client,serviceName,consumer,onFailure,onError,amount,ms);
+    public ServiceNode(String serviceId, String host, int port, boolean secure, URI uri, Map<String, String> metadata) {
+        this.serviceId = serviceId;
+        this.host = host;
+        this.port = port;
+        this.secure = secure;
+        this.uri = uri;
+        this.metadata = metadata;
+    }
+
+    /**
+     * get the service id of the node
+     * @return the service id
+     */
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    /**
+     * get the hostname of the node
+     * @return the host name
+     */
+    public String getHost() {
+        return host;
+    }
+
+    /**
+     * get the port number of the node
+     * @return the port number
+     */
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * true if node is secured
+     * @return true if secure
+     */
+    public boolean isSecure() {
+        return secure;
+    }
+
+    /**
+     * Returns the URI of the node
+     * @return the node URI
+     */
+    public URI getUri() {
+        return uri;
+    }
+
+    /**
+     * return the  additional node metadata
+     * @return the node properties
+     */
+    public Map<String, String> getMetadata() {
+        return metadata;
     }
 
 
+    @Override
+    public String toString() {
+        return "ServiceNode{" +
+                "serviceId='" + serviceId + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", secure=" + secure +
+                ", uri=" + uri +
+                ", metadata=" + metadata +
+                '}';
+    }
 }

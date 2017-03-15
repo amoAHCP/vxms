@@ -211,7 +211,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSObjectResponse;
@@ -333,7 +333,7 @@ public class EventbusBlockingResponse {
      *
      * @param objectFunction the function, that takes the response message from the event bus and that maps it to a valid response for the REST request
      * @param encoder        the encoder to serialize your object response
-     * @return the execution chain {@link ExecuteRSByteResponse}
+     * @return the execution chain {@link ExecuteRSObjectResponse}
      */
     public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction, Encoder encoder) {
 

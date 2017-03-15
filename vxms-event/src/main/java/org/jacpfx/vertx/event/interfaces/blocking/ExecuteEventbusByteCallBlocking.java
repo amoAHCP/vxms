@@ -209,22 +209,37 @@ package org.jacpfx.vertx.event.interfaces.blocking;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableFunction;
 
 import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 21.03.16.
+ * Typed functional interface called on event-bus response. The execution will be handled as blocking code.
  */
 @FunctionalInterface
 public interface ExecuteEventbusByteCallBlocking {
-
-    void execute(String _methodId,
-                 Vertx _vertx,
-                 Consumer<Throwable> _errorMethodHandler,
-                 Message<Object> _requestMessage,
-                 Consumer<Throwable> _errorHandler,
+    /**
+     * Execute  chain when event-bus response handler is executed
+     *
+     * @param methodId                the method identifier
+     * @param vertx                   the vertx instance
+     * @param errorMethodHandler      the error-method handler
+     * @param requestMessage          the message to reply
+     * @param errorHandler            the error handler
+     * @param onFailureRespond        the consumer that takes a Future with the alternate response value in case of failure
+     * @param responseDeliveryOptions the delivery options for the response
+     * @param retryCount              the amount of retries before failure execution is triggered
+     * @param timeout                 the delay time in ms between an execution error and the retry
+     * @param delay                   the delay time in ms between an execution error and the retry
+     * @param circuitBreakerTimeout   the amount of time before the circuit breaker closed again
+     */
+    void execute(String methodId,
+                 Vertx vertx,
+                 Consumer<Throwable> errorMethodHandler,
+                 Message<Object> requestMessage,
+                 Consumer<Throwable> errorHandler,
                  ThrowableFunction<Throwable, byte[]> onFailureRespond,
-                 DeliveryOptions _responseDeliveryOptions,
-                 int _retryCount, long _timeout, long _delay, long _circuitBreakerTimeout);
+                 DeliveryOptions responseDeliveryOptions,
+                 int retryCount, long timeout, long delay, long circuitBreakerTimeout);
 }

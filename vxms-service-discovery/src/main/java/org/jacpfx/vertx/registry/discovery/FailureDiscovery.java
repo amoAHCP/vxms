@@ -204,73 +204,41 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
+package org.jacpfx.vertx.registry.discovery;
 
-import io.vertx.core.shareddata.Shareable;
+import io.vertx.core.Vertx;
+import org.jacpfx.vertx.registry.DiscoveryClient;
+import org.jacpfx.vertx.registry.nodes.NodeResponse;
 
-import java.io.Serializable;
+import java.util.function.Consumer;
 
 /**
- * Created by Andy Moncsek on 04.05.16.
+ * Created by Andy Moncsek on 30.05.16.
+ * Define the terminal onFailure onSuccess which will be called when lookup fails.
  */
-public class Root implements Serializable,Shareable {
-    private final String action;
-    private final Node node;
-    private final Node prevNode;
+public class FailureDiscovery extends ExecuteDiscovery {
 
-    // For errors
-    private final int errorCode;
-    private final String message;
-    private final String cause;
-    private final int index;
 
-    public Root(String action, Node node, Node prevNode, int errorCode, String message, String cause, int index) {
-        this.action = action;
-        this.node = node;
-        this.prevNode = prevNode;
-        this.errorCode = errorCode;
-        this.message = message;
-        this.cause = cause;
-        this.index = index;
+    public FailureDiscovery(Vertx vertx,
+                            DiscoveryClient client,
+                            String serviceName,
+                            Consumer<NodeResponse> onSuccess,
+                            Consumer<NodeResponse> onFailure,
+                            Consumer<NodeResponse> onError, int amount, long delay) {
+        super(vertx, client, serviceName, onSuccess, onFailure, onError, amount, delay);
     }
 
-    public Root() {
-        this(null,null,null,0,null,null,0);
+
+
+    /**
+     * Terminal on failure method which is called after retries are failed
+     *
+     * @param onFailure the onSuccess executed when no entry was found
+     * @return {@link RetryDiscovery}, define the amount of retries
+     */
+    public RetryDiscovery onFailure(Consumer<NodeResponse> onFailure) {
+        return new RetryDiscovery(vertx, client, serviceName, onSuccess, onFailure, onError);
     }
 
-    public Node getPrevNode() {
-        return prevNode;
-    }
 
-    public Integer getErrorCode() {
-        return errorCode;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getCause() {
-        return cause;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public Node getNode() {
-        return node;
-    }
-
-    @Override
-    public String toString() {
-        return "Root{" +
-                "action='" + action + '\'' +
-                ", node=" + node +
-                '}';
-    }
 }

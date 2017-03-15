@@ -209,8 +209,8 @@ package org.jacpfx.vertx.event.response.blocking;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
 
@@ -280,6 +280,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
      * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
      *
      * @param onFailureRespond the handler (function) to execute on error
+     * @param encoder          the encoder to serialize your object
      * @return the createResponse chain  {@link ExecuteEventbusObject}
      */
     public ExecuteEventbusObject onFailureRespond(ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {
@@ -303,7 +304,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
     /**
      * Will be executed on each error
      *
-     * @param errorHandler
+     * @param errorHandler the error handler
      * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
      */
     public ExecuteEventbusObjectResponse onError(Consumer<Throwable> errorHandler) {
@@ -327,7 +328,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
     /**
      * retry operation on error
      *
-     * @param retryCount
+     * @param retryCount the amount of retries before failure execution is triggered
      * @return the createResponse chain {@link ExecuteEventbusObjectCircuitBreaker}
      */
     public ExecuteEventbusObjectCircuitBreaker retry(int retryCount) {

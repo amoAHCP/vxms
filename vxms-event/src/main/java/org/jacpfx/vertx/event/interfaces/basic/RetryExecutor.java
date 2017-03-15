@@ -210,31 +210,52 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableErrorConsumer;
-import org.jacpfx.common.ThrowableFutureBiConsumer;
-import org.jacpfx.common.ThrowableFutureConsumer;
+import org.jacpfx.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.util.function.Consumer;
 
 /**
  * Created by amo on 31.01.17.
+ * Generic Functional interface to pass typed executions steps in case of retry operations
  */
-
+@FunctionalInterface
 public interface RetryExecutor<T> {
-    void execute(String _targetId,
-                 Object _message,
-                 ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> _function,
-                 DeliveryOptions _requestDeliveryOptions,
-                 String _methodId,
-                 Vertx _vertx,
-                 Throwable _t,
-                 Consumer<Throwable> _errorMethodHandler,
-                 Message<Object> _requestMessage,
-                 ThrowableFutureConsumer<T> _consumer,
-                 Encoder _encoder,
-                 Consumer<Throwable> _errorHandler,
-                 ThrowableErrorConsumer<Throwable, T> _onFailureRespond,
-                 DeliveryOptions _responseDeliveryOptions,
-                 int _retryCount, long _timeout, long _circuitBreakerTimeout);
+    /**
+     * Execute typed retry handling
+     * @param targetId event-bus target id
+     * @param message the message to reply
+     * @param function the function to execute and to create a response object
+     * @param requestDeliveryOptions the request delivery options
+     * @param methodId  the method identifier
+     * @param vertx the vertx instance
+     * @param failure the failure thrown while task execution or messaging
+     * @param errorMethodHandler the error-method handler
+     * @param requestMessage the message to reply to
+     * @param consumer the consumer to complete the response
+     * @param encoder the encoder to serialize the response object
+     * @param errorHandler the error handler
+     * @param onFailureRespond the consumer that takes a Future with the alternate response value in case of failure
+     * @param responseDeliveryOptions the delivery options for the response
+     * @param retryCount              the amount of retries before failure execution is triggered
+     * @param timeout                 the delay time in ms between an execution error and the retry
+     * @param circuitBreakerTimeout   the amount of time before the circuit breaker closed again
+     */
+    void execute(String targetId,
+                 Object message,
+                 ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
+                 DeliveryOptions requestDeliveryOptions,
+                 String methodId,
+                 Vertx vertx,
+                 Throwable failure,
+                 Consumer<Throwable> errorMethodHandler,
+                 Message<Object> requestMessage,
+                 ThrowableFutureConsumer<T> consumer,
+                 Encoder encoder,
+                 Consumer<Throwable> errorHandler,
+                 ThrowableErrorConsumer<Throwable, T> onFailureRespond,
+                 DeliveryOptions responseDeliveryOptions,
+                 int retryCount, long timeout, long circuitBreakerTimeout);
 }

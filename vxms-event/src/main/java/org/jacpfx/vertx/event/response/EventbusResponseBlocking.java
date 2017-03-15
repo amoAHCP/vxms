@@ -208,7 +208,7 @@ package org.jacpfx.vertx.event.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusByteResponse;
 import org.jacpfx.vertx.event.response.blocking.ExecuteEventbusObjectResponse;
@@ -237,7 +237,7 @@ public class EventbusResponseBlocking {
      * @param failure            the failure thrown while task execution
      * @param errorMethodHandler the error handler
      */
-    public EventbusResponseBlocking(String methodId, Message<Object> message,Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler) {
+    public EventbusResponseBlocking(String methodId, Message<Object> message, Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
         this.vertx = vertx;
         this.failure = failure;
@@ -271,6 +271,7 @@ public class EventbusResponseBlocking {
      * Retunrs a Serializable to the target type
      *
      * @param objectSupplier supplier which returns the createResponse value as Serializable
+     * @param encoder        the encoder to serialize the response object
      * @return {@link ExecuteEventbusObjectResponse}
      */
     public ExecuteEventbusObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {

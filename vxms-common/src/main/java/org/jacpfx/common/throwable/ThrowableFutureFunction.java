@@ -204,33 +204,18 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
-
-import io.vertx.core.Vertx;
-
-import java.util.function.Consumer;
+package org.jacpfx.common.throwable;
 
 /**
- * Created by Andy Moncsek on 30.05.16. Define the terminal onFailure consumer which will be called when lookup fails.
+ * Created by Andy Moncsek on 12.04.16.
  */
-public class FailureDiscovery extends ExecuteDiscovery {
-
-
-    public FailureDiscovery(Vertx vertx, DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, Consumer<NodeResponse> onError, int amount, long delay) {
-        super(vertx, client, serviceName, consumer, onFailure, onError, amount, delay);
-    }
-
-
+public interface ThrowableFutureFunction<T, R> {
 
     /**
-     * Terminal on failure method which is called after retries are failed
+     * Applies this function to the given argument.
      *
-     * @param onFailure
-     * @return {@link RetryDiscovery}, define the amount of retries
+     * @param t the function argument
+     * @return the function result
      */
-    public RetryDiscovery onFailure(Consumer<NodeResponse> onFailure) {
-        return new RetryDiscovery(vertx, client, serviceName, consumer, onFailure, onError);
-    }
-
-
+    R apply(T t) throws Throwable;
 }

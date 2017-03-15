@@ -207,30 +207,63 @@
 package org.jacpfx.vertx.event.eventbus.blocking;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 
 import java.util.function.Consumer;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
+ * Defines an event-bus request as the beginning of your (blocking) execution chain
  */
 public class EventbusBridgeBlockingRequest {
     private final String methodId;
     private final Vertx vertx;
-    private final Throwable t;
+    private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final Message<Object> requestmessage;
 
-    public EventbusBridgeBlockingRequest(String methodId, Message<Object> requestmessage, Vertx vertx, Throwable t, Consumer<Throwable> errorMethodHandler) {
+    /**
+     * Pass all members to execute the chain
+     *
+     * @param methodId           the method identifier
+     * @param requestmessage     the message to responde
+     * @param vertx              the vertx instance
+     * @param failure            the vertx instance
+     * @param errorMethodHandler the error-method handler
+     */
+    public EventbusBridgeBlockingRequest(String methodId,
+                                         Message<Object> requestmessage,
+                                         Vertx vertx,
+                                         Throwable failure,
+                                         Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
         this.vertx = vertx;
-        this.t = t;
+        this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.requestmessage = requestmessage;
     }
 
-
+    /**
+     * Send message and perform (blocking) task on reply
+     *
+     * @param id      the target id to send to
+     * @param message the message to send
+     * @return the execution chain {@link EventbusBridgeBlockingResponse}
+     */
     public EventbusBridgeBlockingResponse send(String id, Object message) {
-        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vertx, t, errorMethodHandler, id, message, null);
+        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vertx, failure, errorMethodHandler, id, message, null);
+    }
+
+    /**
+     * Send message and perform (blocking) task on reply
+     *
+     * @param id             the target id to send to
+     * @param message        the message to send
+     * @param requestOptions the delivery options for the event bus request
+     * @return the execution chain {@link EventbusBridgeBlockingResponse}
+     */
+    public EventbusBridgeBlockingResponse send(String id, Object message, DeliveryOptions requestOptions) {
+        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vertx, failure, errorMethodHandler, id, message, requestOptions);
     }
 }

@@ -208,7 +208,7 @@ package org.jacpfx.vertx.event.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFutureConsumer;
+import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicByteResponse;
 import org.jacpfx.vertx.event.response.basic.ExecuteEventbusBasicObjectResponse;
@@ -278,6 +278,7 @@ public class EventbusResponse {
      * Returns a Serializable to the target type
      *
      * @param objectConsumer consumes a io.vertx.core.Future to compleate with a Serialized Object response
+     * @param encoder        the encoder to serialize the response object
      * @return {@link ExecuteEventbusBasicObjectResponse}
      */
     public ExecuteEventbusBasicObjectResponse objectResponse(ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {

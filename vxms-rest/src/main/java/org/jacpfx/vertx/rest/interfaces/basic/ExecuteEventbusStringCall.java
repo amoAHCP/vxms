@@ -208,7 +208,7 @@ package org.jacpfx.vertx.rest.interfaces.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.ThrowableErrorConsumer;
+import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
 import java.util.Map;

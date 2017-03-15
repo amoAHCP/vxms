@@ -204,29 +204,36 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.registry;
+package org.jacpfx.vertx.registry.discovery;
+
+import io.vertx.core.Vertx;
+import org.jacpfx.vertx.registry.DiscoveryClient;
+import org.jacpfx.vertx.registry.nodes.NodeResponse;
+
+import java.util.function.Consumer;
 
 /**
- * Created by Andy Moncsek on 12.05.16.
+ * Created by Andy Moncsek on 30.05.16.
+ * Defines the intermidiate onError onSuccess if lookup failes
  */
-public class NodeNotFoundException extends RuntimeException {
+public class ErrorDiscovery extends FailureDiscovery {
 
-    public NodeNotFoundException() {
+
+    public ErrorDiscovery(Vertx vertx, DiscoveryClient client, String serviceName, Consumer<NodeResponse> consumer, Consumer<NodeResponse> onFailure, Consumer<NodeResponse> onError, int amount, long delay) {
+        super(vertx, client, serviceName, consumer, onFailure, onError, amount, delay);
     }
 
-    public NodeNotFoundException(String message) {
-        super(message);
+
+    /**
+     * Intermediate on failure method which is called on each error
+     *
+     * @param onError the on error consumer
+     * @return {@link FailureDiscovery} the next step, define onFailure
+     */
+    public FailureDiscovery onError(Consumer<NodeResponse> onError) {
+        return new FailureDiscovery(vertx, client, serviceName, onSuccess, onFailure, onError, 0, 0);
     }
 
-    public NodeNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 
-    public NodeNotFoundException(Throwable cause) {
-        super(cause);
-    }
 
-    public NodeNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

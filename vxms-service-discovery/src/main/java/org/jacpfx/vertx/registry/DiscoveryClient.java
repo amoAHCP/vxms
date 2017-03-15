@@ -212,6 +212,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import or.jacpfx.spi.DiscoveryClientSpi;
+import org.jacpfx.vertx.registry.discovery.OnSuccessDiscovery;
+import org.jacpfx.vertx.registry.nodes.NodeResponse;
 
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -225,8 +227,8 @@ public interface DiscoveryClient {
     /**
      * find service by name by using a builder to define error handling und further execution parameters
      *
-     * @param serviceName
-     * @return DCServiceName
+     * @param serviceName the service name
+     * @return the discovery execution chain
      */
     OnSuccessDiscovery find(String serviceName);
 
@@ -234,7 +236,7 @@ public interface DiscoveryClient {
      * simple find service node method
      *
      * @param serviceName the service name to lookup
-     * @param consumer    the consumer holding the service node
+     * @param consumer    the onSuccess holding the service node
      */
     void findNode(String serviceName, Consumer<NodeResponse> consumer);
 
@@ -266,7 +268,7 @@ public interface DiscoveryClient {
     }
 
     /**
-     * check if client is connected to discovery server, accepts consumer and should not block the thread
+     * check if client is connected to discovery server, accepts onSuccess and should not block the thread
      *
      * @param  connected, provide Lambda expression to check if connection was successful
      */

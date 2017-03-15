@@ -210,8 +210,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.ThrowableFunction;
-import org.jacpfx.common.ThrowableSupplier;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.vertx.event.eventbus.blocking.EventbusBridgeBlockingExecution;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
 import org.jacpfx.vertx.event.interfaces.blocking.RecursiveBlockingExecutor;
@@ -230,22 +230,23 @@ public class EventbusStringExecutionBlockingUtil {
     /**
      * create execution chain for event-bus request and reply to the event
      *
-     * @param _methodId               the method identifier
-     * @param _targetId               the event-bus target id
-     * @param _message                the message to send
-     * @param _stringFunction         the function to process the result message
-     * @param _requestDeliveryOptions the event-bus delivery options
-     * @param _vertx                  the vertx instance
-     * @param _failure                the failure thrown while task execution
-     * @param _errorMethodHandler     the error-method handler
-     * @param _requestMessage         the event-bus request options
-     * @param _stringSupplier         the supplier, producing the string response
-     * @param _errorHandler           the error handler
-     * @param _onFailureRespond       the consumer that takes a Future with the alternate response value in case of failure
-     * @param _retryCount             the amount of retries before failure execution is triggered
-     * @param _timeout                the amount of time before the execution will be aborted
-     * @param _delay                  the delay between an error and the retry
-     * @param _circuitBreakerTimeout  the amount of time before the circuit breaker closed again
+     * @param _methodId                the method identifier
+     * @param _targetId                the event-bus target id
+     * @param _message                 the message to send
+     * @param _stringFunction          the function to process the result message
+     * @param _requestDeliveryOptions  the event-bus delivery options
+     * @param _vertx                   the vertx instance
+     * @param _failure                 the failure thrown while task execution
+     * @param _errorMethodHandler      the error-method handler
+     * @param _requestMessage          the event-bus request options
+     * @param _stringSupplier          the supplier, producing the string response
+     * @param _errorHandler            the error handler
+     * @param _onFailureRespond        the consumer that takes a Future with the alternate response value in case of failure
+     * @param _responseDeliveryOptions the response delivery options
+     * @param _retryCount              the amount of retries before failure execution is triggered
+     * @param _timeout                 the amount of time before the execution will be aborted
+     * @param _delay                   the delay between an error and the retry
+     * @param _circuitBreakerTimeout   the amount of time before the circuit breaker closed again
      * @return the execution chain {@link ExecuteEventbusStringResponse}
      */
     public static ExecuteEventbusStringResponse mapToStringResponse(String _methodId,
