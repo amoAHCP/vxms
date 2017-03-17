@@ -353,7 +353,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <failOnError>true</failOnError>
+                            <failOnError>false</failOnError>
                         </configuration>
                     </execution>
                 </executions>
