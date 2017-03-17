@@ -217,6 +217,7 @@ import java.util.UUID;
 
 /**
  * Created by Andy Moncsek on 25.11.15.
+ * Provides several methods to get the correct configuration
  */
 public class ConfigurationUtil {
 

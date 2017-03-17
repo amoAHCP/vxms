@@ -208,14 +208,33 @@ package org.jacpfx.common.encoder;
 
 /**
  * Created by Andy Moncsek on 17.11.15.
+ * The encoder interface
  */
 public interface Encoder {
 
+    /**
+     * Encode to byte array
+     * @param <I> the type of the object to encode
+     */
     interface ByteEncoder<I> extends Encoder{
+        /**
+         * encode an object to byte array
+         * @param input the object
+         * @return the byte array
+         */
         byte[] encode(I input);
     }
 
+    /**
+     * Encode to string
+     * @param <I> the type of the object to encode
+     */
     interface StringEncoder<I> extends Encoder{
+        /**
+         * Encode to String
+         * @param input the object
+         * @return the string
+         */
         String encode(I input);
     }
 }

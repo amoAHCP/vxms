@@ -213,6 +213,7 @@ import io.vertx.ext.web.handler.CookieHandler;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
+ * The endpoint configuration interface
  */
 public interface EndpointConfiguration {
 

@@ -208,13 +208,14 @@ package org.jacpfx.common.throwable;
 
 /**
  * Created by Andy Moncsek on 27.11.15.
+ * A supplier that throws a throwable, so vxms can handle the exceptions
  */
 public interface ThrowableSupplier<T> {
 
     /**
-     * Gets a result.
-     *
-     * @return a result
+     * the supplier method
+     * @return the value
+     * @throws Throwable the throwable
      */
     T get() throws Throwable;
 }

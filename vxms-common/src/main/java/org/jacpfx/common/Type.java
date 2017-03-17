@@ -208,6 +208,7 @@ package org.jacpfx.common;
 
 /**
  * Created by amo on 29.10.14.
+ * The Web operation type
  */
 public enum Type {
    WEBSOCKET, EVENTBUS, REST_POST,REST_GET, REST_PUT, REST_DELETE

@@ -210,13 +210,16 @@ import io.vertx.core.Future;
 
 /**
  * Created by Andy Moncsek on 21.01.16.
+ *
+ * A consumer that throws a throwable, so vxms can handle the exceptions
  */
 public interface ThrowableFutureConsumer<T> {
 
+
     /**
      * Performs this operation on the given argument.
-     *
      * @param operationResult the input argument
+     * @throws Throwable the throwable
      */
     void accept(Future<T> operationResult) throws Throwable;
 }

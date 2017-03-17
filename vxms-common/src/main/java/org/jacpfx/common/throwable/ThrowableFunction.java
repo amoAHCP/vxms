@@ -208,6 +208,7 @@ package org.jacpfx.common.throwable;
 
 /**
  * Created by Andy Moncsek on 12.04.16.
+ * A function that throws a throwable, so vxms can handle the exceptions
  */
 public interface ThrowableFunction<T, R> {
 
@@ -216,6 +217,7 @@ public interface ThrowableFunction<T, R> {
      *
      * @param t the function argument
      * @return the function result
+     * @throws Throwable the throwable
      */
     R apply(T t) throws Throwable;
 }

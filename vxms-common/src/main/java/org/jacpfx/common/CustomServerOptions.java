@@ -211,6 +211,7 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * Created by Andy Moncsek on 18.07.16.
+ * Interface for custom http server option definition
  */
 public interface CustomServerOptions {
 

@@ -206,10 +206,10 @@
 
 package org.jacpfx.common;
 
-import java.util.stream.Stream;
 
 /**
  * Created by amo on 19.09.16.
+ * Defines the result wrapper for async operations
  */
 public class ExecutionResult<T> {
 
@@ -222,9 +222,9 @@ public class ExecutionResult<T> {
     /**
      * The default constructor
      *
-     * @param result
+     * @param result    the result value
      * @param succeeded the connection status
-     * @param cause     The failure caus
+     * @param cause     The failure cause
      */
     public ExecutionResult(T result, boolean succeeded, Throwable cause) {
         this(result, succeeded, false, cause);
@@ -233,9 +233,10 @@ public class ExecutionResult<T> {
     /**
      * The default constructor
      *
-     * @param result
-     * @param succeeded the connection status
-     * @param cause     The failure caus
+     * @param result        the result value
+     * @param succeeded     the connection status
+     * @param errorHandling true if an error was handled while execution
+     * @param cause         The failure cause
      */
     public ExecutionResult(T result, boolean succeeded, boolean errorHandling, Throwable cause) {
         this.result = result;
@@ -283,6 +284,7 @@ public class ExecutionResult<T> {
 
     /**
      * Returns true if result was created during error handling
+     *
      * @return true if error occured
      */
     public boolean handledError() {

@@ -210,8 +210,15 @@ import java.io.*;
 
 /**
  * Created by amo on 04.12.14.
+ * Serializing util
  */
 public class Serializer {
+    /**
+     * Serialize an object
+     * @param obj the object to serialize
+     * @return the byte array of the serialized object
+     * @throws IOException the possible io exception
+     */
     public static byte[] serialize(Object obj) throws IOException {
         final ByteArrayOutputStream b = new ByteArrayOutputStream();
         final ObjectOutputStream o = new ObjectOutputStream(b);
@@ -220,6 +227,13 @@ public class Serializer {
         return b.toByteArray();
     }
 
+    /**
+     * Deserialize an object
+     * @param bytes the byte array to deserialize
+     * @return the object
+     * @throws IOException deserialization exception
+     * @throws ClassNotFoundException if class not found
+     */
     public static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
         final ByteArrayInputStream b = new ByteArrayInputStream(bytes);
         final ObjectInputStream o = new ObjectInputStream(b);

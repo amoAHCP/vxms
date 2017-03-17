@@ -210,16 +210,36 @@ import java.util.Optional;
 
 /**
  * Created by Andy Moncsek on 18.11.15.
+ * The decoder interface
  */
 public interface Decoder<O> {
 
 
-
+    /**
+     * Decode from byte array
+     * @param <O> the type of the object to decode
+     */
     interface ByteDecoder<O>  extends Decoder<O> {
+        /**
+         *
+         * decode the input
+         * @param input the byte array input
+         * @return an optional with the result
+         */
          Optional<O> decode(byte[] input);
     }
 
+    /**
+     * Decode from String
+     * @param <O> the type of the object to decode
+     */
     interface StringDecoder<O> extends Decoder<O> {
+        /**
+         *
+         * decode the input
+         * @param input the String input
+         * @return an optional with the result
+         */
          Optional<O> decode(String input);
     }
 }

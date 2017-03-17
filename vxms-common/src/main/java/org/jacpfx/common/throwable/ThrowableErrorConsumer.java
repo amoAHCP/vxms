@@ -210,6 +210,7 @@ import io.vertx.core.Future;
 
 /**
  * Created by Andy Moncsek on 21.01.16.
+ * A consumer that throws a throwable, so vxms can handle the exceptions
  */
 public interface ThrowableErrorConsumer<T, R> {
 
@@ -218,6 +219,7 @@ public interface ThrowableErrorConsumer<T, R> {
      *
      * @param error,          the error
      * @param operationResult the input argument
+     * @throws Throwable the throwable
      */
     void accept(T error, Future<R> operationResult) throws Throwable;
 }
