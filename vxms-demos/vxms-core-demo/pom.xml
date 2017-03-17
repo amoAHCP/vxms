@@ -218,13 +218,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.0-SNAPSHOT</vxms.version>
+        <vxms.version>1.0-RC1</vxms.version>
         <main.verticle>org.jacpfx.verticle.SimpleREST</main.verticle>
     </properties>
 
     <repositories>
         <repository>
-            <targetId>sonatype-nexus-snapshots</targetId>
+            <id>sonatype-nexus-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>

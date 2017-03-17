@@ -212,7 +212,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-RC1</version>
     <name>vxms</name>
     <url>http://maven.apache.org</url>
 
@@ -253,8 +253,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git@github.com:amoAHCP/vert.x-microservice.git</connection>
-        <developerConnection>scm:git:git@github.com:amoAHCP/vert.x-microservice.git</developerConnection>
+        <connection>scm:git:git@github.com:amoAHCP/vxms.git</connection>
+        <developerConnection>scm:git:git@github.com:amoAHCP/vxms.git</developerConnection>
         <url>git@github.com:amoAHCP/vxms.git</url>
         <tag>vxms-parent</tag>
     </scm>
@@ -276,7 +276,7 @@
             </modules>
         </profile>
         <profile>
-            <id>beta1</id>
+            <id>release</id>
             <modules>
                 <module>vxms-common</module>
                 <module>vxms-verticle</module>
@@ -342,6 +342,19 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <!-- create source jar -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>${artifactId}-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

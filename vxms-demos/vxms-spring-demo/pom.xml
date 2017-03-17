@@ -218,11 +218,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.0-SNAPSHOT</vxms.version>
+        <vxms.version>1.0-RC1</vxms.version>
         <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
         <spring.version>4.2.1.RELEASE</spring.version>
         <main.verticle>java-spring:org.jacpfx.SimpleSpringREST</main.verticle>
-        <vertx.version>3.4.0.Beta1</vertx.version>
+        <vertx.version>3.4.0</vertx.version>
     </properties>
 
     <repositories>

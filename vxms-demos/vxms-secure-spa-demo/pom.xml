@@ -218,7 +218,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.0-SNAPSHOT</vxms.version>
+        <vxms.version>1.0-RC1</vxms.version>
         <main.verticle>org.jacpfx.verticle.SecureEndpoint</main.verticle>
         <vertx-spring-ext.version>2.0.3</vertx-spring-ext.version>
 

@@ -223,11 +223,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertx.version>3.4.0.Beta1</vertx.version>
+        <vertx.version>3.4.0</vertx.version>
         <junit.version>4.11</junit.version>
+        <vxms-verticle.version>1.0-RC1</vxms-verticle.version>
         <hazelcast.version>3.6.2</hazelcast.version>
-        <slf4j-api.version>1.7.16</slf4j-api.version>
         <hazelcast-kubernetes-discovery.version>0.9.3-SNAPSHOT</hazelcast-kubernetes-discovery.version>
+        <slf4j-api.version>1.7.16</slf4j-api.version>
     </properties>
 
     <dependencies>
