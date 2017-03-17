@@ -5,6 +5,33 @@ Vxms is a modular micro service framework, based 100% on Vert.x 3. While Vert.x 
 Currently vxms consists of 1 base module and 4 extension modules, helping the developer to write Jax-RX like REST services, EventBus endpoints and handling service registration/discovery using etcd. Since the *core module* is using Java SPIs to handle REST, EventBus and service registration you can adopt the API easily for your needs.
 Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any other Vert.x extension will work in vxms out of the box.
     
+## maven dependencies
+
+### vxms-core
+```xml
+ <dependency>
+      <groupId>org.jacpfx</groupId>
+      <artifactId>vxms-verticle</artifactId>
+      <version>1.0-RC1</version>
+ </dependency>
+```   
+### vxms-rest
+```xml   
+  <dependency>
+       <groupId>org.jacpfx</groupId>
+       <artifactId>vxms-rest</artifactId>
+       <version>1.0-RC1</version>
+  </dependency>
+```   
+### vxms-event bus
+```xml
+ <dependency>
+        <groupId>org.jacpfx</groupId>
+        <artifactId>vxms-event</artifactId>
+        <version>1.0-RC1</version>
+  </dependency>
+```     
+
 
 ## vxms-rest example
 
