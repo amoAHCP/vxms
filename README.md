@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.org/amoAHCP/vxms.svg?branch=master)](https://travis-ci.org/amoAHCP/vxms)
 
 # vxms
-Vxms is a modular micro service framework, based 100% on Vert.x 3. While Vert.x is a totally unopinionated framework/toolkit, vxms helps the developer to create (micro) services typically using REST and/or events. 
-Currently vxms consists of 1 base module and 4 extension modules, helping the developer to write Jax-RX like REST services, EventBus endpoints and handling service registration/discovery using etcd. Since the *core module* is using Java SPIs to handle REST, EventBus and service registration you can adopt the API easily for your needs.
+Vxms is a modular micro service framework, based 100% on Vert.x 3. While Vert.x is a totally un opinionated framework/toolkit, vxms helps the developer to create (micro) services typically using REST and/or events. 
+Currently vxms consists of 1 base module and 4 extension modules, helping the developer to write Jax-RS like REST services, EventBus endpoints and handling service registration/discovery using etcd. Since the *core module* is using Java SPIs to handle REST, EventBus and service registration you can adopt the API easily for your needs.
 Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any other Vert.x extension will work in vxms out of the box.
     
 ## maven dependencies

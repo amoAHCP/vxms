@@ -211,6 +211,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
@@ -229,7 +230,7 @@ import java.util.function.Consumer;
  */
 public class EventbusBlockingResponse {
     private final String methodId;
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
@@ -242,7 +243,7 @@ public class EventbusBlockingResponse {
      * Pass all parameters to execute the chain
      *
      * @param methodId           the method identifier
-     * @param vertx              the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure            the vertx instance
      * @param errorMethodHandler the error-method handler
      * @param context            the vertx routing context
@@ -251,7 +252,7 @@ public class EventbusBlockingResponse {
      * @param options            the event-bus delivery options
      */
     public EventbusBlockingResponse(String methodId,
-                                    Vertx vertx,
+                                    VxmsShared vxmsShared,
                                     Throwable failure,
                                     Consumer<Throwable> errorMethodHandler,
                                     RoutingContext context,
@@ -259,7 +260,7 @@ public class EventbusBlockingResponse {
                                     Object message,
                                     DeliveryOptions options) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -281,7 +282,7 @@ public class EventbusBlockingResponse {
                 message,
                 options,
                 stringFunction,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -311,7 +312,7 @@ public class EventbusBlockingResponse {
                 message,
                 options,
                 byteFunction,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -342,7 +343,7 @@ public class EventbusBlockingResponse {
                 message,
                 options,
                 objectFunction,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

@@ -218,6 +218,8 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.CustomServerOptions;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.concurrent.LocalData;
 import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
 import org.jacpfx.common.util.URIUtil;
@@ -236,11 +238,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     private Consumer<Future<Void>> onStop;
 
+    private VxmsShared vxmsShared;
+
     @Override
     public final void start(final Future<Void> startFuture) {
+        vxmsShared = new VxmsShared(vertx, new LocalData(vertx));
         // register info (keepAlive) handler
         vertx.eventBus().consumer(ConfigurationUtil.getServiceName(getConfig(), this.getClass()) + "-info", this::info);
         initEndpoint(startFuture);
+
     }
 
 
@@ -334,7 +340,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         // check for REST extension
         Optional.
                 ofNullable(getRESTSPI()).
-                ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vertx, router,  this));
+                ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vxmsShared, router,  this));
     }
 
     private void initEventBusExtensions() {

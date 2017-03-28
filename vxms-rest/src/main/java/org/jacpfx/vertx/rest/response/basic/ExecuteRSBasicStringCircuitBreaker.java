@@ -208,6 +208,7 @@ package org.jacpfx.vertx.rest.response.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
@@ -226,7 +227,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
      * The constructor to pass all needed members
      *
      * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                  the failure thrown while task execution
      * @param errorMethodHandler       the error handler
      * @param context                  the vertx routing context
@@ -243,7 +244,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
      * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
      */
     public ExecuteRSBasicStringCircuitBreaker(String methodId,
-                                              Vertx vertx,
+                                              VxmsShared vxmsShared,
                                               Throwable failure,
                                               Consumer<Throwable> errorMethodHandler,
                                               RoutingContext context,
@@ -253,7 +254,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
                                               Encoder encoder, Consumer<Throwable> errorHandler, ThrowableErrorConsumer<Throwable, String> onFailureRespond,
                                               int httpStatusCode, int httpErrorCode, int retryCount, long timeout, long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -279,7 +280,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
      */
     public ExecuteRSBasicStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
         return new ExecuteRSBasicStringResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

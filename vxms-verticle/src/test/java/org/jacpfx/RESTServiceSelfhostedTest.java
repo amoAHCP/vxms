@@ -422,6 +422,11 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
 
         HttpClientRequest request = client.get("/wsService/endpointNine_exception?val=123&tmp=456", new Handler<HttpClientResponse>() {
             public void handle(HttpClientResponse resp) {
+
+                vertx.runOnContext(h -> {
+                    assertEquals(500, resp.statusCode());
+                    assertEquals("test", resp.statusMessage());
+                });
                 resp.bodyHandler(body -> {
                     System.out.println("Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
 

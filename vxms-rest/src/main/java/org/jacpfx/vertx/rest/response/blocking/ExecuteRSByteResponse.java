@@ -206,11 +206,11 @@
 
 package org.jacpfx.vertx.rest.response.blocking;
 
-import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
-import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusByteCallBlocking;
 
 import java.util.HashMap;
@@ -227,7 +227,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * The constructor to pass all needed members
      *
      * @param methodId                         the method identifier
-     * @param vertx                            the vertx instance
+     * @param vxmsShared                       the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                          the failure thrown while task execution
      * @param errorMethodHandler               the error handler
      * @param context                          the vertx routing context
@@ -245,7 +245,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      * @param circuitBreakerTimeout            the amount of time before the circuit breaker closed again
      */
     public ExecuteRSByteResponse(String methodId,
-                                 Vertx vertx,
+                                 VxmsShared vxmsShared,
                                  Throwable failure,
                                  Consumer<Throwable> errorMethodHandler,
                                  RoutingContext context,
@@ -262,7 +262,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
                                  long delay,
                                  long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -288,7 +288,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      */
     public ExecuteRSByteOnFailureCode onFailureRespond(ThrowableFunction<Throwable, byte[]> onFailureRespond) {
         return new ExecuteRSByteOnFailureCode(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -314,7 +314,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      */
     public ExecuteRSByteResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -340,7 +340,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      */
     public ExecuteRSByteCircuitBreaker retry(int retryCount) {
         return new ExecuteRSByteCircuitBreaker(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -366,7 +366,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      */
     public ExecuteRSByteResponse timeout(long timeout) {
         return new ExecuteRSByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -392,7 +392,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
      */
     public ExecuteRSByteResponse delay(long delay) {
         return new ExecuteRSByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -421,7 +421,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
         return new ExecuteRSByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

@@ -208,6 +208,7 @@ package org.jacpfx.vertx.rest.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.blocking.ExecuteRSByteResponse;
@@ -224,7 +225,7 @@ import java.util.function.Consumer;
  */
 public class RESTResponseBlocking {
     private final String methodId;
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
@@ -234,20 +235,20 @@ public class RESTResponseBlocking {
      * Pass all needed values to execute the chain
      *
      * @param methodId           the method identifier
-     * @param vertx              the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure            the failure thrown while task execution
      * @param errorMethodHandler the error handler
      * @param context            the vertx routing context
      * @param headers            the headers to pass to the response
      */
     public RESTResponseBlocking(String methodId,
-                                Vertx vertx,
+                                VxmsShared vxmsShared,
                                 Throwable failure,
                                 Consumer<Throwable> errorMethodHandler,
                                 RoutingContext context,
                                 Map<String, String> headers) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -263,7 +264,7 @@ public class RESTResponseBlocking {
      */
     public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
         return new ExecuteRSByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -289,7 +290,7 @@ public class RESTResponseBlocking {
      */
     public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
         return new ExecuteRSStringResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -316,7 +317,7 @@ public class RESTResponseBlocking {
      */
     public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
         return new ExecuteRSObjectResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

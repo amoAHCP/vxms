@@ -10,18 +10,13 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.common.util.Serializer;
-import org.jacpfx.entity.Payload;
-import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.vertx.event.annotation.Consume;
 import org.jacpfx.vertx.event.response.EventbusHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Supplier;
 
 /**
  * Created by Andy Moncsek on 23.04.15.
@@ -30,7 +25,7 @@ public class EventbusFailureCircuitBreakerTests extends VertxTestBase {
     private final static int MAX_RESPONSE_ELEMENTS = 4;
     public static final String SERVICE_REST_GET = "/wsService";
     private static final String HOST = "127.0.0.1";
-    public static final int PORT = 9998;
+    public static final int PORT = 0;
 
     protected int getNumNodes() {
         return 1;
@@ -87,154 +82,44 @@ public class EventbusFailureCircuitBreakerTests extends VertxTestBase {
 
     @Test
 
-    public void simpleBlockingStringResponseFailure() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleBlockingStringResponseFailure", "hello", res -> {
-            assertTrue(res.succeeded());
-            assertEquals("helloNPE", res.result().body().toString());
-            System.out.println("out: " + res.result().body().toString());
-            testComplete();
-        });
-        await();
-
-    }
-
-    @Test
-
     public void simpleStringResponseFailure() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponseFailure", "hello", res -> {
+        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponseFailure", "crash", res -> {
             assertTrue(res.succeeded());
-            assertEquals("helloNPE", res.result().body().toString());
+            assertEquals("failure", res.result().body().toString());
             System.out.println("out: " + res.result().body().toString());
-            testComplete();
+            getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponseFailure", "val", res2 -> {
+                assertTrue(res2.succeeded());
+                assertEquals("failure", res2.result().body().toString());
+                System.out.println("out: " + res2.result().body().toString());
+
+                // wait 1s, but circuit is still open
+                vertx.setTimer(1205, handler -> {
+                    getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponseFailure", "val", res3 -> {
+                        assertTrue(res3.succeeded());
+                        assertEquals("failure", res3.result().body().toString());
+                        System.out.println("out: " + res3.result().body().toString());
+
+                        // wait another 1s, now circuit should be closed
+                        vertx.setTimer(1005, handler2 -> {
+                            getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponseFailure", "val", res4 -> {
+                                assertTrue(res4.succeeded());
+                                assertEquals("val", res4.result().body().toString());
+                                System.out.println("out: " + res4.result().body().toString());
+
+
+                                testComplete();
+                            });
+                        });
+
+                    });
+                });
+
+            });
         });
         await();
 
     }
 
-    @Test
-
-    public void simpleStringResponseFailureInCompleate() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleStringResponseFailureInCompleate", "hello", res -> {
-            assertTrue(res.succeeded());
-            assertEquals("helloNPE", res.result().body().toString());
-            System.out.println("out: " + res.result().body().toString());
-            testComplete();
-        });
-        await();
-
-    }
-
-    @Test
-
-    public void simpleByteResponseFailure() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleByteResponseFailure", "hello", res -> {
-            assertTrue(res.succeeded());
-            Payload<String> pp = null;
-            final Object body = res.result().body();
-            try {
-                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            String value = pp.getValue();
-            assertEquals("helloNPE", value);
-            System.out.println("out: " + value);
-            testComplete();
-        });
-        await();
-
-    }
-
-    @Test
-
-    public void simpleBlockingByteResponseFailure() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleBlockingByteResponseFailure", "hello", res -> {
-            assertTrue(res.succeeded());
-            Payload<String> pp = null;
-            final Object body = res.result().body();
-            try {
-                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            String value = pp.getValue();
-            assertEquals("helloNPE", value);
-            System.out.println("out: " + value);
-            testComplete();
-        });
-        await();
-
-    }
-
-    @Test
-    public void simpleObjectResponseFailure() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleObjectResponseFailure", "hello", res -> {
-            assertTrue(res.succeeded());
-            Payload<String> pp = null;
-            final Object body = res.result().body();
-            try {
-                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            String value = pp.getValue();
-            assertEquals("helloNPE", value);
-            System.out.println("out: " + value);
-            testComplete();
-        });
-        await();
-
-    }
-
-    
-    @Test
-    public void simpleObjectResponseFailureInCompleate() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleObjectResponseFailureInCompleate", "hello", res -> {
-            assertTrue(res.succeeded());
-            Payload<String> pp = null;
-            final Object body = res.result().body();
-            try {
-                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            String value = pp.getValue();
-            assertEquals("helloNPE", value);
-            System.out.println("out: " + value);
-            testComplete();
-        });
-        await();
-
-    }
-    @Test
-    public void simpleBlockingObjectResponseFailure() throws InterruptedException {
-        getVertx().eventBus().send(SERVICE_REST_GET + "/simpleBlockingObjectResponseFailure", "hello", res -> {
-            assertTrue(res.succeeded());
-            Payload<String> pp = null;
-            final Object body = res.result().body();
-            try {
-                pp = (Payload<String>) Serializer.deserialize((byte[]) body);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            String value = pp.getValue();
-            assertEquals("helloNPE", value);
-            System.out.println("out: " + value);
-            testComplete();
-        });
-        await();
-
-    }
 
     public HttpClient getClient() {
         return client;
@@ -247,97 +132,22 @@ public class EventbusFailureCircuitBreakerTests extends VertxTestBase {
         @Consume("/simpleStringResponseFailure")
         public void simpleStringResponseFailure(EventbusHandler reply) {
             System.out.println("simpleStringResponseFailure: " + reply);
-            reply.response().stringResponse((future) -> {
-                final String body = reply.request().body().toString() + "NPE";
-                throw new NullPointerException(body);
-            }).onFailureRespond((t, f) -> f.complete(t.getMessage())).execute();
+            String value = reply.request().body().toString();
+            reply.
+                    response().
+                    stringResponse((future) -> {
+                        if (value.equals("crash")) {
+                            throw new NullPointerException("test-123");
+                        }
+                        future.complete(value);
+                    }).
+                    onError(e -> System.out.println(e.getMessage())).
+                    retry(3).
+                    closeCircuitBreaker(2000).
+                    onFailureRespond((error, future) -> future.complete("failure")).
+                    execute();
         }
 
-        @Consume("/simpleStringResponseFailureInCompleate")
-        public void simpleStringResponseFailureInCompleate(EventbusHandler reply) {
-            System.out.println("simpleStringResponseFailureInCompleate: " + reply);
-            reply.response().stringResponse((future) -> {
-                final String body = reply.request().body().toString() + "NPE";
-                Supplier<String> s = () -> {
-                    throw new NullPointerException(body);
-                };
-                future.complete(s.get());
-            }).onFailureRespond((t, f) -> f.complete(t.getMessage())).execute();
-        }
-
-        @Consume("/simpleBlockingStringResponseFailure")
-        public void simpleBlockingStringResponseFailure(EventbusHandler reply) {
-            System.out.println("simpleBlockingStringResponseFailure: " + reply);
-            reply.response().blocking().stringResponse(() -> {
-                throw new NullPointerException(reply.request().body().toString() + "NPE");
-            }).onFailureRespond(t -> {
-                return t.getMessage();
-            }).execute();
-        }
-
-
-        @Consume("/simpleByteResponseFailure")
-        public void simpleByteResponseFailure(EventbusHandler reply) {
-            System.out.println("simpleByteResponseFailure: " + reply);
-            Payload<String> p = new Payload<>(reply.request().body().toString());
-            reply.response().byteResponse((future) -> {
-                final byte[] serialize = Serializer.serialize(p);
-                throw new NullPointerException(reply.request().body().toString());
-            }).onFailureRespond((t, f) -> f.complete(Serializer.serialize(new Payload<>(t.getMessage() + "NPE")))).execute();
-        }
-
-        @Consume("/simpleByteResponseFailureInCompleate")
-        public void simpleByteResponseFailureInCompleate(EventbusHandler reply) {
-            System.out.println("simpleByteResponseFailureInCompleate: " + reply);
-            Payload<String> p = new Payload<>(reply.request().body().toString());
-            reply.response().byteResponse((future) -> {
-                final byte[] serialize = Serializer.serialize(p);
-                Supplier<byte[]> s = () -> {
-                    throw new NullPointerException(reply.request().body().toString());
-                };
-                future.complete(s.get());
-            }).onFailureRespond((t, f) -> f.complete(Serializer.serialize(new Payload<>(t.getMessage() + "NPE")))).execute();
-        }
-
-        @Consume("/simpleBlockingByteResponseFailure")
-        public void simpleBlockingByteResponseFailure(EventbusHandler reply) {
-            System.out.println("simpleByteResponseFailure: " + reply);
-            Payload<String> p = new Payload<>(reply.request().body().toString());
-            reply.response().blocking().byteResponse(() -> {
-                throw new NullPointerException(reply.request().body().toString() + "NPE");
-            }).onFailureRespond(t -> Serializer.serialize(new Payload<>(t.getMessage()))).execute();
-        }
-
-        @Consume("/simpleObjectResponseFailure")
-        public void simpleObjectResponseFailure(EventbusHandler reply) {
-            System.out.println("simpleObjectResponseFailure: " + reply);
-            Payload<String> p = new Payload<>(reply.request().body().toString());
-            reply.response().objectResponse((future) -> {
-                throw new NullPointerException(reply.request().body().toString());
-            }, new ExampleByteEncoder()).onFailureRespond((t, f) -> f.complete(new Payload<>(t.getMessage() + "NPE")), new ExampleByteEncoder()).execute();
-        }
-
-
-        @Consume("/simpleObjectResponseFailureInCompleate")
-        public void simpleObjectResponseFailureInCompleate(EventbusHandler reply) {
-            System.out.println("simpleObjectResponseFailure: " + reply);
-            Payload<String> p = new Payload<>(reply.request().body().toString());
-            reply.response().objectResponse((future) -> {
-                Supplier<Payload<String>> s = () -> {
-                    throw new NullPointerException(reply.request().body().toString());
-                };
-                future.complete(s.get());
-            }, new ExampleByteEncoder()).onFailureRespond((t, f) -> f.complete(new Payload<>(t.getMessage() + "NPE")), new ExampleByteEncoder()).execute();
-        }
-
-        @Consume("/simpleBlockingObjectResponseFailure")
-        public void simpleBlockingObjectResponseFailure(EventbusHandler reply) {
-            System.out.println("simpleByteResponseFailure: " + reply);
-            Payload<String> p = new Payload<>(reply.request().body().toString());
-            reply.response().blocking().objectResponse(() -> {
-                throw new NullPointerException(reply.request().body().toString());
-            }, new ExampleByteEncoder()).onFailureRespond(t-> new Payload<>(t.getMessage()+"NPE"), new ExampleByteEncoder()).execute();
-        }
 
     }
 

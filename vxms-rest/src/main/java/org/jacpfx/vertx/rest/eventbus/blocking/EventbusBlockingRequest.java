@@ -209,6 +209,7 @@ package org.jacpfx.vertx.rest.eventbus.blocking;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 
 import java.util.function.Consumer;
 
@@ -218,7 +219,7 @@ import java.util.function.Consumer;
  */
 public class EventbusBlockingRequest {
     private final String methodId;
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
@@ -227,18 +228,18 @@ public class EventbusBlockingRequest {
      * Pass all members to execute the chain
      *
      * @param methodId           the method identifier
-     * @param vertx              the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure            the vertx instance
      * @param errorMethodHandler the error-method handler
      * @param context            the vertx routing context
      */
     public EventbusBlockingRequest(String methodId,
-                                   Vertx vertx,
+                                   VxmsShared vxmsShared,
                                    Throwable failure,
                                    Consumer<Throwable> errorMethodHandler,
                                    RoutingContext context) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -254,7 +255,7 @@ public class EventbusBlockingRequest {
      */
     public EventbusBlockingResponse send(String targetId, Object message) {
         return new EventbusBlockingResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -273,7 +274,7 @@ public class EventbusBlockingRequest {
      */
     public EventbusBlockingResponse send(String targetId, Object message, DeliveryOptions options) {
         return new EventbusBlockingResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

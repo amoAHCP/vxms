@@ -213,6 +213,8 @@ import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 import org.jacpfx.common.ExecutionResult;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.concurrent.LocalData;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
@@ -244,7 +246,7 @@ public class ResponseBlockingExecution {
      * @param _errorHandler          the intermediate error method, executed on each error
      * @param _onFailureRespond      the method to be executed on failure
      * @param _errorMethodHandler    the fallback method
-     * @param vertx                  the vertx instance
+     * @param vxmsShared             the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param _fail                  last thrown Exception
      * @param _retry                 the amount of retries
      * @param _timeout,              the max timeout time for the method execution
@@ -258,7 +260,7 @@ public class ResponseBlockingExecution {
                                                      Consumer<Throwable> _errorHandler,
                                                      ThrowableFunction<Throwable, T> _onFailureRespond,
                                                      Consumer<Throwable> _errorMethodHandler,
-                                                     Vertx vertx, Throwable _fail,
+                                                     VxmsShared vxmsShared, Throwable _fail,
                                                      int _retry,
                                                      long _timeout,
                                                      long _circuitBreakerTimeout,
@@ -273,7 +275,7 @@ public class ResponseBlockingExecution {
                             _errorHandler,
                             _onFailureRespond,
                             _errorMethodHandler,
-                            vertx, _fail,
+                            vxmsShared, _fail,
                             _retry, _timeout,
                             _circuitBreakerTimeout,
                             _delay, lock, counter);
@@ -284,16 +286,16 @@ public class ResponseBlockingExecution {
                             _errorHandler,
                             _onFailureRespond,
                             _errorMethodHandler,
-                            vertx, _fail,
+                            vxmsShared, _fail,
                             _retry, _timeout,
                             _circuitBreakerTimeout,
                             _delay, lock);
                 } else {
                     executeErrorState(_resultHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, _fail, lock);
                 }
-            }), _methodId, vertx, _resultHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, null);
+            }), _methodId, vxmsShared, _resultHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, null);
         } else {
-            executeStateless(_supplier, _resultHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vertx, _retry, _timeout, _delay);
+            executeStateless(_supplier, _resultHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vxmsShared, _retry, _timeout, _delay);
         }
     }
 
@@ -316,14 +318,15 @@ public class ResponseBlockingExecution {
                                            Consumer<Throwable> _errorHandler,
                                            ThrowableFunction<Throwable, T> _onFailureRespond,
                                            Consumer<Throwable> _errorMethodHandler,
-                                           Vertx vertx, Throwable _failure,
+                                           VxmsShared vxmsShared, Throwable _failure,
                                            int _retry, long _timeout,
                                            long _circuitBreakerTimeout,
                                            long _delay, Lock lock) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.executeBlocking(bhandler -> {
             try {
-                executeDefaultState(_supplier, _blockingHandler, vertx, _timeout);
+                executeDefaultState(_supplier, _blockingHandler, vxmsShared, _timeout);
                 bhandler.complete();
             } catch (Throwable e) {
                 executeLocked((lck, counter) ->
@@ -335,7 +338,7 @@ public class ResponseBlockingExecution {
                                         _errorHandler,
                                         _onFailureRespond,
                                         _errorMethodHandler,
-                                        vertx, _failure,
+                                        vxmsShared, _failure,
                                         _retry,
                                         _timeout,
                                         _circuitBreakerTimeout,
@@ -347,7 +350,7 @@ public class ResponseBlockingExecution {
                                 releaseLockAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, valHandler.cause(), lck);
                                 bhandler.complete();
                             }
-                        }), _methodId, vertx, _blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, bhandler);
+                        }), _methodId, vxmsShared, _blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, bhandler);
             }
         }, false, res -> {
 
@@ -361,12 +364,12 @@ public class ResponseBlockingExecution {
                                                 Consumer<Throwable> _errorHandler,
                                                 ThrowableFunction<Throwable, T> _onFailureRespond,
                                                 Consumer<Throwable> _errorMethodHandler,
-                                                Vertx vertx, Throwable _t, int _retry,
+                                                VxmsShared vxmsShared, Throwable _t, int _retry,
                                                 long _timeout, long _circuitBreakerTimeout,
                                                 long _delay, Lock lock, Counter counter) {
         final long initialRetryCounterValue = (long) (_retry + 1);
         counter.addAndGet(initialRetryCounterValue, rHandler -> executeDefault(_methodId, _supplier, _blockingHandler, _errorHandler, _onFailureRespond,
-                _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, lock));
+                _errorMethodHandler, vxmsShared, _t, _retry, _timeout, _circuitBreakerTimeout, _delay, lock));
     }
 
     private static <T> void releaseLockAndHandleError(Future<ExecutionResult<T>> _blockingHandler,
@@ -394,21 +397,21 @@ public class ResponseBlockingExecution {
                                                 Consumer<Throwable> _errorHandler,
                                                 ThrowableFunction<Throwable, T> _onFailureRespond,
                                                 Consumer<Throwable> _errorMethodHandler,
-                                                Vertx vertx, Throwable _t, int _retry,
+                                                VxmsShared vxmsShared, Throwable _t, int _retry,
                                                 long _timeout, long _circuitBreakerTimeout,
                                                 long _delay, Throwable e, Lock lck,
                                                 Counter counter, AsyncResult<Long> valHandler) {
         //////////////////////////////////////////
         long count = valHandler.result();
         if (count <= DEFAULT_LONG_VALUE) {
-            setCircuitBreakerReleaseTimer(vertx, _retry, _circuitBreakerTimeout, counter);
-            openCircuitBreakerAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vertx, e, lck, counter);
+            setCircuitBreakerReleaseTimer(vxmsShared, _retry, _circuitBreakerTimeout, counter);
+            openCircuitBreakerAndHandleError(_blockingHandler, _errorHandler, _onFailureRespond, _errorMethodHandler, vxmsShared, e, lck, counter);
         } else {
             lck.release();
             ResponseExecution.handleError(_errorHandler, e);
             handleDelay(_delay);
             executeRetryAndCatchAsync(_methodId, _supplier, _blockingHandler, _errorHandler,
-                    _onFailureRespond, _errorMethodHandler, vertx, _t, _retry, _timeout, _circuitBreakerTimeout, _delay);
+                    _onFailureRespond, _errorMethodHandler, vxmsShared, _t, _retry, _timeout, _circuitBreakerTimeout, _delay);
         }
         ////////////////////////////////////////
     }
@@ -417,10 +420,11 @@ public class ResponseBlockingExecution {
                                                              Consumer<Throwable> _errorHandler,
                                                              ThrowableFunction<Throwable, T> _onFailureRespond,
                                                              Consumer<Throwable> _errorMethodHandler,
-                                                             Vertx vertx, Throwable e,
+                                                             VxmsShared vxmsShared, Throwable e,
                                                              Lock lck, Counter counter) {
         counter.addAndGet(LOCK_VALUE, val -> {
             lck.release();
+            final Vertx vertx = vxmsShared.getVertx();
             vertx.executeBlocking(bhandler -> {
                 T result = null;
                 result = handleError(result, _errorHandler, _onFailureRespond, _errorMethodHandler, e);
@@ -432,7 +436,8 @@ public class ResponseBlockingExecution {
         });
     }
 
-    private static void setCircuitBreakerReleaseTimer(Vertx vertx, int _retry, long _circuitBreakerTimeout, Counter counter) {
+    private static void setCircuitBreakerReleaseTimer(VxmsShared vxmsShared, int _retry, long _circuitBreakerTimeout, Counter counter) {
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.setTimer(_circuitBreakerTimeout, timer -> {
             final long initialRetryCounterValue = (long) (_retry + 1);
             counter.addAndGet(initialRetryCounterValue, val -> {
@@ -440,19 +445,20 @@ public class ResponseBlockingExecution {
         });
     }
 
-    private static <T> void executeDefaultState(ThrowableSupplier<T> _supplier, Future<ExecutionResult<T>> _blockingHandler, Vertx vertx, long _timeout) throws Throwable {
+    private static <T> void executeDefaultState(ThrowableSupplier<T> _supplier, Future<ExecutionResult<T>> _blockingHandler, VxmsShared vxmsShared, long _timeout) throws Throwable {
         T result;
         if (_timeout > DEFAULT_LONG_VALUE) {
-            result = executeWithTimeout(_supplier, vertx, _timeout);
+            result = executeWithTimeout(_supplier, vxmsShared, _timeout);
         } else {
             result = _supplier.get();
         }
         if (!_blockingHandler.isComplete()) _blockingHandler.complete(new ExecutionResult<>(result, true, false, null));
     }
 
-    private static <T> T executeWithTimeout(ThrowableSupplier<T> _supplier, Vertx vertx, long _timeout) throws Throwable {
+    private static <T> T executeWithTimeout(ThrowableSupplier<T> _supplier, VxmsShared vxmsShared, long _timeout) throws Throwable {
         T result;
         final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.executeBlocking((innerHandler) -> {
             try {
                 timeoutFuture.complete(_supplier.get());
@@ -476,7 +482,7 @@ public class ResponseBlockingExecution {
                                              Consumer<Throwable> errorHandler,
                                              ThrowableFunction<Throwable, T> onFailureRespond,
                                              Consumer<Throwable> errorMethodHandler,
-                                             Vertx vertx, int _retry,
+                                             VxmsShared vxmsShared, int _retry,
                                              long timeout, long delay) {
         T result = null;
         boolean errorHandling = false;
@@ -484,7 +490,7 @@ public class ResponseBlockingExecution {
             errorHandling = false;
             try {
                 if (timeout > DEFAULT_LONG_VALUE) {
-                    result = executeWithTimeout(_supplier, vertx, timeout);
+                    result = executeWithTimeout(_supplier, vxmsShared, timeout);
                     _retry = STOP_CONDITION;
                 } else {
                     result = _supplier.get();
@@ -546,13 +552,14 @@ public class ResponseBlockingExecution {
 
     private static <T, U> void executeLocked(LockedConsumer consumer,
                                              String _methodId,
-                                             Vertx vertx,
+                                             VxmsShared vxmsShared,
                                              Future<ExecutionResult<T>> _blockingHandler,
                                              Consumer<Throwable> _errorHandler,
                                              ThrowableFunction<Throwable, T> _onFailureRespond,
                                              Consumer<Throwable> _errorMethodHandler,
                                              Future<U> blockingCodeHandler) {
-        final SharedData sharedData = vertx.sharedData();
+        // TODO make cluster-aware
+        final LocalData sharedData = vxmsShared.getLocalData();
         sharedData.getLockWithTimeout(_methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
             final Lock lock = lockHandler.result();
             if (lockHandler.succeeded()) {

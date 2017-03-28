@@ -204,49 +204,64 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.rest.interfaces.basic;
+package org.jacpfx.common.concurrent;
 
-import io.vertx.core.Vertx;
-import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.VxmsShared;
-import org.jacpfx.common.throwable.ThrowableErrorConsumer;
-import org.jacpfx.common.encoder.Encoder;
+import io.vertx.core.*;
+import io.vertx.core.impl.Arguments;
+import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.shareddata.Counter;
+import io.vertx.core.shareddata.Lock;
+import io.vertx.core.shareddata.impl.AsynchronousCounter;
+import io.vertx.core.shareddata.impl.AsynchronousLock;
 
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * Created by Andy Moncsek on 21.03.16.
- * Typed functional interface called on event-bus response.
+ * Created by amo on 23.03.17.
+ * Local Data implementation to get lock and counters without involving cluster manager when running in clustered mode
  */
-@FunctionalInterface
-public interface ExecuteEventbusStringCall {
+public class LocalData {
+
+    private final ConcurrentMap<String, Counter> localCounters = new ConcurrentHashMap();
+    private final ConcurrentMap<String, AsynchronousLock> localLocks = new ConcurrentHashMap();
+    private final Vertx vertx;
+
+    public LocalData(Vertx vertx) {
+        this.vertx = vertx;
+    }
+
+
     /**
-     * Execute  chain when event-bus response handler is executed
+     * Get a local counter. The counter will be passed to the handler.
      *
-     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
-     * @param failure               the failure thrown while task execution or messaging
-     * @param errorMethodHandler    the error-method handler
-     * @param context               the vertx routing context
-     * @param headers               the headers to pass to the response
-     * @param encoder               the encoder to encode your objects
-     * @param errorHandler          the error handler
-     * @param onFailureRespond      the consumer that takes a Future with the alternate response value in case of failure
-     * @param httpStatusCode        the http status code to set for response
-     * @param httpErrorCode         the http error code to set in case of failure handling
-     * @param retryCount            the amount of retries before failure execution is triggered
-     * @param timeout               the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+     * @param name          the name of the counter.
+     * @param resultHandler the handler
      */
-    void execute(
-            VxmsShared vxmsShared,
-            Throwable failure,
-            Consumer<Throwable> errorMethodHandler,
-            RoutingContext context,
-            Map<String, String> headers,
-            Encoder encoder,
-            Consumer<Throwable> errorHandler,
-            ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-            int httpStatusCode, int httpErrorCode,
-            int retryCount, long timeout, long circuitBreakerTimeout);
+    public void getCounter(String name, Handler<AsyncResult<Counter>> resultHandler) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(resultHandler, "resultHandler");
+        Counter counter = this.localCounters.computeIfAbsent(name, (n) -> new AsynchronousCounter((VertxInternal) this.vertx));
+        Context context = this.vertx.getOrCreateContext();
+        context.runOnContext((v) -> resultHandler.handle(Future.succeededFuture(counter)));
+    }
+
+    /**
+     * Get a local lock with the specified name with specifying a timeout. The lock will be passed to the handler when it is available.  If the lock is not obtained within the timeout
+     * a failure will be sent to the handler
+     *
+     * @param name          the name of the lock
+     * @param timeout       the timeout in ms
+     * @param resultHandler the handler
+     */
+    public void getLockWithTimeout(String name, long timeout, Handler<AsyncResult<Lock>> resultHandler) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(resultHandler, "resultHandler");
+        Arguments.require(timeout >= 0L, "timeout must be >= 0");
+        AsynchronousLock lock = this.localLocks.computeIfAbsent(name, (n) -> new AsynchronousLock(this.vertx));
+        lock.acquire(timeout, resultHandler);
+
+    }
+
 }

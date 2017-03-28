@@ -211,6 +211,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
@@ -240,7 +241,7 @@ public class EventbusObjectExecutionBlockingUtil {
      * @param _message               the message to send
      * @param _objectFunction        the function to process the result message
      * @param _options               the event-bus delivery options
-     * @param _vertx                 the vertx instance
+     * @param _vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param _failure               the failure thrown while task execution
      * @param _errorMethodHandler    the error-method handler
      * @param _context               the vertx routing context
@@ -262,7 +263,7 @@ public class EventbusObjectExecutionBlockingUtil {
                                                               Object _message,
                                                               DeliveryOptions _options,
                                                               ThrowableFunction<AsyncResult<Message<Object>>, Serializable> _objectFunction,
-                                                              Vertx _vertx,
+                                                              VxmsShared _vxmsShared,
                                                               Throwable _failure,
                                                               Consumer<Throwable> _errorMethodHandler,
                                                               RoutingContext _context, Map<String, String> _headers,
@@ -282,7 +283,7 @@ public class EventbusObjectExecutionBlockingUtil {
                                              message,
                                              byteFunction,
                                              deliveryOptions,
-                                             vertx, t,
+                                             vxmsShared, failure,
                                              errorMethodHandler,
                                              context,
                                              headers,
@@ -297,7 +298,7 @@ public class EventbusObjectExecutionBlockingUtil {
                     targetId, message,
                     deliveryOptions,
                     byteFunction,
-                    vertx, t,
+                    vxmsShared, failure,
                     errorMethodHandler,
                     context, headers,
                     null,
@@ -313,8 +314,8 @@ public class EventbusObjectExecutionBlockingUtil {
         };
 
         final RecursiveBlockingExecutor executor = (methodId,
-                                                    vertx,
-                                                    t,
+                                                    vxmsShared,
+                                                    failure,
                                                     errorMethodHandler,
                                                     context,
                                                     headers,
@@ -325,7 +326,7 @@ public class EventbusObjectExecutionBlockingUtil {
                                                     httpStatusCode, httpErrorCode,
                                                     retryCount, timeout, delay, circuitBreakerTimeout) ->
                 new ExecuteRSObjectResponse(methodId,
-                        vertx, t,
+                        vxmsShared, failure,
                         errorMethodHandler,
                         context, headers,
                         supplier,
@@ -338,7 +339,7 @@ public class EventbusObjectExecutionBlockingUtil {
                         circuitBreakerTimeout).
                         execute();
 
-        final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply = (vertx, t,
+        final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply = (vxmsShared, failure,
                                                                             errorMethodHandler,
                                                                             context, headers,
                                                                             encoder, errorHandler,
@@ -350,7 +351,7 @@ public class EventbusObjectExecutionBlockingUtil {
                         _targetId, _message,
                         _objectFunction,
                         _deliveryOptions,
-                        vertx, t,
+                        vxmsShared, failure,
                         errorMethodHandler,
                         context, headers,
                         encoder, errorHandler,
@@ -361,7 +362,7 @@ public class EventbusObjectExecutionBlockingUtil {
                         timeout, delay,
                         circuitBreakerTimeout,
                         executor, retry);
-        return new ExecuteRSObjectResponse(_methodId, _vertx, _failure, _errorMethodHandler, _context, _headers, _objectSupplier, excecuteEventBusAndReply,
+        return new ExecuteRSObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler, _context, _headers, _objectSupplier, excecuteEventBusAndReply,
                 _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _delay, _circuitBreakerTimeout);
     }
 

@@ -213,9 +213,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ExecutionResult;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
-import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusStringCallBlocking;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicString;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
@@ -238,26 +239,26 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     /**
      * The constructor to pass all needed members
      *
-     * @param methodId                      the method identifier
-     * @param vertx                         the vertx instance
-     * @param failure                       the failure thrown while task execution
-     * @param errorMethodHandler            the error handler
-     * @param context                       the vertx routing context
-     * @param headers                       the headers to pass to the response
-     * @param stringSupplier                the supplier, producing the byte response
+     * @param methodId                         the method identifier
+     * @param vxmsShared                       the vxmsShared instance, containing the Vertx instance and other shared objects per instance
+     * @param failure                          the failure thrown while task execution
+     * @param errorMethodHandler               the error handler
+     * @param context                          the vertx routing context
+     * @param headers                          the headers to pass to the response
+     * @param stringSupplier                   the supplier, producing the byte response
      * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to the fluent API
-     * @param encoder                       the encoder to encode your objects
-     * @param errorHandler                  the error handler
-     * @param onFailureRespond              the consumer that takes a Future with the alternate response value in case of failure
-     * @param httpStatusCode                the http status code to set for response
-     * @param httpErrorCode                 the http error code to set in case of failure handling
-     * @param retryCount                    the amount of retries before failure execution is triggered
-     * @param timeout                       the amount of time before the execution will be aborted
-     * @param delay                         the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout         the amount of time before the circuit breaker closed again
+     * @param encoder                          the encoder to encode your objects
+     * @param errorHandler                     the error handler
+     * @param onFailureRespond                 the consumer that takes a Future with the alternate response value in case of failure
+     * @param httpStatusCode                   the http status code to set for response
+     * @param httpErrorCode                    the http error code to set in case of failure handling
+     * @param retryCount                       the amount of retries before failure execution is triggered
+     * @param timeout                          the amount of time before the execution will be aborted
+     * @param delay                            the delay time in ms between an execution error and the retry
+     * @param circuitBreakerTimeout            the amount of time before the circuit breaker closed again
      */
     public ExecuteRSString(String methodId,
-                           Vertx vertx,
+                           VxmsShared vxmsShared,
                            Throwable failure,
                            Consumer<Throwable> errorMethodHandler,
                            RoutingContext context,
@@ -274,7 +275,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
                            long delay,
                            long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -299,7 +300,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSString(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -323,7 +324,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         new ExecuteRSString(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -347,7 +348,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSString(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -370,7 +371,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx,
+                evFunction.execute(vxmsShared,
                         failure,
                         errorMethodHandler,
                         context,
@@ -392,14 +393,15 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         Optional.ofNullable(stringSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
-                            this.vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false, getAsyncResultHandler(retry));
+                            final Vertx vertx = vxmsShared.getVertx();
+                            vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false, getAsyncResultHandler(retry));
                         }
 
                 );
     }
 
     private void executeAsync(ThrowableSupplier<String> supplier, int retry, Future<ExecutionResult<String>> blockingHandler) {
-        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, failure, retry, timeout, circuitBreakerTimeout, delay);
+        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, blockingHandler, errorHandler, onFailureRespond, errorMethodHandler, vxmsShared, failure, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<ExecutionResult<String>>> getAsyncResultHandler(int retry) {

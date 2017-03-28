@@ -210,6 +210,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
@@ -227,7 +228,7 @@ import static java.util.Optional.ofNullable;
  */
 public class ExecuteRSBasicString {
     protected final String methodId;
-    protected final Vertx vertx;
+    protected final VxmsShared vxmsShared;
     protected final Throwable failure;
     protected final Consumer<Throwable> errorMethodHandler;
     protected final RoutingContext context;
@@ -247,7 +248,7 @@ public class ExecuteRSBasicString {
      * The constructor to pass all needed members
      *
      * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                  the failure thrown while task execution
      * @param errorMethodHandler       the error handler
      * @param context                  the vertx routing context
@@ -265,7 +266,7 @@ public class ExecuteRSBasicString {
      */
 
     public ExecuteRSBasicString(String methodId,
-                                Vertx vertx,
+                                VxmsShared vxmsShared,
                                 Throwable failure,
                                 Consumer<Throwable> errorMethodHandler,
                                 RoutingContext context,
@@ -281,7 +282,7 @@ public class ExecuteRSBasicString {
                                 long timeout,
                                 long circuitBreakerTimeout) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -307,7 +308,7 @@ public class ExecuteRSBasicString {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSBasicString(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -335,7 +336,7 @@ public class ExecuteRSBasicString {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicString(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -361,7 +362,7 @@ public class ExecuteRSBasicString {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicString(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -383,10 +384,11 @@ public class ExecuteRSBasicString {
      * Execute the reply chain
      */
     public void execute() {
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.runOnContext(action -> {
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx,
+                    evFunction.execute(vxmsShared,
                             failure,
                             errorMethodHandler,
                             context,
@@ -413,7 +415,7 @@ public class ExecuteRSBasicString {
                                         errorHandler,
                                         onFailureRespond,
                                         errorMethodHandler,
-                                        vertx,
+                                        vxmsShared,
                                         failure,
                                         value -> {
                                             if (value.succeeded()) {

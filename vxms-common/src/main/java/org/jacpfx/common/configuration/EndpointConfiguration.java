@@ -220,7 +220,7 @@ public interface EndpointConfiguration {
     /**
      * define a corse handler for your service
      *
-     * @param router
+     * @param router {@link Router}
      */
     default void corsHandler(Router router) {
 

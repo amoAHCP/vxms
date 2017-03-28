@@ -211,9 +211,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusByteCall;
 
 import java.util.Map;
@@ -228,7 +229,7 @@ import static java.util.Optional.ofNullable;
  */
 public class ExecuteRSBasicByte {
     protected final String methodId;
-    protected final Vertx vertx;
+    protected final VxmsShared vxmsShared;
     protected final Throwable failure;
     protected final RoutingContext context;
     protected final Map<String, String> headers;
@@ -248,7 +249,7 @@ public class ExecuteRSBasicByte {
      * The constructor to pass all needed members
      *
      * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
+     * @param vxmsShared               the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                  the failure thrown while task execution
      * @param errorMethodHandler       the error handler
      * @param context                  the vertx routing context
@@ -265,7 +266,7 @@ public class ExecuteRSBasicByte {
      * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
      */
     public ExecuteRSBasicByte(String methodId,
-                              Vertx vertx,
+                              VxmsShared vxmsShared,
                               Throwable failure,
                               Consumer<Throwable> errorMethodHandler,
                               RoutingContext context,
@@ -281,7 +282,7 @@ public class ExecuteRSBasicByte {
                               long timeout,
                               long circuitBreakerTimeout) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -306,7 +307,7 @@ public class ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSBasicByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -334,7 +335,7 @@ public class ExecuteRSBasicByte {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -360,7 +361,7 @@ public class ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSBasicByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -383,10 +384,11 @@ public class ExecuteRSBasicByte {
      * Execute the reply chain
      */
     public void execute() {
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.runOnContext(action -> {
             ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
                 try {
-                    evFunction.execute(vertx,
+                    evFunction.execute(vxmsShared,
                             failure,
                             errorMethodHandler,
                             context,
@@ -413,7 +415,7 @@ public class ExecuteRSBasicByte {
                                         errorHandler,
                                         onFailureRespond,
                                         errorMethodHandler,
-                                        vertx,
+                                        vxmsShared,
                                         failure,
                                         value -> {
                                             if (value.succeeded()) {

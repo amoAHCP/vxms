@@ -207,12 +207,12 @@
 package org.jacpfx.vertx.rest.interfaces.blocking;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.encoder.Encoder;
+import org.jacpfx.common.throwable.ThrowableFunction;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -233,7 +233,7 @@ public interface RetryBlockingExecutor<T> {
      * @param message               the event-bus message
      * @param function              the function to execute on message
      * @param deliveryOptions       the event-bus delivery options
-     * @param vertx                 the vertx instance
+     * @param vxmsShared            the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure               the failure thrown while task execution or messaging
      * @param errorMethodHandler    the error-method handler
      * @param context               the vertx routing context
@@ -253,7 +253,8 @@ public interface RetryBlockingExecutor<T> {
                  Object message,
                  ThrowableFunction<AsyncResult<Message<Object>>, T> function,
                  DeliveryOptions deliveryOptions,
-                 Vertx vertx, Throwable failure,
+                 VxmsShared vxmsShared,
+                 Throwable failure,
                  Consumer<Throwable> errorMethodHandler,
                  RoutingContext context,
                  Map<String, String> headers,

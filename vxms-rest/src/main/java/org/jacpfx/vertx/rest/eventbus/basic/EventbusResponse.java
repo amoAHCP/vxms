@@ -211,6 +211,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByteResponse;
@@ -229,7 +230,7 @@ import java.util.function.Consumer;
  */
 public class EventbusResponse {
     private final String methodId;
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
@@ -241,8 +242,8 @@ public class EventbusResponse {
      * Pass all parameters to execute the chain
      *
      * @param methodId           the method identifier
-     * @param vertx              the vertx instance
-     * @param failure            the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
+     * @param failure            the last exception
      * @param errorMethodHandler the error-method handler
      * @param context            the vertx routing context
      * @param targetId           the event-bus message target-targetId
@@ -250,7 +251,7 @@ public class EventbusResponse {
      * @param options            the event-bus delivery options
      */
     public EventbusResponse(String methodId,
-                            Vertx vertx,
+                            VxmsShared vxmsShared,
                             Throwable failure,
                             Consumer<Throwable> errorMethodHandler,
                             RoutingContext context,
@@ -258,7 +259,7 @@ public class EventbusResponse {
                             Object message,
                             DeliveryOptions options) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -280,7 +281,7 @@ public class EventbusResponse {
                 message,
                 stringFunction,
                 options,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context);
@@ -299,7 +300,7 @@ public class EventbusResponse {
                 message,
                 byteFunction,
                 options,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context);
@@ -319,20 +320,11 @@ public class EventbusResponse {
                 message,
                 objectFunction,
                 options,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
-                null,
-                null,
-                encoder,
-                null,
-                null,
-                0,
-                0,
-                0,
-                0l,
-                0l);
+                encoder);
     }
 
 

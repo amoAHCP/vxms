@@ -208,6 +208,7 @@ package org.jacpfx.vertx.rest.response.blocking;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
@@ -228,7 +229,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * The constructor to pass all needed members
      *
      * @param methodId                         the method identifier
-     * @param vertx                            the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                          the failure thrown while task execution
      * @param errorMethodHandler               the error handler
      * @param context                          the vertx routing context
@@ -246,7 +247,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      * @param circuitBreakerTimeout            the amount of time before the circuit breaker closed again
      */
     public ExecuteRSObjectResponse(String methodId,
-                                   Vertx vertx,
+                                   VxmsShared vxmsShared,
                                    Throwable failure,
                                    Consumer<Throwable> errorMethodHandler,
                                    RoutingContext context,
@@ -263,7 +264,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
                                    long delay,
                                    long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -291,7 +292,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      */
     public ExecuteRSObjectOnFailureCode onFailureRespond(ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {
         return new ExecuteRSObjectOnFailureCode(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -317,7 +318,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      */
     public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSObjectResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -343,7 +344,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      */
     public ExecuteRSObjectCircuitBreaker retry(int retryCount) {
         return new ExecuteRSObjectCircuitBreaker(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -369,7 +370,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      */
     public ExecuteRSObjectResponse timeout(long timeout) {
         return new ExecuteRSObjectResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -395,7 +396,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
      */
     public ExecuteRSObjectResponse delay(long delay) {
         return new ExecuteRSObjectResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -424,7 +425,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
         return new ExecuteRSObjectResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

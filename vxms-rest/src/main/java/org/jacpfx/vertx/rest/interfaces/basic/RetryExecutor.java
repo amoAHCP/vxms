@@ -211,6 +211,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.encoder.Encoder;
@@ -232,7 +233,7 @@ public interface RetryExecutor<T> {
      * @param message               the event-bus message
      * @param function              the function to execute on message
      * @param deliveryOptions       the event-bus delivery options
-     * @param vertx                 the vertx instance
+     * @param vxmsShared            the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure               the failure thrown while task execution or messaging
      * @param errorMethodHandler    the error-method handler
      * @param context               the vertx routing context
@@ -251,7 +252,7 @@ public interface RetryExecutor<T> {
                  Object message,
                  ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                  DeliveryOptions deliveryOptions,
-                 Vertx vertx,
+                 VxmsShared vxmsShared,
                  Throwable failure,
                  Consumer<Throwable> errorMethodHandler,
                  RoutingContext context,

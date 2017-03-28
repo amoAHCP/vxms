@@ -208,6 +208,7 @@ package org.jacpfx.vertx.rest.interfaces.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.encoder.Encoder;
 
@@ -224,7 +225,7 @@ public interface ExecuteEventbusObjectCall {
     /**
      * Execute  chain when event-bus response handler is executed
      *
-     * @param vertx                 the vertx instance
+     * @param vxmsShared            the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure               the failure thrown while task execution or messaging
      * @param errorMethodHandler    the error-method handler
      * @param context               the vertx routing context
@@ -238,7 +239,7 @@ public interface ExecuteEventbusObjectCall {
      * @param timeout               the delay time in ms between an execution error and the retry
      * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
      */
-    void execute(Vertx vertx,
+    void execute(VxmsShared vxmsShared,
                  Throwable failure,
                  Consumer<Throwable> errorMethodHandler,
                  RoutingContext context,

@@ -209,6 +209,7 @@ package org.jacpfx.vertx.rest.response.blocking;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.common.encoder.Encoder;
@@ -227,7 +228,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
      * The constructor to pass all needed members
      *
      * @param methodId                         the method identifier
-     * @param vertx                            the vertx instance
+     * @param vxmsShared                       the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                          the failure thrown while task execution
      * @param errorMethodHandler               the error handler
      * @param context                          the vertx routing context
@@ -245,7 +246,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
      * @param circuitBreakerTimeout            the amount of time before the circuit breaker closed again
      */
     public ExecuteRSByteOnFailureCode(String methodId,
-                                      Vertx vertx,
+                                      VxmsShared vxmsShared,
                                       Throwable failure,
                                       Consumer<Throwable> errorMethodHandler,
                                       RoutingContext context,
@@ -261,7 +262,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
                                       long delay,
                                       long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -287,7 +288,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
      */
     public ExecuteRSByte httpErrorCode(HttpResponseStatus httpErrorCode) {
         return new ExecuteRSByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,

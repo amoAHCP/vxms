@@ -208,6 +208,7 @@ package org.jacpfx.vertx.rest.response.basic;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.common.encoder.Encoder;
@@ -227,7 +228,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      * The constructor to pass all needed members
      *
      * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
+     * @param vxmsShared               the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                  the failure thrown while task execution
      * @param errorMethodHandler       the error handler
      * @param context                  the vertx routing context
@@ -244,7 +245,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
      */
     public ExecuteRSBasicByteResponse(String methodId,
-                                      Vertx vertx,
+                                      VxmsShared vxmsShared,
                                       Throwable failure,
                                       Consumer<Throwable> errorMethodHandler,
                                       RoutingContext context,
@@ -258,7 +259,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
                                       int retryCount, long timeout,
                                       long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context, headers,
@@ -280,7 +281,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      */
     public ExecuteRSBasicByteOnFailureCode onFailureRespond(ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond) {
         return new ExecuteRSBasicByteOnFailureCode(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -304,7 +305,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      */
     public ExecuteRSBasicByteResponse onError(Consumer<Throwable> errorHandler) {
         return new ExecuteRSBasicByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -328,7 +329,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
 
     public ExecuteRSBasicByteResponse timeout(long timeout) {
         return new ExecuteRSBasicByteResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -352,7 +353,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
      */
     public ExecuteRSBasicByteCircuitBreaker retry(int retryCount) {
         return new ExecuteRSBasicByteCircuitBreaker(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context, headers,
@@ -377,7 +378,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         Map<String, String> headerMap = new HashMap<>(headers);
         headerMap.put(key, value);
         return new ExecuteRSBasicByteResponse(methodId,
-                vertx, failure,
+                vxmsShared, failure,
                 errorMethodHandler,
                 context,
                 headerMap,

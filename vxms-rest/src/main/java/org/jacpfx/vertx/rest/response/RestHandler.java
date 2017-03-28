@@ -206,8 +206,8 @@
 
 package org.jacpfx.vertx.rest.response;
 
-import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.vertx.rest.eventbus.basic.EventbusRequest;
 
 import java.util.HashMap;
@@ -218,7 +218,7 @@ import java.util.function.Consumer;
  * The RestHandler gives access to the {@link RoutingContext} , the {@link RESTRequest} , the {@link RESTResponse} and the {@link EventbusRequest}. It is the Entry point to the fluent API to perform tasks and create responses.
  */
 public class RestHandler {
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
@@ -229,14 +229,14 @@ public class RestHandler {
      *
      * @param methodId           the method identifier
      * @param context            the vertx routing context
-     * @param vertx              the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure            the failure thrown while task execution or messaging
      * @param errorMethodHandler the error-method handler
      */
-    public RestHandler(String methodId, RoutingContext context, Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler) {
+    public RestHandler(String methodId, RoutingContext context, VxmsShared vxmsShared, Throwable failure, Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
         this.context = context;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
     }
@@ -266,7 +266,7 @@ public class RestHandler {
      * @return {@link RESTResponse}
      */
     public RESTResponse response() {
-        return new RESTResponse(methodId, vertx, failure, errorMethodHandler, context, new HashMap<>());
+        return new RESTResponse(methodId, vxmsShared, failure, errorMethodHandler, context, new HashMap<>());
     }
 
     /**
@@ -275,7 +275,7 @@ public class RestHandler {
      * @return {@link EventbusRequest}
      */
     public EventbusRequest eventBusRequest() {
-        return new EventbusRequest(methodId, vertx, failure, errorMethodHandler, context);
+        return new EventbusRequest(methodId, vxmsShared, failure, errorMethodHandler, context);
     }
 
 }

@@ -204,49 +204,39 @@
  *    limitations under the License.
  */
 
-package org.jacpfx.vertx.rest.interfaces.basic;
+package org.jacpfx.common;
 
 import io.vertx.core.Vertx;
-import io.vertx.ext.web.RoutingContext;
-import org.jacpfx.common.VxmsShared;
-import org.jacpfx.common.throwable.ThrowableErrorConsumer;
-import org.jacpfx.common.encoder.Encoder;
-
-import java.util.Map;
-import java.util.function.Consumer;
+import org.jacpfx.common.concurrent.LocalData;
 
 /**
- * Created by Andy Moncsek on 21.03.16.
- * Typed functional interface called on event-bus response.
+ * Created by amo on 23.03.17.
+ * Thjis class contains shared structures needed in all modules
  */
-@FunctionalInterface
-public interface ExecuteEventbusStringCall {
+public class VxmsShared {
+
+    private final Vertx vertx;
+
+    private final LocalData localData;
+
+    public VxmsShared(Vertx vertx, LocalData localData) {
+        this.vertx = vertx;
+        this.localData = localData;
+    }
+
     /**
-     * Execute  chain when event-bus response handler is executed
-     *
-     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
-     * @param failure               the failure thrown while task execution or messaging
-     * @param errorMethodHandler    the error-method handler
-     * @param context               the vertx routing context
-     * @param headers               the headers to pass to the response
-     * @param encoder               the encoder to encode your objects
-     * @param errorHandler          the error handler
-     * @param onFailureRespond      the consumer that takes a Future with the alternate response value in case of failure
-     * @param httpStatusCode        the http status code to set for response
-     * @param httpErrorCode         the http error code to set in case of failure handling
-     * @param retryCount            the amount of retries before failure execution is triggered
-     * @param timeout               the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+     * Returns the Vert.x instance
+     * @return the {@link Vertx} instance
      */
-    void execute(
-            VxmsShared vxmsShared,
-            Throwable failure,
-            Consumer<Throwable> errorMethodHandler,
-            RoutingContext context,
-            Map<String, String> headers,
-            Encoder encoder,
-            Consumer<Throwable> errorHandler,
-            ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-            int httpStatusCode, int httpErrorCode,
-            int retryCount, long timeout, long circuitBreakerTimeout);
+    public Vertx getVertx() {
+        return vertx;
+    }
+
+    /**
+     * Returns the local data instance
+     * @return the {@link LocalData} instance
+     */
+    public LocalData getLocalData() {
+        return localData;
+    }
 }

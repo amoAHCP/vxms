@@ -207,14 +207,14 @@
 package org.jacpfx.vertx.rest.util;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.eventbus.basic.EventbusExecution;
 import org.jacpfx.vertx.rest.interfaces.basic.ExecuteEventbusObjectCall;
 import org.jacpfx.vertx.rest.interfaces.basic.RecursiveExecutor;
@@ -231,6 +231,37 @@ import java.util.function.Consumer;
  * Typed execution of event-bus calls and string response
  */
 public class EventbusObjectExecutionUtil {
+
+    /**
+     * create execution chain for event-bus request and reply to rest
+     *
+     * @param _methodId           the method identifier
+     * @param _targetId           the event-bus target id
+     * @param _message            the message to send
+     * @param _objectFunction     the function to process the result message
+     * @param _options            the event-bus delivery options
+     * @param _vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
+     * @param _failure            the failure thrown while task execution
+     * @param _errorMethodHandler the error-method handler
+     * @param _context            the vertx routing context
+     * @param _encoder            the encoder to encode your objects
+     * @return the execution chain {@link ExecuteRSBasicObjectResponse}
+     */
+    public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,
+                                                                   String _targetId,
+                                                                   Object _message,
+                                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
+                                                                   DeliveryOptions _options,
+                                                                   VxmsShared _vxmsShared, Throwable _failure,
+                                                                   Consumer<Throwable> _errorMethodHandler,
+                                                                   RoutingContext _context,
+                                                                   Encoder _encoder
+    ) {
+
+        return mapToObjectResponse(_methodId, _targetId, _message, _objectFunction, _options, _vxmsShared, _failure, _errorMethodHandler, _context, null, null, _encoder, null, null, 0, 0, 0, 0, 0);
+
+    }
+
     /**
      * create execution chain for event-bus request and reply to rest
      *
@@ -239,7 +270,7 @@ public class EventbusObjectExecutionUtil {
      * @param _message               the message to send
      * @param _objectFunction        the function to process the result message
      * @param _options               the event-bus delivery options
-     * @param _vertx                 the vertx instance
+     * @param _vxmsShared            the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param _failure               the failure thrown while task execution
      * @param _errorMethodHandler    the error-method handler
      * @param _context               the vertx routing context
@@ -260,7 +291,7 @@ public class EventbusObjectExecutionUtil {
                                                                    Object _message,
                                                                    ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
                                                                    DeliveryOptions _options,
-                                                                   Vertx _vertx, Throwable _failure,
+                                                                   VxmsShared _vxmsShared, Throwable _failure,
                                                                    Consumer<Throwable> _errorMethodHandler,
                                                                    RoutingContext _context,
                                                                    Map<String, String> _headers,
@@ -282,7 +313,7 @@ public class EventbusObjectExecutionUtil {
                                      message,
                                      stringFunction,
                                      deliveryOptions,
-                                     vertx, t,
+                                     vxmsShared, t,
                                      errorMethodHandler,
                                      context,
                                      headers,
@@ -297,7 +328,7 @@ public class EventbusObjectExecutionUtil {
                     id, message,
                     stringFunction,
                     deliveryOptions,
-                    vertx, t,
+                    vxmsShared, t,
                     errorMethodHandler,
                     context, headers,
                     null,
@@ -312,7 +343,7 @@ public class EventbusObjectExecutionUtil {
                     execute();
         };
         final RecursiveExecutor executor = (methodId,
-                                            vertx,
+                                            vxmsShared,
                                             t,
                                             errorMethodHandler,
                                             context,
@@ -325,7 +356,7 @@ public class EventbusObjectExecutionUtil {
                                             httpStatusCode, httpErrorCode,
                                             retryCount, timeout, circuitBreakerTimeout) ->
                 new ExecuteRSBasicObjectResponse(methodId,
-                        vertx, t,
+                        vxmsShared, t,
                         errorMethodHandler,
                         context, headers,
                         stringConsumer,
@@ -338,7 +369,7 @@ public class EventbusObjectExecutionUtil {
                         circuitBreakerTimeout).
                         execute();
 
-        final ExecuteEventbusObjectCall excecuteEventBusAndReply = (vertx, t,
+        final ExecuteEventbusObjectCall excecuteEventBusAndReply = (vxmsShared, t,
                                                                     errorMethodHandler,
                                                                     context, headers,
                                                                     encoder, errorHandler,
@@ -350,7 +381,7 @@ public class EventbusObjectExecutionUtil {
                         _message,
                         _objectFunction,
                         _deliveryOptions,
-                        vertx,
+                        vxmsShared,
                         t, errorMethodHandler,
                         context, headers,
                         encoder, errorHandler,
@@ -361,7 +392,7 @@ public class EventbusObjectExecutionUtil {
                         timeout,
                         circuitBreakerTimeout, executor, retry);
 
-        return new ExecuteRSBasicObjectResponse(_methodId, _vertx, _failure, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _circuitBreakerTimeout);
+        return new ExecuteRSBasicObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler, _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout, _circuitBreakerTimeout);
     }
 
 

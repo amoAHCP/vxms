@@ -214,6 +214,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.vertx.rest.eventbus.blocking.EventbusBlockingRequest;
 
 import java.util.Optional;
@@ -225,7 +226,7 @@ import java.util.function.Consumer;
  */
 public class EventbusRequest {
     private final String methodId;
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final RoutingContext context;
@@ -234,17 +235,17 @@ public class EventbusRequest {
      * Pass all members to execute the chain
      *
      * @param methodId           the method identifier
-     * @param vertx              the vertx instance
+     * @param vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure            the vertx instance
      * @param errorMethodHandler the error-method handler
      * @param context            the vertx routing context
      */
     public EventbusRequest(String methodId,
-                           Vertx vertx,
+                           VxmsShared vxmsShared,
                            Throwable failure,
                            Consumer<Throwable> errorMethodHandler,
                            RoutingContext context) {
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.context = context;
@@ -260,7 +261,7 @@ public class EventbusRequest {
      */
     public EventbusResponse send(String targetId, Object message) {
         return new EventbusResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -277,7 +278,7 @@ public class EventbusRequest {
      */
     public EventbusResponse send(String targetId, Object message, DeliveryOptions options) {
         return new EventbusResponse(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -304,6 +305,7 @@ public class EventbusRequest {
      * @param options  the event-bus delivery options
      */
     public void sendAndRespondRequest(String targetId, Object message, DeliveryOptions options) {
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.eventBus().send(targetId, message, options != null ? options : new DeliveryOptions(), event -> {
             final HttpServerResponse response = context.response();
             if (event.failed()) {
@@ -331,6 +333,6 @@ public class EventbusRequest {
      * @return the blocking chain {@link EventbusBlockingRequest}
      */
     public EventbusBlockingRequest blocking() {
-        return new EventbusBlockingRequest(methodId, vertx, failure, errorMethodHandler, context);
+        return new EventbusBlockingRequest(methodId, vxmsShared, failure, errorMethodHandler, context);
     }
 }

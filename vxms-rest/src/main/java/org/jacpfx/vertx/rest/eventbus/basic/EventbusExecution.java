@@ -216,6 +216,8 @@ import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.concurrent.LocalData;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
@@ -246,7 +248,7 @@ public class EventbusExecution {
      * @param message               the message to send
      * @param function              the function to process the result message
      * @param deliveryOptions       the event-bus delivery options
-     * @param vertx                 the vertx instance
+     * @param vxmsShared            the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure               the failure thrown while task execution
      * @param errorMethodHandler    the error-method handler
      * @param context               the vertx routing context
@@ -268,7 +270,7 @@ public class EventbusExecution {
                                                        Object message,
                                                        ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                                                        DeliveryOptions deliveryOptions,
-                                                       Vertx vertx,
+                                                       VxmsShared vxmsShared,
                                                        Throwable failure,
                                                        Consumer<Throwable> errorMethodHandler,
                                                        RoutingContext context,
@@ -285,7 +287,7 @@ public class EventbusExecution {
                     targetId, message,
                     function,
                     deliveryOptions,
-                    vertx, failure,
+                    vxmsShared, failure,
                     errorMethodHandler,
                     context, headers,
                     encoder, errorHandler,
@@ -300,7 +302,7 @@ public class EventbusExecution {
                     targetId, message,
                     function,
                     deliveryOptions,
-                    vertx, failure,
+                    vxmsShared, failure,
                     errorMethodHandler,
                     context,
                     headers,
@@ -320,7 +322,7 @@ public class EventbusExecution {
                                             String id, Object message,
                                             ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                                             DeliveryOptions deliveryOptions,
-                                            Vertx vertx, Throwable t,
+                                            VxmsShared vxmsShared, Throwable t,
                                             Consumer<Throwable> errorMethodHandler,
                                             RoutingContext context,
                                             Map<String, String> headers,
@@ -341,7 +343,7 @@ public class EventbusExecution {
                                 id, message,
                                 function,
                                 deliveryOptions,
-                                vertx, t,
+                                vxmsShared, t,
                                 errorMethodHandler,
                                 context, headers,
                                 encoder, errorHandler,
@@ -357,7 +359,7 @@ public class EventbusExecution {
                                 id, message,
                                 function,
                                 deliveryOptions,
-                                vertx, t,
+                                vxmsShared, t,
                                 errorMethodHandler,
                                 context, headers,
                                 encoder, errorHandler,
@@ -370,7 +372,7 @@ public class EventbusExecution {
                                 executor, retry, lock);
                     } else {
                         executeErrorState(methodId,
-                                vertx,
+                                vxmsShared,
                                 errorMethodHandler,
                                 context,
                                 headers,
@@ -384,7 +386,7 @@ public class EventbusExecution {
                                 circuitBreakerTimeout,
                                 executor, lock);
                     }
-                })), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, executor);
+                })), methodId, vxmsShared, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, executor);
     }
 
     private static <T> void executeInitialState(String methodId,
@@ -392,7 +394,7 @@ public class EventbusExecution {
                                                 Object message,
                                                 ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                 DeliveryOptions deliveryOptions,
-                                                Vertx vertx, Throwable t,
+                                                VxmsShared vxmsShared, Throwable t,
                                                 Consumer<Throwable> errorMethodHandler,
                                                 RoutingContext context,
                                                 Map<String, String> headers,
@@ -410,7 +412,7 @@ public class EventbusExecution {
                         id, message,
                         stringFunction,
                         deliveryOptions,
-                        vertx, t,
+                        vxmsShared, t,
                         errorMethodHandler,
                         context,
                         headers,
@@ -428,7 +430,7 @@ public class EventbusExecution {
                                                 String id, Object message,
                                                 ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                 DeliveryOptions deliveryOptions,
-                                                Vertx vertx, Throwable t,
+                                                VxmsShared vxmsShared, Throwable t,
                                                 Consumer<Throwable> errorMethodHandler,
                                                 RoutingContext context,
                                                 Map<String, String> headers,
@@ -442,6 +444,7 @@ public class EventbusExecution {
                                                 RetryExecutor retry,
                                                 Lock lock) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.
                 eventBus().
                 send(id, message, deliveryOptions,
@@ -450,7 +453,7 @@ public class EventbusExecution {
                                         id, message,
                                         stringFunction,
                                         deliveryOptions,
-                                        vertx, t,
+                                        vxmsShared, t,
                                         errorMethodHandler,
                                         context,
                                         headers,
@@ -465,7 +468,7 @@ public class EventbusExecution {
     }
 
     private static <T> void executeErrorState(String methodId,
-                                              Vertx vertx,
+                                              VxmsShared vxmsShared,
                                               Consumer<Throwable> errorMethodHandler,
                                               RoutingContext context,
                                               Map<String, String> headers,
@@ -479,7 +482,7 @@ public class EventbusExecution {
                                               Lock lock) {
         final Throwable cause = Future.failedFuture("circuit open").cause();
         handleError(methodId,
-                vertx,
+                vxmsShared,
                 errorMethodHandler,
                 context,
                 headers,
@@ -496,7 +499,7 @@ public class EventbusExecution {
                                                            String id, Object message,
                                                            ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                            DeliveryOptions deliveryOptions,
-                                                           Vertx vertx, Throwable t,
+                                                           VxmsShared vxmsShared, Throwable t,
                                                            Consumer<Throwable> errorMethodHandler,
                                                            RoutingContext context,
                                                            Map<String, String> headers,
@@ -516,7 +519,7 @@ public class EventbusExecution {
                     message,
                     stringFunction,
                     deliveryOptions,
-                    vertx, t,
+                    vxmsShared, t,
                     errorMethodHandler,
                     context, headers,
                     encoder, errorHandler,
@@ -532,7 +535,7 @@ public class EventbusExecution {
                     id, message,
                     stringFunction,
                     deliveryOptions,
-                    vertx, t,
+                    vxmsShared, t,
                     errorMethodHandler,
                     context, headers,
                     encoder, errorHandler,
@@ -550,7 +553,7 @@ public class EventbusExecution {
                                                String id, Object message,
                                                ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                DeliveryOptions options,
-                                               Vertx vertx, Throwable t,
+                                               VxmsShared vxmsShared, Throwable t,
                                                Consumer<Throwable> errorMethodHandler,
                                                RoutingContext context, Map<String, String> headers,
                                                Encoder encoder, Consumer<Throwable> errorHandler,
@@ -562,7 +565,7 @@ public class EventbusExecution {
                                                AsyncResult<Message<Object>> event, ThrowableFutureConsumer<T> stringSupplier) {
         if (event.succeeded() || (event.failed() && retryCount <= 0)) {
             executor.execute(methodId,
-                    vertx, t,
+                    vxmsShared, t,
                     errorMethodHandler,
                     context, headers,
                     stringSupplier,
@@ -579,7 +582,7 @@ public class EventbusExecution {
             retryOperation(methodId,
                     id, message,
                     stringFunction,
-                    options, vertx,
+                    options, vxmsShared,
                     cause,
                     errorMethodHandler,
                     context, headers,
@@ -597,7 +600,7 @@ public class EventbusExecution {
                                               String id, Object message,
                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                               DeliveryOptions deliveryOptions,
-                                              Vertx vertx, Throwable t,
+                                              VxmsShared vxmsShared, Throwable t,
                                               Consumer<Throwable> errorMethodHandler,
                                               RoutingContext context,
                                               Map<String, String> headers,
@@ -612,7 +615,7 @@ public class EventbusExecution {
                                               ThrowableFutureConsumer<T> stringSupplier) {
         if (event.succeeded()) {
             executor.execute(methodId,
-                    vertx, t,
+                    vxmsShared, t,
                     errorMethodHandler,
                     context, headers,
                     stringSupplier,
@@ -629,7 +632,7 @@ public class EventbusExecution {
                     message,
                     stringFunction,
                     deliveryOptions,
-                    vertx,
+                    vxmsShared,
                     errorMethodHandler,
                     context,
                     headers,
@@ -648,7 +651,7 @@ public class EventbusExecution {
                                                   String id, Object message,
                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> stringFunction,
                                                   DeliveryOptions deliveryOptions,
-                                                  Vertx vertx, Consumer<Throwable> errorMethodHandler,
+                                                  VxmsShared vxmsShared, Consumer<Throwable> errorMethodHandler,
                                                   RoutingContext context, Map<String, String> headers,
                                                   Encoder encoder, Consumer<Throwable> errorHandler,
                                                   ThrowableErrorConsumer<Throwable, T> onFailureRespond,
@@ -665,7 +668,7 @@ public class EventbusExecution {
                         long count = valHandler.result();
                         if (count <= DEFAULT_VALUE) {
                             openCircuitAndHandleError(methodId,
-                                    vertx,
+                                    vxmsShared,
                                     errorMethodHandler,
                                     context, headers,
                                     encoder, errorHandler,
@@ -683,7 +686,7 @@ public class EventbusExecution {
                                     message,
                                     stringFunction,
                                     deliveryOptions,
-                                    vertx,
+                                    vxmsShared,
                                     event.cause(),
                                     errorMethodHandler,
                                     context, headers,
@@ -696,7 +699,7 @@ public class EventbusExecution {
                     } else {
                         final Throwable cause = valHandler.cause();
                         handleError(methodId,
-                                vertx,
+                                vxmsShared,
                                 errorMethodHandler,
                                 context, headers,
                                 encoder,
@@ -708,7 +711,7 @@ public class EventbusExecution {
                                 circuitBreakerTimeout,
                                 executor, lock, cause);
                     }
-                }), methodId, vertx, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, executor);
+                }), methodId, vxmsShared, errorHandler, onFailureRespond, errorMethodHandler, context, headers, encoder, httpStatusCode, httpErrorCode, retryCount, timeout, circuitBreakerTimeout, executor);
 
 
     }
@@ -720,7 +723,7 @@ public class EventbusExecution {
 
     private static <T> void executeLocked(LockedConsumer consumer,
                                           String _methodId,
-                                          Vertx vertx,
+                                          VxmsShared vxmsShared,
                                           Consumer<Throwable> errorHandler,
                                           ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                           Consumer<Throwable> errorMethodHandler,
@@ -730,7 +733,8 @@ public class EventbusExecution {
                                           int httpStatusCode, int httpErrorCode,
                                           int retryCount, long timeout,
                                           long circuitBreakerTimeout, RecursiveExecutor executor) {
-        final SharedData sharedData = vertx.sharedData();
+        // TODO check if cluster-wide locks should be used
+        final LocalData sharedData = vxmsShared.getLocalData();
         sharedData.getLockWithTimeout(_methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
             if (lockHandler.succeeded()) {
                 final Lock lock = lockHandler.result();
@@ -740,7 +744,7 @@ public class EventbusExecution {
                     } else {
                         final Throwable cause = resultHandler.cause();
                         handleError(_methodId,
-                                vertx,
+                                vxmsShared,
                                 errorMethodHandler,
                                 context,
                                 headers,
@@ -758,7 +762,7 @@ public class EventbusExecution {
             } else {
                 final Throwable cause = lockHandler.cause();
                 handleError(_methodId,
-                        vertx,
+                        vxmsShared,
                         errorMethodHandler,
                         context, headers,
                         encoder, errorHandler,
@@ -775,7 +779,7 @@ public class EventbusExecution {
     }
 
     private static <T> void openCircuitAndHandleError(String methodId,
-                                                      Vertx vertx,
+                                                      VxmsShared vxmsShared,
                                                       Consumer<Throwable> errorMethodHandler,
                                                       RoutingContext context, Map<String, String> headers,
                                                       Encoder encoder, Consumer<Throwable> errorHandler,
@@ -784,12 +788,13 @@ public class EventbusExecution {
                                                       int retryCount, long timeout,
                                                       long circuitBreakerTimeout, RecursiveExecutor executor,
                                                       AsyncResult<Message<Object>> event, Lock lock, Counter counter) {
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.setTimer(circuitBreakerTimeout, timer -> counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), val -> {
         }));
         counter.addAndGet(LOCK_VALUE, val -> {
             final Throwable cause = event.cause();
             handleError(methodId,
-                    vertx,
+                    vxmsShared,
                     errorMethodHandler,
                     context, headers,
                     encoder, errorHandler,
@@ -803,7 +808,7 @@ public class EventbusExecution {
     }
 
     private static <T> void handleError(String methodId,
-                                        Vertx vertx,
+                                        VxmsShared vxmsShared,
                                         Consumer<Throwable> errorMethodHandler,
                                         RoutingContext context, Map<String, String> headers,
                                         Encoder encoder,
@@ -816,7 +821,7 @@ public class EventbusExecution {
         Optional.ofNullable(lock).ifPresent(Lock::release);
         final ThrowableFutureConsumer<T> failConsumer = (future) -> future.fail(cause);
         executor.execute(methodId,
-                vertx, cause,
+                vxmsShared, cause,
                 errorMethodHandler,
                 context, headers,
                 failConsumer,
@@ -835,7 +840,7 @@ public class EventbusExecution {
                                            Object message,
                                            ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                                            DeliveryOptions deliveryOptions,
-                                           Vertx vertx, Throwable t,
+                                           VxmsShared vxmsShared, Throwable t,
                                            Consumer<Throwable> errorMethodHandler,
                                            RoutingContext context,
                                            Map<String, String> headers,
@@ -850,7 +855,7 @@ public class EventbusExecution {
                 id, message,
                 function,
                 deliveryOptions,
-                vertx, t,
+                vxmsShared, t,
                 errorMethodHandler,
                 context, headers,
                 encoder,

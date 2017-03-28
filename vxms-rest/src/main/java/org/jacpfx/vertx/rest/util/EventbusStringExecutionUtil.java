@@ -211,6 +211,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.RoutingContext;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
@@ -240,7 +241,7 @@ public class EventbusStringExecutionUtil {
      * @param _message            the message to send
      * @param _stringFunction     the function to process the result message
      * @param _options            the event-bus delivery options
-     * @param _vertx              the vertx instance
+     * @param _vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param _failure            the failure thrown while task execution
      * @param _errorMethodHandler the error handler
      * @param _context            the vertx routing context
@@ -251,7 +252,7 @@ public class EventbusStringExecutionUtil {
                                                                    Object _message,
                                                                    ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
                                                                    DeliveryOptions _options,
-                                                                   Vertx _vertx,
+                                                                   VxmsShared _vxmsShared,
                                                                    Throwable _failure,
                                                                    Consumer<Throwable> _errorMethodHandler,
                                                                    RoutingContext _context) {
@@ -260,7 +261,7 @@ public class EventbusStringExecutionUtil {
                 _message,
                 _stringFunction,
                 _options,
-                _vertx,
+                _vxmsShared,
                 _failure,
                 _errorMethodHandler,
                 _context,
@@ -285,7 +286,7 @@ public class EventbusStringExecutionUtil {
      * @param _message               the message to send
      * @param _stringFunction        the function to process the result message
      * @param _options               the event-bus delivery options
-     * @param _vertx                 the vertx instance
+     * @param _vxmsShared         the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param _failure               the failure thrown while task execution
      * @param _errorMethodHandler    the error-method handler
      * @param _context               the vertx routing context
@@ -306,7 +307,7 @@ public class EventbusStringExecutionUtil {
                                                                    Object _message,
                                                                    ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
                                                                    DeliveryOptions _options,
-                                                                   Vertx _vertx,
+                                                                   VxmsShared _vxmsShared,
                                                                    Throwable _failure,
                                                                    Consumer<Throwable> _errorMethodHandler,
                                                                    RoutingContext _context,
@@ -327,7 +328,7 @@ public class EventbusStringExecutionUtil {
                                      message,
                                      stringFunction,
                                      deliveryOptions,
-                                     vertx, t,
+                                     vxmsShared, t,
                                      errorMethodHandler,
                                      context,
                                      headers,
@@ -342,7 +343,7 @@ public class EventbusStringExecutionUtil {
                     id, message,
                     stringFunction,
                     deliveryOptions,
-                    vertx, t,
+                    vxmsShared, t,
                     errorMethodHandler,
                     context, headers,
                     null,
@@ -357,7 +358,7 @@ public class EventbusStringExecutionUtil {
                     execute();
         };
         final RecursiveExecutor executor = (methodId,
-                                            vertx,
+                                            vxmsShared,
                                             t,
                                             errorMethodHandler,
                                             context,
@@ -370,7 +371,7 @@ public class EventbusStringExecutionUtil {
                                             httpStatusCode, httpErrorCode,
                                             retryCount, timeout, circuitBreakerTimeout) ->
                 new ExecuteRSBasicStringResponse(methodId,
-                        vertx, t,
+                        vxmsShared, t,
                         errorMethodHandler,
                         context, headers,
                         stringConsumer,
@@ -383,7 +384,7 @@ public class EventbusStringExecutionUtil {
                         circuitBreakerTimeout).
                         execute();
 
-        final ExecuteEventbusStringCall excecuteEventBusAndReply = (vertx, t,
+        final ExecuteEventbusStringCall excecuteEventBusAndReply = (vxmsShared, t,
                                                                     errorMethodHandler,
                                                                     context, headers,
                                                                     encoder, errorHandler,
@@ -395,7 +396,7 @@ public class EventbusStringExecutionUtil {
                         _message,
                         _stringFunction,
                         _deliveryOptions,
-                        vertx,
+                        vxmsShared,
                         t, errorMethodHandler,
                         context, headers,
                         encoder, errorHandler,
@@ -407,7 +408,7 @@ public class EventbusStringExecutionUtil {
                         circuitBreakerTimeout, executor, retry);
 
         return new ExecuteRSBasicStringResponse(_methodId,
-                _vertx, _failure,
+                _vxmsShared, _failure,
                 _errorMethodHandler,
                 _context, _headers,
                 _stringConsumer,

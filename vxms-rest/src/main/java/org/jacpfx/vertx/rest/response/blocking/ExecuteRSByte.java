@@ -213,9 +213,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.common.ExecutionResult;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
-import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.vertx.rest.interfaces.blocking.ExecuteEventbusByteCallBlocking;
 import org.jacpfx.vertx.rest.response.basic.ExecuteRSBasicByte;
 import org.jacpfx.vertx.rest.response.basic.ResponseExecution;
@@ -239,7 +240,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
      * The constructor to pass all needed members
      *
      * @param methodId                      the method identifier
-     * @param vertx                         the vertx instance
+     * @param vxmsShared                    the vxmsShared instance, containing the Vertx instance and other shared objects per instance
      * @param failure                       the failure thrown while task execution
      * @param errorMethodHandler            the error handler
      * @param context                       the vertx routing context
@@ -257,7 +258,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
      * @param circuitBreakerTimeout         the amount of time before the circuit breaker closed again
      */
     public ExecuteRSByte(String methodId,
-                         Vertx vertx,
+                         VxmsShared vxmsShared,
                          Throwable failure,
                          Consumer<Throwable> errorMethodHandler,
                          RoutingContext context, Map<String, String> headers,
@@ -273,7 +274,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
                          long delay,
                          long circuitBreakerTimeout) {
         super(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -298,7 +299,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(HttpResponseStatus status) {
         Objects.requireNonNull(status);
         new ExecuteRSByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -322,7 +323,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Objects.requireNonNull(status);
         Objects.requireNonNull(contentType);
         new ExecuteRSByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -345,7 +346,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute(String contentType) {
         Objects.requireNonNull(contentType);
         new ExecuteRSByte(methodId,
-                vertx,
+                vxmsShared,
                 failure,
                 errorMethodHandler,
                 context,
@@ -369,7 +370,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     public void execute() {
         Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
             try {
-                evFunction.execute(vertx,
+                evFunction.execute(vxmsShared,
                         failure,
                         errorMethodHandler,
                         context,
@@ -391,7 +392,8 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         Optional.ofNullable(byteSupplier).
                 ifPresent(supplier -> {
                             int retry = retryCount;
-                            this.vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false, getAsyncResultHandler(retry));
+                            final Vertx vertx = vxmsShared.getVertx();
+                            vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false, getAsyncResultHandler(retry));
                         }
 
                 );
@@ -400,7 +402,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
     }
 
     private void executeAsync(ThrowableSupplier<byte[]> supplier, int retry, Future<ExecutionResult<byte[]>> resultHandler) {
-        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, resultHandler, errorHandler, onFailureRespond, errorMethodHandler, vertx, failure, retry, timeout, circuitBreakerTimeout, delay);
+        ResponseBlockingExecution.executeRetryAndCatchAsync(methodId, supplier, resultHandler, errorHandler, onFailureRespond, errorMethodHandler, vxmsShared, failure, retry, timeout, circuitBreakerTimeout, delay);
     }
 
     private Handler<AsyncResult<ExecutionResult<byte[]>>> getAsyncResultHandler(int retry) {
