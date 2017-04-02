@@ -49,7 +49,7 @@
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms-verticle.version>1.0-RC1</vxms-verticle.version>
+        <vxms-verticle.version>1.0-SNAPSHOT</vxms-verticle.version>
         <hazelcast.version>3.6.2</hazelcast.version>
         <hazelcast-kubernetes-discovery.version>0.9.3-SNAPSHOT</hazelcast-kubernetes-discovery.version>
         <slf4j-api.version>1.7.16</slf4j-api.version>
@@ -97,7 +97,7 @@
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-verticle</artifactId>
+            <artifactId>vxms-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

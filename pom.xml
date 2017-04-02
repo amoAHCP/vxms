@@ -77,7 +77,7 @@
             </activation>
             <modules>
                 <module>vxms-common</module>
-                <module>vxms-verticle</module>
+                <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
                 <module>vxms-websocket</module>
@@ -89,7 +89,7 @@
             <id>release</id>
             <modules>
                 <module>vxms-common</module>
-                <module>vxms-verticle</module>
+                <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
             </modules>

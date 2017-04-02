@@ -11,8 +11,8 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
 ```xml
  <dependency>
       <groupId>org.jacpfx</groupId>
-      <artifactId>vxms-verticle</artifactId>
-      <version>1.0-RC1</version>
+      <artifactId>vxms-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
  </dependency>
 ```   
 ### vxms-rest
@@ -20,7 +20,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
   <dependency>
        <groupId>org.jacpfx</groupId>
        <artifactId>vxms-rest</artifactId>
-       <version>1.0-RC1</version>
+       <version>1.0-SNAPSHOT</version>
   </dependency>
 ```   
 ### vxms-event bus
@@ -28,11 +28,18 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-event</artifactId>
-        <version>1.0-RC1</version>
+        <version>1.0-SNAPSHOT</version>
   </dependency>
-```     
-
-
+```   
+  ### snapshot repository
+```xml
+ <repositories>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
+``` 
 ## vxms-rest example
 
 ```java

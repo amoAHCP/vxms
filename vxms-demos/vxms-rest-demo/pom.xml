@@ -28,7 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.0-RC1</vxms.version>
+        <vxms.version>1.0-SNAPSHOT</vxms.version>
         <main.verticle>org.jacpfx.verticle.SimpleREST</main.verticle>
     </properties>
 
@@ -42,7 +42,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-verticle</artifactId>
+            <artifactId>vxms-core</artifactId>
             <version>${vxms.version}</version>
         </dependency>
         <dependency>
