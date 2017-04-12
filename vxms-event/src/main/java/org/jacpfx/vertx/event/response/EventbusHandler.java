@@ -18,6 +18,7 @@ package org.jacpfx.vertx.event.response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.vertx.event.eventbus.basic.EventbusBridgeRequest;
 
 import java.util.function.Consumer;
@@ -27,7 +28,7 @@ import java.util.function.Consumer;
  * The EventbusHandler gives access to the {@link Message} , the {@link EventbusRequest} , the {@link EventbusResponse} and the {@link EventbusBridgeRequest}.
  */
 public class EventbusHandler {
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final Message<Object> message;
@@ -38,14 +39,15 @@ public class EventbusHandler {
      *
      * @param methodId           the method identifier
      * @param message            the message to respond to
-     * @param vertx              the vertx instance
+     * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+     * objects per instance
      * @param failure            the failure thrown while task execution or messaging
      * @param errorMethodHandler the error-method handler
      */
-    public EventbusHandler(String methodId, Message<Object> message, Vertx vertx, Throwable failure, Consumer<Throwable> errorMethodHandler) {
+    public EventbusHandler(String methodId, Message<Object> message, VxmsShared vxmsShared, Throwable failure, Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
         this.message = message;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
     }
@@ -75,7 +77,7 @@ public class EventbusHandler {
      * @return {@link EventbusResponse}
      */
     public EventbusResponse response() {
-        return new EventbusResponse(methodId, message, vertx, failure, errorMethodHandler);
+        return new EventbusResponse(methodId, message, vxmsShared, failure, errorMethodHandler);
     }
 
     /**
@@ -84,7 +86,7 @@ public class EventbusHandler {
      * @return {@link EventbusBridgeRequest}
      */
     public EventbusBridgeRequest eventBusRequest() {
-        return new EventbusBridgeRequest(methodId, message, vertx, failure, errorMethodHandler);
+        return new EventbusBridgeRequest(methodId, message, vxmsShared, failure, errorMethodHandler);
     }
 
 }

@@ -172,7 +172,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     // check for REST extension
     Optional.
         ofNullable(getEventBusSPI()).
-        ifPresent(eventbusHandlerSPI -> eventbusHandlerSPI.initEventHandler(vertx, this));
+        ifPresent(eventbusHandlerSPI -> eventbusHandlerSPI.initEventHandler(vxmsShared, this));
   }
 
   private void initWebSocketExtensions(HttpServer server) {

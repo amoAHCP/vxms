@@ -16,169 +16,176 @@
 
 package org.jacpfx.vertx.event.response.basic;
 
+import static java.util.Optional.ofNullable;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.Objects;
+import java.util.function.Consumer;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vertx.event.interfaces.basic.ExecuteEventbusByteCall;
-
-import java.util.Objects;
-import java.util.function.Consumer;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the non blocking fluent API, all data collected to execute the chain.
  */
 public class ExecuteEventbusBasicByte {
-    protected final String methodId;
-    protected final Vertx vertx;
-    protected final Throwable failure;
-    protected final Message<Object> message;
-    protected final Consumer<Throwable> errorHandler;
-    protected final Consumer<Throwable> errorMethodHandler;
-    protected final ThrowableFutureConsumer<byte[]> byteConsumer;
-    protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
-    protected final ExecuteEventbusByteCall excecuteEventBusAndReply;
-    protected final DeliveryOptions deliveryOptions;
-    protected final int retryCount;
-    protected final long timeout;
-    protected final long circuitBreakerTimeout;
 
-    /**
-     * The constructor to pass all needed members
-     *
-     * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
-     * @param failure                  the failure thrown while task execution
-     * @param errorMethodHandler       the error handler
-     * @param message                  the message to respond to
-     * @param byteConsumer             the consumer, producing the byte response
-     * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
-     * @param errorHandler             the error handler
-     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
-     * @param deliveryOptions          the response deliver options
-     * @param retryCount               the amount of retries before failure execution is triggered
-     * @param timeout                  the amount of time before the execution will be aborted
-     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
-     */
-    public ExecuteEventbusBasicByte(String methodId,
-                                    Vertx vertx,
-                                    Throwable failure,
-                                    Consumer<Throwable> errorMethodHandler,
-                                    Message<Object> message,
-                                    ThrowableFutureConsumer<byte[]> byteConsumer,
-                                    ExecuteEventbusByteCall excecuteEventBusAndReply,
-                                    Consumer<Throwable> errorHandler,
-                                    ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
-                                    DeliveryOptions deliveryOptions,
-                                    int retryCount,
-                                    long timeout,
-                                    long circuitBreakerTimeout) {
-        this.methodId = methodId;
-        this.vertx = vertx;
-        this.failure = failure;
-        this.errorMethodHandler = errorMethodHandler;
-        this.message = message;
-        this.byteConsumer = byteConsumer;
-        this.errorHandler = errorHandler;
-        this.onFailureRespond = onFailureRespond;
-        this.deliveryOptions = deliveryOptions;
-        this.retryCount = retryCount;
-        this.excecuteEventBusAndReply = excecuteEventBusAndReply;
-        this.timeout = timeout;
-        this.circuitBreakerTimeout = circuitBreakerTimeout;
-    }
+  protected final String methodId;
+  protected final VxmsShared vxmsShared;
+  protected final Throwable failure;
+  protected final Message<Object> message;
+  protected final Consumer<Throwable> errorHandler;
+  protected final Consumer<Throwable> errorMethodHandler;
+  protected final ThrowableFutureConsumer<byte[]> byteConsumer;
+  protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
+  protected final ExecuteEventbusByteCall excecuteEventBusAndReply;
+  protected final DeliveryOptions deliveryOptions;
+  protected final int retryCount;
+  protected final long timeout;
+  protected final long circuitBreakerTimeout;
 
-    /**
-     * Execute the reply chain with given http status code
-     *
-     * @param deliveryOptions, the event b us deliver options
-     */
-    public void execute(DeliveryOptions deliveryOptions) {
-        Objects.requireNonNull(deliveryOptions);
-        new ExecuteEventbusBasicByte(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                byteConsumer,
-                excecuteEventBusAndReply,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                circuitBreakerTimeout).
-                execute();
-    }
+  /**
+   * The constructor to pass all needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to respond to
+   * @param byteConsumer the consumer, producing the byte response
+   * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
+   * @param errorHandler the error handler
+   * @param onFailureRespond the consumer that takes a Future with the alternate response value in
+   * case of failure
+   * @param deliveryOptions the response deliver options
+   * @param retryCount the amount of retries before failure execution is triggered
+   * @param timeout the amount of time before the execution will be aborted
+   * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+   */
+  public ExecuteEventbusBasicByte(String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
+      ThrowableFutureConsumer<byte[]> byteConsumer,
+      ExecuteEventbusByteCall excecuteEventBusAndReply,
+      Consumer<Throwable> errorHandler,
+      ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
+      DeliveryOptions deliveryOptions,
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout) {
+    this.methodId = methodId;
+    this.vxmsShared = vxmsShared;
+    this.failure = failure;
+    this.errorMethodHandler = errorMethodHandler;
+    this.message = message;
+    this.byteConsumer = byteConsumer;
+    this.errorHandler = errorHandler;
+    this.onFailureRespond = onFailureRespond;
+    this.deliveryOptions = deliveryOptions;
+    this.retryCount = retryCount;
+    this.excecuteEventBusAndReply = excecuteEventBusAndReply;
+    this.timeout = timeout;
+    this.circuitBreakerTimeout = circuitBreakerTimeout;
+  }
 
-
-    /**
-     * Execute the reply chain
-     */
-    public void execute() {
-        vertx.runOnContext(action -> {
-
-            ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
-                try {
-                    evFunction.execute(methodId,
-                            vertx,
-                            errorMethodHandler,
-                            message,
-                            errorHandler,
-                            onFailureRespond,
-                            deliveryOptions,
-                            retryCount,
-                            timeout,
-                            circuitBreakerTimeout);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            });
-
-            ofNullable(byteConsumer).
-                    ifPresent(userOperation -> {
-                                int retry = retryCount;
-                                ResponseExecution.createResponse(methodId,
-                                        retry,
-                                        timeout,
-                                        circuitBreakerTimeout,
-                                        userOperation, errorHandler,
-                                        onFailureRespond, errorMethodHandler,
-                                        vertx, failure, value -> {
-                                            if (value.succeeded()) {
-                                                respond(value.getResult());
-                                            } else {
-                                                fail(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                                            }
-                                        });
-                            }
-                    );
-        });
-
-    }
+  /**
+   * Execute the reply chain with given http status code
+   *
+   * @param deliveryOptions, the event b us deliver options
+   */
+  public void execute(DeliveryOptions deliveryOptions) {
+    Objects.requireNonNull(deliveryOptions);
+    new ExecuteEventbusBasicByte(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        byteConsumer,
+        excecuteEventBusAndReply,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        circuitBreakerTimeout).
+        execute();
+  }
 
 
-    protected void fail(String result, int statuscode) {
-        if (result != null) message.fail(statuscode, result);
+  /**
+   * Execute the reply chain
+   */
+  public void execute() {
+    final Vertx vertx = vxmsShared.getVertx();
+    vertx.runOnContext(action -> {
 
-
-    }
-
-    protected void respond(byte[] result) {
-        if (result != null) {
-            if (deliveryOptions != null) {
-                message.reply(result, deliveryOptions);
-            } else {
-                message.reply(result);
-            }
+      ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
+        try {
+          evFunction.execute(methodId,
+              vxmsShared,
+              errorMethodHandler,
+              message,
+              errorHandler,
+              onFailureRespond,
+              deliveryOptions,
+              retryCount,
+              timeout,
+              circuitBreakerTimeout);
+        } catch (Exception e) {
+          e.printStackTrace();
         }
+
+      });
+
+      ofNullable(byteConsumer).
+          ifPresent(userOperation -> {
+                int retry = retryCount;
+                ResponseExecution.createResponse(methodId,
+                    retry,
+                    timeout,
+                    circuitBreakerTimeout,
+                    userOperation, errorHandler,
+                    onFailureRespond, errorMethodHandler,
+                    vxmsShared, failure, value -> {
+                      if (value.succeeded()) {
+                        respond(value.getResult());
+                      } else {
+                        fail(value.getCause().getMessage(),
+                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                      }
+                    });
+              }
+          );
+    });
+
+  }
+
+
+  protected void fail(String result, int statuscode) {
+    if (result != null) {
+      message.fail(statuscode, result);
     }
+
+
+  }
+
+  protected void respond(byte[] result) {
+    if (result != null) {
+      if (deliveryOptions != null) {
+        message.reply(result, deliveryOptions);
+      } else {
+        message.reply(result);
+      }
+    }
+  }
 
 
 }

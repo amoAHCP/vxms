@@ -17,14 +17,13 @@
 package org.jacpfx.vertx.event.interfaces.blocking;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.function.Consumer;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
-import org.jacpfx.common.encoder.Encoder;
-
-import java.util.function.Consumer;
 
 /**
  * Created by amo on 31.01.17.
@@ -32,44 +31,47 @@ import java.util.function.Consumer;
  */
 @FunctionalInterface
 public interface RetryBlockingExecutor<T> {
-    /**
-     * Execute typed retry handling
-     *
-     * @param methodId               the method identifier
-     * @param targetId               event-bus target id
-     * @param message                the event-bus message
-     * @param function               the function to execute on message
-     * @param requestDeliveryOptions the event-bus delivery options
-     * @param vertx                  the vertx instance
-     * @param failure                the failure thrown while task execution or messaging
-     * @param errorMethodHandler     the error-method handler
-     * @param requestMessage         the message to responde to
-     * @param supplier               the supplier to generate the response
-     * @param encoder                the encoder to encode your objects
-     * @param errorHandler           the error handler
-     * @param onFailureRespond       the consumer that takes a Future with the alternate response value in case of failure
-     * @param responseDeliveryOptions         the response delivery options
-     * @param retryCount             the amount of retries before failure execution is triggered
-     * @param timeout                the delay time in ms between an execution error and the retry
-     * @param delay                  the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout  the amount of time before the circuit breaker closed again
-     */
-    void execute(String methodId,
-                 String targetId,
-                 Object message,
-                 ThrowableFunction<AsyncResult<Message<Object>>, T> function,
-                 DeliveryOptions requestDeliveryOptions,
-                 Vertx vertx,
-                 Throwable failure,
-                 Consumer<Throwable> errorMethodHandler,
-                 Message<Object> requestMessage,
-                 ThrowableSupplier<T> supplier,
-                 Encoder encoder,
-                 Consumer<Throwable> errorHandler,
-                 ThrowableFunction<Throwable, T> onFailureRespond,
-                 DeliveryOptions responseDeliveryOptions,
-                 int retryCount,
-                 long timeout,
-                 long delay,
-                 long circuitBreakerTimeout);
+
+  /**
+   * Execute typed retry handling
+   *
+   * @param methodId the method identifier
+   * @param targetId event-bus target id
+   * @param message the event-bus message
+   * @param function the function to execute on message
+   * @param requestDeliveryOptions the event-bus delivery options
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param failure the failure thrown while task execution or messaging
+   * @param errorMethodHandler the error-method handler
+   * @param requestMessage the message to responde to
+   * @param supplier the supplier to generate the response
+   * @param encoder the encoder to encode your objects
+   * @param errorHandler the error handler
+   * @param onFailureRespond the consumer that takes a Future with the alternate response value in
+   * case of failure
+   * @param responseDeliveryOptions the response delivery options
+   * @param retryCount the amount of retries before failure execution is triggered
+   * @param timeout the delay time in ms between an execution error and the retry
+   * @param delay the delay time in ms between an execution error and the retry
+   * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+   */
+  void execute(String methodId,
+      String targetId,
+      Object message,
+      ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+      DeliveryOptions requestDeliveryOptions,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> requestMessage,
+      ThrowableSupplier<T> supplier,
+      Encoder encoder,
+      Consumer<Throwable> errorHandler,
+      ThrowableFunction<Throwable, T> onFailureRespond,
+      DeliveryOptions responseDeliveryOptions,
+      int retryCount,
+      long timeout,
+      long delay,
+      long circuitBreakerTimeout);
 }

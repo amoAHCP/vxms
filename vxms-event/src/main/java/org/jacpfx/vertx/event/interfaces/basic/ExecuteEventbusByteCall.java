@@ -16,41 +16,43 @@
 
 package org.jacpfx.vertx.event.interfaces.basic;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.function.Consumer;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 
-import java.util.function.Consumer;
-
 /**
- * Created by Andy Moncsek on 21.03.16.
- * Typed functional interface called on event-bus response. The execution will be handled as non-blocking code.
+ * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response. The
+ * execution will be handled as non-blocking code.
  */
 @FunctionalInterface
 public interface ExecuteEventbusByteCall {
-    /**
-     * Execute typed execution handling
-     *
-     * @param methodId                the method identifier
-     * @param vertx                   the vertx instance
-     * @param errorMethodHandler      the error-method handler
-     * @param requestMessage          the message to responde to
-     * @param errorHandler            the error handler
-     * @param onFailureRespond        the consumer that takes a Future with the alternate response value in case of failure
-     * @param responseDeliveryOptions the delivery options for the response
-     * @param retryCount              the amount of retries before failure execution is triggered
-     * @param timeout                 the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout   the amount of time before the circuit breaker closed again
-     */
-    void execute(String methodId,
-                 Vertx vertx,
-                 Consumer<Throwable> errorMethodHandler,
-                 Message<Object> requestMessage,
-                 Consumer<Throwable> errorHandler,
-                 ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
-                 DeliveryOptions responseDeliveryOptions,
-                 int retryCount,
-                 long timeout,
-                 long circuitBreakerTimeout);
+
+  /**
+   * Execute typed execution handling
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param errorMethodHandler the error-method handler
+   * @param requestMessage the message to responde to
+   * @param errorHandler the error handler
+   * @param onFailureRespond the consumer that takes a Future with the alternate response value in
+   * case of failure
+   * @param responseDeliveryOptions the delivery options for the response
+   * @param retryCount the amount of retries before failure execution is triggered
+   * @param timeout the delay time in ms between an execution error and the retry
+   * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+   */
+  void execute(String methodId,
+      VxmsShared vxmsShared,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> requestMessage,
+      Consumer<Throwable> errorHandler,
+      ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
+      DeliveryOptions responseDeliveryOptions,
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout);
 }

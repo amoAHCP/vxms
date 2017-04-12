@@ -16,16 +16,15 @@
 
 package org.jacpfx.vertx.event.response.blocking;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import org.jacpfx.common.throwable.ThrowableFunction;
-import org.jacpfx.common.throwable.ThrowableSupplier;
-import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
-
 import java.io.Serializable;
 import java.util.function.Consumer;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.encoder.Encoder;
+import org.jacpfx.common.throwable.ThrowableFunction;
+import org.jacpfx.common.throwable.ThrowableSupplier;
+import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -33,179 +32,184 @@ import java.util.function.Consumer;
  */
 public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
 
-    /**
-     * The constructor to pass all needed members
-     *
-     * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
-     * @param failure                  the failure thrown while task execution
-     * @param errorMethodHandler       the error handler
-     * @param message                  the message to responde to
-     * @param objectSupplier           the supplier, producing the byte response
-     * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent API
-     * @param encoder                  the encoder to serialize your object
-     * @param errorHandler             the error handler
-     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
-     * @param deliveryOptions          the response delivery options
-     * @param retryCount               the amount of retries before failure execution is triggered
-     * @param timeout                  the amount of time before the execution will be aborted
-     * @param delay                    the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
-     */
-    public ExecuteEventbusObjectResponse(String methodId,
-                                         Vertx vertx,
-                                         Throwable failure,
-                                         Consumer<Throwable> errorMethodHandler,
-                                         Message<Object> message,
-                                         ThrowableSupplier<Serializable> objectSupplier,
-                                         ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
-                                         Encoder encoder,
-                                         Consumer<Throwable> errorHandler,
-                                         ThrowableFunction<Throwable, Serializable> onFailureRespond,
-                                         DeliveryOptions deliveryOptions,
-                                         int retryCount,
-                                         long timeout,
-                                         long delay,
-                                         long circuitBreakerTimeout) {
+  /**
+   * The constructor to pass all needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to responde to
+   * @param objectSupplier the supplier, producing the byte response
+   * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
+   * API
+   * @param encoder the encoder to serialize your object
+   * @param errorHandler the error handler
+   * @param onFailureRespond the consumer that takes a Future with the alternate response value in
+   * case of failure
+   * @param deliveryOptions the response delivery options
+   * @param retryCount the amount of retries before failure execution is triggered
+   * @param timeout the amount of time before the execution will be aborted
+   * @param delay the delay time in ms between an execution error and the retry
+   * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+   */
+  public ExecuteEventbusObjectResponse(String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
+      ThrowableSupplier<Serializable> objectSupplier,
+      ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
+      Encoder encoder,
+      Consumer<Throwable> errorHandler,
+      ThrowableFunction<Throwable, Serializable> onFailureRespond,
+      DeliveryOptions deliveryOptions,
+      int retryCount,
+      long timeout,
+      long delay,
+      long circuitBreakerTimeout) {
 
-        super(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                objectSupplier,
-                excecuteEventBusAndReply,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
 
-    /**
-     * defines an action for errors in byte responses, you can handle the error and return an alternate createResponse value
-     *
-     * @param onFailureRespond the handler (function) to execute on error
-     * @param encoder          the encoder to serialize your object
-     * @return the createResponse chain  {@link ExecuteEventbusObject}
-     */
-    public ExecuteEventbusObject onFailureRespond(ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-        return new ExecuteEventbusObject(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                objectSupplier,
-                excecuteEventBusAndReply,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * defines an action for errors in byte responses, you can handle the error and return an
+   * alternate createResponse value
+   *
+   * @param onFailureRespond the handler (function) to execute on error
+   * @param encoder the encoder to serialize your object
+   * @return the createResponse chain  {@link ExecuteEventbusObject}
+   */
+  public ExecuteEventbusObject onFailureRespond(
+      ThrowableFunction<Throwable, Serializable> onFailureRespond, Encoder encoder) {
+    return new ExecuteEventbusObject(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
-    /**
-     * Will be executed on each error
-     *
-     * @param errorHandler the error handler
-     * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
-     */
-    public ExecuteEventbusObjectResponse onError(Consumer<Throwable> errorHandler) {
-        return new ExecuteEventbusObjectResponse(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                objectSupplier,
-                excecuteEventBusAndReply,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * Will be executed on each error
+   *
+   * @param errorHandler the error handler
+   * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
+   */
+  public ExecuteEventbusObjectResponse onError(Consumer<Throwable> errorHandler) {
+    return new ExecuteEventbusObjectResponse(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
-    /**
-     * retry operation on error
-     *
-     * @param retryCount the amount of retries before failure execution is triggered
-     * @return the createResponse chain {@link ExecuteEventbusObjectCircuitBreaker}
-     */
-    public ExecuteEventbusObjectCircuitBreaker retry(int retryCount) {
-        return new ExecuteEventbusObjectCircuitBreaker(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                objectSupplier,
-                excecuteEventBusAndReply,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * retry operation on error
+   *
+   * @param retryCount the amount of retries before failure execution is triggered
+   * @return the createResponse chain {@link ExecuteEventbusObjectCircuitBreaker}
+   */
+  public ExecuteEventbusObjectCircuitBreaker retry(int retryCount) {
+    return new ExecuteEventbusObjectCircuitBreaker(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
-    /**
-     * Defines how long a method can be executed before aborted.
-     *
-     * @param timeout time to wait in ms
-     * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
-     */
-    public ExecuteEventbusObjectResponse timeout(long timeout) {
-        return new ExecuteEventbusObjectResponse(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                objectSupplier,
-                excecuteEventBusAndReply,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * Defines how long a method can be executed before aborted.
+   *
+   * @param timeout time to wait in ms
+   * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
+   */
+  public ExecuteEventbusObjectResponse timeout(long timeout) {
+    return new ExecuteEventbusObjectResponse(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
-    /**
-     * Defines the delay (in ms) between the createResponse retries (on error).
-     *
-     * @param delay the delay time in ms before retry
-     * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
-     */
-    public ExecuteEventbusObjectResponse delay(long delay) {
-        return new ExecuteEventbusObjectResponse(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                objectSupplier,
-                excecuteEventBusAndReply,
-                encoder,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * Defines the delay (in ms) between the createResponse retries (on error).
+   *
+   * @param delay the delay time in ms before retry
+   * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
+   */
+  public ExecuteEventbusObjectResponse delay(long delay) {
+    return new ExecuteEventbusObjectResponse(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
 
 }

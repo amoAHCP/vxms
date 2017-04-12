@@ -16,92 +16,96 @@
 
 package org.jacpfx.vertx.event.response.blocking;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.function.Consumer;
+import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.throwable.ThrowableFunction;
 import org.jacpfx.common.throwable.ThrowableSupplier;
 import org.jacpfx.vertx.event.interfaces.blocking.ExecuteEventbusByteCallBlocking;
 
-import java.util.function.Consumer;
-
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class defines the fluid API part to define the amount of time after the circuit breaker will be closed again
+ * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
+ * of time after the circuit breaker will be closed again
  */
 public class ExecuteEventbusByteCircuitBreaker extends ExecuteEventbusByteResponse {
 
 
-    /**
-     * The constructor to pass all needed members
-     *
-     * @param methodId                 the method identifier
-     * @param vertx                    the vertx instance
-     * @param failure                  the failure thrown while task execution
-     * @param errorMethodHandler       the error handler
-     * @param message                  the message to responde to
-     * @param byteSupplier           the supplier, producing the byte response
-     * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent API
-     * @param errorHandler             the error handler
-     * @param onFailureRespond         the consumer that takes a Future with the alternate response value in case of failure
-     * @param deliveryOptions          the response delivery options
-     * @param retryCount               the amount of retries before failure execution is triggered
-     * @param timeout                  the amount of time before the execution will be aborted
-     * @param delay                    the delay time in ms between an execution error and the retry
-     * @param circuitBreakerTimeout    the amount of time before the circuit breaker closed again
-     */
-    public ExecuteEventbusByteCircuitBreaker(String methodId,
-                                             Vertx vertx,
-                                             Throwable failure,
-                                             Consumer<Throwable> errorMethodHandler,
-                                             Message<Object> message,
-                                             ThrowableSupplier<byte[]> byteSupplier,
-                                             ExecuteEventbusByteCallBlocking excecuteEventBusAndReply,
-                                             Consumer<Throwable> errorHandler,
-                                             ThrowableFunction<Throwable, byte[]> onFailureRespond,
-                                             DeliveryOptions deliveryOptions,
-                                             int retryCount,
-                                             long timeout,
-                                             long delay,
-                                             long circuitBreakerTimeout) {
-        super(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                byteSupplier,
-                excecuteEventBusAndReply,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * The constructor to pass all needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to responde to
+   * @param byteSupplier the supplier, producing the byte response
+   * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
+   * API
+   * @param errorHandler the error handler
+   * @param onFailureRespond the consumer that takes a Future with the alternate response value in
+   * case of failure
+   * @param deliveryOptions the response delivery options
+   * @param retryCount the amount of retries before failure execution is triggered
+   * @param timeout the amount of time before the execution will be aborted
+   * @param delay the delay time in ms between an execution error and the retry
+   * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
+   */
+  public ExecuteEventbusByteCircuitBreaker(String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
+      ThrowableSupplier<byte[]> byteSupplier,
+      ExecuteEventbusByteCallBlocking excecuteEventBusAndReply,
+      Consumer<Throwable> errorHandler,
+      ThrowableFunction<Throwable, byte[]> onFailureRespond,
+      DeliveryOptions deliveryOptions,
+      int retryCount,
+      long timeout,
+      long delay,
+      long circuitBreakerTimeout) {
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        byteSupplier,
+        excecuteEventBusAndReply,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
 
-    /**
-     * Defines how long a method can be executed before aborted.
-     *
-     * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs faster)
-     * @return the response chain {@link ExecuteEventbusByteResponse}
-     */
-    public ExecuteEventbusByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-        return new ExecuteEventbusByteResponse(methodId,
-                vertx,
-                failure,
-                errorMethodHandler,
-                message,
-                byteSupplier,
-                excecuteAsyncEventBusAndReply,
-                errorHandler,
-                onFailureRespond,
-                deliveryOptions,
-                retryCount,
-                timeout,
-                delay,
-                circuitBreakerTimeout);
-    }
+  /**
+   * Defines how long a method can be executed before aborted.
+   *
+   * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
+   * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
+   * faster)
+   * @return the response chain {@link ExecuteEventbusByteResponse}
+   */
+  public ExecuteEventbusByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+    return new ExecuteEventbusByteResponse(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        byteSupplier,
+        excecuteAsyncEventBusAndReply,
+        errorHandler,
+        onFailureRespond,
+        deliveryOptions,
+        retryCount,
+        timeout,
+        delay,
+        circuitBreakerTimeout);
+  }
 
 }

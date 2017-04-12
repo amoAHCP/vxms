@@ -21,6 +21,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 
 import java.util.function.Consumer;
+import org.jacpfx.common.VxmsShared;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
@@ -28,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class EventbusBridgeBlockingRequest {
     private final String methodId;
-    private final Vertx vertx;
+    private final VxmsShared vxmsShared;
     private final Throwable failure;
     private final Consumer<Throwable> errorMethodHandler;
     private final Message<Object> requestmessage;
@@ -38,17 +39,18 @@ public class EventbusBridgeBlockingRequest {
      *
      * @param methodId           the method identifier
      * @param requestmessage     the message to responde
-     * @param vertx              the vertx instance
+     * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+     * objects per instance
      * @param failure            the vertx instance
      * @param errorMethodHandler the error-method handler
      */
     public EventbusBridgeBlockingRequest(String methodId,
                                          Message<Object> requestmessage,
-                                         Vertx vertx,
+        VxmsShared vxmsShared,
                                          Throwable failure,
                                          Consumer<Throwable> errorMethodHandler) {
         this.methodId = methodId;
-        this.vertx = vertx;
+        this.vxmsShared = vxmsShared;
         this.failure = failure;
         this.errorMethodHandler = errorMethodHandler;
         this.requestmessage = requestmessage;
@@ -62,7 +64,7 @@ public class EventbusBridgeBlockingRequest {
      * @return the execution chain {@link EventbusBridgeBlockingResponse}
      */
     public EventbusBridgeBlockingResponse send(String id, Object message) {
-        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vertx, failure, errorMethodHandler, id, message, null);
+        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vxmsShared, failure, errorMethodHandler, id, message, null);
     }
 
     /**
@@ -74,6 +76,6 @@ public class EventbusBridgeBlockingRequest {
      * @return the execution chain {@link EventbusBridgeBlockingResponse}
      */
     public EventbusBridgeBlockingResponse send(String id, Object message, DeliveryOptions requestOptions) {
-        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vertx, failure, errorMethodHandler, id, message, requestOptions);
+        return new EventbusBridgeBlockingResponse(methodId, requestmessage, vxmsShared, failure, errorMethodHandler, id, message, requestOptions);
     }
 }

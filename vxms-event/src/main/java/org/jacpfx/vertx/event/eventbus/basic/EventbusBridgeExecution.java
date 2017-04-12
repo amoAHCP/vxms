@@ -25,6 +25,8 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
+import org.jacpfx.common.VxmsShared;
+import org.jacpfx.common.concurrent.LocalData;
 import org.jacpfx.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.common.throwable.ThrowableFutureConsumer;
@@ -55,7 +57,8 @@ public class EventbusBridgeExecution {
      * @param message                 the message to send
      * @param function                the function to process the result message
      * @param requestDeliveryOptions the event-bus delivery options
-     * @param vertx  the vertx instance
+     * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+     * objects per instance
      * @param errorMethodHandler the error-method handler
      * @param requestMessage the request message to respond after chain execution
      * @param encoder the encoder to serialize the response object
@@ -74,7 +77,7 @@ public class EventbusBridgeExecution {
                                                        Object message,
                                                        ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
                                                        DeliveryOptions requestDeliveryOptions,
-                                                       Vertx vertx,
+                                                       VxmsShared vxmsShared,
                                                        Consumer<Throwable> errorMethodHandler,
                                                        Message<Object> requestMessage,
                                                        Encoder encoder,
@@ -92,7 +95,7 @@ public class EventbusBridgeExecution {
                     message,
                     function,
                     requestDeliveryOptions,
-                    methodId, vertx,
+                    methodId, vxmsShared,
                     errorMethodHandler,
                     requestMessage,
                     encoder,
@@ -106,7 +109,7 @@ public class EventbusBridgeExecution {
                     message,
                     function,
                     requestDeliveryOptions,
-                    methodId, vertx,
+                    methodId, vxmsShared,
                     errorMethodHandler,
                     requestMessage,
                     encoder, errorHandler,
@@ -124,7 +127,7 @@ public class EventbusBridgeExecution {
                                             ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                             DeliveryOptions requestDeliveryOptions,
                                             String methodId,
-                                            Vertx vertx,
+                                            VxmsShared vxmsShared,
                                             Consumer<Throwable> errorMethodHandler,
                                             Message<Object> requestMessage,
                                             Encoder encoder,
@@ -142,7 +145,7 @@ public class EventbusBridgeExecution {
                                 message,
                                 objectFunction,
                                 requestDeliveryOptions,
-                                methodId, vertx,
+                                methodId, vxmsShared,
                                 errorMethodHandler,
                                 requestMessage,
                                 encoder, errorHandler,
@@ -156,7 +159,7 @@ public class EventbusBridgeExecution {
                                 message,
                                 objectFunction,
                                 requestDeliveryOptions,
-                                methodId, vertx,
+                                methodId, vxmsShared,
                                 errorMethodHandler,
                                 requestMessage,
                                 encoder, errorHandler,
@@ -166,7 +169,7 @@ public class EventbusBridgeExecution {
                                 circuitBreakerTimeout, executor, retry, lock);
                     } else {
                         executeErrorState(methodId,
-                                vertx,
+                                vxmsShared,
                                 errorMethodHandler,
                                 requestMessage,
                                 encoder, errorHandler,
@@ -175,7 +178,7 @@ public class EventbusBridgeExecution {
                                 retryCount, timeout,
                                 circuitBreakerTimeout, executor, lock);
                     }
-                })), methodId, vertx, errorMethodHandler, requestMessage, encoder, errorHandler, onFailureRespond, responseDeliveryOptions, retryCount, timeout, circuitBreakerTimeout, executor);
+                })), methodId, vxmsShared, errorMethodHandler, requestMessage, encoder, errorHandler, onFailureRespond, responseDeliveryOptions, retryCount, timeout, circuitBreakerTimeout, executor);
     }
 
 
@@ -184,7 +187,7 @@ public class EventbusBridgeExecution {
                                                 ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                                 DeliveryOptions requestDeliveryOptions,
                                                 String methodId,
-                                                Vertx vertx,
+                                                VxmsShared vxmsShared,
                                                 Consumer<Throwable> errorMethodHandler,
                                                 Message<Object> requestMessage,
                                                 Encoder encoder,
@@ -197,7 +200,7 @@ public class EventbusBridgeExecution {
                 message,
                 objectFunction,
                 requestDeliveryOptions,
-                methodId, vertx,
+                methodId, vxmsShared,
                 errorMethodHandler,
                 requestMessage,
                 encoder,
@@ -212,7 +215,7 @@ public class EventbusBridgeExecution {
                                                 ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                                 DeliveryOptions requestDeliveryOptions,
                                                 String methodId,
-                                                Vertx vertx,
+                                                VxmsShared vxmsShared,
                                                 Consumer<Throwable> errorMethodHandler,
                                                 Message<Object> requestMessage,
                                                 Encoder encoder,
@@ -221,6 +224,7 @@ public class EventbusBridgeExecution {
                                                 DeliveryOptions responseDeliveryOptions,
                                                 int retryCount, long timeout, long circuitBreakerTimeout, RecursiveExecutor executor, RetryExecutor retry, Lock lock) {
         Optional.ofNullable(lock).ifPresent(Lock::release);
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.
                 eventBus().
                 send(targetId, message, requestDeliveryOptions,
@@ -229,7 +233,7 @@ public class EventbusBridgeExecution {
                                         message,
                                         objectFunction,
                                         requestDeliveryOptions,
-                                        methodId, vertx,
+                                        methodId, vxmsShared,
                                         errorMethodHandler,
                                         requestMessage,
                                         encoder, errorHandler,
@@ -240,7 +244,7 @@ public class EventbusBridgeExecution {
     }
 
     private static <T> void executeErrorState(String methodId,
-                                              Vertx vertx,
+                                              VxmsShared vxmsShared,
                                               Consumer<Throwable> errorMethodHandler,
                                               Message<Object> requestMessage,
                                               Encoder encoder,
@@ -251,7 +255,7 @@ public class EventbusBridgeExecution {
                                               Lock lock) {
         final Throwable cause = Future.failedFuture("circuit open").cause();
         handleError(methodId,
-                vertx, errorMethodHandler,
+                vxmsShared, errorMethodHandler,
                 requestMessage, encoder,
                 errorHandler, onFailureRespond,
                 responseDeliveryOptions,
@@ -264,7 +268,7 @@ public class EventbusBridgeExecution {
                                                      ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                                      DeliveryOptions requestDeliveryOptions,
                                                      String methodId,
-                                                     Vertx vertx,
+                                                     VxmsShared vxmsShared,
                                                      Consumer<Throwable> errorMethodHandler,
                                                      Message<Object> requestMessage,
                                                      Encoder encoder,
@@ -279,7 +283,7 @@ public class EventbusBridgeExecution {
                     message,
                     objectFunction,
                     requestDeliveryOptions,
-                    methodId, vertx,
+                    methodId, vxmsShared,
                     errorMethodHandler,
                     requestMessage,
                     encoder,
@@ -292,7 +296,7 @@ public class EventbusBridgeExecution {
                     message,
                     objectFunction,
                     requestDeliveryOptions,
-                    methodId, vertx,
+                    methodId, vxmsShared,
                     errorMethodHandler,
                     requestMessage,
                     encoder,
@@ -311,7 +315,7 @@ public class EventbusBridgeExecution {
                                                ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                                DeliveryOptions requestDeliveryOptions,
                                                String methodId,
-                                               Vertx vertx,
+                                               VxmsShared vxmsShared,
                                                Consumer<Throwable> errorMethodHandler,
                                                Message<Object> requestMessage,
                                                Encoder encoder,
@@ -324,7 +328,7 @@ public class EventbusBridgeExecution {
                                                ThrowableFutureConsumer<T> objectConsumer) {
         if (!event.failed() || (event.failed() && retryCount <= 0)) {
             executor.execute(methodId,
-                    vertx, event.cause(),
+                    vxmsShared, event.cause(),
                     errorMethodHandler,
                     requestMessage,
                     objectConsumer,
@@ -337,7 +341,7 @@ public class EventbusBridgeExecution {
                     message,
                     objectFunction,
                     requestDeliveryOptions,
-                    methodId, vertx,
+                    methodId, vxmsShared,
                     event.cause(), errorMethodHandler,
                     requestMessage, encoder,
                     errorHandler, onFailureRespond,
@@ -351,7 +355,7 @@ public class EventbusBridgeExecution {
                                               ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                               DeliveryOptions requestDeliveryOptions,
                                               String methodId,
-                                              Vertx vertx,
+                                              VxmsShared vxmsShared,
                                               Consumer<Throwable> errorMethodHandler,
                                               Message<Object> requestMessage,
                                               Encoder encoder,
@@ -361,13 +365,13 @@ public class EventbusBridgeExecution {
                                               int retryCount, long timeout, long circuitBreakerTimeout, RecursiveExecutor executor,
                                               RetryExecutor retry, AsyncResult<Message<Object>> event, ThrowableFutureConsumer<T> objectConsumer) {
         if (event.succeeded()) {
-            executor.execute(methodId, vertx, event.cause(), errorMethodHandler, requestMessage, objectConsumer,
+            executor.execute(methodId, vxmsShared, event.cause(), errorMethodHandler, requestMessage, objectConsumer,
                     encoder, errorHandler, onFailureRespond, responseDeliveryOptions, retryCount, timeout, circuitBreakerTimeout);
         } else {
             statefulErrorHandling(targetId,
                     message, objectFunction,
                     requestDeliveryOptions,
-                    methodId, vertx,
+                    methodId, vxmsShared,
                     event.cause(),
                     errorMethodHandler,
                     requestMessage,
@@ -385,7 +389,7 @@ public class EventbusBridgeExecution {
                                                   ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                                   DeliveryOptions requestDeliveryOptions,
                                                   String methodId,
-                                                  Vertx vertx,
+                                                  VxmsShared vxmsShared,
                                                   Throwable t,
                                                   Consumer<Throwable> errorMethodHandler,
                                                   Message<Object> requestMessage,
@@ -402,7 +406,7 @@ public class EventbusBridgeExecution {
                                         long count = valHandler.result();
                                         if (count <= 0) {
                                             openCircuitAndHandleError(methodId,
-                                                    vertx,
+                                                    vxmsShared,
                                                     errorMethodHandler,
                                                     requestMessage,
                                                     encoder,
@@ -420,7 +424,7 @@ public class EventbusBridgeExecution {
                                                     objectFunction,
                                                     requestDeliveryOptions,
                                                     methodId,
-                                                    vertx, t,
+                                                    vxmsShared, t,
                                                     errorMethodHandler,
                                                     requestMessage,
                                                     encoder,
@@ -432,10 +436,10 @@ public class EventbusBridgeExecution {
                                         }
                                     } else {
                                         final Throwable cause = valHandler.cause();
-                                        handleError(methodId, vertx, errorMethodHandler, requestMessage,
+                                        handleError(methodId, vxmsShared, errorMethodHandler, requestMessage,
                                                 encoder, errorHandler, onFailureRespond, responseDeliveryOptions, retryCount, timeout, circuitBreakerTimeout, executor, lock, cause);
                                     }
-                                }), methodId, vertx, errorMethodHandler, requestMessage,
+                                }), methodId, vxmsShared, errorMethodHandler, requestMessage,
                 encoder, errorHandler, onFailureRespond, responseDeliveryOptions, retryCount, timeout, circuitBreakerTimeout, executor);
 
 
@@ -448,7 +452,7 @@ public class EventbusBridgeExecution {
 
     private static <T> void executeLocked(LockedConsumer consumer,
                                           String methodId,
-                                          Vertx vertx,
+                                          VxmsShared vxmsShared,
                                           Consumer<Throwable> errorMethodHandler,
                                           Message<Object> requestMessage,
                                           Encoder encoder,
@@ -456,7 +460,7 @@ public class EventbusBridgeExecution {
                                           ThrowableErrorConsumer<Throwable, T> onFailureRespond,
                                           DeliveryOptions responseDeliveryOptions,
                                           int retryCount, long timeout, long circuitBreakerTimeout, RecursiveExecutor executor) {
-        final SharedData sharedData = vertx.sharedData();
+        final LocalData sharedData = vxmsShared.getLocalData();
         sharedData.getLockWithTimeout(methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
             if (lockHandler.succeeded()) {
                 final Lock lock = lockHandler.result();
@@ -466,7 +470,7 @@ public class EventbusBridgeExecution {
                     } else {
                         final Throwable cause = resultHandler.cause();
                         handleError(methodId,
-                                vertx,
+                                vxmsShared,
                                 errorMethodHandler,
                                 requestMessage,
                                 encoder, errorHandler,
@@ -480,7 +484,7 @@ public class EventbusBridgeExecution {
             } else {
                 final Throwable cause = lockHandler.cause();
                 handleError(methodId,
-                        vertx,
+                        vxmsShared,
                         errorMethodHandler,
                         requestMessage,
                         encoder, errorHandler,
@@ -500,7 +504,7 @@ public class EventbusBridgeExecution {
     }
 
     private static <T> void openCircuitAndHandleError(String methodId,
-                                                      Vertx vertx,
+                                                      VxmsShared vxmsShared,
                                                       Consumer<Throwable> errorMethodHandler,
                                                       Message<Object> requestMessage,
                                                       Encoder encoder,
@@ -510,11 +514,11 @@ public class EventbusBridgeExecution {
                                                       int retryCount, long timeout, long circuitBreakerTimeout,
                                                       RecursiveExecutor executor, AsyncResult<Message<Object>> event,
                                                       Lock lock, Counter counter) {
-        resetLockTimer(vertx, retryCount, circuitBreakerTimeout, counter);
+        resetLockTimer(vxmsShared, retryCount, circuitBreakerTimeout, counter);
         lockAndHandle(counter, val -> {
             final Throwable cause = event.cause();
             handleError(methodId,
-                    vertx,
+                    vxmsShared,
                     errorMethodHandler,
                     requestMessage,
                     encoder,
@@ -532,13 +536,14 @@ public class EventbusBridgeExecution {
         counter.addAndGet(LOCK_VALUE, asyncResultHandler);
     }
 
-    private static void resetLockTimer(Vertx vertx, int retryCount, long circuitBreakerTimeout, Counter counter) {
+    private static void resetLockTimer(VxmsShared vxmsShared, int retryCount, long circuitBreakerTimeout, Counter counter) {
+        final Vertx vertx = vxmsShared.getVertx();
         vertx.setTimer(circuitBreakerTimeout, timer -> counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), val -> {
         }));
     }
 
     private static <T> void handleError(String methodId,
-                                        Vertx vertx,
+                                        VxmsShared vxmsShared,
                                         Consumer<Throwable> errorMethodHandler,
                                         Message<Object> requestMessage,
                                         Encoder encoder,
@@ -549,7 +554,7 @@ public class EventbusBridgeExecution {
         Optional.ofNullable(lock).ifPresent(Lock::release);
         final ThrowableFutureConsumer<T> failConsumer = (future) -> future.fail(cause);
         executor.execute(methodId,
-                vertx,
+                vxmsShared,
                 cause,
                 errorMethodHandler,
                 requestMessage,
@@ -567,7 +572,7 @@ public class EventbusBridgeExecution {
                                           ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> objectFunction,
                                           DeliveryOptions requestDeliveryOptions,
                                           String methodId,
-                                          Vertx vertx,
+                                          VxmsShared vxmsShared,
                                           Throwable t,
                                           Consumer<Throwable> errorMethodHandler,
                                           Message<Object> requestMessage,
@@ -581,7 +586,7 @@ public class EventbusBridgeExecution {
                 message,
                 objectFunction,
                 requestDeliveryOptions,
-                methodId, vertx, t,
+                methodId, vxmsShared, t,
                 errorMethodHandler,
                 requestMessage,
                 null,

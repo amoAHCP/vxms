@@ -20,11 +20,17 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import org.jacpfx.common.VxmsShared;
 
 /**
  * Created by amo on 05.08.16.
  */
 public interface EventhandlerSPI {
 
-    void initEventHandler(Vertx vertx, AbstractVerticle service);
+    /**
+     * initialize the event-bus API
+     * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared objects per instance
+     * @param service the verticle to be applied
+     */
+    void initEventHandler(VxmsShared vxmsShared, AbstractVerticle service);
 }
