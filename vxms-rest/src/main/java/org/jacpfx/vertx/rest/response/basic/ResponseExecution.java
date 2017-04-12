@@ -482,7 +482,7 @@ public class ResponseExecution {
   private static void updateResponseHaders(Map<String, String> headers,
       HttpServerResponse response) {
     Optional.ofNullable(headers).ifPresent(
-        h -> h.entrySet().forEach(entry -> response.putHeader(entry.getKey(), entry.getValue())));
+        h -> h.forEach(response::putHeader));
   }
 
   private static void updateResponseStatusCode(int httpStatusCode, HttpServerResponse response) {

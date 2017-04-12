@@ -40,9 +40,7 @@ import org.jacpfx.vertx.event.util.ReflectionUtil;
 public class EventInitializer {
 
 
-  public static final String ROOT = "/";
-  public static final String HTTP_ALL = "ALL";
-  public static final String EVENTBUS = "eventbus";
+  private static final String EVENTBUS = "eventbus";
 
   /**
    * initialize default Event Bus implementation for vxms

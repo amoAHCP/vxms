@@ -119,9 +119,9 @@ public class EventbusBridgeRequest {
   protected void respond(Object resp, DeliveryOptions options) {
     if (resp instanceof String) {
       if (options != null) {
-        requestmessage.reply((String) resp, options);
+        requestmessage.reply(resp, options);
       } else {
-        requestmessage.reply((String) resp);
+        requestmessage.reply(resp);
       }
     } else if (resp instanceof byte[]) {
       if (options != null) {

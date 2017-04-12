@@ -42,9 +42,9 @@ import org.jacpfx.vertx.event.response.basic.ResponseExecution;
  */
 public class EventbusBridgeExecution {
 
-  public static final long LOCK_VALUE = -1l;
-  public static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  public static final long NO_TIMEOUT = 0l;
+  private static final long LOCK_VALUE = -1l;
+  private static final int DEFAULT_LOCK_TIMEOUT = 2000;
+  private static final long NO_TIMEOUT = 0l;
 
 
   /**

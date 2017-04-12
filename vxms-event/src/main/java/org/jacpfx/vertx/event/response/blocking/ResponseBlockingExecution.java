@@ -260,8 +260,7 @@ public class ResponseBlockingExecution {
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       Throwable cause) {
-    T result = null;
-    result = handleError(result, _errorHandler, _onFailureRespond, _errorMethodHandler, cause);
+    final T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, cause);
     if (!_blockingHandler.isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
     }
@@ -312,8 +311,7 @@ public class ResponseBlockingExecution {
       lck.release();
       final Vertx vertx = vxmsShared.getVertx();
       vertx.executeBlocking(bhandler -> {
-        T result = null;
-        result = handleError(result, _errorHandler, _onFailureRespond, _errorMethodHandler, e);
+        T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, e);
         if (!_blockingHandler.isComplete()) {
           _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
         }
@@ -397,7 +395,7 @@ public class ResponseBlockingExecution {
         _retry--;
         if (_retry < DEFAULT_VALUE) {
           try {
-            result = handleError(result, errorHandler, onFailureRespond, errorMethodHandler, e);
+            result = handleError(errorHandler, onFailureRespond, errorMethodHandler, e);
             errorHandling = true;
           } catch (Exception ee) {
             _blockingHandler.fail(ee);
@@ -409,7 +407,7 @@ public class ResponseBlockingExecution {
         }
       }
     }
-    if (!errorHandling || errorHandling && result != null) {
+    if (!errorHandling || result != null) {
       if (!_blockingHandler.isComplete()) {
         _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
       }
@@ -428,10 +426,11 @@ public class ResponseBlockingExecution {
   }
 
 
-  private static <T> T handleError(T result, Consumer<Throwable> errorHandler,
+  private static <T> T handleError(Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Throwable e) {
+    T result = null;
     try {
       if (errorHandler != null) {
         errorHandler.accept(e);
