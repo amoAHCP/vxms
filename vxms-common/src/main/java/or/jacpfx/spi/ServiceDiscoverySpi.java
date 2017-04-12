@@ -17,7 +17,6 @@
 package or.jacpfx.spi;
 
 import io.vertx.core.AbstractVerticle;
-
 import java.util.function.Consumer;
 
 /**
@@ -25,7 +24,8 @@ import java.util.function.Consumer;
  */
 public interface ServiceDiscoverySpi {
 
-    void registerService(Runnable onSuccess, Consumer<Throwable> onFail, AbstractVerticle verticleInstance);
+  void registerService(Runnable onSuccess, Consumer<Throwable> onFail,
+      AbstractVerticle verticleInstance);
 
-    void disconnect();
+  void disconnect();
 }

@@ -17,8 +17,6 @@
 package or.jacpfx.spi;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import org.jacpfx.common.VxmsShared;
 
@@ -28,11 +26,13 @@ import org.jacpfx.common.VxmsShared;
  */
 public interface RESThandlerSPI {
 
-    /**
-     * initialize a rest API
-     * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared objects per instance
-     * @param router the vertx web router
-     * @param service the verticle to be applied
-     */
-    void initRESTHandler(VxmsShared vxmsShared, Router router, AbstractVerticle service);
+  /**
+   * initialize a rest API
+   *
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param router the vertx web router
+   * @param service the verticle to be applied
+   */
+  void initRESTHandler(VxmsShared vxmsShared, Router router, AbstractVerticle service);
 }

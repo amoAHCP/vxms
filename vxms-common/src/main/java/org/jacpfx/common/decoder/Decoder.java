@@ -25,31 +25,35 @@ import java.util.Optional;
 public interface Decoder<O> {
 
 
-    /**
-     * Decode from byte array
-     * @param <O> the type of the object to decode
-     */
-    interface ByteDecoder<O>  extends Decoder<O> {
-        /**
-         *
-         * decode the input
-         * @param input the byte array input
-         * @return an optional with the result
-         */
-         Optional<O> decode(byte[] input);
-    }
+  /**
+   * Decode from byte array
+   *
+   * @param <O> the type of the object to decode
+   */
+  interface ByteDecoder<O> extends Decoder<O> {
 
     /**
-     * Decode from String
-     * @param <O> the type of the object to decode
+     * decode the input
+     *
+     * @param input the byte array input
+     * @return an optional with the result
      */
-    interface StringDecoder<O> extends Decoder<O> {
-        /**
-         *
-         * decode the input
-         * @param input the String input
-         * @return an optional with the result
-         */
-         Optional<O> decode(String input);
-    }
+    Optional<O> decode(byte[] input);
+  }
+
+  /**
+   * Decode from String
+   *
+   * @param <O> the type of the object to decode
+   */
+  interface StringDecoder<O> extends Decoder<O> {
+
+    /**
+     * decode the input
+     *
+     * @param input the String input
+     * @return an optional with the result
+     */
+    Optional<O> decode(String input);
+  }
 }

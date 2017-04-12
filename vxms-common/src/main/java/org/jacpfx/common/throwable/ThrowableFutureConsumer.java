@@ -26,10 +26,11 @@ import io.vertx.core.Future;
 public interface ThrowableFutureConsumer<T> {
 
 
-    /**
-     * Performs this operation on the given argument.
-     * @param operationResult the input argument
-     * @throws Throwable the throwable
-     */
-    void accept(Future<T> operationResult) throws Throwable;
+  /**
+   * Performs this operation on the given argument.
+   *
+   * @param operationResult the input argument
+   * @throws Throwable the throwable
+   */
+  void accept(Future<T> operationResult) throws Throwable;
 }

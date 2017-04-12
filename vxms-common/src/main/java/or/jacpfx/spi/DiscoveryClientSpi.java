@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject;
  */
 public interface DiscoveryClientSpi<T> {
 
-    T getClient(AbstractVerticle verticleInstance);
-    T getClient(Vertx vertx, HttpClientOptions clientOptions, JsonObject config);
+  T getClient(AbstractVerticle verticleInstance);
+
+  T getClient(Vertx vertx, HttpClientOptions clientOptions, JsonObject config);
 }

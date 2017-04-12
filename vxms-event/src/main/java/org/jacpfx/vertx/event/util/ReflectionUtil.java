@@ -16,11 +16,10 @@
 
 package org.jacpfx.vertx.event.util;
 
-import org.jacpfx.common.exceptions.EndpointExecutionException;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
+import org.jacpfx.common.exceptions.EndpointExecutionException;
 
 /**
  * Created by Andy Moncsek on 25.11.15.
@@ -29,51 +28,56 @@ import java.util.function.Supplier;
 public class ReflectionUtil {
 
 
-    /**
-     * Invoke a vxms event-bus method parameters
-     * @param method the method identifier
-     * @param t the failure
-     * @param handler the handler
-     * @param <T> the type
-     * @return the array of parameters to pass to method invokation
-     */
-    public static <T> Object[] invokeParameters(Method method, Throwable t, T handler) {
-        method.setAccessible(true);
-        final java.lang.reflect.Parameter[] parameters = method.getParameters();
-        final Object[] parameterResult = new Object[parameters.length];
-        int i = 0;
-        for (java.lang.reflect.Parameter p : parameters) {
-            if (handler!=null && handler.getClass().equals(p.getType())) {
-                parameterResult[i] = handler;
-            }
-            if (Throwable.class.isAssignableFrom(p.getType())) {
-                parameterResult[i] = t;
-            }
-            i++;
-        }
-        return parameterResult;
+  /**
+   * Invoke a vxms event-bus method parameters
+   *
+   * @param method the method identifier
+   * @param t the failure
+   * @param handler the handler
+   * @param <T> the type
+   * @return the array of parameters to pass to method invokation
+   */
+  public static <T> Object[] invokeParameters(Method method, Throwable t, T handler) {
+    method.setAccessible(true);
+    final java.lang.reflect.Parameter[] parameters = method.getParameters();
+    final Object[] parameterResult = new Object[parameters.length];
+    int i = 0;
+    for (java.lang.reflect.Parameter p : parameters) {
+      if (handler != null && handler.getClass().equals(p.getType())) {
+        parameterResult[i] = handler;
+      }
+      if (Throwable.class.isAssignableFrom(p.getType())) {
+        parameterResult[i] = t;
+      }
+      i++;
     }
+    return parameterResult;
+  }
 
-    /**
-     * invoke a method with given parameters
-     * @param method the method
-     * @param parameters the parameters
-     * @param invokeTo the target
-     * @throws Throwable the exception
-     */
-    public static void genericMethodInvocation(Method method, Supplier<Object[]> parameters, Object invokeTo) throws Throwable {
-        try {
-            method.invoke(invokeTo, parameters.get());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+  /**
+   * invoke a method with given parameters
+   *
+   * @param method the method
+   * @param parameters the parameters
+   * @param invokeTo the target
+   * @throws Throwable the exception
+   */
+  public static void genericMethodInvocation(Method method, Supplier<Object[]> parameters,
+      Object invokeTo) throws Throwable {
+    try {
+      method.invoke(invokeTo, parameters.get());
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
 
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof EndpointExecutionException) throw e.getCause().getCause();
-            throw e.getTargetException();
-        } catch (Exception e) {
-            throw e;
+    } catch (InvocationTargetException e) {
+        if (e.getCause() instanceof EndpointExecutionException) {
+            throw e.getCause().getCause();
         }
+      throw e.getTargetException();
+    } catch (Exception e) {
+      throw e;
     }
+  }
 
 
 }

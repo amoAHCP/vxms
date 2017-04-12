@@ -24,8 +24,8 @@ import io.vertx.core.json.JsonObject;
  */
 public interface CustomConnectionOptions {
 
-    default HttpClientOptions  getClientOptions(JsonObject config) {
-        return new HttpClientOptions();
-    }
+  default HttpClientOptions getClientOptions(JsonObject config) {
+    return new HttpClientOptions();
+  }
 
 }

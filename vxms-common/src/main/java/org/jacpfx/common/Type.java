@@ -21,5 +21,5 @@ package org.jacpfx.common;
  * The Web operation type
  */
 public enum Type {
-   WEBSOCKET, EVENTBUS, REST_POST,REST_GET, REST_PUT, REST_DELETE
+  WEBSOCKET, EVENTBUS, REST_POST, REST_GET, REST_PUT, REST_DELETE
 }

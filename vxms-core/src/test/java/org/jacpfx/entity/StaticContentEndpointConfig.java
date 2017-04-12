@@ -11,13 +11,13 @@ import org.jacpfx.common.configuration.EndpointConfiguration;
 public class StaticContentEndpointConfig implements EndpointConfiguration {
 
 
-    public void staticHandler(Router router) {
-        router.route("/static/*").handler(StaticHandler.create());
-        // Create a router endpoint for the static content.
-       // router.route().handler(StaticHandler.create());
-    }
+  public void staticHandler(Router router) {
+    router.route("/static/*").handler(StaticHandler.create());
+    // Create a router endpoint for the static content.
+    // router.route().handler(StaticHandler.create());
+  }
 
-    public BodyHandler bodyHandler() {
-        return BodyHandler.create();
-    }
+  public BodyHandler bodyHandler() {
+    return BodyHandler.create();
+  }
 }

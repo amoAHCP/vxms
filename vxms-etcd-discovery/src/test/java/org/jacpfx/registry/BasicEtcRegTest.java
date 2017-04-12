@@ -1,7 +1,10 @@
 package org.jacpfx.registry;
 
 
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
@@ -10,6 +13,8 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Router;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientBuilder;
 import org.jacpfx.vertx.etcd.client.DiscoveryClientEtcd;
@@ -21,725 +26,716 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.concurrent.CountDownLatch;
-
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
 public class BasicEtcRegTest extends VertxTestBase {
-    private final static int MAX_RESPONSE_ELEMENTS = 4;
-    public static final String SERVICE_REST_GET = "/wsService";
-    public static final String SERVICE2_REST_GET = "/wsService2";
-    private static final String HOST = "localhost";
-    public static final int PORT = 9998;
-    public static final int PORT2 = 9988;
 
-    protected int getNumNodes() {
-        return 1;
-    }
+  public static final String SERVICE_REST_GET = "/wsService";
+  public static final String SERVICE2_REST_GET = "/wsService2";
+  public static final int PORT = 9998;
+  public static final int PORT2 = 9988;
+  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final String HOST = "localhost";
+  private HttpClient client;
 
-    protected Vertx getVertx() {
-        return vertices[0];
-    }
+  protected int getNumNodes() {
+    return 1;
+  }
 
-    @Override
-    protected ClusterManager getClusterManager() {
-        return new FakeClusterManager();
-    }
+  protected Vertx getVertx() {
+    return vertices[0];
+  }
+
+  @Override
+  protected ClusterManager getClusterManager() {
+    return new FakeClusterManager();
+  }
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    startNodes(getNumNodes());
+
+  }
+
+  @Before
+  public void startVerticles() throws InterruptedException {
+
+    CountDownLatch latch2 = new CountDownLatch(2);
+    DeploymentOptions options = new DeploymentOptions().setInstances(1);
+    options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // don't have to hardecode it in your tests
+
+    getVertx().deployVerticle(new BasicEtcRegTest.WsServiceOne(), options, asyncResult -> {
+      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+      System.out.println("start service: " + asyncResult.succeeded());
+      assertTrue(asyncResult.succeeded());
+      assertNotNull("deploymentID should not be null", asyncResult.result());
+      // If deployed correctly then start the tests!
+      //   latch2.countDown();
+
+      latch2.countDown();
+
+    });
+
+    getVertx().deployVerticle(new BasicEtcRegTest.WsServiceTwo(), options, asyncResult -> {
+      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+      System.out.println("start service: " + asyncResult.succeeded());
+      assertTrue(asyncResult.succeeded());
+      assertNotNull("deploymentID should not be null", asyncResult.result());
+      // If deployed correctly then start the tests!
+      //   latch2.countDown();
+
+      latch2.countDown();
+
+    });
+
+    client = getVertx().
+        createHttpClient(new HttpClientOptions());
+    awaitLatch(latch2);
+
+  }
 
 
-    private HttpClient client;
+  @Test
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        startNodes(getNumNodes());
-
-    }
-
-    @Before
-    public void startVerticles() throws InterruptedException {
-
-
-        CountDownLatch latch2 = new CountDownLatch(2);
-        DeploymentOptions options = new DeploymentOptions().setInstances(1);
-        options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-        // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don't have to hardecode it in your tests
-
-        getVertx().deployVerticle(new BasicEtcRegTest.WsServiceOne(), options, asyncResult -> {
-            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
-            assertTrue(asyncResult.succeeded());
-            assertNotNull("deploymentID should not be null", asyncResult.result());
-            // If deployed correctly then start the tests!
-            //   latch2.countDown();
-
-            latch2.countDown();
-
+  public void basicServiceRegistration() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("petShop").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance1");
+    reg.connect(result -> {
+      if (result.succeeded()) {
+        reg.retrieveKeys(root -> {
+          System.out.println(root.getNode());
+          testComplete();
         });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
 
-        getVertx().deployVerticle(new BasicEtcRegTest.WsServiceTwo(), options, asyncResult -> {
-            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
-            assertTrue(asyncResult.succeeded());
-            assertNotNull("deploymentID should not be null", asyncResult.result());
-            // If deployed correctly then start the tests!
-            //   latch2.countDown();
+    await();
+  }
 
-            latch2.countDown();
+  @Test
 
+  public void getKeys() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("petShop").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance2");
+
+    System.out.println("connect ");
+    reg.connect(result -> {
+      if (result.succeeded()) {
+        reg.retrieveKeys(root -> {
+          Node n1 = findNode(root.getNode(), "/petShop/myService");
+          System.out.println(n1);
+          assertEquals("/petShop/myService", n1.getKey());
+          testComplete();
         });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
 
-        client = getVertx().
-                createHttpClient(new HttpClientOptions());
-        awaitLatch(latch2);
-
-    }
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
 
 
-    @Test
+  @Test
 
-    public void basicServiceRegistration() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance1");
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                reg.retrieveKeys(root -> {
-                    System.out.println(root.getNode());
+  public void findNodes() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("petShop").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+
+        final DiscoveryClient client = result.result();
+        client.findNode("/myService", node -> {
+          System.out.println(" found node : " + node.getNode());
+          testComplete();
+        });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
+
+  @Test
+
+  public void findServiceNode() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("petShop").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+        final DiscoveryClient client = result.result();
+
+        client.findNode("/myService", node -> {
+          System.out.println(" found node : " + node.getServiceNode());
+          System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
+          testComplete();
+        });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
+
+  @Test
+
+  public void findServiceNodeAndDisconnect() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("deletIt").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    EtcdRegistration reg2 = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("deletIt").
+        serviceName("myServicexy").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+        final DiscoveryClient client = result.result();
+
+        client.findNode("/myService", node -> {
+          System.out.println(" found node : " + node.getServiceNode());
+          System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
+          reg.disconnect(handler -> {
+            System.out.println("status code: " + handler.statusCode());
+            if (handler.statusCode() == 200) {
+              reg2.connect(result2 -> {
+                final DiscoveryClient client2 = result2.result();
+                client2.findNode("/myService", node2 -> {
+                  if (!node2.succeeded()) {
+                    // myservice should not exists anymore
                     testComplete();
+                  } else {
+                    System.out.println(node2.toString());
+                  }
                 });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
+              });
+
             }
+          });
+
         });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
 
 
-        await();
-    }
+  @Test
 
-    @Test
+  public void connectServiceNode() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("testdomain").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
 
-    public void getKeys() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance2");
+    reg.connect(result -> {
+      if (result.succeeded()) {
 
-        System.out.println("connect ");
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                reg.retrieveKeys(root -> {
-                    Node n1 = findNode(root.getNode(), "/petShop/myService");
-                    System.out.println(n1);
-                    assertEquals("/petShop/myService", n1.getKey());
+        final DiscoveryClient discoveryClient = result.result();
+        discoveryClient.findNode(SERVICE_REST_GET, node -> {
+          assertTrue("did not find node", node.succeeded());
+          System.out.println(" found node : " + node.getServiceNode());
+          System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
+          HttpClientOptions options = new HttpClientOptions();
+          HttpClient client = vertx.
+              createHttpClient(options);
+
+          HttpClientRequest request = client
+              .getAbs(node.getServiceNode().getUri().toString() + "/endpointOne",
+                  resp -> resp.bodyHandler(body -> {
+                    System.out.println("Got a response: " + body.toString());
+                    Assert.assertEquals(body.toString(), "test");
                     testComplete();
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
+                  }));
+          request.end();
+
         });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
 
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
 
+  @Test
+
+  public void connectServiceNodeTwo() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("testdomain").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+
+        final DiscoveryClient discoveryClient = result.result();
+        discoveryClient.findNode(SERVICE_REST_GET, node -> {
+          assertTrue("did not find node", node.succeeded());
+          System.out.println(" found node : " + node.getServiceNode());
+          System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
+          HttpClientOptions options = new HttpClientOptions();
+          HttpClient client = vertx.
+              createHttpClient(options);
+
+          HttpClientRequest request = client
+              .getAbs(node.getServiceNode().getUri().toString() + "/endpointTwo/123", resp -> {
+                resp.bodyHandler(body -> {
+                  System.out.println("Got.. a response: " + body.toString());
+                  assertEquals(body.toString(), "123");
+                  testComplete();
+                });
+
+              });
+          request.end();
+
+        });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
+
+  @Test
+
+  public void connectServiceNodeThree() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("testdomain").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+
+        final DiscoveryClient discoveryClient = result.result();
+        discoveryClient.findNode(SERVICE_REST_GET, node -> {
+          assertTrue("did not find node", node.succeeded());
+          System.out.println(" found node : " + node.getServiceNode());
+          System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
+          HttpClientOptions options = new HttpClientOptions();
+          HttpClient client = vertx.
+              createHttpClient(options);
+
+          HttpClientRequest request = client
+              .getAbs(node.getServiceNode().getUri().toString() + "/endpointThree/123", resp -> {
+                resp.bodyHandler(body -> {
+                  System.out.println("Got.. a response: " + body.toString());
+                  assertEquals(body.toString(), "WsServiceTwo:123");
+                  testComplete();
+                });
+
+              });
+          request.end();
+
+        });
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
+
+  @Test
+
+  public void findServiceNodeWithBuilder() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("petShop").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+        final DiscoveryClient client = result.result();
+        client.find("/myService").onSuccess(val -> {
+          System.out.println(" found node : " + val.getServiceNode());
+          System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
+          testComplete();
+
+        }).onFailure(node -> {
+        }).retry(2).execute();
+
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
+
+  @Test
+
+  public void findServiceNodeWithBuilderError() throws InterruptedException {
+    EtcdRegistration reg = EtcdRegistration.
+        buildRegistration().
+        vertx(vertx).
+        clientOptions(new HttpClientOptions()).
+        etcdHost("127.0.0.1").
+        etcdPort(4001).
+        ttl(60).
+        domainName("petShop").
+        serviceName("myService").
+        serviceHost("localhost").
+        servicePort(8080).
+        serviceContextRoot("/myService").
+        secure(false).
+        nodeName("instance");
+
+    reg.connect(result -> {
+      if (result.succeeded()) {
+        final DiscoveryClient client = result.result();
+        client.find("/myServicexsd").onSuccess(val -> {
+          System.out.println(" found node : " + val.getServiceNode());
+          System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
+          testComplete();
+
+        }).onFailure(node -> {
+          System.out.println("error: " + node.getThrowable().getMessage());
+          testComplete();
+
+        }).retry(2).execute();
+
+      } else {
+        assertTrue("connection failed", true);
+        testComplete();
+      }
+    });
+
+    //  reg.disconnect(Future.factory.future());
+    await();
+  }
+
+  @Test
+  public void findServiceWithDiscoveryClient() throws InterruptedException {
+    DiscoveryClientBuilder builder = new DiscoveryClientBuilder();
+    WsServiceOne service = new WsServiceOne();
+    service.init(vertx, vertx.getOrCreateContext());
+    final DiscoveryClientEtcd client = builder.getClient(service);
+    client.isConnected(future -> {
+      if (future.succeeded()) {
+        client.find("/wsService").onSuccess(val -> {
+          System.out.println(" found node : " + val.getServiceNode());
+          System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
+          testComplete();
+
+        }).onError(error -> {
+          System.out.println("error: " + error.getThrowable().getMessage());
+        }).onFailure(node -> {
+          System.out.println("not found");
+          testComplete();
+        }).retry(2).execute();
+
+        System.out.println("await");
         //  reg.disconnect(Future.factory.future());
         await();
-    }
+      }
+    });
 
 
-    @Test
+  }
 
-    public void findNodes() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
+  @Test
+  public void testContext() {
+    System.out.println("Current: " + Thread.currentThread());
+    vertx.executeBlocking(handler -> {
+      System.out.println("Current in executeBlocking: " + Thread.currentThread());
+      vertx.getOrCreateContext().runOnContext(hanlder -> {
+        System.out.println("Current in runOnContext: " + Thread.currentThread());
+      });
+    }, result -> {
+
+    });
+  }
 
 
-        reg.connect(result -> {
-            if (result.succeeded()) {
+  @Test
+  @Ignore
+  // TODO implement test
+  public void testRetryAndFailure() {
 
-                final DiscoveryClient client = result.result();
-                client.findNode("/myService", node -> {
-                    System.out.println(" found node : " + node.getNode());
-                    testComplete();
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
+  }
 
 
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
-
-    @Test
-
-    public void findServiceNode() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
+  private Node findNode(Node node, String value) {
+    System.out.println("find: " + node.getKey() + "  value:" + value);
+      if (node.getKey() != null && node.getKey().equals(value)) {
+          return node;
+      }
+      if (node.isDir() && node.getNodes() != null) {
+          return node.getNodes().stream().filter(n1 -> {
+              Node n2 = n1.isDir() ? findNode(n1, value) : n1;
+              return n2.getKey().equals(value);
+          }).findFirst().orElse(new Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
+      }
+    return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
+  }
 
 
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                final DiscoveryClient client = result.result();
+  public HttpClient getClient() {
+    return getVertx().
+        createHttpClient(new HttpClientOptions());
+  }
 
-                client.findNode("/myService", node -> {
-                    System.out.println(" found node : " + node.getServiceNode());
-                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
-                    testComplete();
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
+  @org.jacpfx.vertx.etcd.client.EtcdClient(domain = "testdomain")
+  // this annotation does nothing on an AbstractVerticle but is needed vor client init test
+  @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
+  public class WsServiceOne extends AbstractVerticle {
 
+    DiscoveryClient client;
 
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
+    public void start(Future<Void> startFuture) throws Exception {
 
-    @Test
+      Router router = Router.router(vertx);
+      // define some REST API
 
-    public void findServiceNodeAndDisconnect() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("deletIt").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
+      router.get(SERVICE_REST_GET + "/endpointOne").handler(handler -> {
+        handler.request().response().end("test");
+      });
 
+      router.get(SERVICE_REST_GET + "/endpointTwo/:help").handler(handler -> {
+        String productType = handler.request().getParam("help");
+        handler.request().response().end(productType);
+      });
 
-        EtcdRegistration reg2 = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("deletIt").
-                serviceName("myServicexy").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
+      router.get(SERVICE_REST_GET + "/endpointThree/:help").handler(handler -> {
 
+        client.findNode(SERVICE2_REST_GET, node -> {
+          if (node.succeeded()) {
+            HttpClientOptions options = new HttpClientOptions();
+            HttpClient client = vertx.
+                createHttpClient(options);
 
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                final DiscoveryClient client = result.result();
-
-                client.findNode("/myService", node -> {
-                    System.out.println(" found node : " + node.getServiceNode());
-                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
-                    reg.disconnect(handler -> {
-                        System.out.println("status code: " + handler.statusCode());
-                        if (handler.statusCode() == 200) {
-                            reg2.connect(result2 -> {
-                                final DiscoveryClient client2 = result2.result();
-                                client2.findNode("/myService", node2 -> {
-                                    if (!node2.succeeded()) {
-                                        // myservice should not exists anymore
-                                        testComplete();
-                                    } else {
-                                        System.out.println(node2.toString());
-                                    }
-                                });
-                            });
-
-                        }
-                    });
+            HttpClientRequest request = client.getAbs(
+                node.getServiceNode().getUri().toString() + "/endpointTwo/" + handler.request()
+                    .getParam("help"), resp -> {
+                  resp.bodyHandler(body -> {
+                    System.out.println("Got a response: " + body.toString());
+                    handler.request().response().end(new String(body.getBytes()));
+                  });
 
                 });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
+            request.end();
+          } else {
+            String productType = handler.request().getParam("help");
+            handler.request().response().end(productType);
+          }
         });
+      });
+      vertx.createHttpServer().requestHandler(router::accept).listen(PORT, HOST);
+      postConstruct(startFuture);
+    }
 
-
-        //  reg.disconnect(Future.factory.future());
-        await();
+    public void postConstruct(final Future<Void> startFuture) {
+      EtcdRegistration reg = EtcdRegistration.
+          buildRegistration().
+          vertx(vertx).
+          clientOptions(new HttpClientOptions()).
+          etcdHost("127.0.0.1").
+          etcdPort(4001).
+          ttl(60).
+          domainName("testdomain").
+          serviceName(SERVICE_REST_GET).
+          serviceHost(HOST).
+          servicePort(PORT).
+          serviceContextRoot(SERVICE_REST_GET).
+          secure(false).
+          nodeName(this.toString());
+      reg.connect(result -> {
+        client = result.result();
+          if (!startFuture.isComplete()) {
+              startFuture.complete();
+          }
+      });
     }
 
 
-    @Test
+  }
 
-    public void connectServiceNode() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("testdomain").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
+  public class WsServiceTwo extends AbstractVerticle {
 
+    public void start(Future<Void> startFuture) throws Exception {
 
-        reg.connect(result -> {
-            if (result.succeeded()) {
+      Router router = Router.router(vertx);
+      // define some REST API
 
-                final DiscoveryClient discoveryClient = result.result();
-                discoveryClient.findNode(SERVICE_REST_GET, node -> {
-                    assertTrue("did not find node", node.succeeded());
-                    System.out.println(" found node : " + node.getServiceNode());
-                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
-                    HttpClientOptions options = new HttpClientOptions();
-                    HttpClient client = vertx.
-                            createHttpClient(options);
+      router.get(SERVICE2_REST_GET + "/endpointOne").handler(handler -> {
+        handler.request().response().end("test");
+      });
 
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointOne", resp -> resp.bodyHandler(body -> {
-                        System.out.println("Got a response: " + body.toString());
-                        Assert.assertEquals(body.toString(), "test");
-                        testComplete();
-                    }));
-                    request.end();
-
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
-
-
-        //  reg.disconnect(Future.factory.future());
-        await();
+      router.get(SERVICE2_REST_GET + "/endpointTwo/:help").handler(handler -> {
+        String productType = "WsServiceTwo:" + handler.request().getParam("help");
+        handler.request().response().end(productType);
+      });
+      vertx.createHttpServer().requestHandler(router::accept).listen(PORT2, HOST);
+      postConstruct(startFuture);
     }
 
-    @Test
-
-    public void connectServiceNodeTwo() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("testdomain").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
-
-
-        reg.connect(result -> {
-            if (result.succeeded()) {
-
-                final DiscoveryClient discoveryClient = result.result();
-                discoveryClient.findNode(SERVICE_REST_GET, node -> {
-                    assertTrue("did not find node", node.succeeded());
-                    System.out.println(" found node : " + node.getServiceNode());
-                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
-                    HttpClientOptions options = new HttpClientOptions();
-                    HttpClient client = vertx.
-                            createHttpClient(options);
-
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointTwo/123", resp -> {
-                        resp.bodyHandler(body -> {
-                            System.out.println("Got.. a response: " + body.toString());
-                            assertEquals(body.toString(), "123");
-                            testComplete();
-                        });
-
-                    });
-                    request.end();
-
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
-
-
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
-
-    @Test
-
-    public void connectServiceNodeThree() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("testdomain").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
-
-
-        reg.connect(result -> {
-            if (result.succeeded()) {
-
-                final DiscoveryClient discoveryClient = result.result();
-                discoveryClient.findNode(SERVICE_REST_GET, node -> {
-                    assertTrue("did not find node", node.succeeded());
-                    System.out.println(" found node : " + node.getServiceNode());
-                    System.out.println(" found URI : " + node.getServiceNode().getUri().toString());
-                    HttpClientOptions options = new HttpClientOptions();
-                    HttpClient client = vertx.
-                            createHttpClient(options);
-
-                    HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointThree/123", resp -> {
-                        resp.bodyHandler(body -> {
-                            System.out.println("Got.. a response: " + body.toString());
-                            assertEquals(body.toString(), "WsServiceTwo:123");
-                            testComplete();
-                        });
-
-                    });
-                    request.end();
-
-                });
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
-
-
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
-
-    @Test
-
-    public void findServiceNodeWithBuilder() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
-
-
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                final DiscoveryClient client = result.result();
-                client.find("/myService").onSuccess(val -> {
-                    System.out.println(" found node : " + val.getServiceNode());
-                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
-                    testComplete();
-
-                }).onFailure(node -> {
-                }).retry(2).execute();
-
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
-
-
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
-
-    @Test
-
-    public void findServiceNodeWithBuilderError() throws InterruptedException {
-        EtcdRegistration reg = EtcdRegistration.
-                buildRegistration().
-                vertx(vertx).
-                clientOptions(new HttpClientOptions()).
-                etcdHost("127.0.0.1").
-                etcdPort(4001).
-                ttl(60).
-                domainName("petShop").
-                serviceName("myService").
-                serviceHost("localhost").
-                servicePort(8080).
-                serviceContextRoot("/myService").
-                secure(false).
-                nodeName("instance");
-
-
-        reg.connect(result -> {
-            if (result.succeeded()) {
-                final DiscoveryClient client = result.result();
-                client.find("/myServicexsd").onSuccess(val -> {
-                    System.out.println(" found node : " + val.getServiceNode());
-                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
-                    testComplete();
-
-                }).onFailure(node -> {
-                    System.out.println("error: " + node.getThrowable().getMessage());
-                    testComplete();
-
-                }).retry(2).execute();
-
-            } else {
-                assertTrue("connection failed", true);
-                testComplete();
-            }
-        });
-
-
-        //  reg.disconnect(Future.factory.future());
-        await();
-    }
-
-    @Test
-    public void findServiceWithDiscoveryClient() throws InterruptedException {
-        DiscoveryClientBuilder builder = new DiscoveryClientBuilder();
-        WsServiceOne service = new WsServiceOne();
-        service.init(vertx, vertx.getOrCreateContext());
-        final DiscoveryClientEtcd client = builder.getClient(service);
-        client.isConnected(future -> {
-            if (future.succeeded()) {
-                client.find("/wsService").onSuccess(val -> {
-                    System.out.println(" found node : " + val.getServiceNode());
-                    System.out.println(" found URI : " + val.getServiceNode().getUri().toString());
-                    testComplete();
-
-                }).onError(error -> {
-                    System.out.println("error: " + error.getThrowable().getMessage());
-                }).onFailure(node -> {
-                    System.out.println("not found");
-                    testComplete();
-                }).retry(2).execute();
-
-                System.out.println("await");
-                //  reg.disconnect(Future.factory.future());
-                await();
-            }
-        });
-
-
-    }
-
-    @Test
-    public void testContext() {
-        System.out.println("Current: " + Thread.currentThread());
-        vertx.executeBlocking(handler -> {
-            System.out.println("Current in executeBlocking: " + Thread.currentThread());
-            vertx.getOrCreateContext().runOnContext(hanlder -> {
-                System.out.println("Current in runOnContext: " + Thread.currentThread());
-            });
-        }, result -> {
-
-        });
+    public void postConstruct(final Future<Void> startFuture) {
+      EtcdRegistration reg = EtcdRegistration.
+          buildRegistration().
+          vertx(vertx).
+          clientOptions(new HttpClientOptions()).
+          etcdHost("127.0.0.1").
+          etcdPort(4001).
+          ttl(60).
+          domainName("testdomain").
+          serviceName(SERVICE2_REST_GET).
+          serviceHost(HOST).
+          servicePort(PORT2).
+          serviceContextRoot(SERVICE2_REST_GET).
+          secure(false).
+          nodeName(this.toString());
+      reg.connect(result -> {
+          if (!startFuture.isComplete()) {
+              startFuture.complete();
+          }
+      });
     }
 
 
-    @Test
-    @Ignore
-    // TODO implement test
-    public void testRetryAndFailure() {
-
-    }
-
-
-    private Node findNode(Node node, String value) {
-        System.out.println("find: " + node.getKey() + "  value:" + value);
-        if (node.getKey() != null && node.getKey().equals(value)) return node;
-        if (node.isDir() && node.getNodes() != null) return node.getNodes().stream().filter(n1 -> {
-            Node n2 = n1.isDir() ? findNode(n1, value) : n1;
-            return n2.getKey().equals(value);
-        }).findFirst().orElse(new Node(false, "", "", "", 0, 0, 0, Collections.emptyList()));
-        return new Node(false, "", "", "", 0, 0, 0, Collections.emptyList());
-    }
-
-
-    public HttpClient getClient() {
-        return getVertx().
-                createHttpClient(new HttpClientOptions());
-    }
-
-    @org.jacpfx.vertx.etcd.client.EtcdClient(domain = "testdomain")
-    // this annotation does nothing on an AbstractVerticle but is needed vor client init test
-    @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
-    public class WsServiceOne extends AbstractVerticle {
-        DiscoveryClient client;
-
-        public void start(Future<Void> startFuture) throws Exception {
-
-            Router router = Router.router(vertx);
-            // define some REST API
-
-            router.get(SERVICE_REST_GET + "/endpointOne").handler(handler -> {
-                handler.request().response().end("test");
-            });
-
-            router.get(SERVICE_REST_GET + "/endpointTwo/:help").handler(handler -> {
-                String productType = handler.request().getParam("help");
-                handler.request().response().end(productType);
-            });
-
-            router.get(SERVICE_REST_GET + "/endpointThree/:help").handler(handler -> {
-
-                client.findNode(SERVICE2_REST_GET, node -> {
-                    if (node.succeeded()) {
-                        HttpClientOptions options = new HttpClientOptions();
-                        HttpClient client = vertx.
-                                createHttpClient(options);
-
-                        HttpClientRequest request = client.getAbs(node.getServiceNode().getUri().toString() + "/endpointTwo/" + handler.request().getParam("help"), resp -> {
-                            resp.bodyHandler(body -> {
-                                System.out.println("Got a response: " + body.toString());
-                                handler.request().response().end(new String(body.getBytes()));
-                            });
-
-                        });
-                        request.end();
-                    } else {
-                        String productType = handler.request().getParam("help");
-                        handler.request().response().end(productType);
-                    }
-                });
-            });
-            vertx.createHttpServer().requestHandler(router::accept).listen(PORT, HOST);
-            postConstruct(startFuture);
-        }
-
-        public void postConstruct(final Future<Void> startFuture) {
-            EtcdRegistration reg = EtcdRegistration.
-                    buildRegistration().
-                    vertx(vertx).
-                    clientOptions(new HttpClientOptions()).
-                    etcdHost("127.0.0.1").
-                    etcdPort(4001).
-                    ttl(60).
-                    domainName("testdomain").
-                    serviceName(SERVICE_REST_GET).
-                    serviceHost(HOST).
-                    servicePort(PORT).
-                    serviceContextRoot(SERVICE_REST_GET).
-                    secure(false).
-                    nodeName(this.toString());
-            reg.connect(result -> {
-                client = result.result();
-                if (!startFuture.isComplete()) startFuture.complete();
-            });
-        }
-
-
-    }
-
-    public class WsServiceTwo extends AbstractVerticle {
-
-        public void start(Future<Void> startFuture) throws Exception {
-
-            Router router = Router.router(vertx);
-            // define some REST API
-
-            router.get(SERVICE2_REST_GET + "/endpointOne").handler(handler -> {
-                handler.request().response().end("test");
-            });
-
-            router.get(SERVICE2_REST_GET + "/endpointTwo/:help").handler(handler -> {
-                String productType = "WsServiceTwo:" + handler.request().getParam("help");
-                handler.request().response().end(productType);
-            });
-            vertx.createHttpServer().requestHandler(router::accept).listen(PORT2, HOST);
-            postConstruct(startFuture);
-        }
-
-        public void postConstruct(final Future<Void> startFuture) {
-            EtcdRegistration reg = EtcdRegistration.
-                    buildRegistration().
-                    vertx(vertx).
-                    clientOptions(new HttpClientOptions()).
-                    etcdHost("127.0.0.1").
-                    etcdPort(4001).
-                    ttl(60).
-                    domainName("testdomain").
-                    serviceName(SERVICE2_REST_GET).
-                    serviceHost(HOST).
-                    servicePort(PORT2).
-                    serviceContextRoot(SERVICE2_REST_GET).
-                    secure(false).
-                    nodeName(this.toString());
-            reg.connect(result -> {
-                if (!startFuture.isComplete()) startFuture.complete();
-            });
-        }
-
-
-    }
+  }
 
 }
 

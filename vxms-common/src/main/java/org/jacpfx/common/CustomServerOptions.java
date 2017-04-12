@@ -25,7 +25,7 @@ import io.vertx.core.json.JsonObject;
  */
 public interface CustomServerOptions {
 
-    default HttpServerOptions getServerOptions(JsonObject config) {
-        return new HttpServerOptions();
-    }
+  default HttpServerOptions getServerOptions(JsonObject config) {
+    return new HttpServerOptions();
+  }
 }

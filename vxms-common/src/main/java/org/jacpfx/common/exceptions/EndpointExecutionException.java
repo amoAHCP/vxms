@@ -23,9 +23,9 @@ package org.jacpfx.common.exceptions;
 public class EndpointExecutionException extends RuntimeException {
 
 
-    public EndpointExecutionException(Throwable cause) {
-        super(cause);
-    }
+  public EndpointExecutionException(Throwable cause) {
+    super(cause);
+  }
 
 
 }

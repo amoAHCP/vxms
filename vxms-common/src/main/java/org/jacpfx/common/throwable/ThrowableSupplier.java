@@ -22,10 +22,11 @@ package org.jacpfx.common.throwable;
  */
 public interface ThrowableSupplier<T> {
 
-    /**
-     * the supplier method
-     * @return the value
-     * @throws Throwable the throwable
-     */
-    T get() throws Throwable;
+  /**
+   * the supplier method
+   *
+   * @return the value
+   * @throws Throwable the throwable
+   */
+  T get() throws Throwable;
 }

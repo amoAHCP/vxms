@@ -21,39 +21,43 @@ package org.jacpfx.common.util;
  * Utility to clean up context root
  */
 public class URIUtil {
-    public static final String ROOT = "/";
 
-    /**
-     * clean the path and set correct root
-     * @param path the path to clean
-     * @return the cleaned path
-     */
-    public static String cleanPath(String path) {
-        return path.startsWith(ROOT) ? path : ROOT + path;
+  public static final String ROOT = "/";
+
+  /**
+   * clean the path and set correct root
+   *
+   * @param path the path to clean
+   * @return the cleaned path
+   */
+  public static String cleanPath(String path) {
+    return path.startsWith(ROOT) ? path : ROOT + path;
+  }
+
+
+  /**
+   * clean the context root
+   *
+   * @param contextRoot the context root to clean
+   * @return the cleaned context root
+   */
+  public static String getCleanContextRoot(String contextRoot) {
+    if (String.valueOf(contextRoot.charAt(contextRoot.length() - 1)).equals(ROOT)) {
+      String _root = contextRoot.substring(0, contextRoot.length() - 1);
+      return _root.startsWith(ROOT) ? _root : ROOT + _root;
+    } else if (!contextRoot.startsWith(ROOT)) {
+      return ROOT + contextRoot;
     }
+    return contextRoot;
+  }
 
-
-    /**
-     * clean the context root
-     * @param contextRoot the context root to clean
-     * @return the cleaned context root
-     */
-    public static String getCleanContextRoot(String contextRoot) {
-        if (String.valueOf(contextRoot.charAt(contextRoot.length() - 1)).equals(ROOT)) {
-            String _root = contextRoot.substring(0, contextRoot.length() - 1);
-            return _root.startsWith(ROOT) ? _root : ROOT + _root;
-        } else if (!contextRoot.startsWith(ROOT)) {
-            return ROOT + contextRoot;
-        }
-        return contextRoot;
-    }
-
-    /**
-     * check if context root is set
-     * @param cRoot the URI string
-     * @return true if context root is set
-     */
-    public static boolean isContextRootSet(String cRoot) {
-        return !cRoot.trim().equals(ROOT) && cRoot.length() > 1;
-    }
+  /**
+   * check if context root is set
+   *
+   * @param cRoot the URI string
+   * @return true if context root is set
+   */
+  public static boolean isContextRootSet(String cRoot) {
+    return !cRoot.trim().equals(ROOT) && cRoot.length() > 1;
+  }
 }

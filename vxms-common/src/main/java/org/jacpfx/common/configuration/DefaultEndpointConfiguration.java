@@ -23,5 +23,4 @@ package org.jacpfx.common.configuration;
 public class DefaultEndpointConfiguration implements EndpointConfiguration {
 
 
-
 }

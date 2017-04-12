@@ -25,28 +25,30 @@ import org.jacpfx.common.concurrent.LocalData;
  */
 public class VxmsShared {
 
-    private final Vertx vertx;
+  private final Vertx vertx;
 
-    private final LocalData localData;
+  private final LocalData localData;
 
-    public VxmsShared(Vertx vertx, LocalData localData) {
-        this.vertx = vertx;
-        this.localData = localData;
-    }
+  public VxmsShared(Vertx vertx, LocalData localData) {
+    this.vertx = vertx;
+    this.localData = localData;
+  }
 
-    /**
-     * Returns the Vert.x instance
-     * @return the {@link Vertx} instance
-     */
-    public Vertx getVertx() {
-        return vertx;
-    }
+  /**
+   * Returns the Vert.x instance
+   *
+   * @return the {@link Vertx} instance
+   */
+  public Vertx getVertx() {
+    return vertx;
+  }
 
-    /**
-     * Returns the local data instance
-     * @return the {@link LocalData} instance
-     */
-    public LocalData getLocalData() {
-        return localData;
-    }
+  /**
+   * Returns the local data instance
+   *
+   * @return the {@link LocalData} instance
+   */
+  public LocalData getLocalData() {
+    return localData;
+  }
 }

@@ -24,4 +24,5 @@ import io.vertx.core.Handler;
  * Handles Async results
  */
 public interface AsyncResultHandler<T> extends Handler<AsyncResult<T>> {
+
 }

@@ -21,4 +21,5 @@ package org.jacpfx.common;
  * Defines the default http server options if no custom option is defined
  */
 public class DefaultServerOptions implements CustomServerOptions {
+
 }

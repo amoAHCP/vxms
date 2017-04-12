@@ -8,23 +8,22 @@ import org.junit.Test;
  */
 public class GetPidTest {
 
-    @Test
-    @Ignore
-    public void testGetPid() {
-        System.out.println("test: "+getPID());
-    }
-
-    public static String getPID() {
-        String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-        if (processName != null && processName.length() > 0) {
-            try {
-                return processName.split("@")[0];
-            }
-            catch (Exception e) {
-                return "0";
-            }
-        }
-
+  public static String getPID() {
+    String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+    if (processName != null && processName.length() > 0) {
+      try {
+        return processName.split("@")[0];
+      } catch (Exception e) {
         return "0";
+      }
     }
+
+    return "0";
+  }
+
+  @Test
+  @Ignore
+  public void testGetPid() {
+    System.out.println("test: " + getPID());
+  }
 }

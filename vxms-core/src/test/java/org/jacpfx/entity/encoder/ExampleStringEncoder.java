@@ -8,9 +8,10 @@ import org.jacpfx.entity.Payload;
  * Created by Andy Moncsek on 25.11.15.
  */
 public class ExampleStringEncoder implements Encoder.StringEncoder<Payload<String>> {
-    @Override
-    public String encode(Payload<String> input) {
-        Gson gg = new Gson();
-        return gg.toJson(input);
-    }
+
+  @Override
+  public String encode(Payload<String> input) {
+    Gson gg = new Gson();
+    return gg.toJson(input);
+  }
 }

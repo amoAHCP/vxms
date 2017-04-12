@@ -16,7 +16,11 @@
 
 package org.jacpfx.vertx.event.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -26,9 +30,11 @@ import java.lang.annotation.*;
  * makrs fallback methods to be executed wenn an exception in method occurred and not handled
  */
 public @interface OnEventError {
-    /**
-     * the path name
-     * @return the name of the Consumes path
-     */
-    String value();
+
+  /**
+   * the path name
+   *
+   * @return the name of the Consumes path
+   */
+  String value();
 }

@@ -23,82 +23,82 @@ package org.jacpfx.common;
  */
 public class ExecutionResult<T> {
 
-    private final T result;
-    private final boolean succeeded;
-    private final Throwable cause;
-    private final boolean errorHandling;
+  private final T result;
+  private final boolean succeeded;
+  private final Throwable cause;
+  private final boolean errorHandling;
 
 
-    /**
-     * The default constructor
-     *
-     * @param result    the result value
-     * @param succeeded the connection status
-     * @param cause     The failure cause
-     */
-    public ExecutionResult(T result, boolean succeeded, Throwable cause) {
-        this(result, succeeded, false, cause);
-    }
+  /**
+   * The default constructor
+   *
+   * @param result the result value
+   * @param succeeded the connection status
+   * @param cause The failure cause
+   */
+  public ExecutionResult(T result, boolean succeeded, Throwable cause) {
+    this(result, succeeded, false, cause);
+  }
 
-    /**
-     * The default constructor
-     *
-     * @param result        the result value
-     * @param succeeded     the connection status
-     * @param errorHandling true if an error was handled while execution
-     * @param cause         The failure cause
-     */
-    public ExecutionResult(T result, boolean succeeded, boolean errorHandling, Throwable cause) {
-        this.result = result;
-        this.succeeded = succeeded;
-        this.errorHandling = errorHandling;
-        this.cause = cause;
-    }
+  /**
+   * The default constructor
+   *
+   * @param result the result value
+   * @param succeeded the connection status
+   * @param errorHandling true if an error was handled while execution
+   * @param cause The failure cause
+   */
+  public ExecutionResult(T result, boolean succeeded, boolean errorHandling, Throwable cause) {
+    this.result = result;
+    this.succeeded = succeeded;
+    this.errorHandling = errorHandling;
+    this.cause = cause;
+  }
 
-    /**
-     * The stream of services found
-     *
-     * @return a stream with requested ServiceInfos
-     */
-    public T getResult() {
-        return result;
-    }
+  /**
+   * The stream of services found
+   *
+   * @return a stream with requested ServiceInfos
+   */
+  public T getResult() {
+    return result;
+  }
 
 
-    /**
-     * The connection status
-     *
-     * @return true if connection to ServiceRepository succeeded
-     */
-    public boolean succeeded() {
-        return succeeded;
-    }
+  /**
+   * The connection status
+   *
+   * @return true if connection to ServiceRepository succeeded
+   */
+  public boolean succeeded() {
+    return succeeded;
+  }
 
-    /**
-     * The connection status
-     *
-     * @return true if connection to ServiceRepository NOT succeeded
-     */
-    public boolean failed() {
-        return !succeeded;
-    }
+  /**
+   * The connection status
+   *
+   * @return true if connection to ServiceRepository NOT succeeded
+   */
+  public boolean failed() {
+    return !succeeded;
+  }
 
-    /**
-     * Returns the failure cause
-     *
-     * @return The failure cause when connection to ServiceRegistry was not successful
-     */
-    public Throwable getCause() {
-        return cause;
-    }
+  /**
+   * Returns the failure cause
+   *
+   * @return The failure cause when connection to ServiceRegistry was not successful
+   */
+  public Throwable getCause() {
+    return cause;
+  }
 
-    /**
-     * Returns true if result was created during error handling
-     *
-     * @return true if error occured
-     */
-    public boolean handledError() {
-        return errorHandling;
-    }
+  /**
+   * Returns true if result was created during error handling
+   *
+   * @return true if error occured
+   */
+  public boolean handledError() {
+    return errorHandling;
+  }
 
 }

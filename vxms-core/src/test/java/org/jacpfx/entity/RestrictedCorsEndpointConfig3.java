@@ -11,16 +11,18 @@ import org.jacpfx.common.configuration.EndpointConfiguration;
 public class RestrictedCorsEndpointConfig3 implements EndpointConfiguration {
 
 
-    public void corsHandler(Router router) {
-        router.route("/stringGETResponseSyncAsync*").handler(CorsHandler.create("http://example.com").
-                allowedMethod(io.vertx.core.http.HttpMethod.GET).
-                allowedMethod(io.vertx.core.http.HttpMethod.POST).
-                allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).
-                allowedMethod(io.vertx.core.http.HttpMethod.PUT).
-                allowedMethod(io.vertx.core.http.HttpMethod.DELETE).
-                allowedHeader("Content-Type").
-                allowedHeader("X-Requested-With"));
-    }
+  public void corsHandler(Router router) {
+    router.route("/stringGETResponseSyncAsync*").handler(CorsHandler.create("http://example.com").
+        allowedMethod(io.vertx.core.http.HttpMethod.GET).
+        allowedMethod(io.vertx.core.http.HttpMethod.POST).
+        allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).
+        allowedMethod(io.vertx.core.http.HttpMethod.PUT).
+        allowedMethod(io.vertx.core.http.HttpMethod.DELETE).
+        allowedHeader("Content-Type").
+        allowedHeader("X-Requested-With"));
+  }
 
-    public BodyHandler bodyHandler() {return BodyHandler.create();}
+  public BodyHandler bodyHandler() {
+    return BodyHandler.create();
+  }
 }

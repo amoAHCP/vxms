@@ -10,6 +10,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.InvocationCallback;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.common.util.Serializer;
 import org.jacpfx.entity.Payload;
@@ -20,456 +31,460 @@ import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
 public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTestBase {
-    private final static int MAX_RESPONSE_ELEMENTS = 4;
-    public static final String SERVICE_REST_GET = "/wsService";
-    private static final String HOST = "127.0.0.1";
-    public static final int PORT = 9998;
-    public static final int PORT2 = 9999;
-    public static final int PORT3 = 9991;
 
-    protected int getNumNodes() {
-        return 1;
-    }
+  public static final String SERVICE_REST_GET = "/wsService";
+  public static final int PORT = 9998;
+  public static final int PORT2 = 9999;
+  public static final int PORT3 = 9991;
+  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final String HOST = "127.0.0.1";
+  private HttpClient client;
 
-    protected Vertx getVertx() {
-        return vertices[0];
-    }
+  protected int getNumNodes() {
+    return 1;
+  }
 
-    @Override
-    protected ClusterManager getClusterManager() {
-        return new FakeClusterManager();
-    }
+  protected Vertx getVertx() {
+    return vertices[0];
+  }
 
+  @Override
+  protected ClusterManager getClusterManager() {
+    return new FakeClusterManager();
+  }
 
-    private HttpClient client;
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    startNodes(getNumNodes());
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        startNodes(getNumNodes());
+  }
 
-    }
+  @Before
+  public void startVerticles() throws InterruptedException {
 
-    @Before
-    public void startVerticles() throws InterruptedException {
+    CountDownLatch latch2 = new CountDownLatch(3);
+    DeploymentOptions options = new DeploymentOptions().setInstances(1);
+    options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // don'failure have to hardecode it in your tests
 
+    getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
+      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+      System.out.println("start service: " + asyncResult.succeeded());
+      assertTrue(asyncResult.succeeded());
+      assertNotNull("deploymentID should not be null", asyncResult.result());
+      // If deployed correctly then start the tests!
+      //   latch2.countDown();
 
-        CountDownLatch latch2 = new CountDownLatch(3);
-        DeploymentOptions options = new DeploymentOptions().setInstances(1);
-        options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-        // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
-        // don'failure have to hardecode it in your tests
+      latch2.countDown();
 
+    });
+    getVertx().deployVerticle(new TestVerticle(), options, asyncResult -> {
+      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+      System.out.println("start service: " + asyncResult.succeeded());
+      assertTrue(asyncResult.succeeded());
+      assertNotNull("deploymentID should not be null", asyncResult.result());
+      // If deployed correctly then start the tests!
+      //   latch2.countDown();
 
-        getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
-            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
-            assertTrue(asyncResult.succeeded());
-            assertNotNull("deploymentID should not be null", asyncResult.result());
-            // If deployed correctly then start the tests!
-            //   latch2.countDown();
+      latch2.countDown();
 
-            latch2.countDown();
+    });
+    getVertx().deployVerticle(new TestErrorVerticle(), options, asyncResult -> {
+      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+      System.out.println("start service: " + asyncResult.succeeded());
+      assertTrue(asyncResult.succeeded());
+      assertNotNull("deploymentID should not be null", asyncResult.result());
+      // If deployed correctly then start the tests!
+      //   latch2.countDown();
 
-        });
-        getVertx().deployVerticle(new TestVerticle(), options, asyncResult -> {
-            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
-            assertTrue(asyncResult.succeeded());
-            assertNotNull("deploymentID should not be null", asyncResult.result());
-            // If deployed correctly then start the tests!
-            //   latch2.countDown();
+      latch2.countDown();
 
-            latch2.countDown();
+    });
 
-        });
-        getVertx().deployVerticle(new TestErrorVerticle(), options, asyncResult -> {
-            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-            System.out.println("start service: " + asyncResult.succeeded());
-            assertTrue(asyncResult.succeeded());
-            assertNotNull("deploymentID should not be null", asyncResult.result());
-            // If deployed correctly then start the tests!
-            //   latch2.countDown();
+    client = getVertx().
+        createHttpClient(new HttpClientOptions());
+    awaitLatch(latch2);
 
-            latch2.countDown();
-
-        });
-
-
-        client = getVertx().
-                createHttpClient(new HttpClientOptions());
-        awaitLatch(latch2);
-
-    }
+  }
 
 
-    @Test
+  @Test
 
-    public void simpleSyncNoConnectionErrorResponseTest() throws InterruptedException {
-        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-        CountDownLatch latch = new CountDownLatch(1);
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponse");
-        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+  public void simpleSyncNoConnectionErrorResponseTest() throws InterruptedException {
+    System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+    CountDownLatch latch = new CountDownLatch(1);
+    Client client = ClientBuilder.newClient();
+    WebTarget target = client.target("http://" + HOST + ":" + PORT2)
+        .path("/wsService/simpleSyncNoConnectionErrorResponse");
+    Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+        .get(new InvocationCallback<byte[]>() {
 
-            @Override
-            public void completed(byte[] response) {
-                System.out.println("Response entity '" + response + "' received.");
+          @Override
+          public void completed(byte[] response) {
+            System.out.println("Response entity '" + response + "' received.");
 
-                vertx.runOnContext(h -> {
-                    Payload<String> pp = null;
-                    try {
-                        pp = (Payload<String>) Serializer.deserialize(response);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    assertEquals(pp.getValue(), "No handlers for address hello1");
-                });
-                latch.countDown();
-            }
+            vertx.runOnContext(h -> {
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize(response);
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), "No handlers for address hello1");
+            });
+            latch.countDown();
+          }
 
-            @Override
-            public void failed(Throwable throwable) {
-                throwable.printStackTrace();
-            }
+          @Override
+          public void failed(Throwable throwable) {
+            throwable.printStackTrace();
+          }
         });
 
-        latch.await();
-        testComplete();
+    latch.await();
+    testComplete();
 
-    }
+  }
 
 
-    @Test
+  @Test
 
-    public void simpleSyncNoConnectionAndExceptionErrorResponse() throws InterruptedException {
-        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-        CountDownLatch latch = new CountDownLatch(1);
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponse");
-        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+  public void simpleSyncNoConnectionAndExceptionErrorResponse() throws InterruptedException {
+    System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+    CountDownLatch latch = new CountDownLatch(1);
+    Client client = ClientBuilder.newClient();
+    WebTarget target = client.target("http://" + HOST + ":" + PORT2)
+        .path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponse");
+    Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+        .get(new InvocationCallback<byte[]>() {
 
-            @Override
-            public void completed(byte[] response) {
-                System.out.println("Response entity '" + response + "' received.");
+          @Override
+          public void completed(byte[] response) {
+            System.out.println("Response entity '" + response + "' received.");
 
-                vertx.runOnContext(h -> {
-                    Payload<String> pp = null;
-                    try {
-                        pp = (Payload<String>) Serializer.deserialize(response);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    assertEquals( "fallback response nullpointer in onFailureRespond",pp.getValue());
-                });
-                latch.countDown();
-            }
+            vertx.runOnContext(h -> {
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize(response);
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals("fallback response nullpointer in onFailureRespond", pp.getValue());
+            });
+            latch.countDown();
+          }
 
-            @Override
-            public void failed(Throwable throwable) {
-                throwable.printStackTrace();
-            }
+          @Override
+          public void failed(Throwable throwable) {
+            throwable.printStackTrace();
+          }
         });
 
-        latch.await();
-        testComplete();
+    latch.await();
+    testComplete();
 
-    }
+  }
 
-    @Test
+  @Test
 
-    public void simpleSyncNoConnectionAndExceptionErrorResponseFail() throws InterruptedException {
-        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-        CountDownLatch latch = new CountDownLatch(1);
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponseFail");
-        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+  public void simpleSyncNoConnectionAndExceptionErrorResponseFail() throws InterruptedException {
+    System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+    CountDownLatch latch = new CountDownLatch(1);
+    Client client = ClientBuilder.newClient();
+    WebTarget target = client.target("http://" + HOST + ":" + PORT2)
+        .path("/wsService/simpleSyncNoConnectionAndExceptionErrorResponseFail");
+    Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+        .get(new InvocationCallback<byte[]>() {
 
-            @Override
-            public void completed(byte[] response) {
+          @Override
+          public void completed(byte[] response) {
 
-            }
+          }
 
-            @Override
-            public void failed(Throwable throwable) {
+          @Override
+          public void failed(Throwable throwable) {
 
-                vertx.runOnContext(h -> {
-                    assertEquals("javax.ws.rs.InternalServerErrorException: HTTP 500 nullpointer in onFailureRespond", throwable.getMessage());
-                });
-                latch.countDown();
-                throwable.printStackTrace();
-            }
+            vertx.runOnContext(h -> {
+              assertEquals(
+                  "javax.ws.rs.InternalServerErrorException: HTTP 500 nullpointer in onFailureRespond",
+                  throwable.getMessage());
+            });
+            latch.countDown();
+            throwable.printStackTrace();
+          }
         });
 
-        latch.await();
-        testComplete();
+    latch.await();
+    testComplete();
 
-    }
+  }
 
-    @Test
+  @Test
 
-    public void simpleSyncNoConnectionErrorResponseStateful() throws InterruptedException {
-        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-        CountDownLatch latch = new CountDownLatch(1);
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
-        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+  public void simpleSyncNoConnectionErrorResponseStateful() throws InterruptedException {
+    System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+    CountDownLatch latch = new CountDownLatch(1);
+    Client client = ClientBuilder.newClient();
+    WebTarget target = client.target("http://" + HOST + ":" + PORT2)
+        .path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
+    Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+        .get(new InvocationCallback<byte[]>() {
 
-            @Override
-            public void completed(byte[] response) {
-                System.out.println("Response entity '" + response + "' received.");
+          @Override
+          public void completed(byte[] response) {
+            System.out.println("Response entity '" + response + "' received.");
 
-                vertx.runOnContext(h -> {
-                    Payload<String> pp = null;
-                    try {
-                        pp = (Payload<String>) Serializer.deserialize(response);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    assertEquals(pp.getValue(), "No handlers for address hello1");
+            vertx.runOnContext(h -> {
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize(response);
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), "No handlers for address hello1");
 
-                    vertx.setTimer(1000, val -> {
-                        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
-                        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
+              vertx.setTimer(1000, val -> {
+                WebTarget target = client.target("http://" + HOST + ":" + PORT2)
+                    .path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
+                Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+                    .get(new InvocationCallback<byte[]>() {
 
-                            @Override
-                            public void completed(byte[] response) {
-                                System.out.println("Response entity '" + response + "' received.");
+                      @Override
+                      public void completed(byte[] response) {
+                        System.out.println("Response entity '" + response + "' received.");
 
-                                vertx.runOnContext(h -> {
-                                    Payload<String> pp = null;
-                                    try {
+                        vertx.runOnContext(h -> {
+                          Payload<String> pp = null;
+                          try {
+                            pp = (Payload<String>) Serializer.deserialize(response);
+                          } catch (IOException e) {
+                            e.printStackTrace();
+                          } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                          }
+                          assertEquals(pp.getValue(), "circuit open");
+
+                          vertx.setTimer(2000, val -> {
+                            WebTarget target = client.target("http://" + HOST + ":" + PORT2)
+                                .path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
+                            Future<byte[]> getCallback = target
+                                .request(MediaType.APPLICATION_JSON_TYPE).async()
+                                .get(new InvocationCallback<byte[]>() {
+
+                                  @Override
+                                  public void completed(byte[] response) {
+                                    System.out
+                                        .println("Response entity '" + response + "' received.");
+
+                                    vertx.runOnContext(h -> {
+                                      Payload<String> pp = null;
+                                      try {
                                         pp = (Payload<String>) Serializer.deserialize(response);
-                                    } catch (IOException e) {
+                                      } catch (IOException e) {
                                         e.printStackTrace();
-                                    } catch (ClassNotFoundException e) {
+                                      } catch (ClassNotFoundException e) {
                                         e.printStackTrace();
-                                    }
-                                    assertEquals(pp.getValue(), "circuit open");
-
-                                    vertx.setTimer(2000, val -> {
-                                        WebTarget target = client.target("http://" + HOST + ":" + PORT2).path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
-                                        Future<byte[]> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<byte[]>() {
-
-                                            @Override
-                                            public void completed(byte[] response) {
-                                                System.out.println("Response entity '" + response + "' received.");
-
-                                                vertx.runOnContext(h -> {
-                                                    Payload<String> pp = null;
-                                                    try {
-                                                        pp = (Payload<String>) Serializer.deserialize(response);
-                                                    } catch (IOException e) {
-                                                        e.printStackTrace();
-                                                    } catch (ClassNotFoundException e) {
-                                                        e.printStackTrace();
-                                                    }
-                                                    assertEquals(pp.getValue(), "No handlers for address hello1");
-                                                });
-                                                latch.countDown();
-                                            }
-
-                                            @Override
-                                            public void failed(Throwable throwable) {
-                                                throwable.printStackTrace();
-                                            }
-                                        });
+                                      }
+                                      assertEquals(pp.getValue(), "No handlers for address hello1");
                                     });
+                                    latch.countDown();
+                                  }
+
+                                  @Override
+                                  public void failed(Throwable throwable) {
+                                    throwable.printStackTrace();
+                                  }
                                 });
-
-
-                            }
-
-                            @Override
-                            public void failed(Throwable throwable) {
-                                throwable.printStackTrace();
-                            }
+                          });
                         });
+
+
+                      }
+
+                      @Override
+                      public void failed(Throwable throwable) {
+                        throwable.printStackTrace();
+                      }
                     });
-                });
+              });
+            });
 
 
-            }
+          }
 
-            @Override
-            public void failed(Throwable throwable) {
-                throwable.printStackTrace();
-            }
+          @Override
+          public void failed(Throwable throwable) {
+            throwable.printStackTrace();
+          }
         });
 
-        latch.await();
-        testComplete();
+    latch.await();
+    testComplete();
 
+  }
+
+
+  public HttpClient getClient() {
+    return client;
+  }
+
+
+  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT2)
+  public class WsServiceTwo extends VxmsEndpoint {
+
+
+    @Path("/simpleSyncNoConnectionErrorResponse")
+    @GET
+    public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
+      System.out.println("-------1");
+      reply.eventBusRequest().
+          blocking().
+          send("hello1", "welt").
+          mapToObjectResponse((handler) -> {
+            System.out.println("value from event  ");
+            return new Payload<String>(handler.result().body().toString());
+          }, new ExampleByteEncoder()).
+          onError(error -> {
+            System.out.println(":::" + error.getMessage());
+          }).
+          retry(3).
+          onFailureRespond((t) -> new Payload<String>(t.getMessage()), new ExampleByteEncoder()).
+          execute();
+      System.out.println("-------2");
+    }
+
+    @Path("/simpleSyncNoConnectionAndExceptionErrorResponse")
+    @GET
+    public void simpleSyncNoConnectionAndExceptionErrorResponse(RestHandler reply) {
+      System.out.println("-------1");
+      reply.eventBusRequest().
+          blocking().
+          send("hello1", "welt").
+          mapToObjectResponse((handler) -> {
+            System.out.println("value from event  ");
+            return new Payload<String>(handler.result().body().toString());
+          }, new ExampleByteEncoder()).
+          onError(error -> {
+            System.out.println(":::" + error.getMessage());
+          }).
+          retry(3).
+          onFailureRespond((t) -> {
+            throw new NullPointerException("nullpointer in onFailureRespond");
+          }, new ExampleByteEncoder()).
+          execute();
+      System.out.println("-------2");
+    }
+
+    @OnRestError("/simpleSyncNoConnectionAndExceptionErrorResponse")
+    @GET
+    public void simpleSyncNoConnectionAndExceptionErrorResponseOnFail(RestHandler reply,
+        Throwable tt) {
+      System.out.println("-------1");
+      reply.response().
+          blocking().
+          objectResponse(() -> new Payload<>("fallback response " + tt.getMessage()),
+              new ExampleByteEncoder()).
+          onError(error -> {
+            System.out.println(":::" + error.getMessage());
+          }).
+          retry(3).
+          onFailureRespond((t) -> new Payload<>(t.getMessage()), new ExampleByteEncoder()).
+          execute();
+      System.out.println("-------2");
     }
 
 
-    public HttpClient getClient() {
-        return client;
+    @Path("/simpleSyncNoConnectionAndExceptionErrorResponseFail")
+    @GET
+    public void simpleSyncNoConnectionAndExceptionErrorResponseFail(RestHandler reply) {
+      System.out.println("-------1");
+      reply.eventBusRequest().
+          blocking().
+          send("hello1", "welt").
+          mapToObjectResponse((handler) -> {
+            System.out.println("value from event  ");
+            return new Payload<String>(handler.result().body().toString());
+          }, new ExampleByteEncoder()).
+          onError(error -> {
+            System.out.println(":::" + error.getMessage());
+          }).
+          retry(3).
+          onFailureRespond((t) -> {
+            throw new NullPointerException("nullpointer in onFailureRespond");
+          }, new ExampleByteEncoder()).
+          execute();
+      System.out.println("-------2");
+    }
+
+    @Path("/simpleSyncNoConnectionErrorResponseStateful")
+    @GET
+    public void simpleSyncNoConnectionErrorResponseStateful(RestHandler reply) {
+      System.out.println("-------1");
+      reply.eventBusRequest().
+          blocking().
+          send("hello1", "welt").
+          mapToObjectResponse((handler) -> {
+            System.out.println("value from event  ");
+            return new Payload<>(handler.result().body().toString());
+          }, new ExampleByteEncoder()).
+          onError(error -> {
+            System.out.println(":::" + error.getMessage());
+          }).
+          retry(3).
+          closeCircuitBreaker(2000).
+          onFailureRespond((t) -> new Payload<>(t.getMessage()), new ExampleByteEncoder()).
+          execute();
+      System.out.println("-------2");
     }
 
 
-    @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT2)
-    public class WsServiceTwo extends VxmsEndpoint {
+  }
 
 
-        @Path("/simpleSyncNoConnectionErrorResponse")
-        @GET
-        public void simpleSyncNoConnectionErrorResponse(RestHandler reply) {
-            System.out.println("-------1");
-            reply.eventBusRequest().
-                    blocking().
-                    send("hello1", "welt").
-                    mapToObjectResponse((handler) -> {
-                        System.out.println("value from event  ");
-                        return new Payload<String>(handler.result().body().toString());
-                    },new ExampleByteEncoder()).
-                    onError(error -> {
-                        System.out.println(":::" + error.getMessage());
-                    }).
-                    retry(3).
-                    onFailureRespond((t) -> new Payload<String>(t.getMessage()),new ExampleByteEncoder()).
-                    execute();
-            System.out.println("-------2");
-        }
+  public class TestVerticle extends AbstractVerticle {
 
-        @Path("/simpleSyncNoConnectionAndExceptionErrorResponse")
-        @GET
-        public void simpleSyncNoConnectionAndExceptionErrorResponse(RestHandler reply) {
-            System.out.println("-------1");
-            reply.eventBusRequest().
-                    blocking().
-                    send("hello1", "welt").
-                    mapToObjectResponse((handler) -> {
-                        System.out.println("value from event  ");
-                        return new Payload<String>(handler.result().body().toString());
-                    },new ExampleByteEncoder()).
-                    onError(error -> {
-                        System.out.println(":::" + error.getMessage());
-                    }).
-                    retry(3).
-                    onFailureRespond((t) -> {
-                        throw new NullPointerException("nullpointer in onFailureRespond");
-                    },new ExampleByteEncoder()).
-                    execute();
-            System.out.println("-------2");
-        }
-
-        @OnRestError("/simpleSyncNoConnectionAndExceptionErrorResponse")
-        @GET
-        public void simpleSyncNoConnectionAndExceptionErrorResponseOnFail(RestHandler reply, Throwable tt) {
-            System.out.println("-------1");
-            reply.response().
-                    blocking().
-                    objectResponse(() -> new Payload<>("fallback response "+tt.getMessage()),new ExampleByteEncoder()).
-                    onError(error -> {
-                        System.out.println(":::" + error.getMessage());
-                    }).
-                    retry(3).
-                    onFailureRespond((t) -> new Payload<>(t.getMessage()),new ExampleByteEncoder()).
-                    execute();
-            System.out.println("-------2");
-        }
-
-
-        @Path("/simpleSyncNoConnectionAndExceptionErrorResponseFail")
-        @GET
-        public void simpleSyncNoConnectionAndExceptionErrorResponseFail(RestHandler reply) {
-            System.out.println("-------1");
-            reply.eventBusRequest().
-                    blocking().
-                    send("hello1", "welt").
-                    mapToObjectResponse((handler) -> {
-                        System.out.println("value from event  ");
-                        return new Payload<String>(handler.result().body().toString());
-                    },new ExampleByteEncoder()).
-                    onError(error -> {
-                        System.out.println(":::" + error.getMessage());
-                    }).
-                    retry(3).
-                    onFailureRespond((t) -> {
-                        throw new NullPointerException("nullpointer in onFailureRespond");
-                    },new ExampleByteEncoder()).
-                    execute();
-            System.out.println("-------2");
-        }
-
-        @Path("/simpleSyncNoConnectionErrorResponseStateful")
-        @GET
-        public void simpleSyncNoConnectionErrorResponseStateful(RestHandler reply) {
-            System.out.println("-------1");
-            reply.eventBusRequest().
-                    blocking().
-                    send("hello1", "welt").
-                    mapToObjectResponse((handler) -> {
-                        System.out.println("value from event  ");
-                        return new Payload<>(handler.result().body().toString());
-                    },new ExampleByteEncoder()).
-                    onError(error -> {
-                        System.out.println(":::" + error.getMessage());
-                    }).
-                    retry(3).
-                    closeCircuitBreaker(2000).
-                    onFailureRespond((t) -> new Payload<>(t.getMessage()),new ExampleByteEncoder()).
-                    execute();
-            System.out.println("-------2");
-        }
-
-
+    public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+      System.out.println("start");
+      vertx.eventBus().consumer("hello", handler -> {
+        System.out.println("request::" + handler.body().toString());
+        handler.reply("hello");
+      });
+      startFuture.complete();
     }
+  }
 
+  public class TestErrorVerticle extends AbstractVerticle {
 
-    public class TestVerticle extends AbstractVerticle {
-        public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-            System.out.println("start");
-            vertx.eventBus().consumer("hello", handler -> {
-                System.out.println("request::" + handler.body().toString());
-                handler.reply("hello");
-            });
-            startFuture.complete();
+    private AtomicLong counter = new AtomicLong(0L);
+
+    public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+      System.out.println("start");
+      vertx.eventBus().consumer("error", handler -> {
+        System.out.println("request::" + handler.body().toString());
+        if (counter.incrementAndGet() % 3 == 0) {
+          System.out.println("reply::" + handler.body().toString());
+          handler.reply("hello");
+        } else {
+          System.out.println("fail::" + handler.body().toString());
+          handler.fail(500, "my error");
         }
+
+      });
+      startFuture.complete();
     }
-
-    public class TestErrorVerticle extends AbstractVerticle {
-        private AtomicLong counter = new AtomicLong(0L);
-
-        public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-            System.out.println("start");
-            vertx.eventBus().consumer("error", handler -> {
-                System.out.println("request::" + handler.body().toString());
-                if (counter.incrementAndGet() % 3 == 0) {
-                    System.out.println("reply::" + handler.body().toString());
-                    handler.reply("hello");
-                } else {
-                    System.out.println("fail::" + handler.body().toString());
-                    handler.fail(500, "my error");
-                }
-
-            });
-            startFuture.complete();
-        }
-    }
+  }
 
 
 }

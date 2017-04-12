@@ -28,9 +28,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EndpointConfig {
-    /**
-     * The Class of type EndpointConfiguration defining the custom Endpoint configuration
-     * @return Class implementing EndpointConfiguration
-     */
-    Class<? extends EndpointConfiguration> value();
+
+  /**
+   * The Class of type EndpointConfiguration defining the custom Endpoint configuration
+   *
+   * @return Class implementing EndpointConfiguration
+   */
+  Class<? extends EndpointConfiguration> value();
 }

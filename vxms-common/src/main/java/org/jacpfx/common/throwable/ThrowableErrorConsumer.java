@@ -24,12 +24,12 @@ import io.vertx.core.Future;
  */
 public interface ThrowableErrorConsumer<T, R> {
 
-    /**
-     * Performs this operation on the given argument.
-     *
-     * @param error,          the error
-     * @param operationResult the input argument
-     * @throws Throwable the throwable
-     */
-    void accept(T error, Future<R> operationResult) throws Throwable;
+  /**
+   * Performs this operation on the given argument.
+   *
+   * @param error, the error
+   * @param operationResult the input argument
+   * @throws Throwable the throwable
+   */
+  void accept(T error, Future<R> operationResult) throws Throwable;
 }

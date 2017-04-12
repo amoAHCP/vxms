@@ -22,14 +22,14 @@ import io.vertx.core.Future;
  * Created by Andy Moncsek on 21.01.16.
  * A bi function that throws a throwable, so vxms can handle the exceptions
  */
-public interface ThrowableFutureBiConsumer<H,T> {
+public interface ThrowableFutureBiConsumer<H, T> {
 
-    /**
-     * Performs this operation on the given argument.
-     *
-     * @param operationResult the input argument
-     * @param handler the input argument
-     * @throws Throwable the throwable
-     */
-    void accept(H handler, Future<T> operationResult) throws Throwable;
+  /**
+   * Performs this operation on the given argument.
+   *
+   * @param operationResult the input argument
+   * @param handler the input argument
+   * @throws Throwable the throwable
+   */
+  void accept(H handler, Future<T> operationResult) throws Throwable;
 }

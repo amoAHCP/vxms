@@ -16,7 +16,11 @@
 
 package org.jacpfx.vertx.event.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -26,9 +30,11 @@ import java.lang.annotation.*;
  * Defines an eventbus consumer id
  */
 public @interface Consume {
-    /**
-     * The consumer ID
-     * @return the ID
-     */
-    String value();
+
+  /**
+   * The consumer ID
+   *
+   * @return the ID
+   */
+  String value();
 }

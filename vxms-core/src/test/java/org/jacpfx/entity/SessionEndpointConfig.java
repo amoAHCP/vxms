@@ -14,18 +14,18 @@ import org.jacpfx.common.configuration.EndpointConfiguration;
 public class SessionEndpointConfig implements EndpointConfiguration {
 
 
-    public void sessionHandler(Vertx vertx, Router router) {
-        // Create a clustered session store using defaults
-        SessionStore store = LocalSessionStore.create(vertx, "xyz");
+  public void sessionHandler(Vertx vertx, Router router) {
+    // Create a clustered session store using defaults
+    SessionStore store = LocalSessionStore.create(vertx, "xyz");
 
-        SessionHandler sessionHandler = SessionHandler.create(store);
+    SessionHandler sessionHandler = SessionHandler.create(store);
 
-        // Make sure all requests are routed through the session handler too
-        router.route().handler(sessionHandler);
+    // Make sure all requests are routed through the session handler too
+    router.route().handler(sessionHandler);
 
-    }
+  }
 
-    public BodyHandler bodyHandler() {
-        return BodyHandler.create();
-    }
+  public BodyHandler bodyHandler() {
+    return BodyHandler.create();
+  }
 }
