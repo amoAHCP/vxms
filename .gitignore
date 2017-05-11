@@ -15,8 +15,8 @@ build
 target
 file-uploads
 .vertx
-vxms-demos/vxms-petshop-demo/*
-vxms-demos/vxms-petshop-demo/
+docker-compose.yml
+Dockerfile
 vxms-demos/vxms-stream-demo
 vxms-demos/vxms-test
 vxms-demos/vxms-test/*

@@ -20,10 +20,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jacpfx</groupId>
-    <artifactId>vxms-container-demo</artifactId>
+    <artifactId>vxms-container-eventbus-demo</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>vxms-container-demo</name>
+    <name>vxms-container-eventbus-demo</name>
     <url>http://maven.apache.org</url>
 
     <parent>

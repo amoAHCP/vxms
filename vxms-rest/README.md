@@ -148,7 +148,26 @@ with the *@OnRestError* annotation. This annotation **must** contain the same RE
 
 ## circuit breaker
 Vxms has a simple built-in circuit breaker with two states: open and closed. Currently the circuit beaker is locking each Verticle instance separately. In further releases a locking on JVM Process & Cluster wide is planned. 
-To activate the circuit breaker you need first to define a *retry(int amount)* amount on the fluent API and than you can set the *closeCircuitBreaker(long ms)* time before the circuit breaker will close again. Each request inbetween this time will automatically execute the *onFailureResponse* method, 
+To activate the circuit breaker you need first to define a **retry(int amount)** amount on the fluent API and than you can set the **closeCircuitBreaker(long ms)** time before the circuit breaker will close again. Each request inbetween this time will automatically execute the *onFailureResponse* method, 
 without evaluating the *mapTo...* method. Be aware, when you have N instances of your Verticle, each of them counts individually. 
 
-## event bus bridge
+## event-bus bridge
+The "org.jacpfx.vertx.rest.response.RestHandler" has a build-in event-bus bridge. The idea is, that on each REST request, you can send a message via (Vert.x) event-bus and map the response to the original REST response. 
+This way, you can easily build gateways to connect REST application with event-driven Vert.x (or vxms) services (locally or in a cluster). The event-bus result message can be mapped to String, Object or byte[] like any other response. 
+
+
+```java
+    @Path("/helloGET/:name")
+    @GET
+    public void simpleREST(RestHandler handler) {
+
+        handler.
+            eventBusRequest().
+            send("target.id", "message").
+            mapToStringResponse((result, future) -> {
+              Message<Object> message = result.result();
+              future.complete("hello " + message.body().toString());
+            }).execute();
+    }
+
+```
