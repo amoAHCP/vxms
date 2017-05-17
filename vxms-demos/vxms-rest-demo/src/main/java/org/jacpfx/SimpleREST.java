@@ -49,13 +49,6 @@ public class SimpleREST extends VxmsEndpoint {
   public void simpleRESTHelloWithParameter(RestHandler handler) {
 
     handler.
-        eventBusRequest().
-        send("target.id", "message").
-        mapToStringResponse((result, future) -> {
-          Message<Object> message = result.result();
-          future.complete("hello " + message.body().toString());
-        }).execute();
-    handler.
         response().
         stringResponse((response) ->
             response.complete("hello World " + handler.request().param("name"))).

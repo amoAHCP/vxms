@@ -7,7 +7,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
     
 ## maven dependencies
 
-### vxms-core
+### vxms-core  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-core)
 ```xml
  <dependency>
       <groupId>org.jacpfx</groupId>
@@ -15,7 +15,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
       <version>1.0-SNAPSHOT</version>
  </dependency>
 ```   
-### vxms-rest
+### vxms-rest  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-rest)
 ```xml   
   <dependency>
        <groupId>org.jacpfx</groupId>
@@ -23,7 +23,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
        <version>1.0-SNAPSHOT</version>
   </dependency>
 ```   
-### vxms-event bus
+### vxms-event bus  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-event)
 ```xml
  <dependency>
         <groupId>org.jacpfx</groupId>

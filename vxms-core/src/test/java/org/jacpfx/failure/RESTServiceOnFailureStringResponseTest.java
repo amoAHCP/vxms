@@ -91,18 +91,12 @@ public class RESTServiceOnFailureStringResponseTest extends VertxTestBase {
         createHttpClient(options);
 
     HttpClientRequest request = client
-        .get("/wsService/simpleOnFailureResponse", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println("--------catchedAsyncByteErrorDelay: " + val);
-              assertEquals("on failure", val);
-              testComplete();
-            });
-
-
-          }
-        });
+        .get("/wsService/simpleOnFailureResponse", resp -> resp.bodyHandler(body -> {
+          String val = body.getString(0, body.length());
+          System.out.println("--------catchedAsyncByteErrorDelay: " + val);
+          assertEquals("on failure", val);
+          testComplete();
+        }));
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);

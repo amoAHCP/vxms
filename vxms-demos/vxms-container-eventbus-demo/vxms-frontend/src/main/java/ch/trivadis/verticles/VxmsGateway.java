@@ -75,7 +75,6 @@ public class VxmsGateway extends VxmsEndpoint {
     @Path("/api/users")
     @GET
     public void userGet(RestHandler handler) {
-        handler.response().stringResponse(e -> e.complete("")).onFailureRespond((error,future)-> future.complete(""));
         handler.
                 eventBusRequest().
                 send("/read/api/users-GET", "").
