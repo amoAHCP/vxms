@@ -1,1 +1,0 @@
-# this module is not part of 1.0 release

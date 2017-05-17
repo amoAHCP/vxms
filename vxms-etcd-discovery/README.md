@@ -1,1 +1,0 @@
-# vxms etcd discovery module

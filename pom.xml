@@ -80,9 +80,6 @@
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
-                <module>vxms-websocket</module>
-                <module>vxms-etcd-discovery</module>
-                <module>vxms-service-discovery</module>
             </modules>
         </profile>
         <profile>

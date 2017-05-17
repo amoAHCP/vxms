@@ -45,13 +45,6 @@
     </dependency>
     <dependency>
       <groupId>org.jacpfx</groupId>
-      <artifactId>vxms-etcd-discovery</artifactId>
-      <version>${parent.version}</version>
-      <scope>test</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.jacpfx</groupId>
       <artifactId>vxms-rest</artifactId>
       <version>${parent.version}</version>
       <scope>test</scope>
@@ -59,12 +52,6 @@
     <dependency>
       <groupId>org.jacpfx</groupId>
       <artifactId>vxms-event</artifactId>
-      <version>${parent.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jacpfx</groupId>
-      <artifactId>vxms-websocket</artifactId>
       <version>${parent.version}</version>
       <scope>test</scope>
     </dependency>
