@@ -29,7 +29,7 @@ public class RESTExample extends VxmsEndpoint {
     public void simpleNonBlocking(RestHandler handler) {
        handler.
                  response().
-                 stringResponse((response)->
+                 stringResponse(response->
 	                 response.complete("simple response")).
                  execute();
 		}

@@ -65,8 +65,8 @@ public class VxmsGateway extends VxmsEndpoint {
     // init service discovery
     Fabric8DiscoveryClient.
         builder().
-        apiToken(null)
-        .masterUrl(Fabric8DiscoveryClient.DEFAULT_MASTER_URL).
+        apiToken(null).
+        masterUrl(Fabric8DiscoveryClient.DEFAULT_MASTER_URL).
         namespace(Fabric8DiscoveryClient.DEFAULT_NAMESPACE).
         resolveAnnotations(this);
 
