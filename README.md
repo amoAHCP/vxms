@@ -134,7 +134,6 @@ public class EventbusExample extends VxmsEndpoint {
                       timeout(2000). // timeout for stringResponse handling. If timeout is reached, error handling will be executed
                       onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
                       onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
-                      httpErrorCode(HttpResponseStatus.BAD_REQUEST). // http error code in case of onFailureRespond will be executed
                       retry(3). // amount of retries before onFailureRespond will be executed
                       closeCircuitBreaker(2000). // time after circuit breaker will be closed again. While opened, onFailureRespond will be executed on request
                       execute(); // execute non blocking
