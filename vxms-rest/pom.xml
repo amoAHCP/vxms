@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-RC2</version>
     <relativePath>../</relativePath>
   </parent>
 
