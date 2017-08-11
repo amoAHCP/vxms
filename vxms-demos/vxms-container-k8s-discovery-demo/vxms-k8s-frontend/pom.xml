@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-container-k8s-discovery-demo</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-RC2</version>
         <relativePath>../</relativePath>
     </parent>
 
@@ -32,9 +32,6 @@
     <name>vxms-k8s-frontend</name>
     <url>http://maven.apache.org</url>
 
-    <properties>
-        <vxms-verticle.version>1.0-SNAPSHOT</vxms-verticle.version>
-    </properties>
 
     <dependencies>
         <dependency>

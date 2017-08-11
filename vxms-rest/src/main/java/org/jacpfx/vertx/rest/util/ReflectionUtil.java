@@ -41,7 +41,6 @@ public class ReflectionUtil {
    */
   public static Object[] invokeRESTParameters(RoutingContext context, Method method,
       Throwable failure, RestHandler handler) {
-    method.setAccessible(true);
     final java.lang.reflect.Parameter[] parameters = method.getParameters();
     final Object[] parameterResult = new Object[parameters.length];
     int i = 0;
