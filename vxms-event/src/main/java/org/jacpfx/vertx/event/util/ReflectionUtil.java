@@ -38,7 +38,6 @@ public class ReflectionUtil {
    * @return the array of parameters to pass to method invokation
    */
   public static <T> Object[] invokeParameters(Method method, Throwable t, T handler) {
-    method.setAccessible(true);
     final java.lang.reflect.Parameter[] parameters = method.getParameters();
     final Object[] parameterResult = new Object[parameters.length];
     int i = 0;

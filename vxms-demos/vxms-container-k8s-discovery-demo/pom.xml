@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-container-k8s-discovery-demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-RC2</version>
+    <version>1.0-RC3</version>
     <name>vxms-container-k8s-discovery-demo</name>
     <url>http://maven.apache.org</url>
 

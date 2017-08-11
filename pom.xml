@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-RC2</version>
+    <version>1.0-RC3</version>
     <name>vxms</name>
     <url>http://maven.apache.org</url>
 
@@ -34,16 +34,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-
         <!--Vertx module name-->
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
-
         <!--Dependency versions-->
-        <vertx.version>3.4.0</vertx.version>
-
+        <vertx.version>3.4.2</vertx.version>
         <junit.version>4.11</junit.version>
-
         <!--Plugin versions-->
         <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
@@ -222,7 +217,7 @@
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>1.4</version>
                     <configuration>
-                        <skip>true</skip>
+                        <skip>false</skip>
                     </configuration>
                 </plugin>
             </plugins>
