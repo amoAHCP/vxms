@@ -112,12 +112,17 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
   private void initNoHTTPEndpoint(Future<Void> startFuture, Router topRouter) {
+    startFuture.setHandler(result -> logStartfuture(startFuture));
     final ServiceDiscoverySpi serviceDiscovery = getServiceDiscoverySPI();
     if (serviceDiscovery != null) {
       initServiceDiscovery(serviceDiscovery, startFuture);
     } else {
       postConstruct(topRouter, startFuture);
     }
+
+  }
+
+  private void logStartfuture(Future<Void> startFuture) {
     final Throwable cause = startFuture.cause();
     String causeMessage = cause != null ? cause.getMessage() : "";
     log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
@@ -141,6 +146,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    */
   private void initHTTPEndpoint(Future<Void> startFuture, int port, String host, HttpServer server,
       Router topRouter) {
+    startFuture.setHandler(result -> logStartfuture(startFuture));
     server.requestHandler(topRouter::accept).listen(status -> {
       if (status.succeeded()) {
         log("started on PORT: " + port + " host: " + host);
@@ -154,10 +160,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
       } else {
         startFuture.fail(status.cause());
       }
-      final Throwable cause = startFuture.cause();
-      String causeMessage = cause != null ? cause.getMessage() : "";
-      log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
-          + startFuture.failed() + " message:" + causeMessage);
+
     });
   }
 

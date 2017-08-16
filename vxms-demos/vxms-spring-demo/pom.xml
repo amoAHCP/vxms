@@ -28,7 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.0-RC3</vxms.version>
+        <vxms.version>1.0-RC4</vxms.version>
         <vertx-spring-ext.version>2.0.2</vertx-spring-ext.version>
         <spring.version>4.2.1.RELEASE</spring.version>
         <main.verticle>java-spring:org.jacpfx.SimpleSpringREST</main.verticle>

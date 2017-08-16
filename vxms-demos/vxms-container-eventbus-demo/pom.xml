@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-container-eventbus-demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-RC3</version>
+    <version>1.0-RC4</version>
     <name>vxms-container-eventbus-demo</name>
     <url>http://maven.apache.org</url>
 
