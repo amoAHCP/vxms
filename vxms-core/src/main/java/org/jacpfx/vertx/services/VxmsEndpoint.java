@@ -19,7 +19,6 @@ package org.jacpfx.vertx.services;
 import static org.jacpfx.vertx.util.ServiceUtil.getEndpointConfiguration;
 import static org.jacpfx.vertx.util.ServiceUtil.getEventBusSPI;
 import static org.jacpfx.vertx.util.ServiceUtil.getRESTSPI;
-import static org.jacpfx.vertx.util.ServiceUtil.getServiceDiscoverySPI;
 import static org.jacpfx.vertx.util.ServiceUtil.getWebSocketSPI;
 
 import io.vertx.core.AbstractVerticle;
@@ -34,7 +33,6 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import java.util.Optional;
 import java.util.function.Consumer;
-import or.jacpfx.spi.ServiceDiscoverySpi;
 import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.concurrent.LocalData;
@@ -61,7 +59,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     vertx.eventBus()
         .consumer(ConfigurationUtil.getServiceName(getConfig(), this.getClass()) + "-info",
             this::info);
-    initEndpoint(startFuture);
+    initEndpoint(startFuture, this);
 
   }
 
@@ -71,13 +69,13 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    *
    * @param startFuture, the Vertx start feature
    */
-  private void initEndpoint(final Future<Void> startFuture) {
-    final Class<? extends VxmsEndpoint> serviceClass = this.getClass();
+  private void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject) {
+    final Class<? extends AbstractVerticle> serviceClass = registrationObject.getClass();
     final int port = ConfigurationUtil.getEndpointPort(getConfig(), serviceClass);
     final String host = ConfigurationUtil.getEndpointHost(getConfig(), serviceClass);
     final String contexRoot = ConfigurationUtil.getContextRoot(getConfig(), serviceClass);
     final CustomServerOptions endpointConfig = ConfigurationUtil.getEndpointOptions(serviceClass);
-    final HttpServerOptions options = endpointConfig.getServerOptions(this.getConfig());
+    final HttpServerOptions options = endpointConfig.getServerOptions(registrationObject.config());
     final HttpServer server = vertx.createHttpServer(options.setHost(host).setPort(port));
 
     final boolean secure = options.isSsl();
@@ -86,13 +84,14 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     final Router topRouter = Router.router(vertx);
     final Router subRouter = contextRootSet ? Router.router(vertx) : null;
     final Router router = contextRootSet ? subRouter : topRouter;
-    final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(this);
+    final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(
+        registrationObject);
 
     getConfig().put("secure", secure);
 
     initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
 
-    initHandlerSPIs(server, router);
+    initHandlerSPIs(server, router, registrationObject);
 
     postEndoitConfiguration(endpointConfiguration, router);
 
@@ -112,22 +111,18 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
   private void initNoHTTPEndpoint(Future<Void> startFuture, Router topRouter) {
-    final ServiceDiscoverySpi serviceDiscovery = getServiceDiscoverySPI();
-    if (serviceDiscovery != null) {
-      initServiceDiscovery(serviceDiscovery, startFuture);
-    } else {
-      postConstruct(topRouter, startFuture);
-    }
+    postConstruct(topRouter, startFuture);
     final Throwable cause = startFuture.cause();
     String causeMessage = cause != null ? cause.getMessage() : "";
     log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
         + startFuture.failed() + " message:" + causeMessage);
   }
 
-  private void initHandlerSPIs(HttpServer server, Router router) {
-    initWebSocketExtensions(server);
-    initRESTExtensions(router);
-    initEventBusExtensions();
+  private void initHandlerSPIs(HttpServer server, Router router,
+      AbstractVerticle registrationObject) {
+    initWebSocketExtensions(server, registrationObject);
+    initRESTExtensions(router, registrationObject);
+    initEventBusExtensions(registrationObject);
   }
 
   /**
@@ -144,13 +139,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     server.requestHandler(topRouter::accept).listen(status -> {
       if (status.succeeded()) {
         log("started on PORT: " + port + " host: " + host);
-        // check for Service discovery extension
-        final ServiceDiscoverySpi serviceDiscovery = getServiceDiscoverySPI();
-        if (serviceDiscovery != null) {
-          initServiceDiscovery(serviceDiscovery, startFuture);
-        } else {
-          postConstruct(topRouter, startFuture);
-        }
+        postConstruct(topRouter, startFuture);
       } else {
         startFuture.fail(status.cause());
       }
@@ -161,41 +150,30 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     });
   }
 
-  private void initRESTExtensions(Router router) {
+  private void initRESTExtensions(Router router, AbstractVerticle registrationObject) {
     // check for REST extension
     Optional.
         ofNullable(getRESTSPI()).
-        ifPresent(resthandlerSPI -> resthandlerSPI.initRESTHandler(vxmsShared, router, this));
+        ifPresent(resthandlerSPI -> resthandlerSPI
+            .initRESTHandler(vxmsShared, router, registrationObject));
   }
 
-  private void initEventBusExtensions() {
+  private void initEventBusExtensions(AbstractVerticle registrationObject) {
     // check for REST extension
     Optional.
         ofNullable(getEventBusSPI()).
-        ifPresent(eventbusHandlerSPI -> eventbusHandlerSPI.initEventHandler(vxmsShared, this));
+        ifPresent(eventbusHandlerSPI -> eventbusHandlerSPI
+            .initEventHandler(vxmsShared, registrationObject));
   }
 
-  private void initWebSocketExtensions(HttpServer server) {
+  private void initWebSocketExtensions(HttpServer server, AbstractVerticle registrationObject) {
     // check for websocket extension
     Optional.
         ofNullable(getWebSocketSPI()).
         ifPresent(webSockethandlerSPI -> webSockethandlerSPI
-            .registerWebSocketHandler(server, vertx, getConfig(), this));
+            .registerWebSocketHandler(server, vertx, getConfig(), registrationObject));
   }
 
-
-  private void initServiceDiscovery(ServiceDiscoverySpi serviceDiscovery,
-      final Future<Void> startFuture) {
-    final AbstractVerticle current = this;
-    Optional.ofNullable(serviceDiscovery).ifPresent(sDicovery -> {
-      sDicovery.registerService(() -> postConstruct(startFuture), ex -> {
-        if (!startFuture.isComplete()) {
-          startFuture.fail(ex);
-        }
-      }, current);
-      this.onStop = (stopFuture) -> sDicovery.disconnect();
-    });
-  }
 
   /**
    * Stop the service.<p> This is called by Vert.x when the service instance is un-deployed.

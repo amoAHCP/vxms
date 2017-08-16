@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-container-eventbus-demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <name>vxms-container-eventbus-demo</name>
     <url>http://maven.apache.org</url>
 
@@ -93,12 +93,12 @@
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
             <artifactId>vxms-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

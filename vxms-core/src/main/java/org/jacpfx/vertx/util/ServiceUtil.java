@@ -51,18 +51,7 @@ public class ServiceUtil {
     return endpointConfig == null ? new DefaultEndpointConfiguration() : endpointConfig;
   }
 
-  /**
-   * Returns all service discovery implementations
-   *
-   * @return an implementation of {@link ServiceDiscoverySpi}
-   */
-  public static ServiceDiscoverySpi getServiceDiscoverySPI() {
-    ServiceLoader<ServiceDiscoverySpi> loader = ServiceLoader.load(ServiceDiscoverySpi.class);
-    if (!loader.iterator().hasNext()) {
-      return null;
-    }
-    return loader.iterator().next();
-  }
+
 
   /**
    * Returns all REST implementations
