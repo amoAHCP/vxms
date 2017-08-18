@@ -34,13 +34,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms-verticle.version>1.0-RC2</vxms-verticle.version>
+        <vxms-verticle.version>1.1-SNAPSHOT</vxms-verticle.version>
 
         <!--Vertx module name-->
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
 
         <!--Dependency versions-->
-        <vertx.version>3.4.0</vertx.version>
+        <vertx.version>3.4.2</vertx.version>
 
         <junit.version>4.11</junit.version>
 

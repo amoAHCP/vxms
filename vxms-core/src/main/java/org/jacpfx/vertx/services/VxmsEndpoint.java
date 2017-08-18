@@ -32,12 +32,13 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 import org.jacpfx.common.CustomServerOptions;
 import org.jacpfx.common.VxmsShared;
 import org.jacpfx.common.concurrent.LocalData;
 import org.jacpfx.common.configuration.EndpointConfiguration;
 import org.jacpfx.common.util.ConfigurationUtil;
+import org.jacpfx.common.util.ReflectionExecutionWrapper;
 import org.jacpfx.common.util.URIUtil;
 
 /**
@@ -48,19 +49,26 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   private static final Logger log = LoggerFactory.getLogger(VxmsEndpoint.class);
 
-  private Consumer<Future<Void>> onStop;
-
-  private VxmsShared vxmsShared;
+  // private VxmsShared vxmsShared;
 
   @Override
   public final void start(final Future<Void> startFuture) {
-    vxmsShared = new VxmsShared(vertx, new LocalData(vertx));
     // register info (keepAlive) handler
     vertx.eventBus()
         .consumer(ConfigurationUtil.getServiceName(getConfig(), this.getClass()) + "-info",
             this::info);
-    initEndpoint(startFuture, this);
+    initEndpoint(startFuture, this, new VxmsShared(vertx, new LocalData(vertx)));
 
+  }
+
+  /**
+   * Initialize an existing Vert.x instance as a Vxms endpoint so you can use an Verticle (Extending
+   * AbstractVerticle) as a fully functional Vxms Endpoint). Caution: this start methods completes
+   * the start future when it's ready, so it must be the last initialisation (order & callback
+   * wise)
+   */
+  public void start(final Future<Void> startFuture, AbstractVerticle registrationObject) {
+    // initEndpoint(startFuture,registrationObject);
   }
 
 
@@ -69,13 +77,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    *
    * @param startFuture, the Vertx start feature
    */
-  private void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject) {
+  private void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject,
+      VxmsShared vxmsShared) {
     final Class<? extends AbstractVerticle> serviceClass = registrationObject.getClass();
     final int port = ConfigurationUtil.getEndpointPort(getConfig(), serviceClass);
     final String host = ConfigurationUtil.getEndpointHost(getConfig(), serviceClass);
     final String contexRoot = ConfigurationUtil.getContextRoot(getConfig(), serviceClass);
     final CustomServerOptions endpointConfig = ConfigurationUtil.getEndpointOptions(serviceClass);
     final HttpServerOptions options = endpointConfig.getServerOptions(registrationObject.config());
+    final Vertx vertx = vxmsShared.getVertx();
     final HttpServer server = vertx.createHttpServer(options.setHost(host).setPort(port));
 
     final boolean secure = options.isSsl();
@@ -91,7 +101,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
 
-    initHandlerSPIs(server, router, registrationObject);
+    initHandlerSPIs(server, router, registrationObject, vxmsShared);
 
     postEndoitConfiguration(endpointConfiguration, router);
 
@@ -103,26 +113,24 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     if (port != 0) {
       log("create http server: " + options.getHost() + ":" + options.getPort());
-      initHTTPEndpoint(startFuture, port, host, server, topRouter);
+      initHTTPEndpoint(registrationObject, startFuture, port, host, server, topRouter);
     } else {
-      initNoHTTPEndpoint(startFuture, topRouter);
+      initNoHTTPEndpoint(registrationObject, startFuture, topRouter);
     }
 
   }
 
-  private void initNoHTTPEndpoint(Future<Void> startFuture, Router topRouter) {
-    postConstruct(topRouter, startFuture);
-    final Throwable cause = startFuture.cause();
-    String causeMessage = cause != null ? cause.getMessage() : "";
-    log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
-        + startFuture.failed() + " message:" + causeMessage);
+  private void initNoHTTPEndpoint(AbstractVerticle registrationObject, Future<Void> startFuture,
+      Router topRouter) {
+    startFuture.setHandler(result -> logStartfuture(startFuture));
+    executePostConstruct(registrationObject, topRouter, startFuture);
   }
 
   private void initHandlerSPIs(HttpServer server, Router router,
-      AbstractVerticle registrationObject) {
+      AbstractVerticle registrationObject, VxmsShared vxmsShared) {
     initWebSocketExtensions(server, registrationObject);
-    initRESTExtensions(router, registrationObject);
-    initEventBusExtensions(registrationObject);
+    initRESTExtensions(router, registrationObject, vxmsShared);
+    initEventBusExtensions(registrationObject, vxmsShared);
   }
 
   /**
@@ -134,23 +142,29 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * @param server the vertx server
    * @param topRouter the router object
    */
-  private void initHTTPEndpoint(Future<Void> startFuture, int port, String host, HttpServer server,
+  private void initHTTPEndpoint(AbstractVerticle registrationObject, Future<Void> startFuture,
+      int port, String host, HttpServer server,
       Router topRouter) {
+    startFuture.setHandler(result -> logStartfuture(startFuture));
     server.requestHandler(topRouter::accept).listen(status -> {
       if (status.succeeded()) {
         log("started on PORT: " + port + " host: " + host);
-        postConstruct(topRouter, startFuture);
+        executePostConstruct(registrationObject, topRouter, startFuture);
       } else {
         startFuture.fail(status.cause());
       }
-      final Throwable cause = startFuture.cause();
-      String causeMessage = cause != null ? cause.getMessage() : "";
-      log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
-          + startFuture.failed() + " message:" + causeMessage);
     });
   }
 
-  private void initRESTExtensions(Router router, AbstractVerticle registrationObject) {
+  private void logStartfuture(Future<Void> startFuture) {
+    final Throwable cause = startFuture.cause();
+    String causeMessage = cause != null ? cause.getMessage() : "";
+    log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
+        + startFuture.failed() + " message:" + causeMessage);
+  }
+
+  private void initRESTExtensions(Router router, AbstractVerticle registrationObject,
+      VxmsShared vxmsShared) {
     // check for REST extension
     Optional.
         ofNullable(getRESTSPI()).
@@ -158,7 +172,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             .initRESTHandler(vxmsShared, router, registrationObject));
   }
 
-  private void initEventBusExtensions(AbstractVerticle registrationObject) {
+  private void initEventBusExtensions(AbstractVerticle registrationObject, VxmsShared vxmsShared) {
     // check for REST extension
     Optional.
         ofNullable(getEventBusSPI()).
@@ -185,7 +199,6 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * @throws Exception exception while stopping the verticle
    */
   public final void stop(Future<Void> stopFuture) throws Exception {
-    Optional.ofNullable(onStop).ifPresent(stop -> stop.accept(stopFuture));
     if (!stopFuture.isComplete()) {
       stopFuture.complete();
     }
@@ -193,12 +206,35 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
 
   /**
+   * Executes the postConstruct using Reflection. This solves the issue that you can extend from a
+   * VxmsEndpoint or use the static invocation of an AbstractVerticle.
+   *
+   * @param router the http router handler
+   * @param startFuture the vert.x start future
+   * @param registrationObject the object to execute postConstruct
+   */
+  private static void executePostConstruct(AbstractVerticle registrationObject, Router router,
+      final Future<Void> startFuture) {
+    final Stream<ReflectionExecutionWrapper> reflectionExecutionWrapperStream = Stream
+        .of(new ReflectionExecutionWrapper("postConstruct",
+                registrationObject, new Object[]{router, startFuture}, startFuture),
+            new ReflectionExecutionWrapper("postConstruct",
+                registrationObject, new Object[]{startFuture, router}, startFuture),
+            new ReflectionExecutionWrapper("postConstruct",
+                registrationObject, new Object[]{startFuture}, startFuture));
+    final Optional<ReflectionExecutionWrapper> methodWrapperToInvoke = reflectionExecutionWrapperStream
+        .filter(ReflectionExecutionWrapper::isPresent).findFirst();
+    methodWrapperToInvoke.ifPresent(wrapper -> wrapper.invoke());
+
+  }
+
+  /**
    * Overwrite this method to handle your own initialisation after all vxms init is done
    *
    * @param router the http router handler
    * @param startFuture the vert.x start future
    */
-  protected void postConstruct(Router router, final Future<Void> startFuture) {
+  public void postConstruct(Router router, final Future<Void> startFuture) {
     postConstruct(startFuture);
   }
 
@@ -207,7 +243,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    *
    * @param startFuture the start future
    */
-  protected void postConstruct(final Future<Void> startFuture) {
+  public void postConstruct(final Future<Void> startFuture) {
     startFuture.complete();
   }
 

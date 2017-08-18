@@ -27,6 +27,7 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
     router.get("/test").handler(handler -> {
       handler.response().end("hello");
     });
+    startFuture.complete();
   }
 
   @Path("/simpleTest")

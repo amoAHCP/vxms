@@ -1,4 +1,20 @@
-package org.jacpfx;
+/*
+ * Copyright [2017] [Andy Moncsek]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jacpfx.rest;
 
 
 import io.vertx.core.DeploymentOptions;
@@ -7,27 +23,20 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.ext.web.FileUpload;
+import io.vertx.ext.web.Session;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import javax.ws.rs.POST;
+import java.util.concurrent.Future;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.jacpfx.common.ServiceEndpoint;
 import org.jacpfx.common.configuration.EndpointConfig;
-import org.jacpfx.entity.RestrictedBodyHandlingEndpointConfig;
+import org.jacpfx.entity.SessionEndpointConfig;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Before;
@@ -36,7 +45,7 @@ import org.junit.Test;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
+public class RESTJerseyClientSessionTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -73,7 +82,7 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
     // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
+    getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
       // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
       System.out.println("start service: " + asyncResult.succeeded());
       assertTrue(asyncResult.succeeded());
@@ -93,28 +102,29 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
 
 
   @Test
-  /**
-   *   The default EndpointConfig returns a valid BodyHandler... if a custom EndpointConfig set this to null no body handling should be possible
-   */
-  public void noBodyHandling() throws InterruptedException, ExecutionException, IOException {
-    final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
-    File file = new File(getClass().getClassLoader().getResource("payload.xml").getFile());
-    final FileDataBodyPart filePart = new FileDataBodyPart("file", file);
-    FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-    final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar")
-        .field("hello", "world").bodyPart(filePart);
-
+  //@Ignore
+  public void sessionTest() throws InterruptedException {
+    // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+    CountDownLatch latch = new CountDownLatch(1);
+    Client client = ClientBuilder.newClient();
     WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/noBodyHandling");
-    final Response response = target.request()
-        .post(Entity.entity(multipart, multipart.getMediaType()));
+        .path(SERVICE_REST_GET + "/session");
+    Future<String> getCallback = target.request().async().get(new InvocationCallback<String>() {
 
-    //Use createResponse object to verify upload success
-    final String entity = response.readEntity(String.class);
-    System.out.println(entity);
-    assertTrue(entity.equals("no body"));
-    formDataMultiPart.close();
-    multipart.close();
+      @Override
+      public void completed(String response) {
+        System.out.println("Response entity '" + response + "' received.");
+        // Assert.assertEquals(createResponse, "xyz");
+        latch.countDown();
+      }
+
+      @Override
+      public void failed(Throwable throwable) {
+        throwable.printStackTrace();
+      }
+    });
+
+    latch.await();
     testComplete();
 
   }
@@ -126,25 +136,19 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
 
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  @EndpointConfig(RestrictedBodyHandlingEndpointConfig.class)
-  public class WsServiceOne extends VxmsEndpoint {
+  @EndpointConfig(SessionEndpointConfig.class)
+  public class WsServiceTwo extends VxmsEndpoint {
 
-
-    @Path("/noBodyHandling")
-    @POST
-    public void noBodyHandling(RestHandler handler) {
-      handler.response().blocking().stringResponse(() -> {
-        Set<FileUpload> files = handler.request().fileUploads();
-        System.out.println("FILES: " + files + "   " + handler.request().param("foo"));
-        if (files.isEmpty()) {
-          return "no body";
-        } else {
-          return "body";
-        }
+    @Path("/session")
+    @GET
+    public void rsstringGETResponseSyncAsync(RestHandler reply) {
+      Session session = reply.context().session();
+      reply.response().stringResponse((future) -> {
+        future.complete(session.id());
       }).execute();
     }
 
-
   }
+
 
 }

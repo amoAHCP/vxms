@@ -1,4 +1,20 @@
-package org.jacpfx;
+/*
+ * Copyright [2017] [Andy Moncsek]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jacpfx.rest;
 
 
 import io.vertx.core.DeploymentOptions;
@@ -30,6 +46,8 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.jacpfx.common.ServiceEndpoint;
+import org.jacpfx.common.configuration.EndpointConfig;
+import org.jacpfx.entity.MyCustomEndpointConfig;
 import org.jacpfx.vertx.rest.response.RestHandler;
 import org.jacpfx.vertx.services.VxmsEndpoint;
 import org.junit.Before;
@@ -39,7 +57,7 @@ import org.w3c.dom.Document;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
+public class RESTJerseyEndpointConfigTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -127,6 +145,7 @@ public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
 
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
+  @EndpointConfig(MyCustomEndpointConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
 
@@ -155,5 +174,6 @@ public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
     }
 
   }
+
 
 }
