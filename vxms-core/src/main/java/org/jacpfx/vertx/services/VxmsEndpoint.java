@@ -56,7 +56,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     // register info (keepAlive) handler
     vertx.eventBus()
         .consumer(ConfigurationUtil.getServiceName(getConfig(), this.getClass()) + "-info",
-            this::info);
+            VxmsEndpoint::info);
     initEndpoint(startFuture, this, new VxmsShared(vertx, new LocalData(vertx)));
 
   }
@@ -64,11 +64,18 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   /**
    * Initialize an existing Vert.x instance as a Vxms endpoint so you can use an Verticle (Extending
    * AbstractVerticle) as a fully functional Vxms Endpoint). Caution: this start methods completes
-   * the start future when it's ready, so it must be the last initialisation (order & callback
+   * the start future when it's ready, so it must be the last initialisation (order and callback
    * wise)
+   * @param startFuture the Start Future from Vert.x
+   * @param registrationObject the AbstractVerticle to register (mostly this)
    */
-  public void start(final Future<Void> startFuture, AbstractVerticle registrationObject) {
-    // initEndpoint(startFuture,registrationObject);
+  public static void start(final Future<Void> startFuture, AbstractVerticle registrationObject) {
+    final Vertx vertx = registrationObject.getVertx();
+    final JsonObject config = vertx.getOrCreateContext().config();
+    vertx.eventBus()
+        .consumer(ConfigurationUtil.getServiceName(config, registrationObject.getClass()) + "-info",
+            VxmsEndpoint::info);
+    initEndpoint(startFuture, registrationObject, new VxmsShared(vertx, new LocalData(vertx)));
   }
 
 
@@ -77,15 +84,17 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    *
    * @param startFuture, the Vertx start feature
    */
-  private void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject,
+  private static void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject,
       VxmsShared vxmsShared) {
+    final Vertx vertx = vxmsShared.getVertx();
+    final JsonObject config = vertx.getOrCreateContext().config();
     final Class<? extends AbstractVerticle> serviceClass = registrationObject.getClass();
-    final int port = ConfigurationUtil.getEndpointPort(getConfig(), serviceClass);
-    final String host = ConfigurationUtil.getEndpointHost(getConfig(), serviceClass);
-    final String contexRoot = ConfigurationUtil.getContextRoot(getConfig(), serviceClass);
+    final int port = ConfigurationUtil.getEndpointPort(config, serviceClass);
+    final String host = ConfigurationUtil.getEndpointHost(config, serviceClass);
+    final String contexRoot = ConfigurationUtil.getContextRoot(config, serviceClass);
     final CustomServerOptions endpointConfig = ConfigurationUtil.getEndpointOptions(serviceClass);
     final HttpServerOptions options = endpointConfig.getServerOptions(registrationObject.config());
-    final Vertx vertx = vxmsShared.getVertx();
+
     final HttpServer server = vertx.createHttpServer(options.setHost(host).setPort(port));
 
     final boolean secure = options.isSsl();
@@ -97,7 +106,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     final EndpointConfiguration endpointConfiguration = getEndpointConfiguration(
         registrationObject);
 
-    getConfig().put("secure", secure);
+    config.put("secure", secure);
 
     initEndoitConfiguration(endpointConfiguration, vertx, router, secure, host, port);
 
@@ -120,15 +129,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   }
 
-  private void initNoHTTPEndpoint(AbstractVerticle registrationObject, Future<Void> startFuture,
+  private static void initNoHTTPEndpoint(AbstractVerticle registrationObject, Future<Void> startFuture,
       Router topRouter) {
     startFuture.setHandler(result -> logStartfuture(startFuture));
     executePostConstruct(registrationObject, topRouter, startFuture);
   }
 
-  private void initHandlerSPIs(HttpServer server, Router router,
+  private static void initHandlerSPIs(HttpServer server, Router router,
       AbstractVerticle registrationObject, VxmsShared vxmsShared) {
-    initWebSocketExtensions(server, registrationObject);
+    initWebSocketExtensions(server, registrationObject,vxmsShared);
     initRESTExtensions(router, registrationObject, vxmsShared);
     initEventBusExtensions(registrationObject, vxmsShared);
   }
@@ -142,7 +151,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * @param server the vertx server
    * @param topRouter the router object
    */
-  private void initHTTPEndpoint(AbstractVerticle registrationObject, Future<Void> startFuture,
+  private static void initHTTPEndpoint(AbstractVerticle registrationObject,
+      Future<Void> startFuture,
       int port, String host, HttpServer server,
       Router topRouter) {
     startFuture.setHandler(result -> logStartfuture(startFuture));
@@ -156,14 +166,14 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     });
   }
 
-  private void logStartfuture(Future<Void> startFuture) {
+  private static void logStartfuture(Future<Void> startFuture) {
     final Throwable cause = startFuture.cause();
     String causeMessage = cause != null ? cause.getMessage() : "";
     log("startFuture.isComplete(): " + startFuture.isComplete() + " startFuture.failed(): "
         + startFuture.failed() + " message:" + causeMessage);
   }
 
-  private void initRESTExtensions(Router router, AbstractVerticle registrationObject,
+  private static void initRESTExtensions(Router router, AbstractVerticle registrationObject,
       VxmsShared vxmsShared) {
     // check for REST extension
     Optional.
@@ -172,7 +182,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             .initRESTHandler(vxmsShared, router, registrationObject));
   }
 
-  private void initEventBusExtensions(AbstractVerticle registrationObject, VxmsShared vxmsShared) {
+  private static void initEventBusExtensions(AbstractVerticle registrationObject,
+      VxmsShared vxmsShared) {
     // check for REST extension
     Optional.
         ofNullable(getEventBusSPI()).
@@ -180,12 +191,15 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
             .initEventHandler(vxmsShared, registrationObject));
   }
 
-  private void initWebSocketExtensions(HttpServer server, AbstractVerticle registrationObject) {
+  private static void initWebSocketExtensions(HttpServer server,
+      AbstractVerticle registrationObject, VxmsShared vxmsShared) {
     // check for websocket extension
+    final Vertx vertx = vxmsShared.getVertx();
+    final JsonObject config = vertx.getOrCreateContext().config();
     Optional.
         ofNullable(getWebSocketSPI()).
         ifPresent(webSockethandlerSPI -> webSockethandlerSPI
-            .registerWebSocketHandler(server, vertx, getConfig(), registrationObject));
+            .registerWebSocketHandler(server, vertx, config, registrationObject));
   }
 
 
@@ -224,7 +238,10 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
                 registrationObject, new Object[]{startFuture}, startFuture));
     final Optional<ReflectionExecutionWrapper> methodWrapperToInvoke = reflectionExecutionWrapperStream
         .filter(ReflectionExecutionWrapper::isPresent).findFirst();
-    methodWrapperToInvoke.ifPresent(wrapper -> wrapper.invoke());
+    methodWrapperToInvoke.ifPresent(ReflectionExecutionWrapper::invoke);
+    if(!methodWrapperToInvoke.isPresent() && !startFuture.isComplete()) {
+      startFuture.complete();
+    }
 
   }
 
@@ -248,7 +265,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
 
-  private void initEndoitConfiguration(EndpointConfiguration endpointConfiguration, Vertx vertx,
+  private static void initEndoitConfiguration(EndpointConfiguration endpointConfiguration,
+      Vertx vertx,
       Router router, boolean secure, String host, int port) {
     Optional.of(endpointConfiguration).ifPresent(endpointConfig -> {
 
@@ -264,18 +282,19 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     });
   }
 
-  private void postEndoitConfiguration(EndpointConfiguration endpointConfiguration, Router router) {
+  private static void postEndoitConfiguration(EndpointConfiguration endpointConfiguration,
+      Router router) {
     Optional.of(endpointConfiguration)
         .ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
   }
 
 
-  private void log(final String value) {
+  private static void log(final String value) {
     log.info(value);
   }
 
 
-  private void info(Message m) {
+  private static void info(Message m) {
     // TODO create info message about service
   }
 

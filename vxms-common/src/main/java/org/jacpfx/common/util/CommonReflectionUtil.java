@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.jacpfx.common.exceptions.EndpointExecutionException;
@@ -79,7 +80,7 @@ public class CommonReflectionUtil {
     if (first.isPresent()) {
       return first;
     } else {
-      log.info(StringFormatter
+      log.log(Level.FINE,StringFormatter
           .format("method %s was not found in class %s with parameters %s", methodName,
               invokeTo.getClass(),
               Arrays.toString(Stream.of(parameters).map(p -> p.getClass()).toArray()))
