@@ -32,7 +32,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertx.version>3.4.0</vertx.version>
+        <vertx.version>3.4.2</vertx.version>
         <junit.version>4.11</junit.version>
         <vxms-verticle.version>1.0-RC2</vxms-verticle.version>
         <hazelcast.version>3.6.2</hazelcast.version>

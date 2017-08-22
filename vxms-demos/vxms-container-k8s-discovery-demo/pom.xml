@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-container-k8s-discovery-demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-RC4</version>
+    <version>1.0</version>
     <name>vxms-container-k8s-discovery-demo</name>
     <url>http://maven.apache.org</url>
 
@@ -40,7 +40,7 @@
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
 
         <!--Dependency versions-->
-        <vertx.version>3.4.0</vertx.version>
+        <vertx.version>3.4.2</vertx.version>
 
         <junit.version>4.11</junit.version>
 

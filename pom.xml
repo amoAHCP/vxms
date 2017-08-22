@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-RC4</version>
+    <version>1.0</version>
     <name>vxms</name>
     <url>http://maven.apache.org</url>
 
@@ -217,7 +217,7 @@
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>1.6</version>
                     <configuration>
-                        <skip>true</skip>
+                        <skip>false</skip>
                     </configuration>
                 </plugin>
             </plugins>

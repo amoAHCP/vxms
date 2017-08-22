@@ -28,7 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.0-RC4</vxms.version>
+        <vxms.version>1.0</vxms.version>
         <main.verticle>org.jacpfx.verticle.SecureEndpoint</main.verticle>
         <vertx-spring-ext.version>2.0.3</vertx-spring-ext.version>
 
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-oauth2</artifactId>
-            <version>3.4.0.Beta1</version>
+            <version>3.4.2</version>
         </dependency>
         <dependency>
             <groupId>org.jacpfx.vertx.spring</groupId>
