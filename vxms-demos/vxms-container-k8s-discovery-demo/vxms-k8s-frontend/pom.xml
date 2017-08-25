@@ -73,12 +73,8 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>org.jacpfx.verticles.VxmsGateway</Main-Verticle>
+                                        <Main-Verticle>org.jacpfx.vxms.k8sfrontend.verticles.VxmsGateway</Main-Verticle>
                                     </manifestEntries>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
                                 </transformer>
                             </transformers>
                             <artifactSet/>

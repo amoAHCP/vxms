@@ -1,8 +1,8 @@
 package org.jacpfx.entity.encoder;
 
 import java.io.IOException;
-import org.jacpfx.common.encoder.Encoder;
-import org.jacpfx.common.util.Serializer;
+import org.jacpfx.vxms.common.encoder.Encoder;
+import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.entity.Payload;
 
 /**

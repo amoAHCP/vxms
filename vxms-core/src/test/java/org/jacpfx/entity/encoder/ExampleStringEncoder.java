@@ -1,7 +1,7 @@
 package org.jacpfx.entity.encoder;
 
 import com.google.gson.Gson;
-import org.jacpfx.common.encoder.Encoder;
+import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.entity.Payload;
 
 /**

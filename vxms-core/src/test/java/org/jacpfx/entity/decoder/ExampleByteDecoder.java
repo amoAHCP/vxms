@@ -1,7 +1,7 @@
 package org.jacpfx.entity.decoder;
 
 import java.util.Optional;
-import org.jacpfx.common.decoder.Decoder;
+import org.jacpfx.vxms.common.decoder.Decoder;
 
 /**
  * Created by Andy Moncsek on 18.11.15.

@@ -6,7 +6,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
-import org.jacpfx.common.configuration.EndpointConfiguration;
+import org.jacpfx.vxms.common.configuration.EndpointConfiguration;
 
 /**
  * Created by Andy Moncsek on 18.02.16.

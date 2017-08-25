@@ -2,8 +2,8 @@ package org.jacpfx.entity.decoder;
 
 import java.io.IOException;
 import java.util.Optional;
-import org.jacpfx.common.decoder.Decoder;
-import org.jacpfx.common.util.Serializer;
+import org.jacpfx.vxms.common.decoder.Decoder;
+import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.entity.MyTestObject;
 
 /**

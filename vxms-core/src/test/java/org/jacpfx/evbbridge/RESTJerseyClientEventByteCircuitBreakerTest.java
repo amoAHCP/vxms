@@ -21,11 +21,11 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.common.util.Serializer;
+import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.entity.Payload;
-import org.jacpfx.vertx.rest.response.RestHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 

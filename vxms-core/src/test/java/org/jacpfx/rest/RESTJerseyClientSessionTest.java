@@ -34,11 +34,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
-import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.common.configuration.EndpointConfig;
+import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.common.configuration.EndpointConfig;
 import org.jacpfx.entity.SessionEndpointConfig;
-import org.jacpfx.vertx.rest.response.RestHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 

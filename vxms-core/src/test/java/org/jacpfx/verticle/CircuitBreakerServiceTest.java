@@ -7,9 +7,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.vertx.rest.response.RestHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /**
  * Created by amo on 22.11.16.

@@ -16,9 +16,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.vertx.rest.response.RestHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 

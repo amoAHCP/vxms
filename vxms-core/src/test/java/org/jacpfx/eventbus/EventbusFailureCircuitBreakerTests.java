@@ -10,10 +10,10 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
-import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.vertx.event.annotation.Consume;
-import org.jacpfx.vertx.event.response.EventbusHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.event.annotation.Consume;
+import org.jacpfx.vxms.event.response.EventbusHandler;
+import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 

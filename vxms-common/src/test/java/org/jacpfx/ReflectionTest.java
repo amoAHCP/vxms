@@ -18,10 +18,9 @@ package org.jacpfx;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.jacpfx.common.util.CommonReflectionUtil;
+import org.jacpfx.vxms.common.util.CommonReflectionUtil;
 import org.junit.Assert;
 import org.junit.Test;
 

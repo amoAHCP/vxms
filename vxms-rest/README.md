@@ -17,7 +17,7 @@ public class RESTExample extends VxmsEndpoint {
 ``` 
 ## basic usage
 The vxms-rest module provides a non-blocking (with the option of blocking usage), fluent API to build a REST response. 
-You can annotate any public method with Jax-RS annotations and add the "org.jacpfx.vertx.rest.response.RestHandler" class to the method signature to build the response. 
+You can annotate any public method with Jax-RS annotations and add the "RestHandler" class to the method signature to build the response. 
 All methods must not have a return value, the response will be returned through the "RestHandler" API. **Each request must be ended, either by calling "execute()" or "end()"**, otherwise the http response will not be ended. 
 The idea in vxms is, to model your response using the fluent API. Vxms provides a best practice of how to define a repose and to handle errors.
 
@@ -94,7 +94,7 @@ The vxms-rest module is using Jax-rs annotations. Following Annotations are supp
 - @Produces
 
 ## non-blocking rest response
-Vert.x is per default a non-blocking framework, so in vxms non-blocking is the default behaviour. A response is always created using the "org.jacpfx.vertx.rest.response.RestHandler" with it's fluent API. 
+Vert.x is per default a non-blocking framework, so in vxms non-blocking is the default behaviour. A response is always created using the "RestHandler" with it's fluent API. 
 When creating specific responses (like String, byte or Object), you need to call the *execute()* method, so the complete chain will be executed. Be aware, this is a non-blocking call!
 For all non-blocking calls you must provide a consumer, which gives you the handler to complete the execution.
 Following options you can use to define a response handling:
@@ -130,7 +130,7 @@ Vxms provides many features for handling errors while creating the REST response
 Exceptions within the fluent API will be handled by methods like *onError* and *onFailureResponse*. If no error handling is defined, or the *onFailureResponse*
 method is throwing an exception, it must be handled in the calling method (your REST method). In case you have an unhandled exception within your REST method, 
 you can define a separate error-method to handle those exceptions (if no further error handling is defined , the response is delivering a http 500 response). 
-To do so, define your error-handling method (with org.jacpfx.vertx.rest.response.RestHandler and a Throwable as parameter) and annotate the method 
+To do so, define your error-handling method (with RestHandler and a Throwable as parameter) and annotate the method 
 with the *@OnRestError* annotation. This annotation **must** contain the same REST-path as your corresponding @Path annotation. Example:
 
 ```java
@@ -159,7 +159,7 @@ Each request in-between this time will automatically execute the *onFailureRespo
 without evaluating the *mapTo...* method. Be aware, when you have N instances of your Verticle, each of them counts individually. 
 
 ## the event-bus bridge
-The "org.jacpfx.vertx.rest.response.RestHandler" has a build-in event-bus bridge. The idea is, that on each REST request, you can send a message via (Vert.x) event-bus, and map the response to the original REST response (so you can create a chain). 
+The "RestHandler" has a build-in event-bus bridge. The idea is, that on each REST request, you can send a message via (Vert.x) event-bus, and map the response to the original REST response (so you can create a chain). 
 This way, you can easily build gateways to connect REST application with event-driven Vert.x (or vxms) services (locally or in a cluster). The event-bus result-message can be mapped to String, Object or byte[] like any other response. 
 
 

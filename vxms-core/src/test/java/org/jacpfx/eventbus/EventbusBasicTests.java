@@ -11,13 +11,13 @@ import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import org.jacpfx.common.ServiceEndpoint;
-import org.jacpfx.common.util.Serializer;
+import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleByteEncoder;
-import org.jacpfx.vertx.event.annotation.Consume;
-import org.jacpfx.vertx.event.response.EventbusHandler;
-import org.jacpfx.vertx.services.VxmsEndpoint;
+import org.jacpfx.vxms.event.annotation.Consume;
+import org.jacpfx.vxms.event.response.EventbusHandler;
+import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
