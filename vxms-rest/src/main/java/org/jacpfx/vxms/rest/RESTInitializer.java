@@ -62,7 +62,7 @@ public class RESTInitializer {
    */
   static void initRESTHandler(VxmsShared vxmsShared, Router router, Object service) {
     Stream.of(service.getClass().getDeclaredMethods()).
-        filter(m -> m.isAnnotationPresent(Path.class)). // TODO switch to passing vxmsShared
+        filter(m -> m.isAnnotationPresent(Path.class)).
         forEach(restMethod -> initRestMethod(vxmsShared, router, service, restMethod));
   }
 

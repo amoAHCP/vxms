@@ -323,7 +323,6 @@ public class ResponseBlockingExecution {
 
   private static void setCircuitBreakerReleaseTimer(VxmsShared vxmsShared, int _retry,
       long _circuitBreakerTimeout, Counter counter) {
-    // TODO should the counter executed with lock?
     final long initialRetryCounterValue = (long) (_retry + 1);
     final Vertx vertx = vxmsShared.getVertx();
     vertx.setTimer(_circuitBreakerTimeout,
