@@ -58,7 +58,7 @@ public class EventbusResponse {
    * @param context the vertx routing context
    * @param targetId the event-bus message target-targetId
    * @param message the event-bus message
-   * @param options the event-bus delivery options
+   * @param options the event-bus delivery serverOptions
    */
   public EventbusResponse(String methodId,
       VxmsShared vxmsShared,

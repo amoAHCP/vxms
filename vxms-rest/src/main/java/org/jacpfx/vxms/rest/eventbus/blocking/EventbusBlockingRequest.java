@@ -79,7 +79,7 @@ public class EventbusBlockingRequest {
    *
    * @param targetId the target id to send to
    * @param message the message to send
-   * @param options the delivery options for sending the message
+   * @param options the delivery serverOptions for sending the message
    * @return the execution chain {@link EventbusBlockingResponse}
    */
   public EventbusBlockingResponse send(String targetId, Object message, DeliveryOptions options) {

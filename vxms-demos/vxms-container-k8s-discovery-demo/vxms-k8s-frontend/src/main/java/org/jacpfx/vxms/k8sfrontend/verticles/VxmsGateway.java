@@ -16,7 +16,7 @@
 
 package org.jacpfx.vxms.k8sfrontend.verticles;
 
-import org.jacpfx.vxms.k8sfrontend.configuration.CustomEndpointConfig;
+import org.jacpfx.vxms.k8sfrontend.configuration.CustomRouterConfig;
 import org.jacpfx.vxms.k8sfrontend.util.DefaultResponses;
 import org.jacpfx.vxms.k8sfrontend.util.InitMongoDB;
 import io.fabric8.annotations.ServiceName;
@@ -37,15 +37,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import org.jacpfx.client.Fabric8DiscoveryClient;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /**
  * Created by Andy Moncsek on 11.05.17.
  */
-@ServiceEndpoint(port = 8181, name = "vxms-frontend")
-@EndpointConfig(CustomEndpointConfig.class)
+@ServiceEndpoint(port = 8181, name = "vxms-frontend", routerConf = CustomRouterConfig.class)
 public class VxmsGateway extends VxmsEndpoint {
 
 

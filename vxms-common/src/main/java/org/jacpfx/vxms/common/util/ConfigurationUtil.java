@@ -23,10 +23,11 @@ import java.util.UUID;
 import org.jacpfx.vxms.common.CustomServerOptions;
 import org.jacpfx.vxms.common.DefaultServerOptions;
 import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
- * Created by Andy Moncsek on 25.11.15.
- * Provides several methods to get the correct configuration
+ * Created by Andy Moncsek on 25.11.15. Provides several methods to get the correct configuration
  */
 public class ConfigurationUtil {
 
@@ -41,10 +42,10 @@ public class ConfigurationUtil {
    */
   public static String getStringConfiguration(final JsonObject config, String propertyName,
       String defaultValue) {
-    String env = System.getenv(propertyName);
-      if (env != null && !env.isEmpty()) {
-          return env;
-      }
+    String env = System.getenv(propertyName.toUpperCase());
+    if (env != null && !env.isEmpty()) {
+      return env;
+    }
     return config.getString(propertyName, defaultValue);
   }
 
@@ -58,10 +59,10 @@ public class ConfigurationUtil {
    */
   public static Integer getIntegerConfiguration(final JsonObject config, String propertyName,
       int defaultValue) {
-    String env = System.getenv(propertyName);
-      if (env != null && !env.isEmpty()) {
-          return Integer.valueOf(env);
-      }
+    String env = System.getenv(propertyName.toUpperCase());
+    if (env != null && !env.isEmpty()) {
+      return Integer.valueOf(env);
+    }
     return config.getInteger(propertyName, defaultValue);
   }
 
@@ -78,9 +79,9 @@ public class ConfigurationUtil {
     if (clazz.isAnnotationPresent(ServiceEndpoint.class)) {
       final ServiceEndpoint name = (ServiceEndpoint) clazz
           .getAnnotation(ServiceEndpoint.class);
-      return getStringConfiguration(config, "service-name", name.name());
+      return getStringConfiguration(config, "name", name.name());
     }
-    return getStringConfiguration(config, "service-name", clazz.getSimpleName());
+    return getStringConfiguration(config, "sname", clazz.getSimpleName());
   }
 
 
@@ -127,9 +128,9 @@ public class ConfigurationUtil {
     if (clazz.isAnnotationPresent(ServiceEndpoint.class)) {
       final ServiceEndpoint endpoint = (ServiceEndpoint) clazz
           .getAnnotation(ServiceEndpoint.class);
-      return getStringConfiguration(config, "context-root", endpoint.contextRoot());
+      return getStringConfiguration(config, "contextRoot", endpoint.contextRoot());
     }
-    return getStringConfiguration(config, "context-root", "/");
+    return getStringConfiguration(config, "contextRoot", "/");
   }
 
   /**
@@ -144,7 +145,7 @@ public class ConfigurationUtil {
    * @return the correct POSTFIX for method id's
    */
   public static String getCircuitBreakerIDPostfix(final JsonObject config) {
-    final String configValue = getStringConfiguration(config, "circuit-breaker-scope", "unique");
+    final String configValue = getStringConfiguration(config, "cbScope", "unique");
     switch (configValue) {
       case "unique":
         return UUID.randomUUID().toString();
@@ -179,20 +180,58 @@ public class ConfigurationUtil {
    * Returns the endpoint configuration object, defined in ServerEndoint annotation. If no
    * definition is present a DefaultServerOptions instance will be created.
    *
+   * @param config, the configuration object
    * @param clazz, the service class containing the {@link ServiceEndpoint} annotation
    * @return {@link CustomServerOptions} the Endpoint configuration
    */
-  public static CustomServerOptions getEndpointOptions(Class clazz) {
-    if (clazz.isAnnotationPresent(ServiceEndpoint.class)) {
-      ServiceEndpoint selfHosted = (ServiceEndpoint) clazz
-          .getAnnotation(ServiceEndpoint.class);
-      try {
-        return selfHosted.options().newInstance();
-      } catch (InstantiationException | IllegalAccessException e) {
-        e.printStackTrace();
+  public static CustomServerOptions getEndpointOptions(final JsonObject config, Class clazz) {
+    try {
+      String classname;
+      if (clazz.isAnnotationPresent(ServiceEndpoint.class)) {
+        ServiceEndpoint selfHosted = (ServiceEndpoint) clazz
+            .getAnnotation(ServiceEndpoint.class);
+        classname = getStringConfiguration(config, "serverOptions",
+            selfHosted.serverOptions().getCanonicalName());
+      } else {
+        classname = getStringConfiguration(config, "serverOptions",
+            DefaultServerOptions.class.getCanonicalName());
       }
+      final Class<? extends CustomServerOptions> optionsClazz = (Class<? extends CustomServerOptions>) Class
+          .forName(classname);
+      return optionsClazz.newInstance();
+    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+      e.printStackTrace();
     }
     return new DefaultServerOptions();
+  }
+
+  /**
+   * extract the endpoint configuration fro service
+   *
+   * @param clazz the service class annotated with {@link ServiceEndpoint}
+   * @return the {@link RouterConfiguration}
+   */
+  public static RouterConfiguration getRouterConfiguration(final JsonObject config, Class clazz) {
+
+    try {
+      String classname;
+      if (clazz.isAnnotationPresent(ServiceEndpoint.class)) {
+        ServiceEndpoint selfHosted = (ServiceEndpoint) clazz
+            .getAnnotation(ServiceEndpoint.class);
+        classname = getStringConfiguration(config, "routerConf",
+            selfHosted.routerConf().getCanonicalName());
+      } else {
+        classname = getStringConfiguration(config, "routerConf",
+            DefaultRouterConfiguration.class.getCanonicalName());
+      }
+      final Class<? extends RouterConfiguration> optionsClazz = (Class<? extends RouterConfiguration>) Class
+          .forName(classname);
+      return optionsClazz.newInstance();
+    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+
+    return new DefaultRouterConfiguration();
   }
 
   /**

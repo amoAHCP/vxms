@@ -45,7 +45,7 @@ public interface RecursiveBlockingExecutor<T> {
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param responseDeliveryOptions the delivery options for the response
+   * @param responseDeliveryOptions the delivery serverOptions for the response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param delay the delay time in ms between an execution error and the retry

@@ -43,17 +43,17 @@ public class EventbusByteExecutionBlockingUtil {
    * @param _targetId the event-bus target id
    * @param _message the message to send
    * @param _byteFunction the function to process the result message
-   * @param _requestDeliveryOptions the event-bus delivery options
+   * @param _requestDeliveryOptions the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
-   * @param _requestMessage the event-bus request options
+   * @param _requestMessage the event-bus request serverOptions
    * @param _byteSupplier the supplier, producing the byte response
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param _responseDeliveryOptions the response delivery options
+   * @param _responseDeliveryOptions the response delivery serverOptions
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
    * @param _delay the delay between an error and the retry

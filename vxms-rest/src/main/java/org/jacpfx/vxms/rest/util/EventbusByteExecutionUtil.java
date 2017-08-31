@@ -48,7 +48,7 @@ public class EventbusByteExecutionUtil {
    * @param _targetId the event-bus target id
    * @param _message the message to send
    * @param _bytefunction the function to process the result message
-   * @param _options the event-bus delivery options
+   * @param _options the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param _failure the failure thrown while task execution
@@ -93,7 +93,7 @@ public class EventbusByteExecutionUtil {
    * @param _targetId the event-bus target id
    * @param _message the message to send
    * @param _byteFunction the function to process the result message
-   * @param _options the event-bus delivery options
+   * @param _options the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param _failure the failure thrown while task execution

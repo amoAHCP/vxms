@@ -34,7 +34,6 @@ public class SimpleREST extends VxmsEndpoint {
     @Override
     public void postConstruct(Router router, final Future<Void> startFuture) {
         router.get("/helloGET").handler(helloGet -> helloGet.response().end("simple response"));
-        router.get("/test").handler(helloGet -> System.out.println("TEST"));
         router.get("/helloGET/:name").handler(helloGet -> helloGet.response().end("hello World " + helloGet.request().getParam("name")));
         startFuture.complete();
     }

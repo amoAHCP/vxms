@@ -54,7 +54,7 @@ public class EventbusBridgeExecution {
    * @param targetId the event-bus target id
    * @param message the message to send
    * @param function the function to process the result message
-   * @param requestDeliveryOptions the event-bus delivery options
+   * @param requestDeliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param errorMethodHandler the error-method handler
@@ -63,7 +63,7 @@ public class EventbusBridgeExecution {
    * @param errorHandler the error handler
    * @param onFailureRespond the function that takes a Future with the alternate response value in
    * case of failure
-   * @param responseDeliveryOptions the delivery options for the event response
+   * @param responseDeliveryOptions the delivery serverOptions for the event response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again

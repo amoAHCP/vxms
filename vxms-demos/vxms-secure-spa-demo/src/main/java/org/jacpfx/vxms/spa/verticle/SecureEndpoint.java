@@ -25,8 +25,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.jacpfx.vxms.spa.beans.UserLocalRepository;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
-import org.jacpfx.vxms.spa.config.CustomEndpointConfig;
+import org.jacpfx.vxms.spa.config.CustomRouterConfig;
 import org.jacpfx.vxms.spa.config.CustomHTTPOptions;
 import org.jacpfx.vxms.spa.config.SpringConfig;
 import org.jacpfx.vxms.spa.util.DefaultResponses;
@@ -41,8 +40,7 @@ import java.util.Optional;
 /**
  * Created by Andy Moncsek on 25.01.16.
  */
-@ServiceEndpoint(port = 8443, host = "localhost", options = CustomHTTPOptions.class)
-@EndpointConfig(CustomEndpointConfig.class)
+@ServiceEndpoint(port = 8443, host = "localhost", serverOptions = CustomHTTPOptions.class, routerConf = CustomRouterConfig.class)
 @SpringVerticle(springConfig = SpringConfig.class)
 public class SecureEndpoint extends VxmsEndpoint {
 

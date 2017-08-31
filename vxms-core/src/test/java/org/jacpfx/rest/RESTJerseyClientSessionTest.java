@@ -34,9 +34,8 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
+import org.jacpfx.entity.SessionRouterConfig;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
-import org.jacpfx.entity.SessionEndpointConfig;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
@@ -135,8 +134,7 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
   }
 
 
-  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  @EndpointConfig(SessionEndpointConfig.class)
+  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT, routerConf = SessionRouterConfig.class)
   public class WsServiceTwo extends VxmsEndpoint {
 
     @Path("/session")

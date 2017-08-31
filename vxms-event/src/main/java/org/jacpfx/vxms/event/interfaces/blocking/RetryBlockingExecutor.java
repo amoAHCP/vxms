@@ -39,7 +39,7 @@ public interface RetryBlockingExecutor<T> {
    * @param targetId event-bus target id
    * @param message the event-bus message
    * @param function the function to execute on message
-   * @param requestDeliveryOptions the event-bus delivery options
+   * @param requestDeliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param failure the failure thrown while task execution or messaging
@@ -50,7 +50,7 @@ public interface RetryBlockingExecutor<T> {
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param responseDeliveryOptions the response delivery options
+   * @param responseDeliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param delay the delay time in ms between an execution error and the retry

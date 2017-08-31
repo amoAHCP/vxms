@@ -76,7 +76,7 @@ public class EventbusBridgeRequest {
    *
    * @param id the target id to send to
    * @param message the message to send
-   * @param requestOptions the delivery options for the event bus request
+   * @param requestOptions the delivery serverOptions for the event bus request
    * @return the execution chain {@link EventbusBridgeResponse}
    */
   public EventbusBridgeResponse send(String id, Object message, DeliveryOptions requestOptions) {
@@ -99,7 +99,7 @@ public class EventbusBridgeRequest {
    *
    * @param id the target id to send to
    * @param message the message to send
-   * @param requestOptions the delivery options for the event bus request
+   * @param requestOptions the delivery serverOptions for the event bus request
    */
   public void sendAndRespondRequest(String id, Object message, DeliveryOptions requestOptions) {
     final Vertx vertx = vxmsShared.getVertx();

@@ -3,12 +3,12 @@ package org.jacpfx.entity;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-import org.jacpfx.vxms.common.configuration.EndpointConfiguration;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
  */
-public class StaticContentEndpointConfig implements EndpointConfiguration {
+public class StaticContentRouterConfig implements RouterConfiguration {
 
 
   public void staticHandler(Router router) {

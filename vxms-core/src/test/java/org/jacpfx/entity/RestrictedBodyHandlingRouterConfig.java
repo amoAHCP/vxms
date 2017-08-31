@@ -2,12 +2,12 @@ package org.jacpfx.entity;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CorsHandler;
-import org.jacpfx.vxms.common.configuration.EndpointConfiguration;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
  */
-public class RestrictedBodyHandlingEndpointConfig implements EndpointConfiguration {
+public class RestrictedBodyHandlingRouterConfig implements RouterConfiguration {
 
   public void corsHandler(Router router) {
     router.route().handler(CorsHandler.create("*").

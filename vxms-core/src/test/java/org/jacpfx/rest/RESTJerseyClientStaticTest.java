@@ -31,9 +31,8 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
+import org.jacpfx.entity.StaticContentRouterConfig;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
-import org.jacpfx.entity.StaticContentEndpointConfig;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
@@ -131,8 +130,7 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
   }
 
 
-  @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT)
-  @EndpointConfig(StaticContentEndpointConfig.class)
+  @ServiceEndpoint(name = SERVICE_REST_GET, port = PORT, routerConf = StaticContentRouterConfig.class)
   public class WsServiceTwo extends VxmsEndpoint {
 
 

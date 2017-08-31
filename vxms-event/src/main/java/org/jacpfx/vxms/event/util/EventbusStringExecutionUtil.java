@@ -46,7 +46,7 @@ public class EventbusStringExecutionUtil {
    * @param _targetId the event-bus target id
    * @param _message the message to send
    * @param _stringFunction the function to process the result message
-   * @param _requestOptions the event-bus (request) delivery options
+   * @param _requestOptions the event-bus (request) delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param _failure the failure thrown while task execution
@@ -57,7 +57,7 @@ public class EventbusStringExecutionUtil {
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param _responseDeliveryOptions the event-bus (response) delivery options
+   * @param _responseDeliveryOptions the event-bus (response) delivery serverOptions
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again

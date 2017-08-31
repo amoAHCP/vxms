@@ -48,7 +48,7 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param deliveryOptions the response deliver options
+   * @param deliveryOptions the response deliver serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again

@@ -34,11 +34,10 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import org.jacpfx.entity.RestrictedCorsRouterConfig2;
+import org.jacpfx.entity.RestrictedCorsRouterConfig3;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
-import org.jacpfx.entity.RestrictedCorsEndpointConfig;
-import org.jacpfx.entity.RestrictedCorsEndpointConfig2;
-import org.jacpfx.entity.RestrictedCorsEndpointConfig3;
+import org.jacpfx.entity.RestrictedCorsRouterConfig;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Assert;
@@ -258,8 +257,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   }
 
   // TODO extend test for POST, OPTIONAL,....
-  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  @EndpointConfig(RestrictedCorsEndpointConfig.class)
+  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT, routerConf = RestrictedCorsRouterConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
     /////------------- sync blocking ----------------
@@ -276,8 +274,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   }
 
 
-  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT2)
-  @EndpointConfig(RestrictedCorsEndpointConfig2.class)
+  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT2, routerConf = RestrictedCorsRouterConfig2.class)
   public class WsServiceTwo extends VxmsEndpoint {
 
     /////------------- sync blocking ----------------
@@ -293,8 +290,7 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
   }
 
-  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT3)
-  @EndpointConfig(RestrictedCorsEndpointConfig3.class)
+  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT3, routerConf = RestrictedCorsRouterConfig3.class)
   public class WsServiceThree extends VxmsEndpoint {
 
     /////------------- sync blocking ----------------

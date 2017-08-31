@@ -17,12 +17,12 @@
 package org.jacpfx.vxms.common.util;
 
 import java.util.ServiceLoader;
+import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.spi.EventhandlerSPI;
 import org.jacpfx.vxms.spi.RESThandlerSPI;
 import org.jacpfx.vxms.spi.WebSockethandlerSPI;
-import org.jacpfx.vxms.common.configuration.DefaultEndpointConfiguration;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
-import org.jacpfx.vxms.common.configuration.EndpointConfiguration;
+import org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
  * General Utility class for resolving SPI and Endpoint configuration
@@ -34,20 +34,20 @@ public class ServiceUtil {
    * extract the endpoint configuration fro service
    *
    * @param service the service where to extract the endpoint configuration
-   * @return the {@link EndpointConfiguration}
+   * @return the {@link RouterConfiguration}
    */
-  public static EndpointConfiguration getEndpointConfiguration(Object service) {
-    EndpointConfiguration endpointConfig = null;
-    if (service.getClass().isAnnotationPresent(EndpointConfig.class)) {
-      final EndpointConfig annotation = service.getClass().getAnnotation(EndpointConfig.class);
-      final Class<? extends EndpointConfiguration> epConfigClazz = annotation.value();
+  public static RouterConfiguration getEndpointConfiguration(Object service) {
+    RouterConfiguration endpointConfig = null;
+    if (service.getClass().isAnnotationPresent(ServiceEndpoint.class)) {
+      final ServiceEndpoint annotation = service.getClass().getAnnotation(ServiceEndpoint.class);
+      final Class<? extends RouterConfiguration> epConfigClazz = annotation.routerConf();
       try {
         endpointConfig = epConfigClazz.newInstance();
       } catch (InstantiationException | IllegalAccessException e) {
         e.printStackTrace();
       }
     }
-    return endpointConfig == null ? new DefaultEndpointConfiguration() : endpointConfig;
+    return endpointConfig == null ? new DefaultRouterConfiguration() : endpointConfig;
   }
 
 

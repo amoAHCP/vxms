@@ -84,7 +84,7 @@ public class EventbusRequest {
   /**
    * @param targetId the target id to send to
    * @param message the message to send
-   * @param options the delivery options for sending the message
+   * @param options the delivery serverOptions for sending the message
    * @return the execution chain {@link EventbusResponse}
    */
   public EventbusResponse send(String targetId, Object message, DeliveryOptions options) {
@@ -113,7 +113,7 @@ public class EventbusRequest {
    *
    * @param targetId the target id to send to
    * @param message the message to send
-   * @param options the event-bus delivery options
+   * @param options the event-bus delivery serverOptions
    */
   public void sendAndRespondRequest(String targetId, Object message, DeliveryOptions options) {
     final Vertx vertx = vxmsShared.getVertx();

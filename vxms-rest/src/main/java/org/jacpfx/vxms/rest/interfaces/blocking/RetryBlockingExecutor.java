@@ -41,7 +41,7 @@ public interface RetryBlockingExecutor<T> {
    * @param targetId event-bus target id
    * @param message the event-bus message
    * @param function the function to execute on message
-   * @param deliveryOptions the event-bus delivery options
+   * @param deliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param failure the failure thrown while task execution or messaging

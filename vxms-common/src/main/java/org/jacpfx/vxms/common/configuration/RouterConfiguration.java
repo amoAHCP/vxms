@@ -23,9 +23,9 @@ import io.vertx.ext.web.handler.CookieHandler;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
- * The endpoint configuration interface
+ * The endpoint configuration interface. The customRouteConfiguration will be called last.
  */
-public interface EndpointConfiguration {
+public interface RouterConfiguration {
 
   /**
    * define a corse handler for your service

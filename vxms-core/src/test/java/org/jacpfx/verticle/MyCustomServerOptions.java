@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package org.jacpfx.vxms.frontend.configuration;
+package org.jacpfx.verticle;
 
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.StaticHandler;
-import org.jacpfx.vxms.common.configuration.EndpointConfiguration;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
+import org.jacpfx.vxms.common.CustomServerOptions;
 
-/**
- * Created by Andy Moncsek on 18.02.16.
- */
-public class CustomEndpointConfig implements EndpointConfiguration {
-
-    @Override
-    public void staticHandler(Router router) {
-
-        router.route().handler(StaticHandler.create());
-    }
-
+public class MyCustomServerOptions implements CustomServerOptions {
+  public HttpServerOptions getServerOptions(JsonObject config) {
+    System.out.println("custom serverOptions");
+    return new HttpServerOptions();
+  }
 }

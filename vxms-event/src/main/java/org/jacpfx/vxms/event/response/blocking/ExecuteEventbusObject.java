@@ -63,7 +63,7 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param deliveryOptions the response delivery options
+   * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param delay the delay time in ms between an execution error and the retry

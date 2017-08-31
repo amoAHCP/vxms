@@ -58,7 +58,7 @@ public class EventbusBridgeResponse {
    * @param errorMethodHandler the error-method handler
    * @param targetId the event-bus message target-targetId
    * @param message the event-bus message
-   * @param requestOptions the event-bus delivery options
+   * @param requestOptions the event-bus delivery serverOptions
    */
   public EventbusBridgeResponse(String methodId,
       Message<Object> requestmessage,

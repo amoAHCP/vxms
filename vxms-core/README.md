@@ -51,9 +51,8 @@ The vxms core module provides some properties, that you can define inside the co
   
  | property name |  description                        |  default |
  |--- |---|---|
- | service-name  |  the name/identifier of the service  | --- 
+ | serviceName  |  the name/identifier of the service  | --- 
  | port          |  the port number to bind http socket |  8080 
  | host          |  the host name/interface to bind to  | 0.0.0.0 
- | context-root  |  the context-route for your service  | "/" 
- | exportedHost  |  the host name used for service discovery, this exportedHost is useful when working with kubernetes and other orchestration tools |                              |
- | exportedPort  |  the port used for service discovery, this exportedPort is useful when working with kubernetes and other orchestration tools |
+ | contextRoot  |  the context-route for your service  | "/" 
+ 

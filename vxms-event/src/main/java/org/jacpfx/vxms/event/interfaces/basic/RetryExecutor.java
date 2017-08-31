@@ -39,7 +39,7 @@ public interface RetryExecutor<T> {
    * @param targetId event-bus target id
    * @param message the message to reply
    * @param function the function to execute and to create a response object
-   * @param requestDeliveryOptions the request delivery options
+   * @param requestDeliveryOptions the request delivery serverOptions
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
@@ -51,7 +51,7 @@ public interface RetryExecutor<T> {
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    * case of failure
-   * @param responseDeliveryOptions the delivery options for the response
+   * @param responseDeliveryOptions the delivery serverOptions for the response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again

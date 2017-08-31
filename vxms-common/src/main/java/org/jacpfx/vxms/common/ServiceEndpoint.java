@@ -20,6 +20,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
  * Created by Andy Moncsek on 31.07.15. Defines an ServiceEndpoint and his metadata. E Class
@@ -53,9 +55,17 @@ public @interface ServiceEndpoint {
 
 
   /**
-   * Define custom http server options
+   * Define custom http server options to enable e.g HTTPS.
    *
-   * @return the server options
+   * @return the http serverOptions {@link org.jacpfx.vxms.common.CustomServerOptions}
    */
-  Class<? extends CustomServerOptions> options() default DefaultServerOptions.class;
+  Class<? extends CustomServerOptions> serverOptions() default DefaultServerOptions.class;
+
+
+  /**
+   * The Class of type RouterConfiguration defining the custom Endpoint configuration
+   *
+   * @return Class implementing  {@link RouterConfiguration}
+   */
+  Class<? extends RouterConfiguration> routerConf() default DefaultRouterConfiguration.class;
 }

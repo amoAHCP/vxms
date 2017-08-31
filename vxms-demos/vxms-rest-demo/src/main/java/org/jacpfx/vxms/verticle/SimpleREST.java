@@ -49,8 +49,10 @@ public class SimpleREST extends VxmsEndpoint {
 
     handler.
         response().
-        stringResponse((response) ->
-            response.complete("hello World " + handler.request().param("name"))).
+        stringResponse((response) -> {
+          final String name = handler.request().param("name");
+          response.complete("hello World " + name);
+        }).
         timeout(2000).
         onFailureRespond((error, future) -> future.complete("error")).
         httpErrorCode(HttpResponseStatus.BAD_REQUEST).
@@ -59,10 +61,6 @@ public class SimpleREST extends VxmsEndpoint {
         execute();
   }
 
-  @OnRestError("/helloGET/:name")
-  public void simpleRESTHelloWithParameterError(RestHandler handler, Throwable t) {
-
-  }
 
   public static void main(String[] args) {
     DeploymentOptions options = new DeploymentOptions().setInstances(1)

@@ -56,7 +56,7 @@ public class EventbusBlockingExecution {
    * @param targetId the event-bus target id
    * @param message the message to send
    * @param function the function to process the result message
-   * @param deliveryOptions the event-bus delivery options
+   * @param deliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    * objects per instance
    * @param failure the failure thrown while task execution

@@ -72,7 +72,7 @@ public class EventbusBridgeBlockingRequest {
    *
    * @param id the target id to send to
    * @param message the message to send
-   * @param requestOptions the delivery options for the event bus request
+   * @param requestOptions the delivery serverOptions for the event bus request
    * @return the execution chain {@link EventbusBridgeBlockingResponse}
    */
   public EventbusBridgeBlockingResponse send(String id, Object message,

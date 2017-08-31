@@ -41,9 +41,8 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.jacpfx.entity.RestrictedBodyHandlingRouterConfig;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.configuration.EndpointConfig;
-import org.jacpfx.entity.RestrictedBodyHandlingEndpointConfig;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
@@ -141,8 +140,7 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
   }
 
 
-  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  @EndpointConfig(RestrictedBodyHandlingEndpointConfig.class)
+  @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT, routerConf = RestrictedBodyHandlingRouterConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
 

@@ -1,18 +1,16 @@
 package org.jacpfx.entity;
 
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
-import org.jacpfx.vxms.common.configuration.EndpointConfiguration;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
  * Created by Andy Moncsek on 18.02.16.
  */
-public class RestrictedCorsEndpointConfig3 implements EndpointConfiguration {
+public class CookieRouterConfig implements RouterConfiguration {
 
-
-  public void corsHandler(Router router) {
-    router.route("/stringGETResponseSyncAsync*").handler(CorsHandler.create("http://example.com").
+  public void cookieHandler(Router router) {
+    router.route().handler(CorsHandler.create("127.0.0.1").
         allowedMethod(io.vertx.core.http.HttpMethod.GET).
         allowedMethod(io.vertx.core.http.HttpMethod.POST).
         allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS).
@@ -22,7 +20,5 @@ public class RestrictedCorsEndpointConfig3 implements EndpointConfiguration {
         allowedHeader("X-Requested-With"));
   }
 
-  public BodyHandler bodyHandler() {
-    return BodyHandler.create();
-  }
+
 }

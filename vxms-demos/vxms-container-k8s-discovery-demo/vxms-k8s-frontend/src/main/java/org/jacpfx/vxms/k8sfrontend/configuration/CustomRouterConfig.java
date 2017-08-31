@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package org.jacpfx.vxms.common.configuration;
+package org.jacpfx.vxms.k8sfrontend.configuration;
+
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.StaticHandler;
+import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
- * Created by Andy Moncsek on 27.01.16.
- * Default endpoint configuration when none is defined
+ * Created by Andy Moncsek on 11.05.17.
  */
-public class DefaultEndpointConfiguration implements EndpointConfiguration {
+public class CustomRouterConfig implements RouterConfiguration {
 
+    @Override
+    public void staticHandler(Router router) {
+
+        router.route().handler(StaticHandler.create());
+    }
 
 }
