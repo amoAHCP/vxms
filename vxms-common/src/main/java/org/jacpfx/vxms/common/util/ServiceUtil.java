@@ -17,38 +17,16 @@
 package org.jacpfx.vxms.common.util;
 
 import java.util.ServiceLoader;
-import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.spi.EventhandlerSPI;
 import org.jacpfx.vxms.spi.RESThandlerSPI;
 import org.jacpfx.vxms.spi.WebSockethandlerSPI;
-import org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration;
-import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
- * General Utility class for resolving SPI and Endpoint configuration
+ * General Utility class for resolving SPI extensions
  * Created by amo on 24.10.16.
  */
 public class ServiceUtil {
 
-  /**
-   * extract the endpoint configuration fro service
-   *
-   * @param service the service where to extract the endpoint configuration
-   * @return the {@link RouterConfiguration}
-   */
-  public static RouterConfiguration getEndpointConfiguration(Object service) {
-    RouterConfiguration endpointConfig = null;
-    if (service.getClass().isAnnotationPresent(ServiceEndpoint.class)) {
-      final ServiceEndpoint annotation = service.getClass().getAnnotation(ServiceEndpoint.class);
-      final Class<? extends RouterConfiguration> epConfigClazz = annotation.routerConf();
-      try {
-        endpointConfig = epConfigClazz.newInstance();
-      } catch (InstantiationException | IllegalAccessException e) {
-        e.printStackTrace();
-      }
-    }
-    return endpointConfig == null ? new DefaultRouterConfiguration() : endpointConfig;
-  }
 
 
 

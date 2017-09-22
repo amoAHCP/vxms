@@ -17,7 +17,6 @@
 package org.jacpfx.vxms.services;
 
 import static org.jacpfx.vxms.common.util.ConfigurationUtil.getRouterConfiguration;
-import static org.jacpfx.vxms.common.util.ServiceUtil.getEndpointConfiguration;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getEventBusSPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getRESTSPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getWebSocketSPI;
@@ -50,8 +49,6 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   private static final Logger log = LoggerFactory.getLogger(VxmsEndpoint.class);
 
-  // private VxmsShared vxmsShared;
-
   @Override
   public final void start(final Future<Void> startFuture) {
     // register info (keepAlive) handler
@@ -81,9 +78,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
 
   /**
-   * initiate Endpoint  and all Plugins
+   * initiate Endpoint and all Extensions
    *
    * @param startFuture, the Vertx start feature
+   * @param registrationObject, the verticle to initialize
+   * @param vxmsShared, the {@link VxmsShared} object
    */
   private static void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject,
       VxmsShared vxmsShared) {

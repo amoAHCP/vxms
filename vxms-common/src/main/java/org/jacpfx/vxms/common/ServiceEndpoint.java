@@ -24,8 +24,8 @@ import org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration;
 import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
 /**
- * Created by Andy Moncsek on 31.07.15. Defines an ServiceEndpoint and his metadata. E Class
- * Annotated wit @ServiceEndpoint must extend from ServiceVerticle
+ * Created by Andy Moncsek on 31.07.15. Defines an ServiceEndpoint and his metadata. A Class
+ * Annotated with {@link ServiceEndpoint} must extend from ServiceVerticle or initialized statically with the factory
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
