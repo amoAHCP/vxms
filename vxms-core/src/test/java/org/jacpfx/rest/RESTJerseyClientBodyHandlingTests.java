@@ -46,6 +46,7 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -111,6 +112,7 @@ public class RESTJerseyClientBodyHandlingTests extends VertxTestBase {
   /**
    *   The default EndpointConfig returns a valid BodyHandler... if a custom EndpointConfig set this to null no body handling should be possible
    */
+  @Ignore
   public void noBodyHandling() throws InterruptedException, ExecutionException, IOException {
     final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
     File file = new File(getClass().getClassLoader().getResource("payload.xml").getFile());

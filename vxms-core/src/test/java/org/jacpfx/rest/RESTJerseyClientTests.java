@@ -108,7 +108,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
 
   @Test
-
+  @Ignore
   public void stringGETResponse() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
@@ -136,6 +136,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void stringPOST() throws InterruptedException, ExecutionException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
@@ -190,6 +191,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void stringPOSTResponse() throws InterruptedException, ExecutionException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
@@ -217,6 +219,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void stringOPTIONSResponse() throws InterruptedException, ExecutionException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
@@ -243,6 +246,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void stringPUTResponse() throws InterruptedException, ExecutionException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
@@ -271,6 +275,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
 
 
   @Test
+  @Ignore
   public void stringDELETEResponse() throws InterruptedException, ExecutionException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
@@ -297,6 +302,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void stringGETResponseWithParameter() throws InterruptedException {
 
     CountDownLatch latch = new CountDownLatch(1);
@@ -326,6 +332,7 @@ public class RESTJerseyClientTests extends VertxTestBase {
   }
 
   @Test
+  @Ignore
   public void stringPOSTResponseWithParameter() throws InterruptedException, ExecutionException {
 
     CountDownLatch latch = new CountDownLatch(1);

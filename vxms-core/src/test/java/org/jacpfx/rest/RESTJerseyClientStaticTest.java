@@ -36,6 +36,7 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -98,7 +99,7 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
 
 
   @Test
-  //@Ignore
+  @Ignore
   public void staticTest() throws InterruptedException {
     // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);
