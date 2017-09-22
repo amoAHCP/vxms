@@ -28,7 +28,7 @@ import io.vertx.ext.web.handler.CookieHandler;
 public interface RouterConfiguration {
 
   /**
-   * define a corse handler for your service
+   * define a cors handler for your service
    *
    * @param router {@link Router}
    */
@@ -46,7 +46,7 @@ public interface RouterConfiguration {
   }
 
   /**
-   * Define a coockie handler for your service, a cookie handler is always defined by default
+   * Define a cookie handler for your service, a cookie handler is always defined by default
    *
    * @param router {@link Router}
    */

@@ -81,7 +81,6 @@ public class ReflectionExecutionWrapper {
    * Returns a method when existing, otherwise throws an Exception
    *
    * @return the requested method
-   * @throws NoSuchElementException
    */
   public Method getMethod() {
     return CommonReflectionUtil
@@ -91,7 +90,6 @@ public class ReflectionExecutionWrapper {
 
   /**
    * Invoke the method with it's signature
-   * @throws NoSuchElementException
    */
   public void invoke() {
     final Method method = getMethod();

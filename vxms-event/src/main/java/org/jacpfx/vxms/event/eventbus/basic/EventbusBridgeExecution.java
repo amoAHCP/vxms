@@ -89,7 +89,7 @@ public class EventbusBridgeExecution {
       RecursiveExecutor executor,
       RetryExecutor retryExecutor) {
 
-    if (circuitBreakerTimeout == 0l) {
+    if (circuitBreakerTimeout == 0) {
       executeDefaultState(targetId,
           message,
           function,

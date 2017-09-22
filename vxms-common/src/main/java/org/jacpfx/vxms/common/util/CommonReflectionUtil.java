@@ -16,7 +16,6 @@
 
 package org.jacpfx.vxms.common.util;
 
-import com.sun.javafx.binding.StringFormatter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -80,11 +79,11 @@ public class CommonReflectionUtil {
     if (first.isPresent()) {
       return first;
     } else {
-      log.log(Level.FINE,StringFormatter
+      log.log(Level.FINE, String
           .format("method %s was not found in class %s with parameters %s", methodName,
               invokeTo.getClass(),
               Arrays.toString(Stream.of(parameters).map(p -> p.getClass()).toArray()))
-          .getValue());
+          );
       return Optional.empty();
     }
 
