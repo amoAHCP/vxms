@@ -42,8 +42,8 @@
         <!--Plugin versions-->
         <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
-        <maven-compiler-plugin.source>9</maven-compiler-plugin.source>
-        <maven-compiler-plugin.target>9</maven-compiler-plugin.target>
+        <maven-compiler-plugin.source>1.8</maven-compiler-plugin.source>
+        <maven-compiler-plugin.target>1.8</maven-compiler-plugin.target>
         <maven-javadoc-plugin.version>3.0.0-M1</maven-javadoc-plugin.version>
         <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
     </properties>

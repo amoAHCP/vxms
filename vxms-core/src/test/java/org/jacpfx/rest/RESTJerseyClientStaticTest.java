@@ -99,7 +99,6 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
 
 
   @Test
-  @Ignore
   public void staticTest() throws InterruptedException {
     // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);

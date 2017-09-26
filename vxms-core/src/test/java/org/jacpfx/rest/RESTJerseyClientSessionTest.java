@@ -102,7 +102,6 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
 
 
   @Test
-  @Ignore
   public void sessionTest() throws InterruptedException {
     // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);

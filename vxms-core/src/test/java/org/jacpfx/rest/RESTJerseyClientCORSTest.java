@@ -131,7 +131,6 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
 
   @Test
-  @Ignore
   public void corsFail() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);
@@ -163,7 +162,6 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   }
 
   @Test
-  @Ignore
   public void corsOK() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);
@@ -193,7 +191,6 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
 
   @Test
-  @Ignore
   public void WsServiceThree() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);
@@ -222,7 +219,6 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   }
 
   @Test
-  @Ignore
   public void WsServiceThree_1() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
     CountDownLatch latch = new CountDownLatch(1);
