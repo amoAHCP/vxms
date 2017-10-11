@@ -126,7 +126,7 @@ public class ExecuteRSBasicChainResponse<T> {
   }
 
 
-  public <H>ExecuteRSBasicChainResponse<H> andThan(ThrowableFutureBiConsumer<T,H> step) {
+  public <H>ExecuteRSBasicChainResponse<H> andThen(ThrowableFutureBiConsumer<T,H> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
     return new ExecuteRSBasicChainResponse<>(methodId,

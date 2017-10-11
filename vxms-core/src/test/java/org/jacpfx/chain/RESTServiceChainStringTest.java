@@ -29,9 +29,16 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.InvocationCallback;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
@@ -42,7 +49,7 @@ import org.junit.Test;
 /**
  * Created by Andy Moncsek on 23.04.15.
  */
-public class RESTServiceChainTest extends VertxTestBase {
+public class RESTServiceChainStringTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -107,16 +114,11 @@ public class RESTServiceChainTest extends VertxTestBase {
         createHttpClient(options);
 
     HttpClientRequest request = client
-        .get("/wsService/basicTestSupply", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Assert.assertEquals(body.toString(), "1 final");
-              testComplete();
-            });
-
-          }
-        });
+        .get("/wsService/basicTestSupply", resp -> resp.bodyHandler(body -> {
+          System.out.println("Got a createResponse: " + body.toString());
+          Assert.assertEquals(body.toString(), "1 final");
+          testComplete();
+        }));
     request.end();
     await();
 
@@ -243,7 +245,6 @@ public class RESTServiceChainTest extends VertxTestBase {
   }
 
 
-
   @Test
 //@Ignore
   public void basicTestSupplyWithErrorSimpleRetry() throws InterruptedException {
@@ -271,7 +272,7 @@ public class RESTServiceChainTest extends VertxTestBase {
 
   @Test
 //@Ignore
-  public void basicTestSupplyWithErrorUnhandledRetry() throws InterruptedException {
+  public void basicTestAndThenWithErrorUnhandledRetry() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
@@ -279,18 +280,244 @@ public class RESTServiceChainTest extends VertxTestBase {
         createHttpClient(options);
 
     HttpClientRequest request = client
-        .get("/wsService/basicTestSupplyWithErrorUnhandledRetry", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Assert.assertEquals(body.toString(), "error 4 test error");
-              testComplete();
+        .get("/wsService/basicTestAndThenWithErrorUnhandledRetry",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
+                  Assert.assertEquals(body.toString(), "error 4 test error");
+                  testComplete();
+                });
+
+              }
             });
+    request.end();
+    await();
+
+  }
+
+  @Test
+  public void basicTestSupplyWithErrorAndCircuitBreaker() throws InterruptedException {
+    Client client = ClientBuilder.newClient();
+
+    //////// Request 1 -- creates crash
+    WebTarget target = client.target("http://" + HOST + ":" + PORT)
+        .path("/wsService/basicTestSupplyWithErrorAndCircuitBreaker/crash");
+    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+        .get(new InvocationCallback<String>() {
+
+          @Override
+          public void completed(String response) {
+            System.out.println("Response entity '" + response + "' received.");
+            vertx.runOnContext(h -> {
+              System.out.println("--------");
+              assertEquals("failure", response);
+
+              //////// Request 1 -- is valid but crashes due to open circuit
+              WebTarget target2 = client.target("http://" + HOST + ":" + PORT)
+                  .path("/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value");
+              target2.request(MediaType.APPLICATION_JSON_TYPE).async()
+                  .get(new InvocationCallback<String>() {
+
+                    @Override
+                    public void completed(String response) {
+                      System.out.println("Response entity '" + response + "' received.");
+                      vertx.runOnContext(h -> {
+                        System.out.println("--------");
+                        assertEquals("failure", response);
+
+                        // wait 1s, but circuit is still open
+                        vertx.setTimer(1205, handler -> {
+                          target2.request(MediaType.APPLICATION_JSON_TYPE).async()
+                              .get(new InvocationCallback<String>() {
+
+                                @Override
+                                public void completed(String response) {
+                                  System.out
+                                      .println("Response entity '" + response + "' received.");
+                                  vertx.runOnContext(h -> {
+                                    System.out.println("--------");
+                                    assertEquals("failure", response);
+
+                                    // wait another 1s, now circuit should be closed
+                                    vertx.setTimer(1005, handler -> {
+                                      target2.request(MediaType.APPLICATION_JSON_TYPE).async()
+                                          .get(new InvocationCallback<String>() {
+
+                                            @Override
+                                            public void completed(String response) {
+                                              System.out.println(
+                                                  "Response entity '" + response + "' received.");
+                                              vertx.runOnContext(h -> {
+                                                System.out.println("--------");
+                                                assertEquals("value", response);
+
+                                                testComplete();
+
+
+                                              });
+
+
+                                            }
+
+                                            @Override
+                                            public void failed(Throwable throwable) {
+
+                                            }
+                                          });
+                                    });
+
+
+                                  });
+
+
+                                }
+
+                                @Override
+                                public void failed(Throwable throwable) {
+
+                                }
+                              });
+                        });
+
+
+                      });
+
+
+                    }
+
+                    @Override
+                    public void failed(Throwable throwable) {
+
+                    }
+                  });
+
+
+            });
+            // Assert.assertEquals(response, "test-123");
+
+          }
+
+          @Override
+          public void failed(Throwable throwable) {
 
           }
         });
-    request.end();
-    await();
+
+    await(6000, TimeUnit.MILLISECONDS);
+
+  }
+
+
+  @Test
+  public void basicTestAndThenWithErrorAndCircuitBreaker() throws InterruptedException {
+    Client client = ClientBuilder.newClient();
+
+    //////// Request 1 -- creates crash
+    WebTarget target = client.target("http://" + HOST + ":" + PORT)
+        .path("/wsService/basicTestAndThenWithErrorAndCircuitBreaker/crash");
+    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
+        .get(new InvocationCallback<String>() {
+
+          @Override
+          public void completed(String response) {
+            System.out.println("Response entity '" + response + "' received.");
+            vertx.runOnContext(h -> {
+              System.out.println("--------");
+              assertEquals("failure", response);
+
+              //////// Request 1 -- is valid but crashes due to open circuit
+              WebTarget target2 = client.target("http://" + HOST + ":" + PORT)
+                  .path("/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value");
+              target2.request(MediaType.APPLICATION_JSON_TYPE).async()
+                  .get(new InvocationCallback<String>() {
+
+                    @Override
+                    public void completed(String response) {
+                      System.out.println("Response entity '" + response + "' received.");
+                      vertx.runOnContext(h -> {
+                        System.out.println("--------");
+                        assertEquals("failure", response);
+
+                        // wait 1s, but circuit is still open
+                        vertx.setTimer(1205, handler -> {
+                          target2.request(MediaType.APPLICATION_JSON_TYPE).async()
+                              .get(new InvocationCallback<String>() {
+
+                                @Override
+                                public void completed(String response) {
+                                  System.out
+                                      .println("Response entity '" + response + "' received.");
+                                  vertx.runOnContext(h -> {
+                                    System.out.println("--------");
+                                    assertEquals("failure", response);
+
+                                    // wait another 1s, now circuit should be closed
+                                    vertx.setTimer(1005, handler -> {
+                                      target2.request(MediaType.APPLICATION_JSON_TYPE).async()
+                                          .get(new InvocationCallback<String>() {
+
+                                            @Override
+                                            public void completed(String response) {
+                                              System.out.println(
+                                                  "Response entity '" + response + "' received.");
+                                              vertx.runOnContext(h -> {
+                                                System.out.println("--------");
+                                                assertEquals("value", response);
+
+                                                testComplete();
+
+
+                                              });
+
+
+                                            }
+
+                                            @Override
+                                            public void failed(Throwable throwable) {
+
+                                            }
+                                          });
+                                    });
+
+
+                                  });
+
+
+                                }
+
+                                @Override
+                                public void failed(Throwable throwable) {
+
+                                }
+                              });
+                        });
+
+
+                      });
+
+
+                    }
+
+                    @Override
+                    public void failed(Throwable throwable) {
+
+                    }
+                  });
+
+
+            });
+            // Assert.assertEquals(response, "test-123");
+
+          }
+
+          @Override
+          public void failed(Throwable throwable) {
+
+          }
+        });
+
+    await(6000, TimeUnit.MILLISECONDS);
 
   }
 
@@ -350,7 +577,7 @@ public class RESTServiceChainTest extends VertxTestBase {
             future.complete(1);
 
           })
-          .<String>andThan((value, future) -> {
+          .<String>andThen((value, future) -> {
             future.complete(value + 1 + "");
           })
           .mapToStringResponse((val, future) -> {
@@ -388,7 +615,7 @@ public class RESTServiceChainTest extends VertxTestBase {
             future.complete(1);
 
           })
-          .<String>andThan((value, future) -> {
+          .<String>andThen((value, future) -> {
             throw new NullPointerException("test error");
           })
           .mapToStringResponse((val, future) -> {
@@ -402,23 +629,6 @@ public class RESTServiceChainTest extends VertxTestBase {
           }).execute();
     }
 
-    @Path("/basicTestAndThenWithErrorUnhandled")
-    @GET
-    public void basicTestAndThenWithErrorUnhandled(RestHandler reply) {
-      System.out.println("basicTestAndThen: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
-
-          })
-          .<String>andThan((value, future) -> {
-            throw new NullPointerException("test error");
-          })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
-          })
-          .execute();
-    }
 
     @Path("/basicTestSupplyWithErrorUnhandled")
     @GET
@@ -435,34 +645,24 @@ public class RESTServiceChainTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/basicTestSupplyWithErrorUnhandledRetry")
+    @Path("/basicTestAndThenWithErrorUnhandled")
     @GET
-    public void basicTestSupplyWithErrorUnhandledRetry(RestHandler reply) {
-      System.out.println("basicTestSupplyWithErrorUnhandledRetry: " + reply);
-      AtomicInteger counter = new AtomicInteger(1);
+    public void basicTestAndThenWithErrorUnhandled(RestHandler reply) {
+      System.out.println("basicTestAndThen: " + reply);
       reply.response()
           .<Integer>supply((future) -> {
-            counter.decrementAndGet();
             future.complete(1);
 
           })
-          .<String>andThan((value, future) -> {
-            counter.incrementAndGet();
+          .<String>andThen((value, future) -> {
             throw new NullPointerException("test error");
           })
           .mapToStringResponse((val, future) -> {
             future.complete(val + " final");
           })
-          .onError(t -> {
-            System.out.println(t.getMessage() + " counter:" + counter.get());
-          })
-          .retry(3)
-          .onFailureRespond((t, f) ->
-          {
-            f.complete("error " + counter.get() + " " + t.getMessage());
-
-          }).execute();
+          .execute();
     }
+
 
     @Path("/basicTestSupplyWithErrorSimpleRetry")
     @GET
@@ -489,6 +689,82 @@ public class RESTServiceChainTest extends VertxTestBase {
           }).execute();
     }
 
+    @Path("/basicTestAndThenWithErrorUnhandledRetry")
+    @GET
+    public void basicTestAndThenWithErrorUnhandledRetry(RestHandler reply) {
+      System.out.println("basicTestAndThenWithErrorUnhandledRetry: " + reply);
+      AtomicInteger counter = new AtomicInteger(1);
+      reply.response()
+          .<Integer>supply((future) -> {
+            counter.decrementAndGet();
+            future.complete(1);
+
+          })
+          .<String>andThen((value, future) -> {
+            counter.incrementAndGet();
+            throw new NullPointerException("test error");
+          })
+          .mapToStringResponse((val, future) -> {
+            future.complete(val + " final");
+          })
+          .onError(t -> {
+            System.out.println(t.getMessage() + " counter:" + counter.get());
+          })
+          .retry(3)
+          .onFailureRespond((t, f) ->
+          {
+            f.complete("error " + counter.get() + " " + t.getMessage());
+
+          }).execute();
+    }
+
+    @Path("/basicTestSupplyWithErrorAndCircuitBreaker/:val")
+    @GET
+    public void basicTestSupplyWithErrorAndCircuitBreaker(RestHandler reply) {
+      final String val = reply.request().param("val");
+      System.out.println("stringResponse: " + val);
+      reply.response().
+          <String>supply((future) -> {
+            if (val.equals("crash")) {
+              throw new NullPointerException("test-123");
+            }
+            future.complete(val);
+          })
+          .mapToStringResponse((v, future) -> {
+            future.complete(v);
+          }).
+          onError(e -> System.out.println(e.getMessage())).
+          retry(3).
+          closeCircuitBreaker(2000).
+          onFailureRespond((error, future) -> future.complete("failure")).
+          execute();
+    }
+
+    @Path("/basicTestAndThenWithErrorAndCircuitBreaker/:val")
+    @GET
+    public void basicTestAndThenWithErrorAndCircuitBreaker(RestHandler reply) {
+      final String val = reply.request().param("val");
+      System.out.println("stringResponse: " + val);
+      reply.response().
+          <String>supply((future) -> {
+            future.complete(val);
+          }).
+          <String>andThen((v, f) -> {
+            if (v.equals("crash")) {
+              throw new NullPointerException("test-123");
+            }
+            f.complete(v);
+          })
+          .mapToStringResponse((v, future) -> {
+            future.complete(v);
+          }).
+          onError(e -> System.out.println(e.getMessage())).
+          retry(3).
+          closeCircuitBreaker(2000).
+          onFailureRespond((error, future) -> future.complete("failure")).
+          execute();
+    }
+
     @Path("/endpointOne")
     @GET
     public void rsEndpointOne(RestHandler reply) {
@@ -498,7 +774,7 @@ public class RESTServiceChainTest extends VertxTestBase {
             future.complete(1);
 
           })
-          .<String>andThan((v, future) -> {
+          .<String>andThen((v, future) -> {
             future.complete(v + "test");
           })
           .mapToStringResponse((val, future) -> {
