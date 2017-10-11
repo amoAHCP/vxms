@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package org.jacpfx.vxms.common.throwable;
+package org.jacpfx;
 
 import io.vertx.core.Future;
+import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 21.01.16.
- * A bi function that throws a throwable, so vxms can handle the exceptions
- */
-public interface ThrowableFutureBiConsumer<H, T> {
+public class SupplierTest {
 
-  /**
-   * Performs this operation on the given argument.
-   *
-   * @param operationResult the input argument
-   * @param value the input argument
-   * @throws Throwable the throwable
-   */
-  void accept(H value, Future<T> operationResult) throws Throwable;
+  @Test
+  public void testSupplierchain() {
+
+  }
+
+
+
 }

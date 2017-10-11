@@ -28,8 +28,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
 
@@ -89,6 +89,34 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         retryCount,
         timeout,
         circuitBreakerTimeout);
+  }
+
+  public ExecuteRSBasicObjectResponse(String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      RoutingContext context,
+      Map<String, String> headers,
+      ThrowableFutureConsumer<Serializable> objectConsumer,
+      Encoder encoder) {
+
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        objectConsumer,
+        null,
+        encoder,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0l,
+        0l);
+
   }
 
 

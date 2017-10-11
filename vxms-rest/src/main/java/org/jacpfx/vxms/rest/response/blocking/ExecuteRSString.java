@@ -95,6 +95,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         headers,
         null,
         null,
+        null,
         encoder,
         errorHandler,
         null,

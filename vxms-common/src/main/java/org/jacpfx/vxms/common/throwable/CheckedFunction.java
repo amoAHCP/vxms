@@ -16,20 +16,16 @@
 
 package org.jacpfx.vxms.common.throwable;
 
-import io.vertx.core.Future;
+import java.util.concurrent.ExecutionException;
 
-/**
- * Created by Andy Moncsek on 21.01.16.
- * A bi function that throws a throwable, so vxms can handle the exceptions
- */
-public interface ThrowableFutureBiConsumer<H, T> {
+public interface CheckedFunction<T, R> {
 
   /**
-   * Performs this operation on the given argument.
+   * Applies this function to the given argument.
    *
-   * @param operationResult the input argument
-   * @param value the input argument
-   * @throws Throwable the throwable
+   * @param t the function argument
+   * @throws ExecutionException the Exception while runtime
+   * @return the function result
    */
-  void accept(H value, Future<T> operationResult) throws Throwable;
+  R apply(T t) throws Throwable;
 }

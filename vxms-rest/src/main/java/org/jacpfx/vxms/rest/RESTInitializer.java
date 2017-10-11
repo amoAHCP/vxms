@@ -44,8 +44,7 @@ import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.rest.util.ReflectionUtil;
 
 /**
- * Created by Andy Moncsek on 09.03.16.
- * Handles initialization of vxms rest module implementation
+ * Created by Andy Moncsek on 09.03.16. Handles initialization of vxms rest module implementation
  */
 public class RESTInitializer {
 
@@ -96,18 +95,43 @@ public class RESTInitializer {
         restMethod.isAnnotationPresent(DELETE.class) ? restMethod.getAnnotation(DELETE.class)
             : null);
 
-    get.ifPresent(g -> initHttpGet(vxmsShared, router, service, restMethod, path, errorMethodStream,
+    get.ifPresent(g -> initHttpGet(vxmsShared,
+        router,
+        service,
+        restMethod,
+        path,
+        errorMethodStream,
         consumes));
     post.ifPresent(
-        g -> initHttpPost(vxmsShared, router, service, restMethod, path, errorMethodStream,
+        g -> initHttpPost(vxmsShared,
+            router,
+            service,
+            restMethod,
+            path,
+            errorMethodStream,
             consumes));
     options.ifPresent(
-        g -> initHttpOptions(vxmsShared, router, service, restMethod, path, errorMethodStream,
+        g -> initHttpOptions(vxmsShared,
+            router,
+            service,
+            restMethod,
+            path,
+            errorMethodStream,
             consumes));
-    put.ifPresent(g -> initHttpPut(vxmsShared, router, service, restMethod, path, errorMethodStream,
+    put.ifPresent(g -> initHttpPut(vxmsShared,
+        router,
+        service,
+        restMethod,
+        path,
+        errorMethodStream,
         consumes));
     delete.ifPresent(
-        g -> initHttpDelete(vxmsShared, router, service, restMethod, path, errorMethodStream,
+        g -> initHttpDelete(vxmsShared,
+            router,
+            service,
+            restMethod,
+            path,
+            errorMethodStream,
             consumes));
 
     if (!get.isPresent() && !post.isPresent() && !options.isPresent() && !put.isPresent() && !delete

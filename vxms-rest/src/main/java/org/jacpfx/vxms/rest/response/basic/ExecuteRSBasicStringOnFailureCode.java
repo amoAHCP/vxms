@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.basic;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -44,6 +46,7 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
    * @param headers the headers to pass to the response
    * @param stringConsumer the consumer that takes a Future to complete, producing the string
    * response
+   * @param chain, the execution chain when performing many steps
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -62,6 +65,7 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
       Consumer<Throwable> errorMethodHandler,
       RoutingContext context, Map<String, String> headers,
       ThrowableFutureConsumer<String> stringConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -78,6 +82,7 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -104,6 +109,7 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

@@ -17,14 +17,21 @@
 package org.jacpfx.vxms.rest.response;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.Future;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
+import org.jacpfx.vxms.common.throwable.CheckedFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicByteResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicChainResponse;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicStringResponse;
 
@@ -89,16 +96,8 @@ public class RESTResponse {
         errorMethodHandler,
         context,
         headers,
-        byteConsumer,
-        null,
-        null,
-        null,
-        null,
-        0,
-        0,
-        0,
-        0l,
-        0l);
+        byteConsumer);
+
   }
 
   /**
@@ -116,15 +115,19 @@ public class RESTResponse {
         context,
         headers,
         stringConsumer,
-        null,
-        null,
-        null,
-        null,
-        0,
-        0,
-        0,
-        0l,
-        0l);
+        null);
+  }
+
+  public <T>ExecuteRSBasicChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
+    final List<ExecutionStep> chain = new ArrayList<>();
+    chain.add(new ExecutionStep(chainconsumer));
+    return new ExecuteRSBasicChainResponse<>(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        chain);
   }
 
   /**
@@ -144,15 +147,7 @@ public class RESTResponse {
         context,
         headers,
         objectConsumer,
-        null,
-        encoder,
-        null,
-        null,
-        0,
-        0,
-        0,
-        0l,
-        0l);
+        encoder);
   }
 
 

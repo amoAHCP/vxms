@@ -17,8 +17,10 @@
 package org.jacpfx.vxms.rest.response.basic;
 
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -62,6 +64,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<String> stringConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder, Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, String> onFailureRespond,
@@ -74,6 +77,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -103,6 +107,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

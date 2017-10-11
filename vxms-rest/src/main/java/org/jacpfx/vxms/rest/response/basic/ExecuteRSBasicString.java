@@ -22,18 +22,21 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class is the end of the fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16. This class is the end of the fluent API, all data collected
+ * to execute the chain.
  */
 public class ExecuteRSBasicString {
 
@@ -44,6 +47,7 @@ public class ExecuteRSBasicString {
   protected final RoutingContext context;
   protected final Map<String, String> headers;
   protected final ThrowableFutureConsumer<String> stringConsumer;
+  protected final List<ExecutionStep> chain;
   protected final Encoder encoder;
   protected final Consumer<Throwable> errorHandler;
   protected final ThrowableErrorConsumer<Throwable, String> onFailureRespond;
@@ -86,6 +90,7 @@ public class ExecuteRSBasicString {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<String> stringConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -102,6 +107,7 @@ public class ExecuteRSBasicString {
     this.context = context;
     this.headers = headers;
     this.stringConsumer = stringConsumer;
+    this.chain = chain;
     this.excecuteEventBusAndReply = excecuteEventBusAndReply;
     this.encoder = encoder;
     this.errorHandler = errorHandler;
@@ -128,6 +134,7 @@ public class ExecuteRSBasicString {
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -156,6 +163,7 @@ public class ExecuteRSBasicString {
         context,
         ResponseExecution.updateContentType(headers, contentType),
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -182,6 +190,7 @@ public class ExecuteRSBasicString {
         context,
         ResponseExecution.updateContentType(headers, contentType),
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -236,10 +245,12 @@ public class ExecuteRSBasicString {
                         if (!value.handledError()) {
                           respond(value.getResult());
                         } else {
+                          // handle on failure response
                           respond(value.getResult(), httpErrorCode);
                         }
 
                       } else {
+                        // reply unhandled error
                         respond(value.getCause().getMessage(),
                             HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                       }
@@ -249,9 +260,78 @@ public class ExecuteRSBasicString {
               }
           );
 
+      ofNullable(chain).ifPresent(chainList -> {
+        if (!chainList.isEmpty()) {
+          final ExecutionStep executionStep = chainList.get(0);
+          ofNullable(executionStep.getChainconsumer()).ifPresent(initialConsumer -> {
+            int retry = retryCount;
+            ResponseExecution.createResponse(methodId,
+                initialConsumer,
+                errorHandler,
+                onFailureRespond,
+                errorMethodHandler,
+                vxmsShared,
+                failure,
+                value -> {
+                  if (value.succeeded()) {
+                    if (!value.handledError()) {
+                      final Object result = value.getResult();
+                      if (chainList.size() > 1) {
+                        final ExecutionStep executionStepAndThan = chainList.get(1);
+                        ofNullable(executionStepAndThan.getStep()).ifPresent(step -> executeStep(chainList, retry, result, executionStepAndThan, step));
+                      }
+                    } else {
+                      // handle on failure response
+                      respond(value.getResult(), httpErrorCode);
+                    }
+
+                  } else {
+                    // reply unhandled error
+                    respond(value.getCause().getMessage(),
+                        HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                  }
+                  checkAndCloseResponse(retry);
+                }, retry, timeout, circuitBreakerTimeout);
+          });
+        }
+      });
+
     });
 
 
+  }
+
+  private void executeStep(List<ExecutionStep> chainList, int retry, Object result,
+      ExecutionStep element, ThrowableFutureBiConsumer step) {
+    StepExecution.createResponse(methodId,
+        step,
+        result,
+        errorHandler,
+        onFailureRespond,
+        errorMethodHandler,
+        vxmsShared,
+        failure, v -> {
+          final int index = chainList.indexOf(element);
+          final int size = chainList.size();
+          if (v.succeeded()) {
+            if (!v.handledError()) {
+              if (index == size - 1) {
+                // handle last element
+                respond(v.getResult());
+              } else {
+                // call recursive
+                final ExecutionStep executionStepAndThan = chainList.get(index + 1);
+                ofNullable(executionStepAndThan.getStep()).ifPresent(nextStep -> executeStep(chainList, retry, v.getResult(), executionStepAndThan, nextStep));
+              }
+            } else {
+              respond(v.getResult(), httpErrorCode);
+            }
+          } else {
+            respond(v.getCause().getMessage(),
+                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+          }
+
+        }, retry, timeout, circuitBreakerTimeout);
   }
 
 

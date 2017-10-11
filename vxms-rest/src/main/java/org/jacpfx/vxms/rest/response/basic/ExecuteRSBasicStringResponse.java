@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.basic;
 
 import io.vertx.ext.web.RoutingContext;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -27,8 +29,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
 
@@ -64,6 +66,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<String> stringConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -77,6 +80,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -86,6 +90,28 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         retryCount,
         timeout,
         circuitBreakerTimeout);
+  }
+
+  public ExecuteRSBasicStringResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+      ThrowableFutureConsumer<String> stringConsumer, List<ExecutionStep> chain) {
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        stringConsumer,
+        chain,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0l,
+        0l);
   }
 
 
@@ -104,6 +130,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -129,6 +156,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -154,6 +182,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -182,6 +211,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         context,
         headers,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -210,6 +240,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         context,
         headerMap,
         stringConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
