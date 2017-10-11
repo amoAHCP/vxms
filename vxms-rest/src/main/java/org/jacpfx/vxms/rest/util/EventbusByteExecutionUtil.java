@@ -36,8 +36,7 @@ import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicStringResponse;
 
 /**
- * Created by Andy Moncsek on 05.04.16.
- * Typed execution of event-bus calls and byte response
+ * Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and byte response
  */
 public class EventbusByteExecutionUtil {
 
@@ -189,6 +188,7 @@ public class EventbusByteExecutionUtil {
             context, headers,
             stringConsumer,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -223,9 +223,22 @@ public class EventbusByteExecutionUtil {
             timeout,
             circuitBreakerTimeout, executor, retry);
 
-    return new ExecuteRSBasicByteResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _byteConsumer, excecuteEventBusAndReply, _encoder, _errorHandler,
-        _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout,
+    return new ExecuteRSBasicByteResponse(_methodId,
+        _vxmsShared,
+        _failure,
+        _errorMethodHandler,
+        _context,
+        _headers,
+        _byteConsumer,
+        null,
+        excecuteEventBusAndReply,
+        _encoder,
+        _errorHandler,
+        _onFailureRespond,
+        _httpStatusCode,
+        _httpErrorCode,
+        _retryCount,
+        _timeout,
         _circuitBreakerTimeout);
   }
 

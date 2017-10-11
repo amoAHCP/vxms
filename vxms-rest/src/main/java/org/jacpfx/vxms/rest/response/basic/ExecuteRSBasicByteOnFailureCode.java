@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.basic;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -62,6 +64,7 @@ public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse 
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<byte[]> byteConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusByteCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -78,6 +81,7 @@ public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse 
         context,
         headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -104,6 +108,7 @@ public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse 
         context,
         headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

@@ -94,6 +94,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         headers,
         null,
         null,
+        null,
         encoder,
         errorHandler,
         null,

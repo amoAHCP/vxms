@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.basic;
 
 import io.vertx.ext.web.RoutingContext;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -62,6 +64,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<byte[]> byteConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusByteCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -75,6 +78,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         errorMethodHandler,
         context, headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder, errorHandler,
         onFailureRespond,
@@ -93,6 +97,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         errorMethodHandler,
         context, headers,
         byteConsumer,
+        null,
         null,
         null,
         null,
@@ -120,6 +125,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         context,
         headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -145,6 +151,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         context,
         headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder, errorHandler,
         onFailureRespond,
@@ -169,6 +176,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         context,
         headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -192,6 +200,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         errorMethodHandler,
         context, headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder, errorHandler,
         onFailureRespond,
@@ -217,6 +226,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
         context,
         headerMap,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

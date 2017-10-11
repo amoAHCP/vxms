@@ -23,12 +23,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
 
@@ -46,6 +49,7 @@ public class ExecuteRSBasicByte {
   protected final Consumer<Throwable> errorHandler;
   protected final Consumer<Throwable> errorMethodHandler;
   protected final ThrowableFutureConsumer<byte[]> byteConsumer;
+  protected final List<ExecutionStep> chain;
   protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
   protected final ExecuteEventbusByteCall excecuteEventBusAndReply;
   protected final Encoder encoder;
@@ -85,6 +89,7 @@ public class ExecuteRSBasicByte {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<byte[]> byteConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusByteCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -101,6 +106,7 @@ public class ExecuteRSBasicByte {
     this.context = context;
     this.headers = headers;
     this.byteConsumer = byteConsumer;
+    this.chain = chain;
     this.encoder = encoder;
     this.errorHandler = errorHandler;
     this.onFailureRespond = onFailureRespond;
@@ -126,6 +132,7 @@ public class ExecuteRSBasicByte {
         context,
         headers,
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -154,6 +161,7 @@ public class ExecuteRSBasicByte {
         context,
         ResponseExecution.updateContentType(headers, contentType),
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -180,6 +188,7 @@ public class ExecuteRSBasicByte {
         context,
         ResponseExecution.updateContentType(headers, contentType),
         byteConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -246,8 +255,80 @@ public class ExecuteRSBasicByte {
                     }, retry, timeout, circuitBreakerTimeout);
               }
           );
+
+
+      ofNullable(chain).ifPresent(chainList -> {
+        if (!chainList.isEmpty()) {
+          final ExecutionStep executionStep = chainList.get(0);
+          ofNullable(executionStep.getChainconsumer()).ifPresent(initialConsumer -> {
+            int retry = retryCount;
+            ResponseExecution.createResponse(methodId,
+                initialConsumer,
+                errorHandler,
+                onFailureRespond,
+                errorMethodHandler,
+                vxmsShared,
+                failure,
+                value -> {
+                  if (value.succeeded()) {
+                    if (!value.handledError()) {
+                      final Object result = value.getResult();
+                      if (chainList.size() > 1) {
+                        final ExecutionStep executionStepAndThan = chainList.get(1);
+                        ofNullable(executionStepAndThan.getStep()).ifPresent(step -> executeStep(chainList, retry, result, executionStepAndThan, step));
+                      }
+                    } else {
+                      // handle on failure response
+                      respond(value.getResult(), httpErrorCode);
+                    }
+
+                  } else {
+                    // reply unhandled error
+                    respond(value.getCause().getMessage(),
+                        HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                  }
+                  checkAndCloseResponse(retry);
+                }, retry, timeout, circuitBreakerTimeout);
+          });
+        }
+      });
+
     });
 
+  }
+
+
+  private void executeStep(List<ExecutionStep> chainList, int retry, Object result,
+      ExecutionStep element, ThrowableFutureBiConsumer step) {
+    StepExecution.createResponse(methodId,
+        step,
+        result,
+        errorHandler,
+        onFailureRespond,
+        errorMethodHandler,
+        vxmsShared,
+        failure, v -> {
+          final int index = chainList.indexOf(element);
+          final int size = chainList.size();
+          if (v.succeeded()) {
+            if (!v.handledError()) {
+              if (index == size - 1) {
+                // handle last element
+                respond(v.getResult());
+              } else {
+                // call recursive
+                final ExecutionStep executionStepAndThan = chainList.get(index + 1);
+                ofNullable(executionStepAndThan.getStep()).ifPresent(nextStep -> executeStep(chainList, retry, v.getResult(), executionStepAndThan, nextStep));
+              }
+            } else {
+              respond(v.getResult(), httpErrorCode);
+            }
+          } else {
+            respond(v.getCause().getMessage(),
+                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+          }
+
+        }, retry, timeout, circuitBreakerTimeout);
   }
 
   protected void checkAndCloseResponse(int retry) {

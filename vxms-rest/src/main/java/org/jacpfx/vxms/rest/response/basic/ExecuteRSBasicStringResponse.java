@@ -47,6 +47,7 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
    * @param headers the headers to pass to the response
    * @param stringConsumer the consumer that takes a Future to complete, producing the string
    * response
+   * @param chain the execution steps when using *supply/andThen*
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
