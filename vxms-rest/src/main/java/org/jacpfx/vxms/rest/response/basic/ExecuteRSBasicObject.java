@@ -23,12 +23,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
+import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
@@ -46,6 +49,7 @@ public class ExecuteRSBasicObject {
   protected final Consumer<Throwable> errorHandler;
   protected final Consumer<Throwable> errorMethodHandler;
   protected final ThrowableFutureConsumer<Serializable> objectConsumer;
+  protected final List<ExecutionStep> chain;
   protected final ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond;
   protected final ExecuteEventbusObjectCall excecuteEventBusAndReply;
   protected final Encoder encoder;
@@ -67,6 +71,7 @@ public class ExecuteRSBasicObject {
    * @param headers the headers to pass to the response
    * @param objectConsumer the consumer that takes a Future to complete, producing the object
    * response
+   * @param chain the list of execution steps
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -86,6 +91,7 @@ public class ExecuteRSBasicObject {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<Serializable> objectConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -102,6 +108,7 @@ public class ExecuteRSBasicObject {
     this.context = context;
     this.headers = headers;
     this.objectConsumer = objectConsumer;
+    this.chain = chain;
     this.encoder = encoder;
     this.errorHandler = errorHandler;
     this.onFailureRespond = onFailureRespond;
@@ -128,6 +135,7 @@ public class ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        this.chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -157,6 +165,7 @@ public class ExecuteRSBasicObject {
         context,
         ResponseExecution.updateContentType(headers, contentType),
         objectConsumer,
+        this.chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -183,6 +192,7 @@ public class ExecuteRSBasicObject {
         context,
         ResponseExecution.updateContentType(headers, contentType),
         objectConsumer,
+        this.chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -247,9 +257,77 @@ public class ExecuteRSBasicObject {
                     }, retry, timeout, circuitBreakerTimeout);
               }
           );
+
+
+      ofNullable(chain).ifPresent(chainList -> {
+        if (!chainList.isEmpty()) {
+          final ExecutionStep executionStep = chainList.get(0);
+          ofNullable(executionStep.getChainconsumer()).ifPresent(initialConsumer -> {
+            int retry = retryCount;
+            ResponseExecution.createResponse(methodId,
+                initialConsumer,
+                errorHandler,
+                onFailureRespond,
+                errorMethodHandler,
+                vxmsShared,
+                failure,
+                value -> {
+                  if (value.succeeded()) {
+                    if (!value.handledError()) {
+                      final Object result = value.getResult();
+                      if (chainList.size() > 1) {
+                        final ExecutionStep executionStepAndThan = chainList.get(1);
+                        ofNullable(executionStepAndThan.getStep()).ifPresent(step -> executeStep(chainList, retry, result, executionStepAndThan, step));
+                      }
+                    } else {
+                      // handle on failure response
+                      respond(value.getResult(), httpErrorCode);
+                    }
+
+                  } else {
+                    // reply unhandled error
+                    respond(value.getCause().getMessage(),
+                        HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                  }
+                  checkAndCloseResponse(retry);
+                }, retry, timeout, circuitBreakerTimeout);
+          });
+        }
+      });
     });
   }
+  private void executeStep(List<ExecutionStep> chainList, int retry, Object result,
+      ExecutionStep element, ThrowableFutureBiConsumer step) {
+    StepExecution.createResponse(methodId,
+        step,
+        result,
+        errorHandler,
+        onFailureRespond,
+        errorMethodHandler,
+        vxmsShared,
+        failure, v -> {
+          final int index = chainList.indexOf(element);
+          final int size = chainList.size();
+          if (v.succeeded()) {
+            if (!v.handledError()) {
+              if (index == size - 1) {
+                // handle last element
+                respond(v.getResult());
+              } else {
+                // call recursive
+                final ExecutionStep executionStepAndThan = chainList.get(index + 1);
+                ofNullable(executionStepAndThan.getStep()).ifPresent(nextStep -> executeStep(chainList, retry, v.getResult(), executionStepAndThan, nextStep));
+              }
+            } else {
+              respond(v.getResult(), httpErrorCode);
+            }
+          } else {
+            respond(v.getCause().getMessage(),
+                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+          }
 
+        }, retry, timeout, circuitBreakerTimeout);
+  }
   protected void checkAndCloseResponse(int retry) {
     final HttpServerResponse response = context.response();
     if (retry == 0 && !response.ended()) {

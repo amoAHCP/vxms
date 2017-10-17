@@ -64,7 +64,7 @@ public class ExecuteRSBasicChainResponse<T> {
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
-   * @param chain the list of execiution steps
+   * @param chain the list of execution steps
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -182,7 +182,8 @@ public class ExecuteRSBasicChainResponse<T> {
         errorMethodHandler,
         context,
         headers,
-        null);
+        null,
+        chainTmp);
 
   }
 
@@ -204,6 +205,7 @@ public class ExecuteRSBasicChainResponse<T> {
         context,
         headers,
         null,
+        chainTmp,
         encoder);
   }
 

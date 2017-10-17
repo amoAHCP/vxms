@@ -176,6 +176,7 @@ public class EventbusObjectExecutionUtil {
             context, headers,
             stringConsumer,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -208,7 +209,7 @@ public class EventbusObjectExecutionUtil {
             circuitBreakerTimeout, executor, retry);
 
     return new ExecuteRSBasicObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _objectConsumer, excecuteEventBusAndReply, _encoder, _errorHandler,
+        _context, _headers, _objectConsumer, null, excecuteEventBusAndReply, _encoder, _errorHandler,
         _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout,
         _circuitBreakerTimeout);
   }

@@ -19,8 +19,10 @@ package org.jacpfx.vxms.rest.response.basic;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -64,6 +66,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
       Consumer<Throwable> errorMethodHandler,
       RoutingContext context, Map<String, String> headers,
       ThrowableFutureConsumer<Serializable> objectConsumer,
+      List<ExecutionStep> chain,
       ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -80,6 +83,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -98,6 +102,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableFutureConsumer<Serializable> objectConsumer,
+      List<ExecutionStep> chain,
       Encoder encoder) {
 
     super(methodId,
@@ -107,6 +112,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        chain,
         null,
         encoder,
         null,
@@ -137,6 +143,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -163,6 +170,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -188,6 +196,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -213,6 +222,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headers,
         objectConsumer,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -241,6 +251,7 @@ public class ExecuteRSBasicObjectResponse extends ExecuteRSBasicObject {
         context,
         headerMap,
         objectConsumer,
+        this.chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

@@ -47,6 +47,7 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
    * @param byteConsumer the consumer that takes a Future to complete, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
+   * @param chain the list of execution steps
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
@@ -90,14 +91,14 @@ public class ExecuteRSBasicByteResponse extends ExecuteRSBasicByte {
 
   public ExecuteRSBasicByteResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
       Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-      ThrowableFutureConsumer<byte[]> byteConsumer) {
+      ThrowableFutureConsumer<byte[]> byteConsumer,List<ExecutionStep> chain) {
     super(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context, headers,
         byteConsumer,
-        null,
+        chain,
         null,
         null,
         null,

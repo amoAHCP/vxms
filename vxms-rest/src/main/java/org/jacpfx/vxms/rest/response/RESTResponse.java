@@ -17,18 +17,15 @@
 package org.jacpfx.vxms.rest.response;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Future;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
-import org.jacpfx.vxms.common.throwable.CheckedFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicByteResponse;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicChainResponse;
@@ -36,8 +33,8 @@ import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicObjectResponse;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicStringResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
+ * the output of your task.
  */
 public class RESTResponse {
 
@@ -53,13 +50,14 @@ public class RESTResponse {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    */
-  public RESTResponse(String methodId,
+  public RESTResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -79,8 +77,8 @@ public class RESTResponse {
    * @return {@link RESTResponseBlocking}
    */
   public RESTResponseBlocking blocking() {
-    return new RESTResponseBlocking(methodId, vxmsShared, failure, errorMethodHandler, context,
-        headers);
+    return new RESTResponseBlocking(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers);
   }
 
   /**
@@ -90,14 +88,8 @@ public class RESTResponse {
    * @return {@link ExecuteRSBasicByteResponse}
    */
   public ExecuteRSBasicByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
-    return new ExecuteRSBasicByteResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        byteConsumer);
-
+    return new ExecuteRSBasicByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, byteConsumer,null);
   }
 
   /**
@@ -108,64 +100,54 @@ public class RESTResponse {
    */
   public ExecuteRSBasicStringResponse stringResponse(
       ThrowableFutureConsumer<String> stringConsumer) {
-    return new ExecuteRSBasicStringResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        stringConsumer,
-        null);
+    return new ExecuteRSBasicStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, stringConsumer, null);
   }
 
-  public <T>ExecuteRSBasicChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
+  public <T> ExecuteRSBasicChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));
-    return new ExecuteRSBasicChainResponse<>(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        chain);
+    return new ExecuteRSBasicChainResponse<>(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, chain);
   }
 
   /**
    * Returns a Serializable to the target type
    *
    * @param objectConsumer consumes a io.vertx.core.Future to complete with a Serialized Object
-   * response
+   *     response
    * @param encoder the encoder to serialize the object response
    * @return {@link ExecuteRSBasicObjectResponse}
    */
   public ExecuteRSBasicObjectResponse objectResponse(
       ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
-    return new ExecuteRSBasicObjectResponse(methodId,
+    return new ExecuteRSBasicObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
         objectConsumer,
+        null,
         encoder);
   }
 
-
   /**
-   * Ends the createResponse. If no data has been written to the createResponse body,
-   * the actual createResponse won'failure get written until this method gets called.
-   * <p>
-   * Once the createResponse has ended, it cannot be used any more.
+   * Ends the createResponse. If no data has been written to the createResponse body, the actual
+   * createResponse won'failure get written until this method gets called.
+   *
+   * <p>Once the createResponse has ended, it cannot be used any more.
    */
   public void end() {
     context.response().end();
   }
 
   /**
-   * Ends the createResponse. If no data has been written to the createResponse body,
-   * the actual createResponse won'failure get written until this method gets called.
-   * <p>
-   * Once the createResponse has ended, it cannot be used any more.
+   * Ends the createResponse. If no data has been written to the createResponse body, the actual
+   * createResponse won'failure get written until this method gets called.
+   *
+   * <p>Once the createResponse has ended, it cannot be used any more.
    *
    * @param status, the HTTP Status code
    */
@@ -175,6 +157,5 @@ public class RESTResponse {
     } else {
       context.response().end();
     }
-
   }
 }
