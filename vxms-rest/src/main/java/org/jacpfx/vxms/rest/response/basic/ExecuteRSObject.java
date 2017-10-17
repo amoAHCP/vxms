@@ -39,7 +39,7 @@ import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the fluent API, all data collected to execute the chain.
  */
-public class ExecuteRSBasicObject {
+public class ExecuteRSObject {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -84,7 +84,7 @@ public class ExecuteRSBasicObject {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicObject(String methodId,
+  public ExecuteRSObject(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -128,7 +128,7 @@ public class ExecuteRSBasicObject {
    */
   public void execute(HttpResponseStatus status) {
     Objects.requireNonNull(status);
-    new ExecuteRSBasicObject(methodId,
+    new ExecuteRSObject(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -158,7 +158,7 @@ public class ExecuteRSBasicObject {
   public void execute(HttpResponseStatus status, String contentType) {
     Objects.requireNonNull(status);
     Objects.requireNonNull(contentType);
-    new ExecuteRSBasicObject(methodId,
+    new ExecuteRSObject(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -185,7 +185,7 @@ public class ExecuteRSBasicObject {
    */
   public void execute(String contentType) {
     Objects.requireNonNull(contentType);
-    new ExecuteRSBasicObject(methodId,
+    new ExecuteRSObject(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

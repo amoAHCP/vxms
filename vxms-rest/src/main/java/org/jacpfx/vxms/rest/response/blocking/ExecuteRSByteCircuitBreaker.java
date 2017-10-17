@@ -23,7 +23,7 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusByteCallBlocking;
+import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusByteCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
@@ -62,7 +62,7 @@ public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<byte[]> byteSupplier,
-      ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply,
+      ExecuteEventbusByteCall excecuteAsyncEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, byte[]> onFailureRespond,

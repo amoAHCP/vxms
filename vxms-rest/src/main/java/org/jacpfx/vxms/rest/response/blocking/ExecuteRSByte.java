@@ -31,18 +31,16 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusByteCallBlocking;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicByte;
-import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
+import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusByteCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the blocking fluent API, all data collected to execute the chain.
  */
-public class ExecuteRSByte extends ExecuteRSBasicByte {
+public class ExecuteRSByte extends org.jacpfx.vxms.rest.response.basic.ExecuteRSByte {
 
   protected final long delay;
-  protected final ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply;
+  protected final ExecuteEventbusByteCall excecuteAsyncEventBusAndReply;
   protected final ThrowableSupplier<byte[]> byteSupplier;
   protected final ThrowableFunction<Throwable, byte[]> onFailureRespond;
 
@@ -76,7 +74,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
       Consumer<Throwable> errorMethodHandler,
       RoutingContext context, Map<String, String> headers,
       ThrowableSupplier<byte[]> byteSupplier,
-      ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply,
+      ExecuteEventbusByteCall excecuteAsyncEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, byte[]> onFailureRespond,
@@ -141,7 +139,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         byteSupplier,
         excecuteAsyncEventBusAndReply,
         encoder,
@@ -164,7 +162,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         byteSupplier,
         excecuteAsyncEventBusAndReply,
         encoder,
@@ -218,7 +216,7 @@ public class ExecuteRSByte extends ExecuteRSBasicByte {
 
   private void executeAsync(ThrowableSupplier<byte[]> supplier, int retry,
       Future<ExecutionResult<byte[]>> resultHandler) {
-    ResponseBlockingExecution
+    ResponseExecution
         .executeRetryAndCatchAsync(methodId, supplier, resultHandler, errorHandler,
             onFailureRespond, errorMethodHandler, vxmsShared, failure, retry, timeout,
             circuitBreakerTimeout, delay);

@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicByteResponse;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicObjectResponse;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicStringResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSByteResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSObjectResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSStringResponse;
 import org.jacpfx.vxms.rest.util.EventbusByteExecutionUtil;
 import org.jacpfx.vxms.rest.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vxms.rest.util.EventbusStringExecutionUtil;
@@ -82,9 +82,9 @@ public class EventbusResponse {
    * Map Response from event-bus call to REST response
    *
    * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
-   * @return the response chain {@link ExecuteRSBasicStringResponse}
+   * @return the response chain {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSBasicStringResponse mapToStringResponse(
+  public ExecuteRSStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
     return EventbusStringExecutionUtil.mapToStringResponse(methodId,
@@ -102,9 +102,9 @@ public class EventbusResponse {
    * Map Response from event-bus call to REST response
    *
    * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
-   * @return the response chain {@link ExecuteRSBasicByteResponse}
+   * @return the response chain {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSBasicByteResponse mapToByteResponse(
+  public ExecuteRSByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
     return EventbusByteExecutionUtil.mapToByteResponse(methodId,
@@ -123,9 +123,9 @@ public class EventbusResponse {
    *
    * @param objectFunction pass io.vertx.core.AsyncResult and future to complete with a Object
    * @param encoder the Object encoder
-   * @return the response chain {@link ExecuteRSBasicObjectResponse}
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicObjectResponse mapToObjectResponse(
+  public ExecuteRSObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 

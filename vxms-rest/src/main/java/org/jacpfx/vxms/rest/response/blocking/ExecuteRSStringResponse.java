@@ -24,7 +24,7 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusStringCallBlocking;
+import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusStringCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
@@ -63,7 +63,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<String> stringSupplier,
-      ExecuteEventbusStringCallBlocking excecuteBlockingEventBusAndReply,
+      ExecuteEventbusStringCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, String> onFailureRespond,

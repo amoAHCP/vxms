@@ -25,7 +25,7 @@ import org.jacpfx.vxms.common.VxmsShared;
  * Created by Andy Moncsek on 14.03.16.
  * Defines an event-bus request as the beginning of your (blocking) execution chain
  */
-public class EventbusBlockingRequest {
+public class EventbusRequest {
 
   private final String methodId;
   private final VxmsShared vxmsShared;
@@ -43,7 +43,7 @@ public class EventbusBlockingRequest {
    * @param errorMethodHandler the error-method handler
    * @param context the vertx routing context
    */
-  public EventbusBlockingRequest(String methodId,
+  public EventbusRequest(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -61,10 +61,10 @@ public class EventbusBlockingRequest {
    *
    * @param targetId the target id to send to
    * @param message the message to send
-   * @return the execution chain {@link EventbusBlockingResponse}
+   * @return the execution chain {@link EventbusResponse}
    */
-  public EventbusBlockingResponse send(String targetId, Object message) {
-    return new EventbusBlockingResponse(methodId,
+  public EventbusResponse send(String targetId, Object message) {
+    return new EventbusResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -80,10 +80,10 @@ public class EventbusBlockingRequest {
    * @param targetId the target id to send to
    * @param message the message to send
    * @param options the delivery serverOptions for sending the message
-   * @return the execution chain {@link EventbusBlockingResponse}
+   * @return the execution chain {@link EventbusResponse}
    */
-  public EventbusBlockingResponse send(String targetId, Object message, DeliveryOptions options) {
-    return new EventbusBlockingResponse(methodId,
+  public EventbusResponse send(String targetId, Object message, DeliveryOptions options) {
+    return new EventbusResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

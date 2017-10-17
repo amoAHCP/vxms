@@ -32,19 +32,17 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicObject;
-import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
+import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusObjectCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the blocking fluent API, all data collected to execute the chain.
  */
-public class ExecuteRSObject extends ExecuteRSBasicObject {
+public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.ExecuteRSObject {
 
   protected final long delay;
   protected final long timeout;
-  protected final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply;
+  protected final ExecuteEventbusObjectCall excecuteEventBusAndReply;
   protected final ThrowableSupplier<Serializable> objectSupplier;
   protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
 
@@ -79,7 +77,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<Serializable> objectSupplier,
-      ExecuteEventbusObjectCallBlocking excecuteBlockingEventBusAndReply,
+      ExecuteEventbusObjectCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, Serializable> onFailureRespond,
@@ -151,7 +149,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,
@@ -179,7 +177,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,
@@ -233,7 +231,7 @@ public class ExecuteRSObject extends ExecuteRSBasicObject {
 
   private void executeAsync(ThrowableSupplier<Serializable> supplier, int retry,
       Future<ExecutionResult<Serializable>> handler) {
-    ResponseBlockingExecution
+    ResponseExecution
         .executeRetryAndCatchAsync(methodId, supplier, handler, errorHandler, onFailureRespond,
             errorMethodHandler, vxmsShared, failure, retry, timeout, 0l, delay);
   }

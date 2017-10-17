@@ -31,13 +31,12 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.concurrent.LocalData;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
 
 /**
  * Created by Andy Moncsek on 19.01.16.
  * Performs blocking Executions and prepares response
  */
-public class ResponseBlockingExecution {
+public class ResponseExecution {
 
   private static final int DEFAULT_VALUE = 0;
   private static final long DEFAULT_LONG_VALUE = 0;
@@ -231,7 +230,7 @@ public class ResponseBlockingExecution {
           _errorMethodHandler, vxmsShared, e, lck, counter);
     } else {
       lck.release();
-      ResponseExecution.handleError(_errorHandler, e);
+      org.jacpfx.vxms.rest.response.basic.ResponseExecution.handleError(_errorHandler, e);
       handleDelay(_delay);
       executeRetryAndCatchAsync(_methodId, _supplier, _blockingHandler, _errorHandler,
           _onFailureRespond, _errorMethodHandler, vxmsShared, _t, _retry, _timeout,
@@ -339,7 +338,7 @@ public class ResponseBlockingExecution {
           }
 
         } else {
-          ResponseExecution.handleError(errorHandler, e);
+          org.jacpfx.vxms.rest.response.basic.ResponseExecution.handleError(errorHandler, e);
           handleDelay(delay);
         }
       }

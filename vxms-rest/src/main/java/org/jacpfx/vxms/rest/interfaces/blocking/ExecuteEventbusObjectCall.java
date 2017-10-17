@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.rest.interfaces.blocking;
 
 import io.vertx.ext.web.RoutingContext;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
@@ -24,11 +25,11 @@ import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 
 /**
- * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response. The
+ * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response.The
  * execution will be handled as blocking code.
  */
 @FunctionalInterface
-public interface ExecuteEventbusByteCallBlocking {
+public interface ExecuteEventbusObjectCall {
 
   /**
    * Execute  chain when event-bus response handler is executed
@@ -57,7 +58,7 @@ public interface ExecuteEventbusByteCallBlocking {
       Map<String, String> headers,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction<Throwable, byte[]> onFailureRespond,
+      ThrowableFunction<Throwable, Serializable> onFailureRespond,
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout,
       long delay, long circuitBreakerTimeout);

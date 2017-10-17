@@ -31,7 +31,7 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
  * Generic Functional interface to pass typed executions steps in case of retry operations
  */
 @FunctionalInterface
-public interface RetryBlockingExecutor<T> {
+public interface RetryExecutor<T> {
 
 
   /**

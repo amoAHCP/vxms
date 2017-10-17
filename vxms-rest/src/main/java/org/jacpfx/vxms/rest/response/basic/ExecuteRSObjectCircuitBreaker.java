@@ -16,7 +16,6 @@
 
 package org.jacpfx.vxms.rest.response.basic;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
 import java.util.List;
@@ -30,10 +29,11 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16. Defines the fluent API to set the http error code in case of
- * the onFailure method is executed
+ * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
+ * of time after the circuit breaker will be closed again
  */
-public class ExecuteRSBasicObjectOnFailureCode extends ExecuteRSBasicObjectResponse {
+public class ExecuteRSObjectCircuitBreaker extends ExecuteRSObjectResponse {
+
 
   /**
    * The constructor to pass all needed members
@@ -59,7 +59,7 @@ public class ExecuteRSBasicObjectOnFailureCode extends ExecuteRSBasicObjectRespo
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicObjectOnFailureCode(String methodId,
+  public ExecuteRSObjectCircuitBreaker(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -97,13 +97,16 @@ public class ExecuteRSBasicObjectOnFailureCode extends ExecuteRSBasicObjectRespo
 
 
   /**
-   * Define the HTTP Code in case of onFailure execution
+   * Define a timeout to release the stateful circuit breaker. Depending on your configuration the
+   * CircuitBreaker locks either cluster wide, jvm wide or only for the instance
    *
-   * @param httpErrorCode the http error code to set for response, in case of error
-   * @return the response chain {@link ExecuteRSBasicObjectResponse}
+   * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
+   * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
+   * faster)
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicObjectResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
-    return new ExecuteRSBasicObjectResponse(methodId,
+  public ExecuteRSObjectResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+    return new ExecuteRSObjectResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -116,7 +119,7 @@ public class ExecuteRSBasicObjectOnFailureCode extends ExecuteRSBasicObjectRespo
         errorHandler,
         onFailureRespond,
         httpStatusCode,
-        httpErrorCode.code(),
+        httpErrorCode,
         retryCount,
         timeout,
         circuitBreakerTimeout);

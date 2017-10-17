@@ -38,7 +38,7 @@ import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
  * Created by Andy Moncsek on 12.01.16. This class is the end of the fluent API, all data collected
  * to execute the chain.
  */
-public class ExecuteRSBasicString {
+public class ExecuteRSString {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -84,7 +84,7 @@ public class ExecuteRSBasicString {
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
 
-  public ExecuteRSBasicString(String methodId,
+  public ExecuteRSString(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -128,7 +128,7 @@ public class ExecuteRSBasicString {
    */
   public void execute(HttpResponseStatus status) {
     Objects.requireNonNull(status);
-    new ExecuteRSBasicString(methodId,
+    new ExecuteRSString(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -157,7 +157,7 @@ public class ExecuteRSBasicString {
   public void execute(HttpResponseStatus status, String contentType) {
     Objects.requireNonNull(status);
     Objects.requireNonNull(contentType);
-    new ExecuteRSBasicString(methodId,
+    new ExecuteRSString(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -184,7 +184,7 @@ public class ExecuteRSBasicString {
    */
   public void execute(String contentType) {
     Objects.requireNonNull(contentType);
-    new ExecuteRSBasicString(methodId,
+    new ExecuteRSString(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

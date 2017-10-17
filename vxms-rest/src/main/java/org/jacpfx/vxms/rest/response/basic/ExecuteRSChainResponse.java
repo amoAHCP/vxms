@@ -19,23 +19,20 @@ package org.jacpfx.vxms.rest.response.basic;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
-import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
-import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
  * handling, timeouts,...
  */
-public class ExecuteRSBasicChainResponse<T> {
+public class ExecuteRSChainResponse<T> {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -75,7 +72,7 @@ public class ExecuteRSBasicChainResponse<T> {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicChainResponse(String methodId,
+  public ExecuteRSChainResponse(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -105,7 +102,7 @@ public class ExecuteRSBasicChainResponse<T> {
 
   }
 
-  public ExecuteRSBasicChainResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+  public ExecuteRSChainResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
       Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
       List<ExecutionStep> chain) {
     this.methodId = methodId;
@@ -126,10 +123,10 @@ public class ExecuteRSBasicChainResponse<T> {
   }
 
 
-  public <H>ExecuteRSBasicChainResponse<H> andThen(ThrowableFutureBiConsumer<T,H> step) {
+  public <H>ExecuteRSChainResponse<H> andThen(ThrowableFutureBiConsumer<T,H> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSBasicChainResponse<>(methodId,
+    return new ExecuteRSChainResponse<>(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -151,13 +148,13 @@ public class ExecuteRSBasicChainResponse<T> {
    * Returns a String to the target type
    *
    * @param step the execution step to map the respone to string
-   * @return {@link ExecuteRSBasicStringResponse}
+   * @return {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSBasicStringResponse mapToStringResponse(
+  public ExecuteRSStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<T,String> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSBasicStringResponse(methodId,
+    return new ExecuteRSStringResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -171,12 +168,12 @@ public class ExecuteRSBasicChainResponse<T> {
    * Returns a byte array to the target type
    *
    * @param step the execution step to map the respone to byte[]
-   * @return {@link ExecuteRSBasicByteResponse}
+   * @return {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSBasicByteResponse mapToByteResponse(ThrowableFutureBiConsumer<T,byte[]> step) {
+  public ExecuteRSByteResponse mapToByteResponse(ThrowableFutureBiConsumer<T,byte[]> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSBasicByteResponse(methodId,
+    return new ExecuteRSByteResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -192,13 +189,13 @@ public class ExecuteRSBasicChainResponse<T> {
    *
    * @param step the execution step to map the respone to Object
    * @param encoder the encoder to serialize the object response
-   * @return {@link ExecuteRSBasicObjectResponse}
+   * @return {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicObjectResponse mapToObjectResponse(
+  public ExecuteRSObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<T,Serializable> step, Encoder encoder) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSBasicObjectResponse(methodId,
+    return new ExecuteRSObjectResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

@@ -25,13 +25,14 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
+import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
  * of time after the circuit breaker will be closed again
  */
-public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResponse {
+public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
+
 
   /**
    * The constructor to pass all needed members
@@ -43,9 +44,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
-   * @param stringConsumer the consumer that takes a Future to complete, producing the string
-   * response
-   * @param chain the execution steps when using *supply/andThen*
+   * @param byteConsumer the consumer that takes a Future to complete, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -58,18 +57,22 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicStringCircuitBreaker(String methodId,
+  public ExecuteRSByteCircuitBreaker(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       RoutingContext context,
       Map<String, String> headers,
-      ThrowableFutureConsumer<String> stringConsumer,
+      ThrowableFutureConsumer<byte[]> byteConsumer,
       List<ExecutionStep> chain,
-      ExecuteEventbusStringCall excecuteEventBusAndReply,
-      Encoder encoder, Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-      int httpStatusCode, int httpErrorCode, int retryCount, long timeout,
+      ExecuteEventbusByteCall excecuteEventBusAndReply,
+      Encoder encoder,
+      Consumer<Throwable> errorHandler,
+      ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
+      int httpStatusCode,
+      int httpErrorCode,
+      int retryCount,
+      long timeout,
       long circuitBreakerTimeout) {
     super(methodId,
         vxmsShared,
@@ -77,7 +80,7 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        byteConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -98,16 +101,15 @@ public class ExecuteRSBasicStringCircuitBreaker extends ExecuteRSBasicStringResp
    * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
    * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
    * faster)
-   * @return the response chain  {@link ExecuteRSBasicStringResponse}
+   * @return the response chain {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSBasicStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteRSBasicStringResponse(methodId,
+  public ExecuteRSByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+    return new ExecuteRSByteResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
-        context,
-        headers,
-        stringConsumer,
+        context, headers,
+        byteConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,

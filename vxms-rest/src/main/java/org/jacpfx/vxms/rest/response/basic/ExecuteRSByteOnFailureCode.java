@@ -32,7 +32,7 @@ import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
  * Created by Andy Moncsek on 12.01.16. Defines the fluent API to set the http error code in case of
  * the onFailure method is executed
  */
-public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse {
+public class ExecuteRSByteOnFailureCode extends ExecuteRSByteResponse {
 
   /**
    * The constructor to pass all needed members
@@ -57,7 +57,7 @@ public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse 
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicByteOnFailureCode(String methodId,
+  public ExecuteRSByteOnFailureCode(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -98,10 +98,10 @@ public class ExecuteRSBasicByteOnFailureCode extends ExecuteRSBasicByteResponse 
    * Define the HTTP Code in case of onFailure execution
    *
    * @param httpErrorCode the http error code to set for response, in case of error
-   * @return the response chain {@link ExecuteRSBasicByteResponse}
+   * @return the response chain {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSBasicByteResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
-    return new ExecuteRSBasicByteResponse(methodId,
+  public ExecuteRSByteResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
+    return new ExecuteRSByteResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

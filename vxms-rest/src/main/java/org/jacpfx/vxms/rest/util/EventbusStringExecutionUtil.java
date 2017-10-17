@@ -32,7 +32,7 @@ import org.jacpfx.vxms.rest.eventbus.basic.EventbusExecution;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
 import org.jacpfx.vxms.rest.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vxms.rest.interfaces.basic.RetryExecutor;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicStringResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSStringResponse;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
@@ -54,9 +54,9 @@ public class EventbusStringExecutionUtil {
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error handler
    * @param _context the vertx routing context
-   * @return the execution chain {@link ExecuteRSBasicStringResponse}
+   * @return the execution chain {@link ExecuteRSStringResponse}
    */
-  public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId,
+  public static ExecuteRSStringResponse mapToStringResponse(String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
@@ -112,9 +112,9 @@ public class EventbusStringExecutionUtil {
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
-   * @return the execution chain {@link ExecuteRSBasicStringResponse}
+   * @return the execution chain {@link ExecuteRSStringResponse}
    */
-  public static ExecuteRSBasicStringResponse mapToStringResponse(String _methodId,
+  public static ExecuteRSStringResponse mapToStringResponse(String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> _stringFunction,
@@ -183,7 +183,7 @@ public class EventbusStringExecutionUtil {
         onFailureRespond,
         httpStatusCode, httpErrorCode,
         retryCount, timeout, circuitBreakerTimeout) ->
-        new ExecuteRSBasicStringResponse(methodId,
+        new ExecuteRSStringResponse(methodId,
             vxmsShared, t,
             errorMethodHandler,
             context, headers,
@@ -221,7 +221,7 @@ public class EventbusStringExecutionUtil {
             timeout,
             circuitBreakerTimeout, executor, retry);
 
-    return new ExecuteRSBasicStringResponse(_methodId,
+    return new ExecuteRSStringResponse(_methodId,
         _vxmsShared, _failure,
         _errorMethodHandler,
         _context, _headers,

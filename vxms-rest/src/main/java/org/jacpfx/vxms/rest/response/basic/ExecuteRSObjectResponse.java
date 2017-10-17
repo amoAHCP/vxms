@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.rest.response.basic;
 
 import io.vertx.ext.web.RoutingContext;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +27,13 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
+import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
  * handling, timeouts,...
  */
-public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
+public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
 
   /**
@@ -45,9 +46,8 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
-   * @param stringConsumer the consumer that takes a Future to complete, producing the string
+   * @param objectConsumer the consumer that takes a Future to complete, producing the object
    * response
-   * @param chain the execution steps when using *supply/andThen*
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -60,27 +60,29 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicStringResponse(String methodId,
+  public ExecuteRSObjectResponse(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
-      RoutingContext context,
-      Map<String, String> headers,
-      ThrowableFutureConsumer<String> stringConsumer,
+      RoutingContext context, Map<String, String> headers,
+      ThrowableFutureConsumer<Serializable> objectConsumer,
       List<ExecutionStep> chain,
-      ExecuteEventbusStringCall excecuteEventBusAndReply,
+      ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, String> onFailureRespond,
-      int httpStatusCode, int httpErrorCode,
-      int retryCount, long timeout, long circuitBreakerTimeout) {
+      ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
+      int httpStatusCode,
+      int httpErrorCode,
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout) {
     super(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -93,19 +95,26 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         circuitBreakerTimeout);
   }
 
-  public ExecuteRSBasicStringResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
-      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-      ThrowableFutureConsumer<String> stringConsumer, List<ExecutionStep> chain) {
+  public ExecuteRSObjectResponse(String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      RoutingContext context,
+      Map<String, String> headers,
+      ThrowableFutureConsumer<Serializable> objectConsumer,
+      List<ExecutionStep> chain,
+      Encoder encoder) {
+
     super(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         null,
-        null,
+        encoder,
         null,
         null,
         0,
@@ -113,24 +122,54 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
         0,
         0l,
         0l);
+
   }
 
+
+  /**
+   * defines an action for errors in byte responses, you can handle the error and return an
+   * alternate createResponse value
+   *
+   * @param onFailureRespond the handler (function) to execute on error
+   * @param encoder the encoder to serialize your object for response
+   * @return the createResponse chain {@link ExecuteRSObjectOnFailureCode}
+   */
+  public ExecuteRSObjectOnFailureCode onFailureRespond(
+      ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
+    return new ExecuteRSObjectOnFailureCode(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        objectConsumer,
+        chain,
+        excecuteEventBusAndReply,
+        encoder,
+        errorHandler,
+        onFailureRespond,
+        httpStatusCode,
+        httpErrorCode,
+        retryCount,
+        timeout,
+        circuitBreakerTimeout);
+  }
 
   /**
    * intermediate error handler which will be called on each error (at least 1 time, in case on N
    * retries... up to N times)
    *
    * @param errorHandler the handler to be executed on each error
-   * @return the response chain {@link ExecuteRSBasicStringResponse}
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicStringResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteRSBasicStringResponse(methodId,
+  public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
+    return new ExecuteRSObjectResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -147,16 +186,16 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
    * Defines how long a method can be executed before aborted.
    *
    * @param timeout the amount of timeout in ms
-   * @return the response chain {@link ExecuteRSBasicStringResponse}
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicStringResponse timeout(long timeout) {
-    return new ExecuteRSBasicStringResponse(methodId,
+  public ExecuteRSObjectResponse timeout(long timeout) {
+    return new ExecuteRSObjectResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -173,45 +212,16 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
    * retry execution N times before
    *
    * @param retryCount the amount of retries
-   * @return the response chain {@link ExecuteRSBasicStringCircuitBreaker}
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicStringCircuitBreaker retry(int retryCount) {
-    return new ExecuteRSBasicStringCircuitBreaker(methodId,
+  public ExecuteRSObjectCircuitBreaker retry(int retryCount) {
+    return new ExecuteRSObjectCircuitBreaker(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode,
-        httpErrorCode,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout);
-  }
-
-  /**
-   * defines an action for errors in byte responses, you can handle the error and return an
-   * alternate createResponse value, this handler is a terminal handler and will be executed only
-   * once
-   *
-   * @param onFailureRespond the handler (function) to execute on error
-   * @return the response chain {@link ExecuteRSBasicStringOnFailureCode}
-   */
-  public ExecuteRSBasicStringOnFailureCode onFailureRespond(
-      ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
-    return new ExecuteRSBasicStringOnFailureCode(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -229,19 +239,19 @@ public class ExecuteRSBasicStringResponse extends ExecuteRSBasicString {
    *
    * @param key the header name
    * @param value the header value
-   * @return the response chain {@link ExecuteRSBasicStringResponse}
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicStringResponse putHeader(String key, String value) {
+  public ExecuteRSObjectResponse putHeader(String key, String value) {
     Map<String, String> headerMap = new HashMap<>(headers);
     headerMap.put(key, value);
-    return new ExecuteRSBasicStringResponse(methodId,
+    return new ExecuteRSObjectResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headerMap,
-        stringConsumer,
-        chain,
+        objectConsumer,
+        this.chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

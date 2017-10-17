@@ -31,18 +31,16 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusStringCallBlocking;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicString;
-import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
+import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusStringCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the blocking fluent API, all data collected to execute the chain.
  */
-public class ExecuteRSString extends ExecuteRSBasicString {
+public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.ExecuteRSString {
 
   protected final long delay;
-  protected final ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply;
+  protected final ExecuteEventbusStringCall excecuteAsyncEventBusAndReply;
   protected final ThrowableSupplier<String> stringSupplier;
   protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
@@ -77,7 +75,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<String> stringSupplier,
-      ExecuteEventbusStringCallBlocking excecuteBlockingEventBusAndReply,
+      ExecuteEventbusStringCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, String> onFailureRespond,
@@ -142,7 +140,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         encoder,
@@ -166,7 +164,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         encoder,
@@ -217,7 +215,7 @@ public class ExecuteRSString extends ExecuteRSBasicString {
 
   private void executeAsync(ThrowableSupplier<String> supplier, int retry,
       Future<ExecutionResult<String>> blockingHandler) {
-    ResponseBlockingExecution
+    ResponseExecution
         .executeRetryAndCatchAsync(methodId, supplier, blockingHandler, errorHandler,
             onFailureRespond, errorMethodHandler, vxmsShared, failure, retry, timeout,
             circuitBreakerTimeout, delay);

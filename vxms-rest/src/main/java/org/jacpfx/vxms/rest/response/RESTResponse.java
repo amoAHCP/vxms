@@ -27,10 +27,10 @@ import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicByteResponse;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicChainResponse;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicObjectResponse;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicStringResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSByteResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSChainResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSObjectResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSStringResponse;
 
 /**
  * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
@@ -85,10 +85,10 @@ public class RESTResponse {
    * Returns a byte array to the target type
    *
    * @param byteConsumer consumes a io.vertx.core.Future to complete with a byte response
-   * @return {@link ExecuteRSBasicByteResponse}
+   * @return {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSBasicByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
-    return new ExecuteRSBasicByteResponse(
+  public ExecuteRSByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
+    return new ExecuteRSByteResponse(
         methodId, vxmsShared, failure, errorMethodHandler, context, headers, byteConsumer,null);
   }
 
@@ -96,18 +96,18 @@ public class RESTResponse {
    * Returns a String to the target type
    *
    * @param stringConsumer consumes a io.vertx.core.Future to complete with a String response
-   * @return {@link ExecuteRSBasicStringResponse}
+   * @return {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSBasicStringResponse stringResponse(
+  public ExecuteRSStringResponse stringResponse(
       ThrowableFutureConsumer<String> stringConsumer) {
-    return new ExecuteRSBasicStringResponse(
+    return new ExecuteRSStringResponse(
         methodId, vxmsShared, failure, errorMethodHandler, context, headers, stringConsumer, null);
   }
 
-  public <T> ExecuteRSBasicChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
+  public <T> ExecuteRSChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));
-    return new ExecuteRSBasicChainResponse<>(
+    return new ExecuteRSChainResponse<>(
         methodId, vxmsShared, failure, errorMethodHandler, context, headers, chain);
   }
 
@@ -117,11 +117,11 @@ public class RESTResponse {
    * @param objectConsumer consumes a io.vertx.core.Future to complete with a Serialized Object
    *     response
    * @param encoder the encoder to serialize the object response
-   * @return {@link ExecuteRSBasicObjectResponse}
+   * @return {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicObjectResponse objectResponse(
+  public ExecuteRSObjectResponse objectResponse(
       ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
-    return new ExecuteRSBasicObjectResponse(
+    return new ExecuteRSObjectResponse(
         methodId,
         vxmsShared,
         failure,

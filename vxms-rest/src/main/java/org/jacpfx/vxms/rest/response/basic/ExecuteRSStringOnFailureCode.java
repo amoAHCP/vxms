@@ -16,6 +16,7 @@
 
 package org.jacpfx.vxms.rest.response.basic;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +26,13 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
+import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
- * of time after the circuit breaker will be closed again
+ * Created by Andy Moncsek on 12.01.16. Defines the fluent API to set the http error code in case of
+ * the onFailure method is executed
  */
-public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse {
-
+public class ExecuteRSStringOnFailureCode extends ExecuteRSStringResponse {
 
   /**
    * The constructor to pass all needed members
@@ -44,7 +44,9 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
-   * @param byteConsumer the consumer that takes a Future to complete, producing the byte response
+   * @param stringConsumer the consumer that takes a Future to complete, producing the string
+   * response
+   * @param chain the execution steps when using *supply/andThen*
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -57,18 +59,17 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicByteCircuitBreaker(String methodId,
+  public ExecuteRSStringOnFailureCode(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
-      RoutingContext context,
-      Map<String, String> headers,
-      ThrowableFutureConsumer<byte[]> byteConsumer,
+      RoutingContext context, Map<String, String> headers,
+      ThrowableFutureConsumer<String> stringConsumer,
       List<ExecutionStep> chain,
-      ExecuteEventbusByteCall excecuteEventBusAndReply,
+      ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
+      ThrowableErrorConsumer<Throwable, String> onFailureRespond,
       int httpStatusCode,
       int httpErrorCode,
       int retryCount,
@@ -80,7 +81,7 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
         errorMethodHandler,
         context,
         headers,
-        byteConsumer,
+        stringConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -95,28 +96,26 @@ public class ExecuteRSBasicByteCircuitBreaker extends ExecuteRSBasicByteResponse
 
 
   /**
-   * Define a timeout to release the stateful circuit breaker. Depending on your configuration the
-   * CircuitBreaker locks either cluster wide, jvm wide or only for the instance
+   * Define the HTTP Code in case of onFailure execution
    *
-   * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
-   * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
-   * faster)
-   * @return the response chain {@link ExecuteRSBasicByteResponse}
+   * @param httpErrorCode the http error code to set for response, in case of error
+   * @return the response chain {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSBasicByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteRSBasicByteResponse(methodId,
+  public ExecuteRSStringResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
+    return new ExecuteRSStringResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
-        context, headers,
-        byteConsumer,
+        context,
+        headers,
+        stringConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
         onFailureRespond,
         httpStatusCode,
-        httpErrorCode,
+        httpErrorCode.code(),
         retryCount,
         timeout,
         circuitBreakerTimeout);

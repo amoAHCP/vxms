@@ -36,7 +36,7 @@ import org.jacpfx.vxms.rest.util.EventbusStringExecutionBlockingUtil;
  * Created by Andy Moncsek on 14.03.16.
  * Represents the start of a blocking execution chain
  */
-public class EventbusBlockingResponse {
+public class EventbusResponse {
 
   private final String methodId;
   private final VxmsShared vxmsShared;
@@ -61,7 +61,7 @@ public class EventbusBlockingResponse {
    * @param message the event-bus message
    * @param options the event-bus delivery serverOptions
    */
-  public EventbusBlockingResponse(String methodId,
+  public EventbusResponse(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,

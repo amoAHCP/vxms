@@ -33,15 +33,15 @@ import org.jacpfx.vxms.common.concurrent.LocalData;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.interfaces.blocking.RecursiveBlockingExecutor;
-import org.jacpfx.vxms.rest.interfaces.blocking.RetryBlockingExecutor;
+import org.jacpfx.vxms.rest.interfaces.blocking.RecursiveExecutor;
+import org.jacpfx.vxms.rest.interfaces.blocking.RetryExecutor;
 import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
  * Handles event-bus call and blocking execution of the message to create a rest response
  */
-public class EventbusBlockingExecution {
+public class EventbusExecution {
 
 
   public static final long LOCK_VALUE = -1l;
@@ -95,8 +95,8 @@ public class EventbusBlockingExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retryExecutor) {
+      RecursiveExecutor executor,
+      RetryExecutor retryExecutor) {
     if (circuitBreakerTimeout == 0l) {
       executeDefaultState(methodId,
           targetId, message,
@@ -146,8 +146,8 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry) {
+      RecursiveExecutor executor,
+      RetryExecutor retry) {
 
     executeLocked(((lock, counter) ->
             counter.get(counterHandler -> {
@@ -219,8 +219,8 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry,
+      RecursiveExecutor executor,
+      RetryExecutor retry,
       Lock lock, Counter counter) {
     counter.addAndGet(Integer.valueOf(retryCount + 1).longValue(), rHandler ->
         executeDefaultState(methodId,
@@ -255,8 +255,8 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry,
+      RecursiveExecutor executor,
+      RetryExecutor retry,
       Lock lock) {
     Optional.ofNullable(lock).ifPresent(Lock::release);
     final Vertx vertx = vxmsShared.getVertx();
@@ -292,7 +292,7 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
+      RecursiveExecutor executor,
       Lock lock) {
     final Throwable cause = Future.failedFuture("circuit open").cause();
     handleError(methodId,
@@ -323,8 +323,8 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry,
+      RecursiveExecutor executor,
+      RetryExecutor retry,
       AsyncResult<Message<Object>> event) {
     final ThrowableSupplier<T> supplier = createSupplier(methodId,
         targetId,
@@ -395,8 +395,8 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry,
+      RecursiveExecutor executor,
+      RetryExecutor retry,
       AsyncResult<Message<Object>> event, ThrowableSupplier<T> supplier) {
     if (event.succeeded() || (event.failed() && retryCount <= 0)) {
       executor.execute(methodId,
@@ -443,8 +443,8 @@ public class EventbusBlockingExecution {
       ThrowableFunction<Throwable, T> onFailureRespond,
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
-      long circuitBreakerTimeout, RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry,
+      long circuitBreakerTimeout, RecursiveExecutor executor,
+      RetryExecutor retry,
       AsyncResult<Message<Object>> event,
       ThrowableSupplier<T> supplier) {
     if (event.succeeded()) {
@@ -496,8 +496,8 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout, long delay,
       long circuitBreakerTimeout,
-      RecursiveBlockingExecutor executor,
-      RetryBlockingExecutor retry,
+      RecursiveExecutor executor,
+      RetryExecutor retry,
       AsyncResult<Message<Object>> event) {
 
     executeLocked((lock, counter) ->
@@ -577,7 +577,7 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout,
       long delay,
-      long circuitBreakerTimeout, RecursiveBlockingExecutor executor) {
+      long circuitBreakerTimeout, RecursiveExecutor executor) {
     // TODO check for cluster wide option
     final LocalData sharedData = vxmsShared.getLocalData();
     sharedData.getLockWithTimeout(_methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
@@ -634,7 +634,7 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout,
       long delay,
-      long circuitBreakerTimeout, RecursiveBlockingExecutor executor,
+      long circuitBreakerTimeout, RecursiveExecutor executor,
       AsyncResult<Message<Object>> event, Lock lock, Counter counter) {
     final Vertx vertx = vxmsShared.getVertx();
     vertx.setTimer(circuitBreakerTimeout,
@@ -666,7 +666,7 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout,
       long delay,
-      long circuitBreakerTimeout, RecursiveBlockingExecutor executor,
+      long circuitBreakerTimeout, RecursiveExecutor executor,
       Lock lock, Throwable cause) {
     Optional.ofNullable(lock).ifPresent(Lock::release);
     ThrowableSupplier<byte[]> failConsumer = () -> {
@@ -702,7 +702,7 @@ public class EventbusBlockingExecution {
       int httpStatusCode, int httpErrorCode,
       int retryCount, long timeout,
       long delay,
-      long circuitBreakerTimeout, RetryBlockingExecutor retry) {
+      long circuitBreakerTimeout, RetryExecutor retry) {
     ResponseExecution.handleError(errorHandler, t);
     retry.execute(methodId,
         id, message,
@@ -736,7 +736,7 @@ public class EventbusBlockingExecution {
       int retryCount, long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RetryBlockingExecutor retry,
+      RetryExecutor retry,
       AsyncResult<Message<Object>> event) {
     return () -> {
       T resp = null;

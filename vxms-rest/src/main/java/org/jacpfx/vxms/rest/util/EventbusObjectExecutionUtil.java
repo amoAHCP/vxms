@@ -33,7 +33,7 @@ import org.jacpfx.vxms.rest.eventbus.basic.EventbusExecution;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
 import org.jacpfx.vxms.rest.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vxms.rest.interfaces.basic.RetryExecutor;
-import org.jacpfx.vxms.rest.response.basic.ExecuteRSBasicObjectResponse;
+import org.jacpfx.vxms.rest.response.basic.ExecuteRSObjectResponse;
 
 /**
  * Created by Andy Moncsek on 05.04.16.
@@ -55,9 +55,9 @@ public class EventbusObjectExecutionUtil {
    * @param _errorMethodHandler the error-method handler
    * @param _context the vertx routing context
    * @param _encoder the encoder to encode your objects
-   * @return the execution chain {@link ExecuteRSBasicObjectResponse}
+   * @return the execution chain {@link ExecuteRSObjectResponse}
    */
-  public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,
+  public static ExecuteRSObjectResponse mapToObjectResponse(String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
@@ -99,9 +99,9 @@ public class EventbusObjectExecutionUtil {
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
-   * @return the execution chain {@link ExecuteRSBasicObjectResponse}
+   * @return the execution chain {@link ExecuteRSObjectResponse}
    */
-  public static ExecuteRSBasicObjectResponse mapToObjectResponse(String _methodId,
+  public static ExecuteRSObjectResponse mapToObjectResponse(String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
@@ -170,7 +170,7 @@ public class EventbusObjectExecutionUtil {
         onFailureRespond,
         httpStatusCode, httpErrorCode,
         retryCount, timeout, circuitBreakerTimeout) ->
-        new ExecuteRSBasicObjectResponse(methodId,
+        new ExecuteRSObjectResponse(methodId,
             vxmsShared, t,
             errorMethodHandler,
             context, headers,
@@ -208,7 +208,7 @@ public class EventbusObjectExecutionUtil {
             timeout,
             circuitBreakerTimeout, executor, retry);
 
-    return new ExecuteRSBasicObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
+    return new ExecuteRSObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
         _context, _headers, _objectConsumer, null, excecuteEventBusAndReply, _encoder, _errorHandler,
         _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout,
         _circuitBreakerTimeout);

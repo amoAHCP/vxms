@@ -28,10 +28,10 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.rest.eventbus.blocking.EventbusBlockingExecution;
-import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
-import org.jacpfx.vxms.rest.interfaces.blocking.RecursiveBlockingExecutor;
-import org.jacpfx.vxms.rest.interfaces.blocking.RetryBlockingExecutor;
+import org.jacpfx.vxms.rest.eventbus.blocking.EventbusExecution;
+import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusObjectCall;
+import org.jacpfx.vxms.rest.interfaces.blocking.RecursiveExecutor;
+import org.jacpfx.vxms.rest.interfaces.blocking.RetryExecutor;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSObjectResponse;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSStringResponse;
 
@@ -89,7 +89,7 @@ public class EventbusObjectExecutionBlockingUtil {
     final DeliveryOptions _deliveryOptions = Optional.ofNullable(_options)
         .orElse(new DeliveryOptions());
 
-    final RetryBlockingExecutor retry = (methodId,
+    final RetryExecutor retry = (methodId,
         targetId,
         message,
         byteFunction,
@@ -124,7 +124,7 @@ public class EventbusObjectExecutionBlockingUtil {
           execute();
     };
 
-    final RecursiveBlockingExecutor executor = (methodId,
+    final RecursiveExecutor executor = (methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -150,7 +150,7 @@ public class EventbusObjectExecutionBlockingUtil {
             circuitBreakerTimeout).
             execute();
 
-    final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply = (vxmsShared, failure,
+    final ExecuteEventbusObjectCall excecuteEventBusAndReply = (vxmsShared, failure,
         errorMethodHandler,
         context, headers,
         encoder, errorHandler,
@@ -158,7 +158,7 @@ public class EventbusObjectExecutionBlockingUtil {
         httpStatusCode, httpErrorCode,
         retryCount, timeout,
         delay, circuitBreakerTimeout) ->
-        EventbusBlockingExecution.sendMessageAndSupplyHandler(_methodId,
+        EventbusExecution.sendMessageAndSupplyHandler(_methodId,
             _targetId, _message,
             _objectFunction,
             _deliveryOptions,

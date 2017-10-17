@@ -27,7 +27,6 @@ import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
-import org.jacpfx.vxms.rest.eventbus.blocking.EventbusBlockingRequest;
 
 /**
  * Created by Andy Moncsek on 14.03.16.
@@ -143,9 +142,9 @@ public class EventbusRequest {
   /**
    * Switch to blocking API
    *
-   * @return the blocking chain {@link EventbusBlockingRequest}
+   * @return the blocking chain {@link org.jacpfx.vxms.rest.eventbus.blocking.EventbusRequest}
    */
-  public EventbusBlockingRequest blocking() {
-    return new EventbusBlockingRequest(methodId, vxmsShared, failure, errorMethodHandler, context);
+  public org.jacpfx.vxms.rest.eventbus.blocking.EventbusRequest blocking() {
+    return new org.jacpfx.vxms.rest.eventbus.blocking.EventbusRequest(methodId, vxmsShared, failure, errorMethodHandler, context);
   }
 }

@@ -39,7 +39,7 @@ import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the fluent API, all data collected to execute the chain.
  */
-public class ExecuteRSBasicByte {
+public class ExecuteRSByte {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -83,7 +83,7 @@ public class ExecuteRSBasicByte {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicByte(String methodId,
+  public ExecuteRSByte(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -126,7 +126,7 @@ public class ExecuteRSBasicByte {
    */
   public void execute(HttpResponseStatus status) {
     Objects.requireNonNull(status);
-    new ExecuteRSBasicByte(methodId,
+    new ExecuteRSByte(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -155,7 +155,7 @@ public class ExecuteRSBasicByte {
   public void execute(HttpResponseStatus status, String contentType) {
     Objects.requireNonNull(status);
     Objects.requireNonNull(contentType);
-    new ExecuteRSBasicByte(methodId,
+    new ExecuteRSByte(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -182,7 +182,7 @@ public class ExecuteRSBasicByte {
    */
   public void execute(String contentType) {
     Objects.requireNonNull(contentType);
-    new ExecuteRSBasicByte(methodId,
+    new ExecuteRSByte(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

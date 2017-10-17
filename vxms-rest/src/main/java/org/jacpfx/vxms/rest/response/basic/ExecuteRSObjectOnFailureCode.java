@@ -18,6 +18,7 @@ package org.jacpfx.vxms.rest.response.basic;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -26,13 +27,13 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
+import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. Defines the fluent API to set the http error code in case of
  * the onFailure method is executed
  */
-public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringResponse {
+public class ExecuteRSObjectOnFailureCode extends ExecuteRSObjectResponse {
 
   /**
    * The constructor to pass all needed members
@@ -44,9 +45,8 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
-   * @param stringConsumer the consumer that takes a Future to complete, producing the string
+   * @param objectConsumer the consumer that takes a Future to complete, producing the object
    * response
-   * @param chain the execution steps when using *supply/andThen*
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    * API
    * @param encoder the encoder to encode your objects
@@ -59,17 +59,18 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSBasicStringOnFailureCode(String methodId,
+  public ExecuteRSObjectOnFailureCode(String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
-      RoutingContext context, Map<String, String> headers,
-      ThrowableFutureConsumer<String> stringConsumer,
+      RoutingContext context,
+      Map<String, String> headers,
+      ThrowableFutureConsumer<Serializable> objectConsumer,
       List<ExecutionStep> chain,
-      ExecuteEventbusStringCall excecuteEventBusAndReply,
+      ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, String> onFailureRespond,
+      ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
       int httpStatusCode,
       int httpErrorCode,
       int retryCount,
@@ -81,7 +82,7 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
@@ -99,16 +100,16 @@ public class ExecuteRSBasicStringOnFailureCode extends ExecuteRSBasicStringRespo
    * Define the HTTP Code in case of onFailure execution
    *
    * @param httpErrorCode the http error code to set for response, in case of error
-   * @return the response chain {@link ExecuteRSBasicStringResponse}
+   * @return the response chain {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSBasicStringResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
-    return new ExecuteRSBasicStringResponse(methodId,
+  public ExecuteRSObjectResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
+    return new ExecuteRSObjectResponse(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         context,
         headers,
-        stringConsumer,
+        objectConsumer,
         chain,
         excecuteEventBusAndReply,
         encoder,
