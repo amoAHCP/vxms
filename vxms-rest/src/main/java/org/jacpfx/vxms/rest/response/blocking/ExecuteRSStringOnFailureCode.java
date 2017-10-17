@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.blocking;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -63,6 +65,7 @@ public class ExecuteRSStringOnFailureCode extends ExecuteRSString {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<String> stringSupplier,
+      List<BlockingExecutionStep> chain,
       ExecuteEventbusStringCall excecuteAsyncEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -80,6 +83,7 @@ public class ExecuteRSStringOnFailureCode extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -107,6 +111,7 @@ public class ExecuteRSStringOnFailureCode extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,

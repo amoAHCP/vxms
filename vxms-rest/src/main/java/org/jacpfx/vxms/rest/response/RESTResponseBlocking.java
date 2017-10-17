@@ -18,12 +18,16 @@ package org.jacpfx.vxms.rest.response;
 
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSByteResponse;
+import org.jacpfx.vxms.rest.response.blocking.ExecuteRSChainResponse;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSObjectResponse;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSStringResponse;
 
@@ -79,17 +83,7 @@ public class RESTResponseBlocking {
         errorMethodHandler,
         context,
         headers,
-        byteSupplier,
-        null,
-        null,
-        null,
-        null,
-        0,
-        0,
-        0,
-        0l,
-        0l,
-        0l);
+        byteSupplier);
   }
 
   /**
@@ -106,16 +100,7 @@ public class RESTResponseBlocking {
         context,
         headers,
         stringSupplier,
-        null,
-        null,
-        null,
-        null,
-        0,
-        0,
-        0,
-        0l,
-        0l,
-        0l);
+        null);
   }
 
   /**
@@ -134,15 +119,19 @@ public class RESTResponseBlocking {
         context,
         headers,
         objectSupplier,
-        null,
-        encoder,
-        null,
-        null,
-        0,
-        0,
-        0,
-        0l,
-        0l,
-        0l);
+        encoder);
+  }
+
+  /**
+   * starts a supply chain to create a blocking response
+   * @param chainsupplier
+   * @param <T>
+   * @return {@link ExecuteRSChainResponse}
+   */
+  public <T> ExecuteRSChainResponse<T> supply(ThrowableSupplier<T> chainsupplier) {
+    final List<BlockingExecutionStep> chain = new ArrayList<>();
+    chain.add(new BlockingExecutionStep(chainsupplier));
+    return new ExecuteRSChainResponse<>(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, chain);
   }
 }

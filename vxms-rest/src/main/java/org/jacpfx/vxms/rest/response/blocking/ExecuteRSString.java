@@ -22,10 +22,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
@@ -43,6 +45,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
   protected final ExecuteEventbusStringCall excecuteAsyncEventBusAndReply;
   protected final ThrowableSupplier<String> stringSupplier;
   protected final ThrowableFunction<Throwable, String> onFailureRespond;
+  protected final List<BlockingExecutionStep> chain;
 
   /**
    * The constructor to pass all needed members
@@ -75,6 +78,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<String> stringSupplier,
+      List<BlockingExecutionStep> chain,
       ExecuteEventbusStringCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -106,6 +110,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
     this.excecuteAsyncEventBusAndReply = excecuteBlockingEventBusAndReply;
     this.stringSupplier = stringSupplier;
     this.onFailureRespond = onFailureRespond;
+    this.chain = chain;
   }
 
   @Override
@@ -118,6 +123,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -142,6 +148,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
         context,
         org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -166,6 +173,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
         context,
         org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,

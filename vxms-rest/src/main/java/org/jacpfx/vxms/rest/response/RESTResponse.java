@@ -104,6 +104,12 @@ public class RESTResponse {
         methodId, vxmsShared, failure, errorMethodHandler, context, headers, stringConsumer, null);
   }
 
+  /**
+   * starts a supply chain to create a response
+   * @param chainconsumer the initial supplier
+   * @param <T> the type of the return value
+   * @return {@link ExecuteRSChainResponse}
+   */
   public <T> ExecuteRSChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));

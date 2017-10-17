@@ -142,6 +142,7 @@ public class EventbusStringExecutionBlockingUtil {
             context, headers,
             supplier,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -173,11 +174,26 @@ public class EventbusStringExecutionBlockingUtil {
             timeout, delay,
             circuitBreakerTimeout,
             executor, retry);
-    return new ExecuteRSStringResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _stringSupplier, excecuteAsyncEventBusAndReply,
-        _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount,
-        _timeout, _delay, _circuitBreakerTimeout);
+    return new ExecuteRSStringResponse(_methodId,
+        _vxmsShared,
+        _failure,
+        _errorMethodHandler,
+        _context,
+        _headers,
+        _stringSupplier,
+        null,
+        excecuteAsyncEventBusAndReply,
+        _encoder,
+        _errorHandler,
+        _onFailureRespond,
+        _httpStatusCode,
+        _httpErrorCode,
+        _retryCount,
+        _timeout,
+        _delay,
+        _circuitBreakerTimeout);
   }
+
 
 
 }

@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.blocking;
 
 import io.vertx.ext.web.RoutingContext;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -63,6 +65,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<String> stringSupplier,
+      List<BlockingExecutionStep> chain,
       ExecuteEventbusStringCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -80,6 +83,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteBlockingEventBusAndReply,
         encoder,
         errorHandler,
@@ -90,6 +94,29 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         timeout,
         delay,
         circuitBreakerTimeout);
+  }
+
+  public ExecuteRSStringResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+      ThrowableSupplier<String> stringSupplier,List<BlockingExecutionStep> chain) {
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        stringSupplier,
+        chain,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0l,
+        0l,
+        0l);
   }
 
 
@@ -109,6 +136,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -136,6 +164,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -162,6 +191,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -188,6 +218,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -214,6 +245,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headers,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -243,6 +275,7 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         context,
         headerMap,
         stringSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,

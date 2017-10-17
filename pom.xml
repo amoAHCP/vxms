@@ -202,9 +202,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.report.plugin.version}</version>
                     <configuration>
-
-                        <argLine>-Xmx512m -XX:MaxPermSize=256m</argLine>
-
+                        <argLine>-Xmx512m -XX:MaxPermSize=256m -Dsun.net.http.allowRestrictedHeaders=true</argLine>
                     </configuration>
                 </plugin>
                 <plugin>

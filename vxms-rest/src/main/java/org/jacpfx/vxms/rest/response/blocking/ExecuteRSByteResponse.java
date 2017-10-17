@@ -92,6 +92,28 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         circuitBreakerTimeout);
   }
 
+  public ExecuteRSByteResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+      ThrowableSupplier<byte[]> byteSupplier) {
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        byteSupplier,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0l,
+        0l,
+        0l);
+  }
+
   /**
    * defines an action for errors in byte responses, you can handle the error and return an
    * alternate createResponse value
