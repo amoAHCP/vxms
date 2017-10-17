@@ -18,7 +18,6 @@ package org.jacpfx.vxms.rest.response.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
@@ -37,7 +36,7 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
  * Created by Andy Moncsek on 19.01.16.
  * Performs blocking Executions and prepares response
  */
-public class ResponseExecution {
+public class StepExecution {
 
   private static final int DEFAULT_VALUE = 0;
   private static final long DEFAULT_LONG_VALUE = 0;
@@ -52,8 +51,8 @@ public class ResponseExecution {
    * When defining a timeout a second execution context will be created.
    *
    * @param _methodId the method name/id to be executed
-   * @param _supplier the user defined supply method to be executed (mapToStringResponse,
-   * mapToByteResponse, mapToObjectResponse)
+   * @param step the execution step
+   * @param value the value from previous step
    * @param _resultHandler the result handler, that takes the result
    * @param _errorHandler the intermediate error method, executed on each error
    * @param _onFailureRespond the method to be executed on failure
@@ -67,11 +66,12 @@ public class ResponseExecution {
    * @param _delay the delay time between retry
    * @param <T> the type of response (String, byte, Object)
    */
-  public static <T> void executeRetryAndCatchAsync(String _methodId,
-      ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _resultHandler,
+  public static <T,V> void executeRetryAndCatchAsync(String _methodId,
+      ThrowableFunction<T, V> step,
+      T value,
+      Future<ExecutionResult<V>> _resultHandler,
       Consumer<Throwable> _errorHandler,
-      ThrowableFunction<Throwable, T> _onFailureRespond,
+      ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       VxmsShared vxmsShared, Throwable _fail,
       int _retry,
@@ -83,7 +83,8 @@ public class ResponseExecution {
             long currentVal = counterHandler.result();
             if (currentVal == DEFAULT_LONG_VALUE) {
               executeInitialState(_methodId,
-                  _supplier,
+                  step,
+                  value,
                   _resultHandler,
                   _errorHandler,
                   _onFailureRespond,
@@ -94,7 +95,8 @@ public class ResponseExecution {
                   _delay, lock, counter);
             } else if (currentVal > DEFAULT_LONG_VALUE) {
               executeDefault(_methodId,
-                  _supplier,
+                  step,
+                  value,
                   _resultHandler,
                   _errorHandler,
                   _onFailureRespond,
@@ -110,7 +112,7 @@ public class ResponseExecution {
           }), _methodId, vxmsShared, _resultHandler, _errorHandler, _onFailureRespond,
           _errorMethodHandler, null);
     } else {
-      executeStateless(_supplier, _resultHandler, _errorHandler, _onFailureRespond,
+      executeStateless(step,value, _resultHandler, _errorHandler, _onFailureRespond,
           _errorMethodHandler, vxmsShared, _retry, _timeout, _delay);
     }
   }
@@ -128,11 +130,12 @@ public class ResponseExecution {
         Optional.ofNullable(t).orElse(Future.failedFuture("circuit open").cause()));
   }
 
-  private static <T> void executeDefault(String _methodId,
-      ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+  private static <T,V> void executeDefault(String _methodId,
+      ThrowableFunction<T, V> step,
+      T value,
+      Future<ExecutionResult<V>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
-      ThrowableFunction<Throwable, T> _onFailureRespond,
+      ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       VxmsShared vxmsShared, Throwable _failure,
       int _retry, long _timeout,
@@ -142,14 +145,15 @@ public class ResponseExecution {
     final Vertx vertx = vxmsShared.getVertx();
     vertx.executeBlocking(bhandler -> {
       try {
-        executeDefaultState(_supplier, _blockingHandler, vxmsShared, _timeout);
+        executeDefaultState(step,value, _blockingHandler, vxmsShared, _timeout);
         bhandler.complete();
       } catch (Throwable e) {
         executeLocked((lck, counter) ->
                 counter.decrementAndGet(valHandler -> {
                   if (valHandler.succeeded()) {
                     handleStatefulError(_methodId,
-                        _supplier,
+                        step,
+                        value,
                         _blockingHandler,
                         _errorHandler,
                         _onFailureRespond,
@@ -176,18 +180,19 @@ public class ResponseExecution {
   }
 
 
-  private static <T> void executeInitialState(String _methodId,
-      ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+  private static <T,V> void executeInitialState(String _methodId,
+      ThrowableFunction<T, V> step,
+      T value,
+      Future<ExecutionResult<V>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
-      ThrowableFunction<Throwable, T> _onFailureRespond,
+      ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       VxmsShared vxmsShared, Throwable _t, int _retry,
       long _timeout, long _circuitBreakerTimeout,
       long _delay, Lock lock, Counter counter) {
     final long initialRetryCounterValue = (long) (_retry + 1);
     counter.addAndGet(initialRetryCounterValue,
-        rHandler -> executeDefault(_methodId, _supplier, _blockingHandler, _errorHandler,
+        rHandler -> executeDefault(_methodId, step,value, _blockingHandler, _errorHandler,
             _onFailureRespond,
             _errorMethodHandler, vxmsShared, _t, _retry, _timeout, _circuitBreakerTimeout, _delay,
             lock));
@@ -214,11 +219,12 @@ public class ResponseExecution {
     }
   }
 
-  private static <T> void handleStatefulError(String _methodId,
-      ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+  private static <T,V> void handleStatefulError(String _methodId,
+      ThrowableFunction<T, V> step,
+      T value,
+      Future<ExecutionResult<V>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
-      ThrowableFunction<Throwable, T> _onFailureRespond,
+      ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       VxmsShared vxmsShared, Throwable _t, int _retry,
       long _timeout, long _circuitBreakerTimeout,
@@ -234,7 +240,7 @@ public class ResponseExecution {
       lck.release();
       org.jacpfx.vxms.rest.response.basic.ResponseExecution.handleError(_errorHandler, e);
       handleDelay(_delay);
-      executeRetryAndCatchAsync(_methodId, _supplier, _blockingHandler, _errorHandler,
+      executeRetryAndCatchAsync(_methodId, step,value, _blockingHandler, _errorHandler,
           _onFailureRespond, _errorMethodHandler, vxmsShared, _t, _retry, _timeout,
           _circuitBreakerTimeout, _delay);
     }
@@ -272,28 +278,30 @@ public class ResponseExecution {
     });
   }
 
-  private static <T> void executeDefaultState(ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler, VxmsShared vxmsShared, long _timeout)
+  private static <T,V> void executeDefaultState( ThrowableFunction<T, V> step,
+      T value,
+      Future<ExecutionResult<V>> _blockingHandler, VxmsShared vxmsShared, long _timeout)
       throws Throwable {
-    T result;
+    V result;
     if (_timeout > DEFAULT_LONG_VALUE) {
-      result = executeWithTimeout(_supplier, vxmsShared, _timeout);
+      result = executeWithTimeout(step,value, vxmsShared, _timeout);
     } else {
-      result = _supplier.get();
+      result = step.apply(value);
     }
     if (!_blockingHandler.isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, false, null));
     }
   }
 
-  private static <T> T executeWithTimeout(ThrowableSupplier<T> _supplier, VxmsShared vxmsShared,
+  private static <T,V> V executeWithTimeout( ThrowableFunction<T, V> step,
+      T value, VxmsShared vxmsShared,
       long _timeout) throws Throwable {
-    T result;
-    final CompletableFuture<T> timeoutFuture = new CompletableFuture<>();
+    V result;
+    final CompletableFuture<V> timeoutFuture = new CompletableFuture<>();
     final Vertx vertx = vxmsShared.getVertx();
     vertx.executeBlocking((innerHandler) -> {
       try {
-        timeoutFuture.complete(_supplier.get());
+        timeoutFuture.complete(step.apply(value));
       } catch (Throwable throwable) {
         timeoutFuture.obtrudeException(throwable);
       }
@@ -309,23 +317,24 @@ public class ResponseExecution {
     return result;
   }
 
-  private static <T> void executeStateless(ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+  private static <T,V> void executeStateless(      ThrowableFunction<T, V> step,
+      T value,
+      Future<ExecutionResult<V>> _blockingHandler,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction<Throwable, T> onFailureRespond,
+      ThrowableFunction<Throwable, V> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       VxmsShared vxmsShared, int _retry,
       long timeout, long delay) {
-    T result = null;
+    V result = null;
     boolean errorHandling = false;
     while (_retry >= DEFAULT_LONG_VALUE) {
       errorHandling = false;
       try {
         if (timeout > DEFAULT_LONG_VALUE) {
-          result = executeWithTimeout(_supplier, vxmsShared, timeout);
+          result = executeWithTimeout(step,value, vxmsShared, timeout);
           _retry = STOP_CONDITION;
         } else {
-          result = _supplier.get();
+          result = step.apply(value);
           _retry = STOP_CONDITION;
         }
 

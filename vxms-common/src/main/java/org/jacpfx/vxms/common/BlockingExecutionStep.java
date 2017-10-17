@@ -16,6 +16,9 @@
 
 package org.jacpfx.vxms.common;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import java.util.function.Consumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
@@ -26,14 +29,14 @@ public class BlockingExecutionStep<V, T> {
 
   private final ThrowableSupplier<T> chainsupplier;
 
-  private final ThrowableFunction<T,V> step;
+  private final ThrowableFunction<T, V> step;
 
   public BlockingExecutionStep(ThrowableSupplier<T> chainsupplier) {
     this.chainsupplier = chainsupplier;
-    this.step=null;
+    this.step = null;
   }
 
-  public BlockingExecutionStep(ThrowableFunction<T,V> step) {
+  public BlockingExecutionStep(ThrowableFunction<T, V> step) {
     this.step = step;
     this.chainsupplier = null;
   }
@@ -44,5 +47,17 @@ public class BlockingExecutionStep<V, T> {
 
   public ThrowableFunction<T, V> getStep() {
     return step;
+  }
+
+  public Handler<AsyncResult<ExecutionResult<T>>> getAsyncResultHandler(
+      Consumer<ExecutionResult> resultConsumer, Runnable errorHandling) {
+    return value -> {
+      if (!value.failed()) {
+        resultConsumer.accept(value.result());
+      } else {
+        errorHandling.run();
+      }
+
+    };
   }
 }

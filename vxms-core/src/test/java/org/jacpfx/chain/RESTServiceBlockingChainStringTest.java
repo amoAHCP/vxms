@@ -44,6 +44,7 @@ import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -105,7 +106,7 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
   }
 
   @Test
-//@Ignore
+
   public void basicTestSupply() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
@@ -558,13 +559,13 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     @GET
     public void basicTestSupply(RestHandler reply) {
       System.out.println("basicTestSupply: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
+      reply.response().blocking().
+          supply(() -> {
+            return 1;
 
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return  val + " final";
           }).execute();
     }
 

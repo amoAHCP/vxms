@@ -280,6 +280,8 @@ public class ExecuteRSString {
                       if (chainList.size() > 1) {
                         final ExecutionStep executionStepAndThan = chainList.get(1);
                         ofNullable(executionStepAndThan.getStep()).ifPresent(step -> executeStep(chainList, retry, result, executionStepAndThan, step));
+                      } else {
+                        respond(value.getResult());
                       }
                     } else {
                       // handle on failure response
