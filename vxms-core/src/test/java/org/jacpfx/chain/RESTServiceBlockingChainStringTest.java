@@ -573,16 +573,16 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     @GET
     public void basicTestAndThen(RestHandler reply) {
       System.out.println("basicTestAndThen: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
+      reply.response().blocking().
+          supply(() -> {
+            return 1;
 
           })
-          .<String>andThen((value, future) -> {
-            future.complete(value + 1 + "");
+          .andThen((value) -> {
+            return value + 1 + "";
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return val + " final";
           }).execute();
     }
 
@@ -591,18 +591,20 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     @GET
     public void basicTestSupplyWithError(RestHandler reply) {
       System.out.println("basicTestSupplyWithError: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
+      reply.response().blocking().
+          supply(() -> {
             throw new NullPointerException("test error");
 
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return val + " final";
           })
-          .onFailureRespond((t, f) ->
+          .onFailureRespond((t) ->
           {
-            f.complete("error " + t.getMessage());
-            System.out.println(t.getMessage());
+
+            System.out.println("error: "+t.getMessage());
+            return "error " + t.getMessage();
+
 
           }).execute();
     }
@@ -611,21 +613,22 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     @GET
     public void basicTestAndThenWithError(RestHandler reply) {
       System.out.println("basicTestAndThen: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
+      reply.response().blocking()
+          .supply(() -> {
+            return 1;
 
           })
-          .<String>andThen((value, future) -> {
+          .andThen((value) -> {
             throw new NullPointerException("test error");
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return  val + " final";
           })
-          .onFailureRespond((t, f) ->
+          .onFailureRespond((t) ->
           {
-            f.complete("error " + t.getMessage());
             System.out.println(t.getMessage());
+            return "error " + t.getMessage();
+
 
           }).execute();
     }
@@ -635,13 +638,13 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     @GET
     public void basicTestSupplyWithErrorUnhandled(RestHandler reply) {
       System.out.println("basicTestSupplyWithErrorUnhandled: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
+      reply.response().blocking()
+          .supply(() -> {
             throw new NullPointerException("test error");
 
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return val + " final";
           })
           .execute();
     }
@@ -650,16 +653,16 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     @GET
     public void basicTestAndThenWithErrorUnhandled(RestHandler reply) {
       System.out.println("basicTestAndThen: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
+      reply.response().blocking()
+          .supply(() -> {
+            return 1;
 
           })
-          .<String>andThen((value, future) -> {
+          .andThen((value) -> {
             throw new NullPointerException("test error");
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return val + " final";
           })
           .execute();
     }
@@ -670,22 +673,22 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     public void basicTestSupplyWithErrorSimpleRetry(RestHandler reply) {
       System.out.println("basicTestSupplyWithErrorSimpleRetry: " + reply);
       AtomicInteger counter = new AtomicInteger(0);
-      reply.response()
-          .<Integer>supply((future) -> {
+      reply.response().blocking()
+          .supply(() -> {
             counter.incrementAndGet();
             throw new NullPointerException("test error");
 
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return  val + " final";
           })
           .onError(t -> {
             System.out.println(t.getMessage() + " counter:" + counter.get());
           })
           .retry(3)
-          .onFailureRespond((t, f) ->
+          .onFailureRespond((t) ->
           {
-            f.complete("error " + counter.get() + " " + t.getMessage());
+            return "error " + counter.get() + " " + t.getMessage();
 
           }).execute();
     }
@@ -695,26 +698,26 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     public void basicTestAndThenWithErrorUnhandledRetry(RestHandler reply) {
       System.out.println("basicTestAndThenWithErrorUnhandledRetry: " + reply);
       AtomicInteger counter = new AtomicInteger(1);
-      reply.response()
-          .<Integer>supply((future) -> {
+      reply.response().blocking()
+          .<Integer>supply(() -> {
             counter.decrementAndGet();
-            future.complete(1);
+            return 1;
 
           })
-          .<String>andThen((value, future) -> {
+          .andThen((value) -> {
             counter.incrementAndGet();
             throw new NullPointerException("test error");
           })
-          .mapToStringResponse((val, future) -> {
-            future.complete(val + " final");
+          .mapToStringResponse((val) -> {
+            return  val + " final";
           })
           .onError(t -> {
             System.out.println(t.getMessage() + " counter:" + counter.get());
           })
           .retry(3)
-          .onFailureRespond((t, f) ->
+          .onFailureRespond((t) ->
           {
-            f.complete("error " + counter.get() + " " + t.getMessage());
+            return "error " + counter.get() + " " + t.getMessage();
 
           }).execute();
     }
@@ -724,20 +727,20 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     public void basicTestSupplyWithErrorAndCircuitBreaker(RestHandler reply) {
       final String val = reply.request().param("val");
       System.out.println("stringResponse: " + val);
-      reply.response().
-          <String>supply((future) -> {
+      reply.response().blocking()
+          .supply(() -> {
             if (val.equals("crash")) {
               throw new NullPointerException("test-123");
             }
-            future.complete(val);
+            return val;
           })
-          .mapToStringResponse((v, future) -> {
-            future.complete(v);
+          .mapToStringResponse((v) -> {
+            return v;
           }).
           onError(e -> System.out.println(e.getMessage())).
           retry(3).
           closeCircuitBreaker(2000).
-          onFailureRespond((error, future) -> future.complete("failure")).
+          onFailureRespond((error) -> "failure").
           execute();
     }
 
@@ -746,23 +749,23 @@ public class RESTServiceBlockingChainStringTest extends VertxTestBase {
     public void basicTestAndThenWithErrorAndCircuitBreaker(RestHandler reply) {
       final String val = reply.request().param("val");
       System.out.println("stringResponse: " + val);
-      reply.response().
-          <String>supply((future) -> {
-            future.complete(val);
+      reply.response().blocking().
+          supply(() -> {
+            return val;
           }).
-          <String>andThen((v, f) -> {
+          andThen((v) -> {
             if (v.equals("crash")) {
               throw new NullPointerException("test-123");
             }
-            f.complete(v);
+            return v;
           })
-          .mapToStringResponse((v, future) -> {
-            future.complete(v);
+          .mapToStringResponse((v) -> {
+            return v;
           }).
           onError(e -> System.out.println(e.getMessage())).
           retry(3).
           closeCircuitBreaker(2000).
-          onFailureRespond((error, future) -> future.complete("failure")).
+          onFailureRespond((error) -> "failure").
           execute();
     }
 

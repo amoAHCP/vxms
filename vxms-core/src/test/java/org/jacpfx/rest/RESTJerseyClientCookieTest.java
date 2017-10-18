@@ -16,10 +16,8 @@
 
 package org.jacpfx.rest;
 
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
@@ -28,25 +26,18 @@ import io.vertx.ext.web.Cookie;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+// import io.vertx.core.http.HttpClient;
+
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTJerseyClientCookieTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
@@ -61,7 +52,7 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
     // }
   }
 
-  private HttpClient client;
+  private io.vertx.core.http.HttpClient client;
 
   protected int getNumNodes() {
     return 1;
@@ -80,7 +71,6 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -89,34 +79,34 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      if (asyncResult.failed()) {
-        asyncResult.cause().printStackTrace();
-      }
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceTwo(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              if (asyncResult.failed()) {
+                asyncResult.cause().printStackTrace();
+              }
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
-
   @Test
-  @Ignore
-  // TODO switch to vertx impl
   public void cookieTest() throws InterruptedException {
     System.out.println("start cookie test");
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
@@ -124,49 +114,46 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT2);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.createHttpClient(options);
-    HttpClientRequest request = client.get("/wsService/stringGETResponseSyncAsync", resp -> {
+    io.vertx.core.http.HttpClient client = vertx.createHttpClient(options);
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncAsync",
+            resp -> {
+              System.out.println("response from vertx client");
 
-      System.out.println("response from vertx client");
-      Client client1 = ClientBuilder.newClient();
-      WebTarget target = client1
-          .target("http://" + HOST + ":" + PORT2 + "/wsService/stringGETResponseSyncAsync");
-      Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE)
-          .cookie("c1", "xyz").async().get(new InvocationCallback<String>() {
-
-            @Override
-            public void completed(String response) {
-              System.out.println("Response entity '" + response + "' received.");
-              Assert.assertEquals(response, "xyz");
-              latch.countDown();
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-              throwable.printStackTrace();
-            }
-          });
-
-
-    });
+              final HttpClientRequest httpClientRequest =
+                  client.get(
+                      "http://" + HOST + ":" + PORT2 + "/wsService/stringGETResponseSyncAsync",
+                      myresp -> {
+                        myresp.bodyHandler(
+                            body -> {
+                              String response = body.toString();
+                              System.out.println("Response entity '" + response + "' received.");
+                              vertx.runOnContext(
+                                  context -> {
+                                    Assert.assertEquals("xyz", response);
+                                    latch.countDown();
+                                  });
+                            });
+                      });
+              httpClientRequest.headers().add("Cookie", "c1=xyz");
+              httpClientRequest.end();
+            });
     request.end();
 
     System.out.println("wait cookie test");
     latch.await();
     testComplete();
-
   }
 
-
-  public HttpClient getClient() {
+  public io.vertx.core.http.HttpClient getClient() {
     return client;
   }
-
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT2)
   public class WsServiceTwo extends VxmsEndpoint {
 
-    /////------------- sync blocking ----------------
+    ///// ------------- sync blocking ----------------
 
     @Path("/stringGETResponseSyncAsync")
     @GET
@@ -177,14 +164,14 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
         reply.response().end();
       } else {
         String cookieValue = someCookie.getValue();
-        reply.response().stringResponse((future) -> {
-          future.complete(cookieValue);
-        }).execute();
+        reply
+            .response()
+            .stringResponse(
+                (future) -> {
+                  future.complete(cookieValue);
+                })
+            .execute();
       }
-
     }
-
   }
-
-
 }

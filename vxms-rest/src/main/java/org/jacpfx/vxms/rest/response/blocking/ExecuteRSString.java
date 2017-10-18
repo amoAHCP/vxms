@@ -306,12 +306,16 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
             final Vertx vertx = vxmsShared.getVertx();
             final Object res = result.getResult();
             vertx.executeBlocking(
-                handler -> Optional.ofNullable(executionStepAndThan.getStep())
-                    .ifPresent(
-                        stepNext -> executeStep(retry, handler, res, stepNext, onFailureRespond)),
+                handler ->
+                    Optional.ofNullable(executionStepAndThan.getStep())
+                        .ifPresent(
+                            stepNext ->
+                                executeStep(retry, handler, res, stepNext, onFailureRespond)),
                 false,
                 getResultHandler(executionStepAndThan, chainList, retry));
           }
+        } else {
+          respond(result.getResult().toString(), httpErrorCode);
         }
       } else {
         checkAndCloseResponse(retry);
