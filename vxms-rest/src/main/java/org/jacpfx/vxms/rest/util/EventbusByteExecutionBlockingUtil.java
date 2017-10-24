@@ -144,6 +144,7 @@ public class EventbusByteExecutionBlockingUtil {
             context, headers,
             supplier,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -177,7 +178,7 @@ public class EventbusByteExecutionBlockingUtil {
             executor, retry);
 
     return new ExecuteRSByteResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _byteSupplier, excecuteEventBusAndReply,
+        _context, _headers, _byteSupplier, null,excecuteEventBusAndReply,
         _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount,
         _timeout, _delay, _circuitBreakerTimeout);
   }

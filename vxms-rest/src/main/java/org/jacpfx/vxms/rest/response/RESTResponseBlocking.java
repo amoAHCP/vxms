@@ -83,7 +83,8 @@ public class RESTResponseBlocking {
         errorMethodHandler,
         context,
         headers,
-        byteSupplier);
+        byteSupplier,
+        null);
   }
 
   /**

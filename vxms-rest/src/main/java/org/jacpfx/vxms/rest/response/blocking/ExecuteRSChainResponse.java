@@ -25,6 +25,7 @@ import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
+import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusStringCall;
 
 public class ExecuteRSChainResponse<T> {
@@ -154,6 +155,25 @@ public class ExecuteRSChainResponse<T> {
         null,
         chainTmp
     );
+  }
+
+  /**
+   * Retunrs a byte array to the target type
+   *
+   * @param step supplier which returns the createResponse value as byte array
+   * @return {@link ExecuteRSByteResponse}
+   */
+  public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<T,byte[]> step) {
+    final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
+    chainTmp.add(new BlockingExecutionStep(step));
+    return new ExecuteRSByteResponse(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        null,
+        chainTmp);
   }
 
 }
