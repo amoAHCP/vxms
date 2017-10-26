@@ -111,8 +111,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         0,
         0,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
 
 

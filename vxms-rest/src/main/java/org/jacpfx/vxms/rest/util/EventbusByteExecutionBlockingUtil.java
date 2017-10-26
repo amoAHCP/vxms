@@ -67,6 +67,7 @@ public class EventbusByteExecutionBlockingUtil {
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
    * @return the execution chain {@link ExecuteRSStringResponse}
    */
+  @SuppressWarnings("unchecked")
   public static ExecuteRSByteResponse mapToByteResponse(String _methodId,
       String _targetId,
       Object _message,

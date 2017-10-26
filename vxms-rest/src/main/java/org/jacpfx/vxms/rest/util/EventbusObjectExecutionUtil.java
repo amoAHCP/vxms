@@ -39,6 +39,7 @@ import org.jacpfx.vxms.rest.response.basic.ExecuteRSObjectResponse;
  * Created by Andy Moncsek on 05.04.16.
  * Typed execution of event-bus calls and string response
  */
+@SuppressWarnings("unchecked")
 public class EventbusObjectExecutionUtil {
 
   /**
@@ -139,6 +140,7 @@ public class EventbusObjectExecutionUtil {
         httpErrorCode, retryCount,
         timeout, circuitBreakerTimeout) -> {
       final int decrementedCount = retryCount - 1;
+      //noinspection unchecked
       mapToObjectResponse(methodId,
           id, message,
           stringFunction,

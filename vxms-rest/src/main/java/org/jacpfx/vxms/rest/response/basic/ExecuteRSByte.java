@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
@@ -270,7 +271,7 @@ public class ExecuteRSByte {
                 errorMethodHandler,
                 vxmsShared,
                 failure,
-                value -> {
+                (ExecutionResult<byte[]> value) -> {
                   if (value.succeeded()) {
                     if (!value.handledError()) {
                       final Object result = value.getResult();

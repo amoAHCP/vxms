@@ -120,8 +120,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         0,
         0,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
 
   }
 
