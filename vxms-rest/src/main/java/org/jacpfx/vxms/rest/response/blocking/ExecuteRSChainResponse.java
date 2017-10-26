@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.rest.response.blocking;
 
 import io.vertx.ext.web.RoutingContext;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -174,6 +175,28 @@ public class ExecuteRSChainResponse<T> {
         headers,
         null,
         chainTmp);
+  }
+
+  /**
+   * Retunrs a Serializable to the target type
+   *
+   * @param step supplier which returns the createResponse value as Serializable
+   * @param encoder the encoder to serialize the object response
+   * @return {@link ExecuteRSObjectResponse}
+   */
+  public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<T,Serializable> step,
+      Encoder encoder) {
+    final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
+    chainTmp.add(new BlockingExecutionStep(step));
+    return new ExecuteRSObjectResponse(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        context,
+        headers,
+        null,
+        chainTmp,
+        encoder);
   }
 
 }

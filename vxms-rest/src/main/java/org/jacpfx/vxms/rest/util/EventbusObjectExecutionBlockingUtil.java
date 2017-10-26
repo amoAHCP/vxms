@@ -142,6 +142,7 @@ public class EventbusObjectExecutionBlockingUtil {
             context, headers,
             supplier,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -174,7 +175,7 @@ public class EventbusObjectExecutionBlockingUtil {
             circuitBreakerTimeout,
             executor, retry);
     return new ExecuteRSObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _objectSupplier, excecuteEventBusAndReply,
+        _context, _headers, _objectSupplier, null,excecuteEventBusAndReply,
         _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount,
         _timeout, _delay, _circuitBreakerTimeout);
   }

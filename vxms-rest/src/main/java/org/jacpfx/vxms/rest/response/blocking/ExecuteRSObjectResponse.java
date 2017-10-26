@@ -19,8 +19,10 @@ package org.jacpfx.vxms.rest.response.blocking;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -64,6 +66,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<Serializable> objectSupplier,
+      List<BlockingExecutionStep> chain,
       ExecuteEventbusObjectCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -81,6 +84,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         excecuteBlockingEventBusAndReply,
         encoder,
         errorHandler,
@@ -95,7 +99,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
   public ExecuteRSObjectResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
       Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-      ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+      ThrowableSupplier<Serializable> objectSupplier, List<BlockingExecutionStep> chain, Encoder encoder) {
     super(methodId,
         vxmsShared,
         failure,
@@ -103,6 +107,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         null,
         encoder,
         null,
@@ -134,6 +139,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -160,6 +166,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -186,6 +193,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -212,6 +220,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -238,6 +247,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headers,
         objectSupplier,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -267,6 +277,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         context,
         headerMap,
         objectSupplier,
+        chain,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,

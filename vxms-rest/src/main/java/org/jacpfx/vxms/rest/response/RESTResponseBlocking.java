@@ -120,6 +120,7 @@ public class RESTResponseBlocking {
         context,
         headers,
         objectSupplier,
+        null,
         encoder);
   }
 
