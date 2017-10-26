@@ -18,7 +18,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jacpfx</groupId>
+    <groupId>org.org.jacpfx</groupId>
     <artifactId>vxms-core-demo</artifactId>
     <version>${vxms.version}</version>
     <packaging>jar</packaging>
@@ -29,7 +29,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vxms.version>1.1-SNAPSHOT</vxms.version>
-        <main.verticle>org.jacpfx.vxms.verticle.SimpleREST</main.verticle>
+        <main.verticle>org.org.jacpfx.vxms.verticle.SimpleREST</main.verticle>
     </properties>
 
     <repositories>
@@ -41,7 +41,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jacpfx</groupId>
+            <groupId>org.org.jacpfx</groupId>
             <artifactId>vxms-core</artifactId>
             <version>${vxms.version}</version>
         </dependency>

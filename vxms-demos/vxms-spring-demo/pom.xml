@@ -18,7 +18,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jacpfx</groupId>
+    <groupId>org.org.jacpfx</groupId>
     <artifactId>vxms-spring-demo</artifactId>
     <version>${vxms.version}</version>
     <packaging>jar</packaging>
@@ -30,7 +30,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vxms.version>1.1-SNAPSHOT</vxms.version>
         <vertx-spring-ext.version>2.2-SNAPSHOT</vertx-spring-ext.version>
-        <main.verticle>java-spring:org.jacpfx.vxms.spring.SimpleSpringREST</main.verticle>
+        <main.verticle>java-spring:org.org.jacpfx.vxms.spring.SimpleSpringREST</main.verticle>
         <vertx.version>3.4.2</vertx.version>
     </properties>
 
@@ -55,17 +55,17 @@
             <version>${vertx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jacpfx</groupId>
+            <groupId>org.org.jacpfx</groupId>
             <artifactId>vxms-core</artifactId>
             <version>${vxms.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jacpfx</groupId>
+            <groupId>org.org.jacpfx</groupId>
             <artifactId>vxms-rest</artifactId>
             <version>${vxms.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jacpfx.vertx.spring</groupId>
+            <groupId>org.org.jacpfx.vertx.spring</groupId>
             <artifactId>vertx-spring-ext</artifactId>
             <version>${vertx-spring-ext.version}</version>
         </dependency>

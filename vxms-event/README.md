@@ -10,7 +10,7 @@ public class RESTExample extends VxmsEndpoint {
 
 ```xml   
   <dependency>
-       <groupId>org.jacpfx</groupId>
+       <groupId>org.org.jacpfx</groupId>
        <artifactId>vxms-event</artifactId>
        <version>${version}</version>
   </dependency>

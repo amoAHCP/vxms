@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jacpfx</groupId>
+    <groupId>org.org.jacpfx</groupId>
     <artifactId>vxms-container-eventbus-demo</artifactId>
     <packaging>pom</packaging>
     <version>1.1-SNAPSHOT</version>
@@ -91,12 +91,12 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.jacpfx</groupId>
+            <groupId>org.org.jacpfx</groupId>
             <artifactId>vxms-common</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.jacpfx</groupId>
+            <groupId>org.org.jacpfx</groupId>
             <artifactId>vxms-core</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
