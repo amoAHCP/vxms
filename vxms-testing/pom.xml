@@ -29,11 +29,6 @@
   <dependencies>
     <dependency>
       <groupId>org.org.jacpfx</groupId>
-      <artifactId>vxms-common</artifactId>
-      <version>${parent.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.org.jacpfx</groupId>
       <artifactId>vxms-core</artifactId>
       <version>${parent.version}</version>
     </dependency>
