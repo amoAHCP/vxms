@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.blocking;
 
 import io.vertx.ext.web.RoutingContext;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -63,6 +65,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<byte[]> byteSupplier,
+      List<BlockingExecutionStep> chain,
       ExecuteEventbusByteCall excecuteBlockingEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
@@ -80,6 +83,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteBlockingEventBusAndReply,
         encoder,
         errorHandler,
@@ -94,7 +98,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
 
   public ExecuteRSByteResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
       Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-      ThrowableSupplier<byte[]> byteSupplier) {
+      ThrowableSupplier<byte[]> byteSupplier,List<BlockingExecutionStep> chain) {
     super(methodId,
         vxmsShared,
         failure,
@@ -102,6 +106,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         null,
         null,
         null,
@@ -109,9 +114,9 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         0,
         0,
         0,
-        0l,
-        0l,
-        0l);
+        0L,
+        0L,
+        0L);
   }
 
   /**
@@ -130,6 +135,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -156,6 +162,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -182,6 +189,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -208,6 +216,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -234,6 +243,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,
@@ -263,6 +273,7 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         context,
         headerMap,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply,
         encoder,
         errorHandler,

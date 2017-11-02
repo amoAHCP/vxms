@@ -106,9 +106,9 @@ public class EventbusResponse {
         0,
         0,
         0,
-        0l,
-        0l,
-        0l);
+        0L,
+        0L,
+        0L);
   }
 
   /**
@@ -138,9 +138,9 @@ public class EventbusResponse {
         0,
         0,
         0,
-        0l,
-        0l,
-        0l);
+        0L,
+        0L,
+        0L);
   }
 
   /**
@@ -172,9 +172,9 @@ public class EventbusResponse {
         0,
         0,
         0,
-        0l,
-        0l,
-        0l);
+        0L,
+        0L,
+        0L);
   }
 
 

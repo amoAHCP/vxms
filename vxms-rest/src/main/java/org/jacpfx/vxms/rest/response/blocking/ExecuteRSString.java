@@ -60,6 +60,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param stringSupplier the supplier, producing the byte response
+   * @param chain the execution chain
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
    *     the fluent API
    * @param encoder the encoder to encode your objects
@@ -306,12 +307,16 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
             final Vertx vertx = vxmsShared.getVertx();
             final Object res = result.getResult();
             vertx.executeBlocking(
-                handler -> Optional.ofNullable(executionStepAndThan.getStep())
-                    .ifPresent(
-                        stepNext -> executeStep(retry, handler, res, stepNext, onFailureRespond)),
+                handler ->
+                    Optional.ofNullable(executionStepAndThan.getStep())
+                        .ifPresent(
+                            stepNext ->
+                                executeStep(retry, handler, res, stepNext, onFailureRespond)),
                 false,
                 getResultHandler(executionStepAndThan, chainList, retry));
           }
+        } else {
+          respond(result.getResult().toString(), httpErrorCode);
         }
       } else {
         checkAndCloseResponse(retry);

@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest.response.blocking;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -63,6 +65,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
       RoutingContext context,
       Map<String, String> headers,
       ThrowableSupplier<byte[]> byteSupplier,
+      List<BlockingExecutionStep> chain,
       ExecuteEventbusByteCall excecuteBlockingEventBusAndReply,
       Encoder encoder, Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, byte[]> onFailureRespond,
@@ -79,6 +82,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteBlockingEventBusAndReply,
         encoder,
         errorHandler,
@@ -105,6 +109,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
         context,
         headers,
         byteSupplier,
+        chain,
         excecuteAsyncEventBusAndReply, encoder, errorHandler,
         onFailureRespond,
         httpStatusCode,

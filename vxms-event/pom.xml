@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.jacpfx</groupId>
+    <groupId>org.org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
     <version>1.1-SNAPSHOT</version>
     <relativePath>../</relativePath>
@@ -37,10 +37,9 @@
   </properties>
 
   <dependencies>
-
     <dependency>
-      <groupId>org.jacpfx</groupId>
-      <artifactId>vxms-common</artifactId>
+      <groupId>org.org.jacpfx</groupId>
+      <artifactId>vxms-core</artifactId>
       <version>${parent.version}</version>
     </dependency>
     <dependency>

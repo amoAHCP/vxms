@@ -39,6 +39,7 @@ import org.jacpfx.vxms.rest.response.blocking.ExecuteRSStringResponse;
  * Created by Andy Moncsek on 05.04.16.
  * Typed execution of event-bus calls and blocking object response
  */
+@SuppressWarnings("ALL")
 public class EventbusObjectExecutionBlockingUtil {
 
   /**
@@ -142,6 +143,7 @@ public class EventbusObjectExecutionBlockingUtil {
             context, headers,
             supplier,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -174,7 +176,7 @@ public class EventbusObjectExecutionBlockingUtil {
             circuitBreakerTimeout,
             executor, retry);
     return new ExecuteRSObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _objectSupplier, excecuteEventBusAndReply,
+        _context, _headers, _objectSupplier, null,excecuteEventBusAndReply,
         _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount,
         _timeout, _delay, _circuitBreakerTimeout);
   }

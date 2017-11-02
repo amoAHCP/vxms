@@ -67,6 +67,7 @@ public class EventbusByteExecutionBlockingUtil {
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
    * @return the execution chain {@link ExecuteRSStringResponse}
    */
+  @SuppressWarnings("unchecked")
   public static ExecuteRSByteResponse mapToByteResponse(String _methodId,
       String _targetId,
       Object _message,
@@ -144,6 +145,7 @@ public class EventbusByteExecutionBlockingUtil {
             context, headers,
             supplier,
             null,
+            null,
             encoder, errorHandler,
             onFailureRespond,
             httpStatusCode,
@@ -177,7 +179,7 @@ public class EventbusByteExecutionBlockingUtil {
             executor, retry);
 
     return new ExecuteRSByteResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _byteSupplier, excecuteEventBusAndReply,
+        _context, _headers, _byteSupplier, null,excecuteEventBusAndReply,
         _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount,
         _timeout, _delay, _circuitBreakerTimeout);
   }

@@ -44,9 +44,9 @@ import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
 public class EventbusExecution {
 
 
-  public static final long LOCK_VALUE = -1l;
+  public static final long LOCK_VALUE = -1L;
   public static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  public static final long NO_TIMEOUT = 0l;
+  public static final long NO_TIMEOUT = 0L;
 
   /**
    * Send event-bus message and process the result in the passed function for blocking execution
@@ -97,7 +97,7 @@ public class EventbusExecution {
       long circuitBreakerTimeout,
       RecursiveExecutor executor,
       RetryExecutor retryExecutor) {
-    if (circuitBreakerTimeout == 0l) {
+    if (circuitBreakerTimeout == 0L) {
       executeDefaultState(methodId,
           targetId, message,
           function,

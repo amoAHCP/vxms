@@ -30,7 +30,6 @@ import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.concurrent.LocalData;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
-import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
 /**
  * Created by Andy Moncsek on 19.01.16.
@@ -42,7 +41,7 @@ public class StepExecution {
   private static final long DEFAULT_LONG_VALUE = 0;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
   private static final int STOP_CONDITION = -1;
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
 
 
   /**
@@ -354,7 +353,7 @@ public class StepExecution {
         }
       }
     }
-    if (!errorHandling || errorHandling && result != null) {
+    if (!errorHandling || (errorHandling && result != null)) {
       if (!_blockingHandler.isComplete()) {
         _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
       }

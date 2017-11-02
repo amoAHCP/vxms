@@ -83,7 +83,8 @@ public class RESTResponseBlocking {
         errorMethodHandler,
         context,
         headers,
-        byteSupplier);
+        byteSupplier,
+        null);
   }
 
   /**
@@ -119,13 +120,14 @@ public class RESTResponseBlocking {
         context,
         headers,
         objectSupplier,
+        null,
         encoder);
   }
 
   /**
    * starts a supply chain to create a blocking response
-   * @param chainsupplier
-   * @param <T>
+   * @param chainsupplier the first step in the execution chain
+   * @param <T> the reutrn type of the supplier
    * @return {@link ExecuteRSChainResponse}
    */
   public <T> ExecuteRSChainResponse<T> supply(ThrowableSupplier<T> chainsupplier) {

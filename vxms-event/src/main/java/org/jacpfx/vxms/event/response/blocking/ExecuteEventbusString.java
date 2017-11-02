@@ -84,7 +84,8 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
         failure,
         errorMethodHandler,
         message,
-        null,
+
+        null, null,
         null,
         errorHandler,
         null,

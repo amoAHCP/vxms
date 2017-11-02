@@ -18,7 +18,9 @@ package org.jacpfx.vxms.event.response.basic;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
@@ -56,6 +58,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<ExecutionStep> chain,
       ThrowableFutureConsumer<String> stringConsumer,
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -69,7 +72,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         failure,
         errorMethodHandler,
         message,
-        stringConsumer,
+        chain, stringConsumer,
         excecuteEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -77,6 +80,25 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         retryCount,
         timeout,
         circuitBreakerTimeout);
+  }
+
+  public ExecuteEventbusBasicStringResponse(String methodId, VxmsShared vxmsShared,
+      Throwable failure, Consumer<Throwable> errorMethodHandler, Message<Object> message,
+      List<ExecutionStep> chain,
+      ThrowableFutureConsumer<String> stringConsumer) {
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        chain, stringConsumer,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0L,
+        0L);
   }
 
 
@@ -93,6 +115,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -115,6 +138,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -137,6 +161,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -162,6 +187,7 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringConsumer,
         excecuteEventBusAndReply,
         errorHandler,

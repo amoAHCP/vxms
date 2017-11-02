@@ -45,9 +45,9 @@ import org.jacpfx.vxms.rest.response.basic.ResponseExecution;
 public class EventbusExecution {
 
 
-  public static final long LOCK_VALUE = -1l;
+  public static final long LOCK_VALUE = -1L;
   public static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  public static final long DEFAULT_VALUE = 0l;
+  public static final long DEFAULT_VALUE = 0L;
 
   /**
    * Send event-bus message and process the result in the passed function for the execution chain

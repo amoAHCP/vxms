@@ -38,9 +38,9 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 public class StepExecution {
 
   private static final int DEFAULT_VALUE = 0;
-  private static final long DEFAULT_LONG_VALUE = 0l;
+  private static final long DEFAULT_LONG_VALUE = 0L;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
 
   /**
    * Creates the response value based on the flow defined in the fluent API.  The resulting response
@@ -51,6 +51,7 @@ public class StepExecution {
    * @param timeout, the timeout time for execution
    * @param circuitBreakerTimeout, the stateful circuit breaker release time
    * @param step, the user step to be executed
+   * @param inputValue, the input value for the step
    * @param errorHandler, the intermediate error method, executed on each error
    * @param onFailureRespond, the method to be executed on failure
    * @param errorMethodHandler, the fallback method

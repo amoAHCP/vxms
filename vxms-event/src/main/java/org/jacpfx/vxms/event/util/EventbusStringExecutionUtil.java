@@ -171,6 +171,7 @@ public class EventbusStringExecutionUtil {
         _failure,
         _errorMethodHandler,
         _requestMessage,
+        null,
         _stringConsumer,
         excecuteEventBusAndReply,
         _errorHandler,

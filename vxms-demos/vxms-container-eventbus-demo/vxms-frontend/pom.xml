@@ -21,7 +21,7 @@
 
 
   <parent>
-    <groupId>org.jacpfx</groupId>
+    <groupId>org.org.jacpfx</groupId>
     <artifactId>vxms-container-eventbus-demo</artifactId>
     <version>1.1-SNAPSHOT</version>
     <relativePath>../</relativePath>
@@ -36,7 +36,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jacpfx</groupId>
+      <groupId>org.org.jacpfx</groupId>
       <artifactId>vxms-rest</artifactId>
       <version>${vxms-verticle.version}</version>
     </dependency>
@@ -70,7 +70,7 @@
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>io.vertx.core.Launcher</Main-Class>
-                    <Main-Verticle>org.jacpfx.vxms.frontend.verticles.VxmsGateway</Main-Verticle>
+                    <Main-Verticle>org.org.jacpfx.vxms.frontend.verticles.VxmsGateway</Main-Verticle>
                   </manifestEntries>
                 </transformer>
               </transformers>

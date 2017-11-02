@@ -19,11 +19,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jacpfx</groupId>
+    <groupId>org.org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
     <packaging>pom</packaging>
     <version>1.1-SNAPSHOT</version>
-    <name>vxms</name>
+  <modules>
+    <module>vxms-testing</module>
+  </modules>
+  <name>vxms</name>
     <url>http://maven.apache.org</url>
 
     <parent>
@@ -75,19 +78,19 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>vxms-common</module>
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
+                <module>vxms-testing</module>
             </modules>
         </profile>
         <profile>
             <id>release</id>
             <modules>
-                <module>vxms-common</module>
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
+                <module>vxms-testing</module>
             </modules>
         </profile>
 

@@ -18,7 +18,6 @@ package org.jacpfx.vxms.rest.response.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
@@ -43,7 +42,7 @@ public class ResponseExecution {
   private static final long DEFAULT_LONG_VALUE = 0;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
   private static final int STOP_CONDITION = -1;
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
 
 
   /**
@@ -345,7 +344,7 @@ public class ResponseExecution {
         }
       }
     }
-    if (!errorHandling || errorHandling && result != null) {
+    if (!errorHandling || (errorHandling && result != null)) {
       if (!_blockingHandler.isComplete()) {
         _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
       }
