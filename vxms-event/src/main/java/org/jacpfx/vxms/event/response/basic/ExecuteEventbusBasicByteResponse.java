@@ -59,6 +59,24 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         circuitBreakerTimeout);
   }
 
+  public ExecuteEventbusBasicByteResponse(String methodId, VxmsShared vxmsShared,
+      Throwable failure, Consumer<Throwable> errorMethodHandler, Message<Object> message,
+      ThrowableFutureConsumer<byte[]> byteConsumer) {
+    super(methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        byteConsumer,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0L,
+        0L);
+  }
+
   /**
    * defines an action for errors in byte responses, you can handle the error and return an
    * alternate createResponse value

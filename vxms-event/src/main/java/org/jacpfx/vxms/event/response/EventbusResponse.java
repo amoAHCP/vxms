@@ -18,10 +18,14 @@ package org.jacpfx.vxms.event.response;
 
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventChaineResponse;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByteResponse;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
@@ -66,6 +70,20 @@ public class EventbusResponse {
     return new EventbusResponseBlocking(methodId, message, vxmsShared, failure, errorMethodHandler);
   }
 
+
+  /**
+   * starts a supply chain to create a response
+   * @param chainconsumer the initial supplier
+   * @param <T> the type of the return value
+   * @return {@link ExecuteEventChaineResponse}
+   */
+  public <T> ExecuteEventChaineResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
+    final List<ExecutionStep> chain = new ArrayList<>();
+    chain.add(new ExecutionStep(chainconsumer));
+    return new ExecuteEventChaineResponse<>(
+        methodId, vxmsShared, failure, errorMethodHandler, message, chain);
+  }
+
   /**
    * Returns a byte array to the target type
    *
@@ -75,7 +93,7 @@ public class EventbusResponse {
   public ExecuteEventbusBasicByteResponse byteResponse(
       ThrowableFutureConsumer<byte[]> byteConsumer) {
     return new ExecuteEventbusBasicByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, byteConsumer, null, null, null, null, 0, 0l, 0l);
+        message, byteConsumer);
   }
 
   /**
@@ -87,7 +105,7 @@ public class EventbusResponse {
   public ExecuteEventbusBasicStringResponse stringResponse(
       ThrowableFutureConsumer<String> stringConsumer) {
     return new ExecuteEventbusBasicStringResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, stringConsumer, null, null, null, null, 0, 0l, 0l);
+        message,null, stringConsumer);
   }
 
   /**
@@ -101,7 +119,7 @@ public class EventbusResponse {
   public ExecuteEventbusBasicObjectResponse objectResponse(
       ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
     return new ExecuteEventbusBasicObjectResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, objectConsumer, null, encoder, null, null, null, 0, 0l, 0l);
+        message, objectConsumer,encoder);
   }
 
 

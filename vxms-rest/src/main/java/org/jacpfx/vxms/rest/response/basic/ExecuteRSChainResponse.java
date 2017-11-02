@@ -147,7 +147,7 @@ public class ExecuteRSChainResponse<T> {
   /**
    * Returns a String to the target type
    *
-   * @param step the execution step to map the respone to string
+   * @param step the execution step to map the response to string
    * @return {@link ExecuteRSStringResponse}
    */
   public ExecuteRSStringResponse mapToStringResponse(
@@ -167,7 +167,7 @@ public class ExecuteRSChainResponse<T> {
   /**
    * Returns a byte array to the target type
    *
-   * @param step the execution step to map the respone to byte[]
+   * @param step the execution step to map the response to byte[]
    * @return {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse mapToByteResponse(ThrowableFutureBiConsumer<T,byte[]> step) {
@@ -187,7 +187,7 @@ public class ExecuteRSChainResponse<T> {
   /**
    * Returns a Serializable to the target type
    *
-   * @param step the execution step to map the respone to Object
+   * @param step the execution step to map the response to Object
    * @param encoder the encoder to serialize the object response
    * @return {@link ExecuteRSObjectResponse}
    */
