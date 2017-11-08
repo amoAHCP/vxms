@@ -93,7 +93,7 @@ public class EventbusResponse {
   public ExecuteEventbusBasicByteResponse byteResponse(
       ThrowableFutureConsumer<byte[]> byteConsumer) {
     return new ExecuteEventbusBasicByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, byteConsumer);
+        message, null,byteConsumer);
   }
 
   /**

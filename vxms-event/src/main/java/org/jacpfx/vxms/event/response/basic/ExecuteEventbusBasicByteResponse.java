@@ -18,7 +18,9 @@ package org.jacpfx.vxms.event.response.basic;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
@@ -36,6 +38,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<ExecutionStep> chain,
       ThrowableFutureConsumer<byte[]> byteConsumer,
       ExecuteEventbusByteCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -49,7 +52,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         failure,
         errorMethodHandler,
         message,
-        byteConsumer,
+        chain, byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -60,14 +63,14 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
   }
 
   public ExecuteEventbusBasicByteResponse(String methodId, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler, Message<Object> message,
+      Throwable failure, Consumer<Throwable> errorMethodHandler, Message<Object> message, List<ExecutionStep> chain,
       ThrowableFutureConsumer<byte[]> byteConsumer) {
     super(methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-        byteConsumer,
+        chain, byteConsumer,
         null,
         null,
         null,
@@ -91,6 +94,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -114,6 +118,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -136,6 +141,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -158,6 +164,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,

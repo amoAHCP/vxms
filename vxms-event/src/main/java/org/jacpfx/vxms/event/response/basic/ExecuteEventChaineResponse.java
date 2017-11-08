@@ -115,12 +115,12 @@ public class ExecuteEventChaineResponse<T> {
    * response
    * @return {@link ExecuteEventbusBasicByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse byteResponse(
+  public ExecuteEventbusBasicByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<T,byte[]> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
-    chainTmp.add(new ExecutionStep(step)); // TODO add chain to constructor
+    chainTmp.add(new ExecutionStep(step));
     return new ExecuteEventbusBasicByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, null);
+        message, chainTmp,null);
   }
 
   /**
@@ -146,7 +146,7 @@ public class ExecuteEventChaineResponse<T> {
    * @param encoder the encoder to serialize the response object
    * @return {@link ExecuteEventbusBasicObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse objectResponse(
+  public ExecuteEventbusBasicObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<T,Serializable> step, Encoder encoder) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step)); // TODO add chain to constructor

@@ -95,10 +95,11 @@ public class EventbusStringExecutionUtil {
         retryCount,
         timeout,
         circuitBreakerTimeout) ->
-        new ExecuteEventbusBasicByteResponse(methodId,
+        new ExecuteEventbusBasicStringResponse(methodId,
             vxmsShared, t,
             errorMethodHandler,
             requestMessage,
+            null,
             consumer,
             null,
             errorHandler,

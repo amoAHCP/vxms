@@ -97,6 +97,7 @@ public class EventbusByteExecutionUtil {
             vxmsShared, failure,
             errorMethodHandler,
             requestMessage,
+            null,
             consumer,
             null,
             errorHandler,
@@ -164,7 +165,7 @@ public class EventbusByteExecutionUtil {
                 circuitBreakerTimeout, executor, retry);
 
     return new ExecuteEventbusBasicByteResponse(_methodId, _vxmsShared, _failure,
-        _errorMethodHandler, _requestMessage, _byteConsumer, excecuteEventBusAndReply,
+        _errorMethodHandler, _requestMessage,null, _byteConsumer, excecuteEventBusAndReply,
         _errorHandler,
         _onFailureRespond, _responseDeliveryOptions, _retryCount, _timeout, _circuitBreakerTimeout);
   }

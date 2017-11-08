@@ -84,7 +84,7 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
         failure,
         errorMethodHandler,
         message,
-        null,
+        null, null,
         null,
         errorHandler,
         null,

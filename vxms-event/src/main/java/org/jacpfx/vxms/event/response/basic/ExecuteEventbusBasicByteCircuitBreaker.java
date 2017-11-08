@@ -18,7 +18,9 @@ package org.jacpfx.vxms.event.response.basic;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
@@ -55,6 +57,7 @@ public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasic
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<ExecutionStep> chain,
       ThrowableFutureConsumer<byte[]> byteConsumer,
       ExecuteEventbusByteCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -68,6 +71,7 @@ public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasic
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
@@ -94,6 +98,7 @@ public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasic
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
