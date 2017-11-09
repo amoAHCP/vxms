@@ -18,7 +18,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.org.jacpfx</groupId>
+    <groupId>org.jacpfx</groupId>
     <artifactId>vxms-core-demo</artifactId>
     <version>${vxms.version}</version>
     <packaging>jar</packaging>
@@ -41,7 +41,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.org.jacpfx</groupId>
+            <groupId>org.jacpfx</groupId>
             <artifactId>vxms-core</artifactId>
             <version>${vxms.version}</version>
         </dependency>

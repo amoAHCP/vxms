@@ -62,10 +62,9 @@ public class VxmsGateway extends VxmsEndpoint {
     InitMongoDB.initMongoData(vertx, config());
     // init service discovery
     Fabric8DiscoveryClient.
-        builder().
-        apiToken(null).
-        masterUrl(Fabric8DiscoveryClient.DEFAULT_MASTER_URL).
-        namespace(Fabric8DiscoveryClient.DEFAULT_NAMESPACE).
+        builder().user(null).pwd(null).apiToken(null).
+        masterUrl(null).
+        namespace("default").
         resolveAnnotations(this);
 
     startFuture.complete();

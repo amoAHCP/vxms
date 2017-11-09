@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.org.jacpfx</groupId>
+        <groupId>org.jacpfx</groupId>
         <artifactId>vxms-container-k8s-discovery-demo</artifactId>
         <version>1.1-SNAPSHOT</version>
         <relativePath>../</relativePath>
@@ -34,7 +34,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.org.jacpfx</groupId>
+            <groupId>org.jacpfx</groupId>
             <artifactId>vxms-rest</artifactId>
             <version>${vxms-verticle.version}</version>
         </dependency>
