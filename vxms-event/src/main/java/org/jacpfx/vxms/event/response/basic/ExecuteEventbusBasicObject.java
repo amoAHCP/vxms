@@ -23,8 +23,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -32,15 +34,16 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusObjectCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class is the end of the non blocking fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
+ * data collected to execute the chain.
  */
-public class ExecuteEventbusBasicObject {
+public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
   protected final Throwable failure;
   protected final Message<Object> message;
+  protected final List<ExecutionStep> chain;
   protected final Consumer<Throwable> errorHandler;
   protected final Consumer<Throwable> errorMethodHandler;
   protected final ThrowableFutureConsumer<Serializable> objectConsumer;
@@ -57,26 +60,29 @@ public class ExecuteEventbusBasicObject {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
+   * @param chain the execution chain
    * @param objectConsumer the consumer, producing the byte response
    * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
    * @param encoder the encoder to serialize the response object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response deliver serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicObject(String methodId,
+  public ExecuteEventbusBasicObject(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<ExecutionStep> chain,
       ThrowableFutureConsumer<Serializable> objectConsumer,
       ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
@@ -91,6 +97,7 @@ public class ExecuteEventbusBasicObject {
     this.failure = failure;
     this.errorMethodHandler = errorMethodHandler;
     this.message = message;
+    this.chain = chain;
     this.objectConsumer = objectConsumer;
     this.encoder = encoder;
     this.deliveryOptions = deliveryOptions;
@@ -102,7 +109,6 @@ public class ExecuteEventbusBasicObject {
     this.circuitBreakerTimeout = circuitBreakerTimeout;
   }
 
-
   /**
    * Execute the reply chain with given http status code and content-type
    *
@@ -110,91 +116,153 @@ public class ExecuteEventbusBasicObject {
    */
   public void execute(DeliveryOptions deliveryOptions) {
     Objects.requireNonNull(deliveryOptions);
-    new ExecuteEventbusBasicObject(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        message,
-        objectConsumer,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        deliveryOptions,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
+    new ExecuteEventbusBasicObject(
+            methodId,
+            vxmsShared,
+            failure,
+            errorMethodHandler,
+            message,
+            chain,
+            objectConsumer,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            deliveryOptions,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
   }
 
-
-  /**
-   * Execute the reply chain
-   */
+  /** Execute the reply chain */
   public void execute() {
     final Vertx vertx = vxmsShared.getVertx();
-    vertx.runOnContext(action -> {
-      ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
-        try {
-          evFunction.execute(methodId,
-              vxmsShared,
-              errorMethodHandler,
-              message,
-              encoder,
-              errorHandler,
-              onFailureRespond,
-              deliveryOptions,
-              retryCount,
-              timeout,
-              circuitBreakerTimeout);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+    vertx.runOnContext(
+        action -> {
+          ofNullable(excecuteEventBusAndReply)
+              .ifPresent(
+                  evFunction -> {
+                    try {
+                      evFunction.execute(
+                          methodId,
+                          vxmsShared,
+                          errorMethodHandler,
+                          message,
+                          encoder,
+                          errorHandler,
+                          onFailureRespond,
+                          deliveryOptions,
+                          retryCount,
+                          timeout,
+                          circuitBreakerTimeout);
+                    } catch (Exception e) {
+                      e.printStackTrace();
+                    }
+                  });
+          ofNullable(objectConsumer)
+              .ifPresent(
+                  userOperation -> {
+                    int retry = retryCount;
+                    ResponseExecution.createResponse(
+                        methodId,
+                        retry,
+                        timeout,
+                        circuitBreakerTimeout,
+                        userOperation,
+                        errorHandler,
+                        onFailureRespond,
+                        errorMethodHandler,
+                        vxmsShared,
+                        failure,
+                        value -> {
+                          if (value.succeeded()) {
+                            respond(value.getResult());
+                          } else {
+                            fail(
+                                value.getCause().getMessage(),
+                                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                          }
+                        });
+                  });
 
-      });
-      ofNullable(objectConsumer).
-          ifPresent(userOperation -> {
-                int retry = retryCount;
-                ResponseExecution.createResponse(methodId,
-                    retry,
-                    timeout,
-                    circuitBreakerTimeout,
-                    userOperation,
-                    errorHandler,
-                    onFailureRespond,
-                    errorMethodHandler,
-                    vxmsShared, failure, value -> {
-                      if (value.succeeded()) {
-                        respond(value.getResult());
-                      } else {
-                        fail(value.getCause().getMessage(),
-                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                      }
-                    });
-              }
-          );
-    });
+          ofNullable(chain)
+              .ifPresent(
+                  chainList -> {
+                    if (!chainList.isEmpty()) {
+                      final ExecutionStep executionStep = chainList.get(0);
+                      ofNullable(executionStep.getChainconsumer())
+                          .ifPresent(
+                              initialConsumer -> {
+                                int retry = retryCount;
+                                ResponseExecution.createResponse(
+                                    methodId,
+                                    retry,
+                                    timeout,
+                                    circuitBreakerTimeout,
+                                    initialConsumer,
+                                    errorHandler,
+                                    onFailureRespond,
+                                    errorMethodHandler,
+                                    vxmsShared,
+                                    failure,
+                                    value -> {
+                                      if (value.succeeded()) {
+                                        final Object result = value.getResult();
+                                        if (chainList.size() > 1 && !value.handledError()) {
+                                          final ExecutionStep executionStepAndThan =
+                                              chainList.get(1);
+                                          ofNullable(executionStepAndThan.getStep())
+                                              .ifPresent(
+                                                  step ->
+                                                      executeStep(
+                                                          methodId,
+                                                          vxmsShared,
+                                                          failure,
+                                                          errorMethodHandler,
+                                                          chainList,
+                                                          result,
+                                                          executionStepAndThan,
+                                                          step,
+                                                          errorHandler,
+                                                          onFailureRespond,
+                                                          timeout,
+                                                          circuitBreakerTimeout,
+                                                          retry));
+                                        } else {
+                                          respond(value.getResult());
+                                        }
+                                      } else {
+                                        fail(
+                                            value.getCause().getMessage(),
+                                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                                      }
+                                    });
+                              });
+                    }
+                  });
+        });
   }
 
-
+  @Override
   protected void fail(String result, int statuscode) {
     if (result != null) {
       message.fail(statuscode, result);
     }
-
   }
 
+  @Override
   protected void respond(Serializable result) {
     if (result != null) {
-      ResponseExecution.encode(result, encoder).ifPresent(value -> {
-        if (deliveryOptions != null) {
-          message.reply(value, deliveryOptions);
-        } else {
-          message.reply(value);
-        }
-      });
+      ResponseExecution.encode(result, encoder)
+          .ifPresent(
+              value -> {
+                if (deliveryOptions != null) {
+                  message.reply(value, deliveryOptions);
+                } else {
+                  message.reply(value);
+                }
+              });
     }
   }
-
-
 }

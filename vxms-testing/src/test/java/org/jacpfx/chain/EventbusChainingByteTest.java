@@ -107,7 +107,7 @@ public class EventbusChainingByteTest extends VertxTestBase {
               assertTrue(res.succeeded());
               Payload<String> pp = null;
               try {
-                pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
               } catch (IOException e) {
                 e.printStackTrace();
               } catch (ClassNotFoundException e) {
@@ -130,7 +130,7 @@ public class EventbusChainingByteTest extends VertxTestBase {
               assertTrue(res.succeeded());
               Payload<String> pp = null;
               try {
-                pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
               } catch (IOException e) {
                 e.printStackTrace();
               } catch (ClassNotFoundException e) {
@@ -153,7 +153,7 @@ public class EventbusChainingByteTest extends VertxTestBase {
               System.out.println("Got a createResponse: " + res.result().body().toString());
               Payload<String> pp = null;
               try {
-                pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
               } catch (IOException e) {
                 e.printStackTrace();
               } catch (ClassNotFoundException e) {
@@ -173,10 +173,10 @@ public class EventbusChainingByteTest extends VertxTestBase {
             SERVICE_REST_GET + "/basicTestAndThenWithError",
             "hello",
             res -> {
-              System.out.println("Got a createResponse: " +res.result().body().toString());
+              System.out.println("Got a createResponse: " + res.result().body().toString());
               Payload<String> pp = null;
               try {
-                pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
               } catch (IOException e) {
                 e.printStackTrace();
               } catch (ClassNotFoundException e) {
@@ -187,6 +187,7 @@ public class EventbusChainingByteTest extends VertxTestBase {
             });
     await();
   }
+
   @Test
   public void basicTestSupplyWithErrorUnhandled() throws InterruptedException {
     getVertx()
@@ -214,7 +215,7 @@ public class EventbusChainingByteTest extends VertxTestBase {
               System.out.println("Got a createResponse: " + res.result().body().toString());
               Payload<String> pp = null;
               try {
-                pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
               } catch (IOException e) {
                 e.printStackTrace();
               } catch (ClassNotFoundException e) {
@@ -237,7 +238,7 @@ public class EventbusChainingByteTest extends VertxTestBase {
               System.out.println("Got a createResponse: " + res.result().body().toString());
               Payload<String> pp = null;
               try {
-                pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
               } catch (IOException e) {
                 e.printStackTrace();
               } catch (ClassNotFoundException e) {
@@ -250,149 +251,219 @@ public class EventbusChainingByteTest extends VertxTestBase {
   }
 
   @Test
-
   public void basicTestSupplyWithErrorAndCircuitBreaker() throws InterruptedException {
-    getVertx().eventBus().send(SERVICE_REST_GET + "/basicTestSupplyWithErrorAndCircuitBreaker", "crash", res -> {
-      assertTrue(res.succeeded());
-      Payload<String> pp = null;
-      try {
-        pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
-      } catch (IOException e) {
-        e.printStackTrace();
-      } catch (ClassNotFoundException e) {
-        e.printStackTrace();
-      }
-      assertEquals(pp.getValue(), new Payload<>("failure").getValue());
-      System.out.println("out: " + res.result().body().toString());
-      getVertx().eventBus().send(SERVICE_REST_GET + "/basicTestSupplyWithErrorAndCircuitBreaker", "val", res2 -> {
-        assertTrue(res2.succeeded());
-        Payload<String> pp2 = null;
-        try {
-          pp2 = (Payload<String>) Serializer.deserialize((byte[])res2.result().body());
-        } catch (IOException e) {
-          e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-          e.printStackTrace();
-        }
-        assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
-        System.out.println("out: " + res2.result().body().toString());
-
-        // wait 1s, but circuit is still open
-        vertx.setTimer(1205, handler -> {
-          getVertx().eventBus()
-              .send(SERVICE_REST_GET + "/basicTestSupplyWithErrorAndCircuitBreaker", "val", res3 -> {
-                assertTrue(res3.succeeded());
-                Payload<String> pp3 = null;
-                try {
-                  pp3 = (Payload<String>) Serializer.deserialize((byte[])res3.result().body());
-                } catch (IOException e) {
-                  e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                  e.printStackTrace();
-                }
-                assertEquals(pp3.getValue(), new Payload<>("failure").getValue());
-                System.out.println("out: " + res3.result().body().toString());
-
-                // wait another 1s, now circuit should be closed
-                vertx.setTimer(1005, handler2 -> {
-                  getVertx().eventBus()
-                      .send(SERVICE_REST_GET + "/basicTestSupplyWithErrorAndCircuitBreaker", "val", res4 -> {
-                        assertTrue(res4.succeeded());
-                        Payload<String> pp4 = null;
+    getVertx()
+        .eventBus()
+        .send(
+            SERVICE_REST_GET + "/basicTestSupplyWithErrorAndCircuitBreaker",
+            "crash",
+            res -> {
+              assertTrue(res.succeeded());
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("failure").getValue());
+              System.out.println("out: " + res.result().body().toString());
+              getVertx()
+                  .eventBus()
+                  .send(
+                      SERVICE_REST_GET + "/basicTestSupplyWithErrorAndCircuitBreaker",
+                      "val",
+                      res2 -> {
+                        assertTrue(res2.succeeded());
+                        Payload<String> pp2 = null;
                         try {
-                          pp4 = (Payload<String>) Serializer.deserialize((byte[])res4.result().body());
+                          pp2 =
+                              (Payload<String>)
+                                  Serializer.deserialize((byte[]) res2.result().body());
                         } catch (IOException e) {
                           e.printStackTrace();
                         } catch (ClassNotFoundException e) {
                           e.printStackTrace();
                         }
-                        assertEquals(pp4.getValue(), new Payload<>("val").getValue());
-                        System.out.println("out: " + res4.result().body().toString());
+                        assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
+                        System.out.println("out: " + res2.result().body().toString());
 
-                        testComplete();
+                        // wait 1s, but circuit is still open
+                        vertx.setTimer(
+                            1205,
+                            handler -> {
+                              getVertx()
+                                  .eventBus()
+                                  .send(
+                                      SERVICE_REST_GET
+                                          + "/basicTestSupplyWithErrorAndCircuitBreaker",
+                                      "val",
+                                      res3 -> {
+                                        assertTrue(res3.succeeded());
+                                        Payload<String> pp3 = null;
+                                        try {
+                                          pp3 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(
+                                                      (byte[]) res3.result().body());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(
+                                            pp3.getValue(), new Payload<>("failure").getValue());
+                                        System.out.println(
+                                            "out: " + res3.result().body().toString());
+
+                                        // wait another 1s, now circuit should be closed
+                                        vertx.setTimer(
+                                            1005,
+                                            handler2 -> {
+                                              getVertx()
+                                                  .eventBus()
+                                                  .send(
+                                                      SERVICE_REST_GET
+                                                          + "/basicTestSupplyWithErrorAndCircuitBreaker",
+                                                      "val",
+                                                      res4 -> {
+                                                        assertTrue(res4.succeeded());
+                                                        Payload<String> pp4 = null;
+                                                        try {
+                                                          pp4 =
+                                                              (Payload<String>)
+                                                                  Serializer.deserialize(
+                                                                      (byte[])
+                                                                          res4.result().body());
+                                                        } catch (IOException e) {
+                                                          e.printStackTrace();
+                                                        } catch (ClassNotFoundException e) {
+                                                          e.printStackTrace();
+                                                        }
+                                                        assertEquals(
+                                                            pp4.getValue(),
+                                                            new Payload<>("val").getValue());
+                                                        System.out.println(
+                                                            "out: "
+                                                                + res4.result().body().toString());
+
+                                                        testComplete();
+                                                      });
+                                            });
+                                      });
+                            });
                       });
-                });
-
-              });
-        });
-
-      });
-    });
+            });
     await();
-
   }
 
   @Test
-
   public void basicTestAndThenWithErrorAndCircuitBreaker() throws InterruptedException {
-    getVertx().eventBus().send(SERVICE_REST_GET + "/basicTestAndThenWithErrorAndCircuitBreaker", "crash", res -> {
-      assertTrue(res.succeeded());
-      Payload<String> pp = null;
-      try {
-        pp = (Payload<String>) Serializer.deserialize((byte[])res.result().body());
-      } catch (IOException e) {
-        e.printStackTrace();
-      } catch (ClassNotFoundException e) {
-        e.printStackTrace();
-      }
-      assertEquals(pp.getValue(), new Payload<>("failure").getValue());
-      System.out.println("out: " + res.result().body().toString());
-      getVertx().eventBus().send(SERVICE_REST_GET + "/basicTestAndThenWithErrorAndCircuitBreaker", "val", res2 -> {
-        assertTrue(res2.succeeded());
-        Payload<String> pp2 = null;
-        try {
-          pp2 = (Payload<String>) Serializer.deserialize((byte[])res2.result().body());
-        } catch (IOException e) {
-          e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-          e.printStackTrace();
-        }
-        assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
-        System.out.println("out: " + res2.result().body().toString());
-
-        // wait 1s, but circuit is still open
-        vertx.setTimer(1205, handler -> {
-          getVertx().eventBus()
-              .send(SERVICE_REST_GET + "/basicTestAndThenWithErrorAndCircuitBreaker", "val", res3 -> {
-                assertTrue(res3.succeeded());
-                Payload<String> pp3 = null;
-                try {
-                  pp3 = (Payload<String>) Serializer.deserialize((byte[])res3.result().body());
-                } catch (IOException e) {
-                  e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                  e.printStackTrace();
-                }
-                assertEquals(pp3.getValue(), new Payload<>("failure").getValue());
-                System.out.println("out: " + res3.result().body().toString());
-
-                // wait another 1s, now circuit should be closed
-                vertx.setTimer(1005, handler2 -> {
-                  getVertx().eventBus()
-                      .send(SERVICE_REST_GET + "/basicTestAndThenWithErrorAndCircuitBreaker", "val", res4 -> {
-                        assertTrue(res4.succeeded());
-                        Payload<String> pp4 = null;
+    getVertx()
+        .eventBus()
+        .send(
+            SERVICE_REST_GET + "/basicTestAndThenWithErrorAndCircuitBreaker",
+            "crash",
+            res -> {
+              assertTrue(res.succeeded());
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("failure").getValue());
+              System.out.println("out: " + res.result().body().toString());
+              getVertx()
+                  .eventBus()
+                  .send(
+                      SERVICE_REST_GET + "/basicTestAndThenWithErrorAndCircuitBreaker",
+                      "val",
+                      res2 -> {
+                        assertTrue(res2.succeeded());
+                        Payload<String> pp2 = null;
                         try {
-                          pp4 = (Payload<String>) Serializer.deserialize((byte[])res4.result().body());
+                          pp2 =
+                              (Payload<String>)
+                                  Serializer.deserialize((byte[]) res2.result().body());
                         } catch (IOException e) {
                           e.printStackTrace();
                         } catch (ClassNotFoundException e) {
                           e.printStackTrace();
                         }
-                        assertEquals(pp4.getValue(), new Payload<>("val").getValue());
-                        System.out.println("out: " + res4.result().body().toString());
+                        assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
+                        System.out.println("out: " + res2.result().body().toString());
 
-                        testComplete();
+                        // wait 1s, but circuit is still open
+                        vertx.setTimer(
+                            1205,
+                            handler -> {
+                              getVertx()
+                                  .eventBus()
+                                  .send(
+                                      SERVICE_REST_GET
+                                          + "/basicTestAndThenWithErrorAndCircuitBreaker",
+                                      "val",
+                                      res3 -> {
+                                        assertTrue(res3.succeeded());
+                                        Payload<String> pp3 = null;
+                                        try {
+                                          pp3 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(
+                                                      (byte[]) res3.result().body());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(
+                                            pp3.getValue(), new Payload<>("failure").getValue());
+                                        System.out.println(
+                                            "out: " + res3.result().body().toString());
+
+                                        // wait another 1s, now circuit should be closed
+                                        vertx.setTimer(
+                                            1005,
+                                            handler2 -> {
+                                              getVertx()
+                                                  .eventBus()
+                                                  .send(
+                                                      SERVICE_REST_GET
+                                                          + "/basicTestAndThenWithErrorAndCircuitBreaker",
+                                                      "val",
+                                                      res4 -> {
+                                                        assertTrue(res4.succeeded());
+                                                        Payload<String> pp4 = null;
+                                                        try {
+                                                          pp4 =
+                                                              (Payload<String>)
+                                                                  Serializer.deserialize(
+                                                                      (byte[])
+                                                                          res4.result().body());
+                                                        } catch (IOException e) {
+                                                          e.printStackTrace();
+                                                        } catch (ClassNotFoundException e) {
+                                                          e.printStackTrace();
+                                                        }
+                                                        assertEquals(
+                                                            pp4.getValue(),
+                                                            new Payload<>("val").getValue());
+                                                        System.out.println(
+                                                            "out: "
+                                                                + res4.result().body().toString());
+
+                                                        testComplete();
+                                                      });
+                                            });
+                                      });
+                            });
                       });
-                });
-
-              });
-        });
-
-      });
-    });
+            });
     await();
-
   }
 
   public HttpClient getClient() {
@@ -405,90 +476,105 @@ public class EventbusChainingByteTest extends VertxTestBase {
     @Consume("/basicTestSupply")
     public void simpleStringResponse(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
-
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          }).execute();
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                future.complete(1);
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
+          .execute();
     }
+
     @Consume("/basicTestAndThen")
     public void basicTestAndThen(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
-
-          })
-          .<String>andThen((value, future) -> {
-            future.complete(value + 1 + "");
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          }).execute();
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                future.complete(1);
+              })
+          .<String>andThen(
+              (value, future) -> {
+                future.complete(value + 1 + "");
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
+          .execute();
     }
 
     @Consume("/basicTestSupplyWithError")
     public void basicTestSupplyWithError(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            throw new NullPointerException("test error");
-
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          })
-          .onFailureRespond((t, f) ->
-          {
-            Payload<String> pp = new Payload<>("error " + t.getMessage());
-            f.complete(Serializer.serialize(pp));
-            System.out.println(t.getMessage());
-
-          }).execute();
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                throw new NullPointerException("test error");
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
+          .onFailureRespond(
+              (t, f) -> {
+                Payload<String> pp = new Payload<>("error " + t.getMessage());
+                f.complete(Serializer.serialize(pp));
+                System.out.println(t.getMessage());
+              })
+          .execute();
     }
 
     @Consume("/basicTestAndThenWithError")
     public void basicTestAndThenWithError(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            future.complete(1);
-
-          })
-          .<String>andThen((value, future) -> {
-            throw new NullPointerException("test error");
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          })
-          .onFailureRespond((t, f) ->
-          {
-            Payload<String> pp = new Payload<>("error " + t.getMessage());
-            f.complete(Serializer.serialize(pp));
-            System.out.println(t.getMessage());
-
-          }).execute();
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                future.complete(1);
+              })
+          .<String>andThen(
+              (value, future) -> {
+                throw new NullPointerException("test error");
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
+          .onFailureRespond(
+              (t, f) -> {
+                Payload<String> pp = new Payload<>("error " + t.getMessage());
+                f.complete(Serializer.serialize(pp));
+                System.out.println(t.getMessage());
+              })
+          .execute();
     }
 
     @Consume("/basicTestSupplyWithErrorUnhandled")
     public void basicTestSupplyWithErrorUnhandled(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
-      reply.response()
-          .<Integer>supply((future) -> {
-            throw new NullPointerException("test error");
-
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          })
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                throw new NullPointerException("test error");
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
           .execute();
     }
 
@@ -496,109 +582,125 @@ public class EventbusChainingByteTest extends VertxTestBase {
     public void basicTestSupplyWithErrorSimpleRetry(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
       AtomicInteger counter = new AtomicInteger(0);
-      reply.response()
-          .<Integer>supply((future) -> {
-            counter.incrementAndGet();
-            throw new NullPointerException("test error");
-
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          })
-          .onError(t -> {
-            System.out.println(t.getMessage() + " counter:" + counter.get());
-          })
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                counter.incrementAndGet();
+                throw new NullPointerException("test error");
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
+          .onError(
+              t -> {
+                System.out.println(t.getMessage() + " counter:" + counter.get());
+              })
           .retry(3)
-          .onFailureRespond((t, f) ->
-          {
-            Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
-            f.complete(Serializer.serialize(pp));
-
-          }).execute();
+          .onFailureRespond(
+              (t, f) -> {
+                Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
+                f.complete(Serializer.serialize(pp));
+              })
+          .execute();
     }
 
     @Consume("/basicTestAndThenWithErrorUnhandledRetry")
     public void basicTestAndThenWithErrorUnhandledRetry(EventbusHandler reply) {
       System.out.println("simpleStringResponse: " + reply);
       AtomicInteger counter = new AtomicInteger(1);
-      reply.response()
-          .<Integer>supply((future) -> {
-            counter.decrementAndGet();
-            future.complete(1);
-
-          })
-          .<String>andThen((value, future) -> {
-            counter.incrementAndGet();
-            throw new NullPointerException("test error");
-          })
-          .mapToByteResponse((val, future) -> {
-            Payload<String> pp = new Payload<>(val + " final");
-            future.complete(Serializer.serialize(pp));
-          })
-          .onError(t -> {
-            System.out.println(t.getMessage() + " counter:" + counter.get());
-          })
+      reply
+          .response()
+          .<Integer>supply(
+              (future) -> {
+                counter.decrementAndGet();
+                future.complete(1);
+              })
+          .<String>andThen(
+              (value, future) -> {
+                counter.incrementAndGet();
+                throw new NullPointerException("test error");
+              })
+          .mapToByteResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              })
+          .onError(
+              t -> {
+                System.out.println(t.getMessage() + " counter:" + counter.get());
+              })
           .retry(3)
-          .onFailureRespond((t, f) ->
-          {
-            Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
-            f.complete(Serializer.serialize(pp));
-
-          }).execute();
+          .onFailureRespond(
+              (t, f) -> {
+                Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
+                f.complete(Serializer.serialize(pp));
+              })
+          .execute();
     }
 
     @Consume("/basicTestSupplyWithErrorAndCircuitBreaker")
     public void basicTestSupplyWithErrorAndCircuitBreaker(EventbusHandler reply) {
       String val = reply.request().body().toString();
       System.out.println("stringResponse: " + val);
-      reply.response().
-          <String>supply((future) -> {
-            if (val.equals("crash")) {
-              throw new NullPointerException("test-123");
-            }
-            future.complete(val);
-          })
-          .mapToByteResponse((v, future) -> {
-            Payload<String> pp = new Payload<>(v);
-            future.complete(Serializer.serialize(pp));
-          }).
-          onError(e -> System.out.println(e.getMessage())).
-          retry(3).
-          closeCircuitBreaker(2000).
-          onFailureRespond((error, future) -> {
-            Payload<String> pp = new Payload<>("failure");
-            future.complete(Serializer.serialize(pp));
-          }).
-          execute();
+      reply
+          .response()
+          .<String>supply(
+              (future) -> {
+                if (val.equals("crash")) {
+                  throw new NullPointerException("test-123");
+                }
+                future.complete(val);
+              })
+          .mapToByteResponse(
+              (v, future) -> {
+                Payload<String> pp = new Payload<>(v);
+                future.complete(Serializer.serialize(pp));
+              })
+          .onError(e -> System.out.println(e.getMessage()))
+          .retry(3)
+          .closeCircuitBreaker(2000)
+          .onFailureRespond(
+              (error, future) -> {
+                Payload<String> pp = new Payload<>("failure");
+                future.complete(Serializer.serialize(pp));
+              })
+          .execute();
     }
 
     @Consume("/basicTestAndThenWithErrorAndCircuitBreaker")
     public void basicTestAndThenWithErrorAndCircuitBreaker(EventbusHandler reply) {
       String val = reply.request().body().toString();
       System.out.println("stringResponse: " + val);
-      reply.response().
-          <String>supply((future) -> {
-            future.complete(val);
-          }).
-          <String>andThen((v, f) -> {
-            if (v.equals("crash")) {
-              throw new NullPointerException("test-123");
-            }
-            f.complete(v);
-          })
-          .mapToByteResponse((v, future) -> {
-            Payload<String> pp = new Payload<>(v);
-            future.complete(Serializer.serialize(pp));
-          }).
-          onError(e -> System.out.println(e.getMessage())).
-          retry(3).
-          closeCircuitBreaker(2000).
-          onFailureRespond((error, future) -> {
-            Payload<String> pp = new Payload<>("failure");
-            future.complete(Serializer.serialize(pp));
-          }).
-          execute();
+      reply
+          .response()
+          .<String>supply(
+              (future) -> {
+                future.complete(val);
+              })
+          .<String>andThen(
+              (v, f) -> {
+                if (v.equals("crash")) {
+                  throw new NullPointerException("test-123");
+                }
+                f.complete(v);
+              })
+          .mapToByteResponse(
+              (v, future) -> {
+                Payload<String> pp = new Payload<>(v);
+                future.complete(Serializer.serialize(pp));
+              })
+          .onError(e -> System.out.println(e.getMessage()))
+          .retry(3)
+          .closeCircuitBreaker(2000)
+          .onFailureRespond(
+              (error, future) -> {
+                Payload<String> pp = new Payload<>("failure");
+                future.complete(Serializer.serialize(pp));
+              })
+          .execute();
     }
   }
 }

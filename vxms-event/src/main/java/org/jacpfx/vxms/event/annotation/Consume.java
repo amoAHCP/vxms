@@ -22,13 +22,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-/**
- * Defines an eventbus consumer id
- */
+/** Defines an eventbus consumer id */
 public @interface Consume {
 
   /**

@@ -26,8 +26,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
 /**
- * Created by amo on 31.01.17.
- * Generic Functional interface to pass typed executions steps in case of retry operations
+ * Created by amo on 31.01.17. Generic Functional interface to pass typed executions steps in case
+ * of retry operations
  */
 @FunctionalInterface
 public interface RetryBlockingExecutor<T> {
@@ -41,7 +41,7 @@ public interface RetryBlockingExecutor<T> {
    * @param function the function to execute on message
    * @param requestDeliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
    * @param requestMessage the message to responde to
@@ -49,14 +49,15 @@ public interface RetryBlockingExecutor<T> {
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param responseDeliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  void execute(String methodId,
+  void execute(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,

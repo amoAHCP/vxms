@@ -27,10 +27,9 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
-import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusObjectCall;
 
-public class ExecuteEventChaineResponse<T> {
+public class ExecuteEventChainResponse<T> {
   private final String methodId;
   private final VxmsShared vxmsShared;
   private final Throwable failure;
@@ -46,14 +45,21 @@ public class ExecuteEventChaineResponse<T> {
   private final long timeout;
   private final long circuitBreakerTimeout;
 
-
-  public ExecuteEventChaineResponse(String methodId, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler,
-      Message<Object> message, List<ExecutionStep> chain,
+  public ExecuteEventChainResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
+      List<ExecutionStep> chain,
       ExecuteEventbusObjectCall excecuteEventBusAndReply,
-      Encoder encoder, Consumer<Throwable> errorHandler,
+      Encoder encoder,
+      Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
-      DeliveryOptions deliveryOptions, int retryCount, long timeout, long circuitBreakerTimeout) {
+      DeliveryOptions deliveryOptions,
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -70,8 +76,13 @@ public class ExecuteEventChaineResponse<T> {
     this.circuitBreakerTimeout = circuitBreakerTimeout;
   }
 
-  public ExecuteEventChaineResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
-      Consumer<Throwable> errorMethodHandler, Message<Object> message, List<ExecutionStep> chain) {
+  public ExecuteEventChainResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
+      List<ExecutionStep> chain) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -88,11 +99,11 @@ public class ExecuteEventChaineResponse<T> {
     this.circuitBreakerTimeout = 0L;
   }
 
-
-  public <H>ExecuteEventChaineResponse<H> andThen(ThrowableFutureBiConsumer<T,H> step) {
+  public <H> ExecuteEventChainResponse<H> andThen(ThrowableFutureBiConsumer<T, H> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteEventChaineResponse<>(methodId,
+    return new ExecuteEventChainResponse<>(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -111,46 +122,43 @@ public class ExecuteEventChaineResponse<T> {
   /**
    * Returns a byte array to the target type
    *
-   * @param step the execution step to map the response to byte[]
-   * response
+   * @param step the execution step to map the response to byte[] response
    * @return {@link ExecuteEventbusBasicByteResponse}
    */
   public ExecuteEventbusBasicByteResponse mapToByteResponse(
-      ThrowableFutureBiConsumer<T,byte[]> step) {
+      ThrowableFutureBiConsumer<T, byte[]> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteEventbusBasicByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, chainTmp,null);
+    return new ExecuteEventbusBasicByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, chainTmp, null);
   }
 
   /**
    * Returns a String to the target type
    *
-   * @param step the execution step to map the response to String
-   * response
+   * @param step the execution step to map the response to String response
    * @return {@link ExecuteEventbusBasicStringResponse}
    */
   public ExecuteEventbusBasicStringResponse mapToStringResponse(
-      ThrowableFutureBiConsumer<T,String> step) {
+      ThrowableFutureBiConsumer<T, String> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteEventbusBasicStringResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, chainTmp,null);
+    return new ExecuteEventbusBasicStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, chainTmp, null);
   }
 
   /**
    * Returns a Serializable to the target type
    *
-   * @param step the execution step to map the response to Object
-   * response
+   * @param step the execution step to map the response to Object response
    * @param encoder the encoder to serialize the response object
    * @return {@link ExecuteEventbusBasicObjectResponse}
    */
   public ExecuteEventbusBasicObjectResponse mapToObjectResponse(
-      ThrowableFutureBiConsumer<T,Serializable> step, Encoder encoder) {
+      ThrowableFutureBiConsumer<T, Serializable> step, Encoder encoder) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
-    chainTmp.add(new ExecutionStep(step)); // TODO add chain to constructor
-    return new ExecuteEventbusBasicObjectResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, null,encoder);
+    chainTmp.add(new ExecutionStep(step));
+    return new ExecuteEventbusBasicObjectResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, chainTmp, null, encoder);
   }
 }

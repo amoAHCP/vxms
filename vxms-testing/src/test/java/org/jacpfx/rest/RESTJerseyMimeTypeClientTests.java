@@ -16,7 +16,6 @@
 
 package org.jacpfx.rest;
 
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -44,14 +43,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
   private HttpClient client;
 
@@ -72,7 +69,6 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -81,176 +77,198 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
-
   @Test
-
   public void stringGETResponse() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringGETConsumesResponse/123");
-    Future<String> getCallback = target.request()
-        .header("Content-Type", "application/json;charset=UTF-8").async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client
+            .target("http://" + HOST + ":" + PORT)
+            .path("/wsService/stringGETConsumesResponse/123");
+    Future<String> getCallback =
+        target
+            .request()
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, "123");
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "123");
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-            System.out.println("getCallback");
-            throwable.printStackTrace();
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {
+                    System.out.println("getCallback");
+                    throwable.printStackTrace();
+                  }
+                });
 
     latch.await();
     CountDownLatch latch2 = new CountDownLatch(1);
-    Future<String> getCallback2 = target.request(MediaType.APPLICATION_ATOM_XML).async()
-        .get(new InvocationCallback<String>() {
+    Future<String> getCallback2 =
+        target
+            .request(MediaType.APPLICATION_ATOM_XML)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, "123");
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "123");
+                  }
 
-          }
-
-          @Override
-          public void failed(Throwable throwable) {
-            System.out.println("getCallback2");
-            throwable.printStackTrace();
-            latch2.countDown();
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {
+                    System.out.println("getCallback2");
+                    throwable.printStackTrace();
+                    latch2.countDown();
+                  }
+                });
     latch2.await();
     CountDownLatch latch3 = new CountDownLatch(1);
 
-    Future<String> getCallback3 = target.request()
-        .header("Content-Type", "application/xml;charset=UTF-8").async()
-        .get(new InvocationCallback<String>() {
+    Future<String> getCallback3 =
+        target
+            .request()
+            .header("Content-Type", "application/xml;charset=UTF-8")
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received in getCallback3.");
-            Assert.assertEquals(response, "123");
-            latch3.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println(
+                        "Response entity '" + response + "' received in getCallback3.");
+                    Assert.assertEquals(response, "123");
+                    latch3.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-            System.out.println("getCallback");
-            throwable.printStackTrace();
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {
+                    System.out.println("getCallback");
+                    throwable.printStackTrace();
+                  }
+                });
 
     latch3.await();
     testComplete();
-
   }
 
-
   @Test
-
   public void stringPOSTResponse() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringPOSTConsumesResponse/123");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .post(Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE),
-            new InvocationCallback<String>() {
+    WebTarget target =
+        client
+            .target("http://" + HOST + ":" + PORT)
+            .path("/wsService/stringPOSTConsumesResponse/123");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .post(
+                Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE),
+                new InvocationCallback<String>() {
 
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "hello");
-                latch.countDown();
-              }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "hello");
+                    latch.countDown();
+                  }
 
-              @Override
-              public void failed(Throwable throwable) {
-                System.out.println("getCallback");
-                throwable.printStackTrace();
-              }
-            });
+                  @Override
+                  public void failed(Throwable throwable) {
+                    System.out.println("getCallback");
+                    throwable.printStackTrace();
+                  }
+                });
 
     latch.await();
     CountDownLatch latch2 = new CountDownLatch(1);
-    Future<String> getCallback2 = target.request(MediaType.APPLICATION_ATOM_XML).async()
-        .post(Entity.entity("hello", MediaType.APPLICATION_ATOM_XML),
-            new InvocationCallback<String>() {
+    Future<String> getCallback2 =
+        target
+            .request(MediaType.APPLICATION_ATOM_XML)
+            .async()
+            .post(
+                Entity.entity("hello", MediaType.APPLICATION_ATOM_XML),
+                new InvocationCallback<String>() {
 
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                Assert.assertEquals(response, "hello");
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "hello");
+                  }
 
-              }
-
-              @Override
-              public void failed(Throwable throwable) {
-                System.out.println("getCallback2");
-                throwable.printStackTrace();
-                latch2.countDown();
-
-              }
-            });
+                  @Override
+                  public void failed(Throwable throwable) {
+                    System.out.println("getCallback2");
+                    throwable.printStackTrace();
+                    latch2.countDown();
+                  }
+                });
     latch2.await();
     CountDownLatch latch3 = new CountDownLatch(1);
 
-    Future<String> getCallback3 = target.request(MediaType.APPLICATION_XML).async()
-        .post(Entity.entity("hello", MediaType.APPLICATION_XML), new InvocationCallback<String>() {
+    Future<String> getCallback3 =
+        target
+            .request(MediaType.APPLICATION_XML)
+            .async()
+            .post(
+                Entity.entity("hello", MediaType.APPLICATION_XML),
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received in getCallback3.");
-            Assert.assertEquals(response, "hello");
-            latch3.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println(
+                        "Response entity '" + response + "' received in getCallback3.");
+                    Assert.assertEquals(response, "hello");
+                    latch3.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-            System.out.println("getCallback");
-            throwable.printStackTrace();
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {
+                    System.out.println("getCallback");
+                    throwable.printStackTrace();
+                  }
+                });
 
     latch3.await();
     testComplete();
-
   }
-
 
   public HttpClient getClient() {
     return client;
   }
-
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
   public class WsServiceOne extends VxmsEndpoint {
@@ -264,7 +282,6 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
       handler.response().stringResponse((future) -> future.complete(myJSON)).execute();
     }
 
-
     @Path("/stringPOSTConsumesResponse/:myJSON")
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -273,8 +290,5 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
       System.out.println("stringPOSTResponse: " + val);
       handler.response().stringResponse((future) -> future.complete(val)).execute();
     }
-
-
   }
-
 }

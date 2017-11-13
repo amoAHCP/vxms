@@ -25,25 +25,28 @@ import javax.ws.rs.Path;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
-/**
- * Created by amo on 23.11.16.
- */
+/** Created by amo on 23.11.16. */
 public class Testverticl2 extends AbstractVerticle {
 
   public static void main(String[] args) {
-    DeploymentOptions options = new DeploymentOptions().setInstances(1)
-        .setConfig(new JsonObject().put("host", "localhost").put("serverOptions","org.org.jacpfx.verticle.MyCustomServerOptions"));
+    DeploymentOptions options =
+        new DeploymentOptions()
+            .setInstances(1)
+            .setConfig(
+                new JsonObject()
+                    .put("host", "localhost")
+                    .put("serverOptions", "org.org.jacpfx.verticle.MyCustomServerOptions"));
     Vertx.vertx().deployVerticle(Testverticl2.class.getName(), options);
   }
 
   @Override
   public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-    VxmsEndpoint.start(startFuture,this);
+    VxmsEndpoint.start(startFuture, this);
   }
 
   @Path("/hello")
   @GET
   public void hello(RestHandler handler) {
-    handler.response().stringResponse((future)->future.complete("hi")).execute();
+    handler.response().stringResponse((future) -> future.complete("hi")).execute();
   }
 }

@@ -24,9 +24,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.jacpfx.entity.Payload;
+import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.event.annotation.Consume;
 import org.jacpfx.vxms.event.response.EventbusHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
@@ -35,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /** Created by Andy Moncsek on 23.04.15. */
-public class EventbusChainingStringTest extends VertxTestBase {
+public class EventbusChainingObjectTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -102,7 +106,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               assertTrue(res.succeeded());
-              Assert.assertEquals(res.result().body().toString(), "1 final");
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("1 final").getValue());
               testComplete();
             });
     await();
@@ -117,7 +129,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               assertTrue(res.succeeded());
-              Assert.assertEquals(res.result().body().toString(), "2 final");
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("2 final").getValue());
               testComplete();
             });
     await();
@@ -132,7 +152,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error test error");
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("error test error").getValue());
               testComplete();
             });
     await();
@@ -147,7 +175,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error test error");
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("error test error").getValue());
               testComplete();
             });
     await();
@@ -162,6 +198,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               Assert.assertTrue(res.failed());
+
               Assert.assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
               testComplete();
             });
@@ -177,7 +214,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error 4 test error");
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("error 4 test error").getValue());
               testComplete();
             });
     await();
@@ -192,7 +237,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error 4 test error");
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("error 4 test error").getValue());
               testComplete();
             });
     await();
@@ -207,7 +260,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "crash",
             res -> {
               assertTrue(res.succeeded());
-              assertEquals("failure", res.result().body().toString());
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("failure").getValue());
               System.out.println("out: " + res.result().body().toString());
               getVertx()
                   .eventBus()
@@ -216,7 +277,17 @@ public class EventbusChainingStringTest extends VertxTestBase {
                       "val",
                       res2 -> {
                         assertTrue(res2.succeeded());
-                        assertEquals("failure", res2.result().body().toString());
+                        Payload<String> pp2 = null;
+                        try {
+                          pp2 =
+                              (Payload<String>)
+                                  Serializer.deserialize((byte[]) res2.result().body());
+                        } catch (IOException e) {
+                          e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                          e.printStackTrace();
+                        }
+                        assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
                         System.out.println("out: " + res2.result().body().toString());
 
                         // wait 1s, but circuit is still open
@@ -231,7 +302,19 @@ public class EventbusChainingStringTest extends VertxTestBase {
                                       "val",
                                       res3 -> {
                                         assertTrue(res3.succeeded());
-                                        assertEquals("failure", res3.result().body().toString());
+                                        Payload<String> pp3 = null;
+                                        try {
+                                          pp3 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(
+                                                      (byte[]) res3.result().body());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(
+                                            pp3.getValue(), new Payload<>("failure").getValue());
                                         System.out.println(
                                             "out: " + res3.result().body().toString());
 
@@ -247,8 +330,21 @@ public class EventbusChainingStringTest extends VertxTestBase {
                                                       "val",
                                                       res4 -> {
                                                         assertTrue(res4.succeeded());
+                                                        Payload<String> pp4 = null;
+                                                        try {
+                                                          pp4 =
+                                                              (Payload<String>)
+                                                                  Serializer.deserialize(
+                                                                      (byte[])
+                                                                          res4.result().body());
+                                                        } catch (IOException e) {
+                                                          e.printStackTrace();
+                                                        } catch (ClassNotFoundException e) {
+                                                          e.printStackTrace();
+                                                        }
                                                         assertEquals(
-                                                            "val", res4.result().body().toString());
+                                                            pp4.getValue(),
+                                                            new Payload<>("val").getValue());
                                                         System.out.println(
                                                             "out: "
                                                                 + res4.result().body().toString());
@@ -272,7 +368,15 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "crash",
             res -> {
               assertTrue(res.succeeded());
-              assertEquals("failure", res.result().body().toString());
+              Payload<String> pp = null;
+              try {
+                pp = (Payload<String>) Serializer.deserialize((byte[]) res.result().body());
+              } catch (IOException e) {
+                e.printStackTrace();
+              } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+              }
+              assertEquals(pp.getValue(), new Payload<>("failure").getValue());
               System.out.println("out: " + res.result().body().toString());
               getVertx()
                   .eventBus()
@@ -281,7 +385,17 @@ public class EventbusChainingStringTest extends VertxTestBase {
                       "val",
                       res2 -> {
                         assertTrue(res2.succeeded());
-                        assertEquals("failure", res2.result().body().toString());
+                        Payload<String> pp2 = null;
+                        try {
+                          pp2 =
+                              (Payload<String>)
+                                  Serializer.deserialize((byte[]) res2.result().body());
+                        } catch (IOException e) {
+                          e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                          e.printStackTrace();
+                        }
+                        assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
                         System.out.println("out: " + res2.result().body().toString());
 
                         // wait 1s, but circuit is still open
@@ -296,7 +410,19 @@ public class EventbusChainingStringTest extends VertxTestBase {
                                       "val",
                                       res3 -> {
                                         assertTrue(res3.succeeded());
-                                        assertEquals("failure", res3.result().body().toString());
+                                        Payload<String> pp3 = null;
+                                        try {
+                                          pp3 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(
+                                                      (byte[]) res3.result().body());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(
+                                            pp3.getValue(), new Payload<>("failure").getValue());
                                         System.out.println(
                                             "out: " + res3.result().body().toString());
 
@@ -312,8 +438,21 @@ public class EventbusChainingStringTest extends VertxTestBase {
                                                       "val",
                                                       res4 -> {
                                                         assertTrue(res4.succeeded());
+                                                        Payload<String> pp4 = null;
+                                                        try {
+                                                          pp4 =
+                                                              (Payload<String>)
+                                                                  Serializer.deserialize(
+                                                                      (byte[])
+                                                                          res4.result().body());
+                                                        } catch (IOException e) {
+                                                          e.printStackTrace();
+                                                        } catch (ClassNotFoundException e) {
+                                                          e.printStackTrace();
+                                                        }
                                                         assertEquals(
-                                                            "val", res4.result().body().toString());
+                                                            pp4.getValue(),
+                                                            new Payload<>("val").getValue());
                                                         System.out.println(
                                                             "out: "
                                                                 + res4.result().body().toString());
@@ -340,8 +479,16 @@ public class EventbusChainingStringTest extends VertxTestBase {
       System.out.println("simpleStringResponse: " + reply);
       reply
           .response()
-          .<Integer>supply((future) -> future.complete(1))
-          .mapToStringResponse((val, future) -> future.complete(val + " final"))
+          .<Integer>supply(
+              (future) -> {
+                future.complete(1);
+              })
+          .mapToObjectResponse(
+              (val, future) -> {
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -358,10 +505,12 @@ public class EventbusChainingStringTest extends VertxTestBase {
               (value, future) -> {
                 future.complete(value + 1 + "");
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (val, future) -> {
-                future.complete(val + " final");
-              })
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -374,15 +523,18 @@ public class EventbusChainingStringTest extends VertxTestBase {
               (future) -> {
                 throw new NullPointerException("test error");
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (val, future) -> {
-                future.complete(val + " final");
-              })
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .onFailureRespond(
               (t, f) -> {
-                f.complete("error " + t.getMessage());
-                System.out.println(t.getMessage());
-              })
+                Payload<String> pp = new Payload<>("error " + t.getMessage());
+                f.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -399,15 +551,19 @@ public class EventbusChainingStringTest extends VertxTestBase {
               (value, future) -> {
                 throw new NullPointerException("test error");
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (val, future) -> {
-                future.complete(val + " final");
-              })
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .onFailureRespond(
               (t, f) -> {
-                f.complete("error " + t.getMessage());
+                Payload<String> pp = new Payload<>("error " + t.getMessage());
+                f.complete(pp);
                 System.out.println(t.getMessage());
-              })
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -420,10 +576,12 @@ public class EventbusChainingStringTest extends VertxTestBase {
               (future) -> {
                 throw new NullPointerException("test error");
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (val, future) -> {
-                future.complete(val + " final");
-              })
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -438,10 +596,12 @@ public class EventbusChainingStringTest extends VertxTestBase {
                 counter.incrementAndGet();
                 throw new NullPointerException("test error");
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (val, future) -> {
-                future.complete(val + " final");
-              })
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              },
+              new ExampleByteEncoder())
           .onError(
               t -> {
                 System.out.println(t.getMessage() + " counter:" + counter.get());
@@ -449,8 +609,10 @@ public class EventbusChainingStringTest extends VertxTestBase {
           .retry(3)
           .onFailureRespond(
               (t, f) -> {
-                f.complete("error " + counter.get() + " " + t.getMessage());
-              })
+                Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
+                f.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -470,10 +632,12 @@ public class EventbusChainingStringTest extends VertxTestBase {
                 counter.incrementAndGet();
                 throw new NullPointerException("test error");
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (val, future) -> {
-                future.complete(val + " final");
-              })
+                Payload<String> pp = new Payload<>(val + " final");
+                future.complete(Serializer.serialize(pp));
+              },
+              new ExampleByteEncoder())
           .onError(
               t -> {
                 System.out.println(t.getMessage() + " counter:" + counter.get());
@@ -481,8 +645,10 @@ public class EventbusChainingStringTest extends VertxTestBase {
           .retry(3)
           .onFailureRespond(
               (t, f) -> {
-                f.complete("error " + counter.get() + " " + t.getMessage());
-              })
+                Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
+                f.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -499,14 +665,21 @@ public class EventbusChainingStringTest extends VertxTestBase {
                 }
                 future.complete(val);
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (v, future) -> {
-                future.complete(v);
-              })
+                Payload<String> pp = new Payload<>(v);
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .onError(e -> System.out.println(e.getMessage()))
           .retry(3)
           .closeCircuitBreaker(2000)
-          .onFailureRespond((error, future) -> future.complete("failure"))
+          .onFailureRespond(
+              (error, future) -> {
+                Payload<String> pp = new Payload<>("failure");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
 
@@ -527,14 +700,21 @@ public class EventbusChainingStringTest extends VertxTestBase {
                 }
                 f.complete(v);
               })
-          .mapToStringResponse(
+          .mapToObjectResponse(
               (v, future) -> {
-                future.complete(v);
-              })
+                Payload<String> pp = new Payload<>(v);
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .onError(e -> System.out.println(e.getMessage()))
           .retry(3)
           .closeCircuitBreaker(2000)
-          .onFailureRespond((error, future) -> future.complete("failure"))
+          .onFailureRespond(
+              (error, future) -> {
+                Payload<String> pp = new Payload<>("failure");
+                future.complete(pp);
+              },
+              new ExampleByteEncoder())
           .execute();
     }
   }

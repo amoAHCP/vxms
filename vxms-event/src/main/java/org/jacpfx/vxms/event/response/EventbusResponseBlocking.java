@@ -27,8 +27,8 @@ import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusObjectResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusStringResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
+ * the output of your task.
  */
 public class EventbusResponseBlocking {
 
@@ -44,20 +44,22 @@ public class EventbusResponseBlocking {
    * @param methodId the method identifier
    * @param message the event-bus message to respond to
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    */
-  public EventbusResponseBlocking(String methodId, Message<Object> message, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public EventbusResponseBlocking(
+      String methodId,
+      Message<Object> message,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
     this.errorMethodHandler = errorMethodHandler;
     this.message = message;
-
   }
-
 
   /**
    * Retunrs a byte array to the target type
@@ -66,8 +68,21 @@ public class EventbusResponseBlocking {
    * @return {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-    return new ExecuteEventbusByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, byteSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    return new ExecuteEventbusByteResponse(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        byteSupplier,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
@@ -77,8 +92,21 @@ public class EventbusResponseBlocking {
    * @return {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-    return new ExecuteEventbusStringResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, stringSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    return new ExecuteEventbusStringResponse(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        stringSupplier,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
@@ -90,7 +118,21 @@ public class EventbusResponseBlocking {
    */
   public ExecuteEventbusObjectResponse objectResponse(
       ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-    return new ExecuteEventbusObjectResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, objectSupplier, null, encoder, null, null, null, 0, 0, 0l, 0l);
+    return new ExecuteEventbusObjectResponse(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        objectSupplier,
+        null,
+        encoder,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0l,
+        0l);
   }
 }

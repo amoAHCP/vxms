@@ -19,7 +19,9 @@ package org.jacpfx.vxms.event.response.basic;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
@@ -37,27 +39,29 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
    * @param objectConsumer the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to serialize the response object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response deliver serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicObjectCircuitBreaker(String methodId,
+  public ExecuteEventbusBasicObjectCircuitBreaker(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<ExecutionStep> chain,
       ThrowableFutureConsumer<Serializable> objectConsumer,
       ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
@@ -67,11 +71,13 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
       int retryCount,
       long timeout,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectConsumer,
         excecuteEventBusAndReply,
         encoder,
@@ -82,23 +88,24 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
         timeout,
         circuitBreakerTimeout);
   }
-
 
   /**
    * Define a timeout to release the stateful circuit breaker. Depending on your configuration the
    * CircuitBreaker locks either cluster wide, jvm wide or only for the instance
    *
    * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
-   * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
-   * faster)
+   *     "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
+   *     faster)
    * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
    */
   public ExecuteEventbusBasicObjectResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteEventbusBasicObjectResponse(methodId,
+    return new ExecuteEventbusBasicObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectConsumer,
         excecuteEventBusAndReply,
         encoder,
@@ -109,6 +116,4 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
         timeout,
         circuitBreakerTimeout);
   }
-
-
 }

@@ -16,7 +16,6 @@
 
 package org.jacpfx.rest;
 
-
 import com.google.gson.Gson;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -46,14 +45,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
   private HttpClient client;
 
@@ -74,7 +71,6 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -83,124 +79,124 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
-
   @Test
-
   public void endpointOne() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointOne", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Assert.assertEquals(body.toString(), "test");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointOne",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Assert.assertEquals(body.toString(), "test");
+                      testComplete();
+                    });
+              }
             });
-
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointTwo() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointTwo/123", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Assert.assertEquals(body.toString(), "123");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointTwo/123",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Assert.assertEquals(body.toString(), "123");
+                      testComplete();
+                    });
+              }
             });
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointThree() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointThree?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              assertEquals(body.toString(), "123456");
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointThree?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "123456");
+                    });
+                testComplete();
+              }
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointFourErrorRetryTest() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/endpointFourErrorRetryTest?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              assertEquals(body.toString(), "123456");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointFourErrorRetryTest?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "123456");
+                      testComplete();
+                    });
+              }
             });
-
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
@@ -208,177 +204,171 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointFourErrorReturnRetryTest?productType=123&product=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointFourErrorReturnRetryTest?productType=123&product=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  System.out.println(
-                      "Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
-                  assertEquals(body.toString(), "456123");
-                  testComplete();
-                });
-
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println(
+                          "Got a createResponse endpointFourErrorReturnRetryTest: "
+                              + body.toString());
+                      assertEquals(body.toString(), "456123");
+                      testComplete();
+                    });
               }
             });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointFive() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointFive?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
-              assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointFive?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
+                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                    });
+                testComplete();
+              }
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
-
   @Test
-
   public void endpointFive_error() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointFive_error?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
-              assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointFive_error?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
+                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                    });
+                testComplete();
+              }
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointSix() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointSix?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Payload<String> pp = null;
-              try {
-                pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-              } catch (IOException e) {
-                e.printStackTrace();
-              } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointSix?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
+                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                    });
+                testComplete();
               }
-              assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointSeven() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointSeven?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Payload<String> pp = null;
-              try {
-                pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-              } catch (IOException e) {
-                e.printStackTrace();
-              } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointSeven?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
+                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                    });
+                testComplete();
               }
-              assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
-
   public void endpointSeven_error() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointSeven_error?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Payload<String> pp = null;
-              try {
-                pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-              } catch (IOException e) {
-                e.printStackTrace();
-              } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointSeven_error?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
+                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                    });
+                testComplete();
               }
-              assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
@@ -386,28 +376,28 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/endpointEight_header?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println(
-                  "Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointEight_header?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println(
+                          "Got a createResponse endpointFourErrorReturnRetryTest: "
+                              + body.toString());
 
-              assertEquals(body.toString(), "123456");
-
+                      assertEquals(body.toString(), "123456");
+                    });
+                String contentType = resp.getHeader("Content-Type");
+                assertEquals(contentType, "application/json");
+                testComplete();
+              }
             });
-            String contentType = resp.getHeader("Content-Type");
-            assertEquals(contentType, "application/json");
-            testComplete();
-
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
@@ -415,80 +405,80 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/endpointEight_put_header?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println(
-                  "Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointEight_put_header?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println(
+                          "Got a createResponse endpointFourErrorReturnRetryTest: "
+                              + body.toString());
 
-              assertEquals(body.toString(), "123456");
-
+                      assertEquals(body.toString(), "123456");
+                    });
+                String contentType = resp.getHeader("Content-Type");
+                assertEquals(contentType, "application/json");
+                String key = resp.getHeader("key");
+                assertEquals(key, "val");
+                testComplete();
+              }
             });
-            String contentType = resp.getHeader("Content-Type");
-            assertEquals(contentType, "application/json");
-            String key = resp.getHeader("key");
-            assertEquals(key, "val");
-            testComplete();
-
-          }
-        });
     request.end();
     await();
-
   }
-
 
   @Test
   public void endpointNine_exception() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/endpointNine_exception?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointNine_exception?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
 
-            vertx.runOnContext(h -> {
-              assertEquals(500, resp.statusCode());
-              assertEquals("test", resp.statusMessage());
+                vertx.runOnContext(
+                    h -> {
+                      assertEquals(500, resp.statusCode());
+                      assertEquals("test", resp.statusMessage());
+                    });
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println(
+                          "Got a createResponse endpointFourErrorReturnRetryTest: "
+                              + body.toString());
+
+                      // assertEquals(body.toString(), "123456");
+
+                    });
+                String contentType = resp.getHeader("Content-Type");
+                // assertEquals(contentType, "application/json");
+                String key = resp.getHeader("key");
+                // assertEquals(key, "val");
+                testComplete();
+              }
             });
-            resp.bodyHandler(body -> {
-              System.out.println(
-                  "Got a createResponse endpointFourErrorReturnRetryTest: " + body.toString());
-
-              // assertEquals(body.toString(), "123456");
-
-            });
-            String contentType = resp.getHeader("Content-Type");
-            //assertEquals(contentType, "application/json");
-            String key = resp.getHeader("key");
-            //assertEquals(key, "val");
-            testComplete();
-
-          }
-        });
     request.end();
     await();
-
   }
 
   public HttpClient getClient() {
     return client;
   }
 
-
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  public class WsServiceOne  extends AbstractVerticle {
+  public class WsServiceOne extends AbstractVerticle {
 
     @Override
     public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-      VxmsEndpoint.start(startFuture,this);
+      VxmsEndpoint.start(startFuture, this);
     }
 
     @Path("/endpointOne")
@@ -512,7 +502,9 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
       System.out.println("wsEndpointTwo: " + handler);
-      handler.response().stringResponse((future) -> future.complete(productType + product))
+      handler
+          .response()
+          .stringResponse((future) -> future.complete(productType + product))
           .execute();
     }
 
@@ -523,22 +515,24 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String product = handler.request().param("tmp");
       System.out.println("wsEndpointTwo: " + handler);
       AtomicInteger count = new AtomicInteger(4);
-      handler.response().
-          stringResponse((future) -> {
-            if (count.decrementAndGet() >= 0) {
-              System.out.println("throw:" + count.get());
-              throw new NullPointerException("test");
-            }
-            future.complete(productType + product);
-          }).
-          onError(error -> {
-            error.printStackTrace();
-            System.out.println("count: " + count.get());
-
-
-          }).
-          retry(3).
-          onFailureRespond((e, response) -> response.complete(productType + product)).execute();
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw:" + count.get());
+                  throw new NullPointerException("test");
+                }
+                future.complete(productType + product);
+              })
+          .onError(
+              error -> {
+                error.printStackTrace();
+                System.out.println("count: " + count.get());
+              })
+          .retry(3)
+          .onFailureRespond((e, response) -> response.complete(productType + product))
+          .execute();
     }
 
     @Path("/endpointFourErrorReturnRetryTest")
@@ -548,21 +542,22 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String product = handler.request().param("product");
       System.out.println("wsEndpointTwo: " + handler);
       AtomicInteger count = new AtomicInteger(4);
-      handler.
-          response().
-          stringResponse((future) -> {
-            if (count.decrementAndGet() >= 0) {
-              System.out.println("throw:" + count.get());
-              throw new NullPointerException("test");
-            }
-            future.complete(productType + product);
-          }).
-          onError(
-              error -> System.out.println("retry: " + count.get() + "   " + error.getStackTrace())).
-          retry(3).
-          closeCircuitBreaker(0l).
-          onFailureRespond((error, response) -> response.complete(product + productType)).
-          execute();
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw:" + count.get());
+                  throw new NullPointerException("test");
+                }
+                future.complete(productType + product);
+              })
+          .onError(
+              error -> System.out.println("retry: " + count.get() + "   " + error.getStackTrace()))
+          .retry(3)
+          .closeCircuitBreaker(0l)
+          .onFailureRespond((error, response) -> response.complete(product + productType))
+          .execute();
     }
 
     @Path("/endpointFive")
@@ -572,7 +567,9 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String product = handler.request().param("tmp");
       System.out.println("wsEndpointTwo: " + handler);
       Payload<String> pp = new Payload<>(productType + product);
-      handler.response().objectResponse((future) -> future.complete(pp), new ExampleStringEncoder())
+      handler
+          .response()
+          .objectResponse((future) -> future.complete(pp), new ExampleStringEncoder())
           .execute();
     }
 
@@ -584,15 +581,18 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       System.out.println("wsEndpointTwo: " + handler);
       Payload<String> pp = new Payload<>(productType + product);
       AtomicInteger count = new AtomicInteger(4);
-      handler.response().objectResponse((future) -> {
-            if (count.decrementAndGet() >= 0) {
-              System.out.println("throw:" + count.get());
-              throw new NullPointerException("test");
-            }
-            future.complete(new Payload<>("hallo"));
-          }
-          , new ExampleStringEncoder()
-      ).retry(3)
+      handler
+          .response()
+          .objectResponse(
+              (future) -> {
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw:" + count.get());
+                  throw new NullPointerException("test");
+                }
+                future.complete(new Payload<>("hallo"));
+              },
+              new ExampleStringEncoder())
+          .retry(3)
           .onFailureRespond((error, future) -> future.complete(pp), new ExampleStringEncoder())
           .execute();
     }
@@ -604,7 +604,9 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String product = handler.request().param("tmp");
       System.out.println("wsEndpointTwo: " + handler);
       Payload<String> pp = new Payload<>(productType + product);
-      handler.response().objectResponse((future) -> future.complete(pp), new ExampleByteEncoder())
+      handler
+          .response()
+          .objectResponse((future) -> future.complete(pp), new ExampleByteEncoder())
           .execute();
     }
 
@@ -615,7 +617,9 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String product = handler.request().param("tmp");
       System.out.println("wsEndpointTwo: " + handler);
       Payload<String> pp = new Payload<>(productType + product);
-      handler.response().byteResponse((future) -> future.complete(Serializer.serialize(pp)))
+      handler
+          .response()
+          .byteResponse((future) -> future.complete(Serializer.serialize(pp)))
           .execute();
     }
 
@@ -627,20 +631,27 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       System.out.println("wsEndpointTwo: " + handler);
       AtomicInteger count = new AtomicInteger(4);
       Payload<String> pp = new Payload<>(productType + product);
-      handler.response().byteResponse((future) -> {
-        if (count.decrementAndGet() >= 0) {
-          System.out.println("throw:" + count.get());
-          throw new NullPointerException("test");
-        }
-        future.complete(Serializer.serialize(pp));
-      }).retry(3).onFailureRespond((error, future) -> {
-        try {
-          future.complete(Serializer.serialize(pp));
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-        future.complete(null);
-      }).execute();
+      handler
+          .response()
+          .byteResponse(
+              (future) -> {
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw:" + count.get());
+                  throw new NullPointerException("test");
+                }
+                future.complete(Serializer.serialize(pp));
+              })
+          .retry(3)
+          .onFailureRespond(
+              (error, future) -> {
+                try {
+                  future.complete(Serializer.serialize(pp));
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+                future.complete(null);
+              })
+          .execute();
     }
 
     @Path("/endpointEight_header")
@@ -651,10 +662,13 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       System.out.println("wsEndpointTwo: " + handler);
       AtomicInteger count = new AtomicInteger(4);
       Payload<String> pp = new Payload<>(productType + product);
-      handler.response().stringResponse((future) -> {
-
-        future.complete(productType + product);
-      }).execute("application/json");
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                future.complete(productType + product);
+              })
+          .execute("application/json");
     }
 
     @Path("/endpointEight_put_header")
@@ -665,10 +679,14 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       System.out.println("wsEndpointTwo: " + handler);
       AtomicInteger count = new AtomicInteger(4);
       Payload<String> pp = new Payload<>(productType + product);
-      handler.response().stringResponse((future) -> {
-
-        future.complete(productType + product);
-      }).putHeader("key", "val").execute("application/json");
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                future.complete(productType + product);
+              })
+          .putHeader("key", "val")
+          .execute("application/json");
     }
 
     @Path("/endpointNine_exception")
@@ -677,12 +695,14 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
       System.out.println("wsEndpointTwo: " + handler);
-      handler.response().stringResponse((future) -> {
-        throw new NullPointerException("test");
-      }).putHeader("key", "val").execute("application/json");
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                throw new NullPointerException("test");
+              })
+          .putHeader("key", "val")
+          .execute("application/json");
     }
-
   }
-
-
 }

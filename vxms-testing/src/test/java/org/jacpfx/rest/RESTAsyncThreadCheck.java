@@ -16,7 +16,6 @@
 
 package org.jacpfx.rest;
 
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -42,14 +41,12 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTAsyncThreadCheck extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
   private HttpServer http;
   private HttpClient client;
@@ -71,7 +68,6 @@ public class RESTAsyncThreadCheck extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -81,160 +77,166 @@ public class RESTAsyncThreadCheck extends VertxTestBase {
 
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST)).setInstances(1);
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
   @Test
-
   public void simpleTest() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
     WebTarget target = client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleTest");
-    target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+    target
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .async()
+        .get(
+            new InvocationCallback<String>() {
 
-      @Override
-      public void completed(String response) {
-        System.out.println("Response entity '" + response + "' received.");
-        vertx.runOnContext((e) -> assertEquals(response, "test exception"));
-        latch.countDown();
-      }
+              @Override
+              public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext((e) -> assertEquals(response, "test exception"));
+                latch.countDown();
+              }
 
-      @Override
-      public void failed(Throwable throwable) {
-
-      }
-    });
+              @Override
+              public void failed(Throwable throwable) {}
+            });
 
     latch.await();
     testComplete();
-
   }
 
   @Test
-
   public void simpleRetryTest() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/simpleRetryTest");
-    target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleRetryTest");
+    target
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .async()
+        .get(
+            new InvocationCallback<String>() {
 
-      @Override
-      public void completed(String response) {
-        System.out.println("Response entity '" + response + "' received.");
-        vertx.runOnContext((e) -> assertEquals(response, "test exception"));
-        latch.countDown();
-      }
+              @Override
+              public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext((e) -> assertEquals(response, "test exception"));
+                latch.countDown();
+              }
 
-      @Override
-      public void failed(Throwable throwable) {
-
-      }
-    });
+              @Override
+              public void failed(Throwable throwable) {}
+            });
 
     latch.await();
     testComplete();
-
   }
 
   @Test
-
   public void simpleTimeoutTest() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/simpleTimeoutTest");
-    target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleTimeoutTest");
+    target
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .async()
+        .get(
+            new InvocationCallback<String>() {
 
-      @Override
-      public void completed(String response) {
-        System.out.println("Response entity '" + response + "' received.");
-        vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
-        latch.countDown();
-      }
+              @Override
+              public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
+                latch.countDown();
+              }
 
-      @Override
-      public void failed(Throwable throwable) {
-
-      }
-    });
+              @Override
+              public void failed(Throwable throwable) {}
+            });
 
     latch.await();
     testComplete();
-
   }
 
-
   @Test
-
   public void simpleTimeoutWithRetryTest() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/simpleTimeoutWithRetryTest");
-    target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleTimeoutWithRetryTest");
+    target
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .async()
+        .get(
+            new InvocationCallback<String>() {
 
-      @Override
-      public void completed(String response) {
-        System.out.println("Response entity '" + response + "' received.");
-        vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
-        latch.countDown();
-      }
+              @Override
+              public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
+                latch.countDown();
+              }
 
-      @Override
-      public void failed(Throwable throwable) {
-
-      }
-    });
+              @Override
+              public void failed(Throwable throwable) {}
+            });
 
     latch.await();
     testComplete();
-
   }
 
   @Test
-
   public void statefulTimeoutWithRetryTest_() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/statefulTimeoutWithRetryTest/crash");
-    target.request(MediaType.APPLICATION_JSON_TYPE).async().get(new InvocationCallback<String>() {
+    WebTarget target =
+        client
+            .target("http://" + HOST + ":" + PORT)
+            .path("/wsService/statefulTimeoutWithRetryTest/crash");
+    target
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .async()
+        .get(
+            new InvocationCallback<String>() {
 
-      @Override
-      public void completed(String response) {
-        System.out.println("Response entity '" + response + "' received.");
-        vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
-        latch.countDown();
-      }
+              @Override
+              public void completed(String response) {
+                System.out.println("Response entity '" + response + "' received.");
+                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
+                latch.countDown();
+              }
 
-      @Override
-      public void failed(Throwable throwable) {
-        throwable.printStackTrace();
-      }
-    });
+              @Override
+              public void failed(Throwable throwable) {
+                throwable.printStackTrace();
+              }
+            });
 
     latch.await();
     testComplete();
-
   }
 
   @Test
@@ -242,118 +244,142 @@ public class RESTAsyncThreadCheck extends VertxTestBase {
     Client client = ClientBuilder.newClient();
 
     //////// Request 1 -- creates crash
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/statefulTimeoutWithRetryTest/crash");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client
+            .target("http://" + HOST + ":" + PORT)
+            .path("/wsService/statefulTimeoutWithRetryTest/crash");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            vertx.runOnContext(h -> {
-              System.out.println("--------");
-              assertEquals("operation _timeout", response);
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    vertx.runOnContext(
+                        h -> {
+                          System.out.println("--------");
+                          assertEquals("operation _timeout", response);
 
-              //////// Request 1 -- is valid but crashes due to open circuit
-              WebTarget target2 = client.target("http://" + HOST + ":" + PORT)
-                  .path("/wsService/statefulTimeoutWithRetryTest/value");
-              target2.request(MediaType.APPLICATION_JSON_TYPE).async()
-                  .get(new InvocationCallback<String>() {
+                          //////// Request 1 -- is valid but crashes due to open circuit
+                          WebTarget target2 =
+                              client
+                                  .target("http://" + HOST + ":" + PORT)
+                                  .path("/wsService/statefulTimeoutWithRetryTest/value");
+                          target2
+                              .request(MediaType.APPLICATION_JSON_TYPE)
+                              .async()
+                              .get(
+                                  new InvocationCallback<String>() {
 
-                    @Override
-                    public void completed(String response) {
-                      System.out.println("Response entity '" + response + "' received.");
-                      vertx.runOnContext(h -> {
-                        System.out.println("--------");
-                        assertEquals("circuit open", response);
+                                    @Override
+                                    public void completed(String response) {
+                                      System.out.println(
+                                          "Response entity '" + response + "' received.");
+                                      vertx.runOnContext(
+                                          h -> {
+                                            System.out.println("--------");
+                                            assertEquals("circuit open", response);
 
-                        // wait 1s, but circuit is still open
-                        vertx.setTimer(1205, handler -> {
-                          target2.request(MediaType.APPLICATION_JSON_TYPE).async()
-                              .get(new InvocationCallback<String>() {
+                                            // wait 1s, but circuit is still open
+                                            vertx.setTimer(
+                                                1205,
+                                                handler -> {
+                                                  target2
+                                                      .request(MediaType.APPLICATION_JSON_TYPE)
+                                                      .async()
+                                                      .get(
+                                                          new InvocationCallback<String>() {
 
-                                @Override
-                                public void completed(String response) {
-                                  System.out
-                                      .println("Response entity '" + response + "' received.");
-                                  vertx.runOnContext(h -> {
-                                    System.out.println("--------");
-                                    assertEquals("circuit open", response);
+                                                            @Override
+                                                            public void completed(String response) {
+                                                              System.out.println(
+                                                                  "Response entity '"
+                                                                      + response
+                                                                      + "' received.");
+                                                              vertx.runOnContext(
+                                                                  h -> {
+                                                                    System.out.println("--------");
+                                                                    assertEquals(
+                                                                        "circuit open", response);
 
-                                    // wait another 1s, now circuit should be closed
-                                    vertx.setTimer(2005, handler -> {
-                                      target2.request(MediaType.APPLICATION_JSON_TYPE).async()
-                                          .get(new InvocationCallback<String>() {
+                                                                    // wait another 1s, now circuit
+                                                                    // should be closed
+                                                                    vertx.setTimer(
+                                                                        2005,
+                                                                        handler -> {
+                                                                          target2
+                                                                              .request(
+                                                                                  MediaType
+                                                                                      .APPLICATION_JSON_TYPE)
+                                                                              .async()
+                                                                              .get(
+                                                                                  new InvocationCallback<
+                                                                                      String>() {
 
-                                            @Override
-                                            public void completed(String response) {
-                                              System.out.println(
-                                                  "Response entity '" + response + "' received.");
-                                              vertx.runOnContext(h -> {
-                                                System.out.println("--------");
-                                                assertEquals("value", response);
+                                                                                    @Override
+                                                                                    public void
+                                                                                        completed(
+                                                                                            String
+                                                                                                response) {
+                                                                                      System.out
+                                                                                          .println(
+                                                                                              "Response entity '"
+                                                                                                  + response
+                                                                                                  + "' received.");
+                                                                                      vertx
+                                                                                          .runOnContext(
+                                                                                              h -> {
+                                                                                                System
+                                                                                                    .out
+                                                                                                    .println(
+                                                                                                        "--------");
+                                                                                                assertEquals(
+                                                                                                    "value",
+                                                                                                    response);
 
-                                                testComplete();
+                                                                                                testComplete();
+                                                                                              });
+                                                                                    }
 
+                                                                                    @Override
+                                                                                    public void
+                                                                                        failed(
+                                                                                            Throwable
+                                                                                                throwable) {}
+                                                                                  });
+                                                                        });
+                                                                  });
+                                                            }
 
-                                              });
-
-
-                                            }
-
-                                            @Override
-                                            public void failed(Throwable throwable) {
-
-                                            }
+                                                            @Override
+                                                            public void failed(
+                                                                Throwable throwable) {}
+                                                          });
+                                                });
                                           });
-                                    });
+                                    }
 
-
+                                    @Override
+                                    public void failed(Throwable throwable) {}
                                   });
-
-
-                                }
-
-                                @Override
-                                public void failed(Throwable throwable) {
-
-                                }
-                              });
                         });
+                    // Assert.assertEquals(response, "test-123");
 
+                  }
 
-                      });
-
-
-                    }
-
-                    @Override
-                    public void failed(Throwable throwable) {
-
-                    }
-                  });
-
-
-            });
-            // Assert.assertEquals(response, "test-123");
-
-          }
-
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     await(80000, TimeUnit.MILLISECONDS);
-
   }
-
 
   public HttpClient getClient() {
     return client;
   }
-
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
   public class WsServiceOne extends VxmsEndpoint {
@@ -362,64 +388,70 @@ public class RESTAsyncThreadCheck extends VertxTestBase {
     @GET
     public void simpleTest(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().
-          blocking().
-          stringResponse(() -> {
-            throw new NullPointerException("test exception");
-          }).
-          onFailureRespond((error) -> error.getMessage()).
-          execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                throw new NullPointerException("test exception");
+              })
+          .onFailureRespond((error) -> error.getMessage())
+          .execute();
     }
 
     @Path("/simpleRetryTest")
     @GET
     public void simpleRetryTest(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().
-          blocking().
-          stringResponse(() -> {
-            throw new NullPointerException("test exception");
-          }).
-          retry(3).
-          onFailureRespond((error) -> error.getMessage()).
-          execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                throw new NullPointerException("test exception");
+              })
+          .retry(3)
+          .onFailureRespond((error) -> error.getMessage())
+          .execute();
     }
-
 
     @Path("/simpleTimeoutTest")
     @GET
     public void simpleTimeoutTest(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().
-          blocking().
-          stringResponse(() -> {
-            System.out.println("SLEEP");
-            Thread.sleep(8000);
-            System.out.println("SLEEP END");
-            return "reply";
-          }).
-          timeout(1000).
-          onFailureRespond((error) -> error.getMessage()).
-          execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                System.out.println("SLEEP");
+                Thread.sleep(8000);
+                System.out.println("SLEEP END");
+                return "reply";
+              })
+          .timeout(1000)
+          .onFailureRespond((error) -> error.getMessage())
+          .execute();
     }
-
 
     @Path("/simpleTimeoutWithRetryTest")
     @GET
     public void simpleTimeoutWithRetryTest(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().
-          blocking().
-          stringResponse(() -> {
-            System.out.println("SLEEP");
-            Thread.sleep(8000);
-            System.out.println("SLEEP END");
-            return "reply";
-          }).
-          timeout(1000).
-          retry(3).
-          onFailureRespond((error) -> error.getMessage()).
-          execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                System.out.println("SLEEP");
+                Thread.sleep(8000);
+                System.out.println("SLEEP END");
+                return "reply";
+              })
+          .timeout(1000)
+          .retry(3)
+          .onFailureRespond((error) -> error.getMessage())
+          .execute();
     }
 
     @Path("/statefulTimeoutWithRetryTest/:val")
@@ -428,24 +460,23 @@ public class RESTAsyncThreadCheck extends VertxTestBase {
       System.out.println("stringResponse: " + reply);
       final String val = reply.request().param("val");
       System.out.println("stringResponse: " + val);
-      reply.response().
-          blocking().
-          stringResponse(() -> {
-            System.out.println("SLEEP");
-              if (val.equals("crash")) {
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                System.out.println("SLEEP");
+                if (val.equals("crash")) {
                   Thread.sleep(6000);
-              }
-            System.out.println("SLEEP END");
-            return val;
-          }).
-          timeout(1000).
-          retry(3).
-          closeCircuitBreaker(3000).
-          onFailureRespond((error) -> error.getMessage()).
-          execute();
+                }
+                System.out.println("SLEEP END");
+                return val;
+              })
+          .timeout(1000)
+          .retry(3)
+          .closeCircuitBreaker(3000)
+          .onFailureRespond((error) -> error.getMessage())
+          .execute();
     }
-
   }
-
-
 }

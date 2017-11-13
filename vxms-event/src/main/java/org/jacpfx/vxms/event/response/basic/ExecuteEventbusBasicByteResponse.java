@@ -27,13 +27,13 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusByteCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class is the end of the non blocking fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
+ * data collected to execute the chain.
  */
 public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
 
-
-  public ExecuteEventbusBasicByteResponse(String methodId,
+  public ExecuteEventbusBasicByteResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -47,12 +47,14 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
       int retryCount,
       long timeout,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-        chain, byteConsumer,
+        chain,
+        byteConsumer,
         excecuteEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -62,15 +64,22 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         circuitBreakerTimeout);
   }
 
-  public ExecuteEventbusBasicByteResponse(String methodId, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler, Message<Object> message, List<ExecutionStep> chain,
+  public ExecuteEventbusBasicByteResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
+      List<ExecutionStep> chain,
       ThrowableFutureConsumer<byte[]> byteConsumer) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-        chain, byteConsumer,
+        chain,
+        byteConsumer,
         null,
         null,
         null,
@@ -89,7 +98,8 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    */
   public ExecuteEventbusBasicByteResponse onFailureRespond(
       ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond) {
-    return new ExecuteEventbusBasicByteResponse(methodId,
+    return new ExecuteEventbusBasicByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -113,7 +123,8 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * @return the response chain {@link ExecuteEventbusBasicByteResponse}
    */
   public ExecuteEventbusBasicByteResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteEventbusBasicByteResponse(methodId,
+    return new ExecuteEventbusBasicByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -136,7 +147,8 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * @return the response chain {@link ExecuteEventbusBasicByteResponse}
    */
   public ExecuteEventbusBasicByteResponse timeout(long timeout) {
-    return new ExecuteEventbusBasicByteResponse(methodId,
+    return new ExecuteEventbusBasicByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -159,7 +171,8 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * @return the response chain {@link ExecuteEventbusBasicByteCircuitBreaker}
    */
   public ExecuteEventbusBasicByteCircuitBreaker retry(int retryCount) {
-    return new ExecuteEventbusBasicByteCircuitBreaker(methodId,
+    return new ExecuteEventbusBasicByteCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -174,5 +187,4 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         timeout,
         circuitBreakerTimeout);
   }
-
 }

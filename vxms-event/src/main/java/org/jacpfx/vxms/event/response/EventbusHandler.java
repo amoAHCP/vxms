@@ -23,8 +23,7 @@ import org.jacpfx.vxms.event.eventbus.basic.EventbusBridgeRequest;
 
 /**
  * Created by Andy Moncsek on 07.01.16. The EventbusHandler gives access to the {@link Message} ,
- * the {@link EventbusRequest} , the {@link EventbusResponse} and the {@link
- * EventbusBridgeRequest}.
+ * the {@link EventbusRequest} , the {@link EventbusResponse} and the {@link EventbusBridgeRequest}.
  */
 public class EventbusHandler {
 
@@ -40,19 +39,22 @@ public class EventbusHandler {
    * @param methodId the method identifier
    * @param message the message to respond to
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
    */
-  public EventbusHandler(String methodId, Message<Object> message, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public EventbusHandler(
+      String methodId,
+      Message<Object> message,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler) {
     this.methodId = methodId;
     this.message = message;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
     this.errorMethodHandler = errorMethodHandler;
   }
-
 
   /**
    * Returns the message to respond to
@@ -90,5 +92,4 @@ public class EventbusHandler {
   public EventbusBridgeRequest eventBusRequest() {
     return new EventbusBridgeRequest(methodId, message, vxmsShared, failure, errorMethodHandler);
   }
-
 }

@@ -33,8 +33,8 @@ import org.jacpfx.vxms.event.interfaces.blocking.RetryBlockingExecutor;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusObjectResponse;
 
 /**
- * Created by Andy Moncsek on 05.04.16.
- * Typed execution of event-bus calls and blocking object response
+ * Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and blocking object
+ * response
  */
 public class EventbusObjectExecutionBlockingUtil {
 
@@ -47,7 +47,7 @@ public class EventbusObjectExecutionBlockingUtil {
    * @param _objectFunction the function to process the result message
    * @param _requestDeliveryOptions the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
    * @param _requestMessage the event-bus request serverOptions
@@ -55,7 +55,7 @@ public class EventbusObjectExecutionBlockingUtil {
    * @param _encoder the encoder to serialize the result object
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param _responseDeliveryOptions the delivery serverOptions
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
@@ -63,7 +63,8 @@ public class EventbusObjectExecutionBlockingUtil {
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
    * @return the execution chain {@link ExecuteEventbusObjectResponse}
    */
-  public static ExecuteEventbusObjectResponse mapToObjectResponse(String _methodId,
+  public static ExecuteEventbusObjectResponse mapToObjectResponse(
+      String _methodId,
       String _targetId,
       Object _message,
       ThrowableFunction<AsyncResult<Message<Object>>, Serializable> _objectFunction,
@@ -81,85 +82,85 @@ public class EventbusObjectExecutionBlockingUtil {
       long _timeout,
       long _delay,
       long _circuitBreakerTimeout) {
-    final DeliveryOptions deliveryOptions = Optional.ofNullable(_requestDeliveryOptions)
-        .orElse(new DeliveryOptions());
-    final RetryBlockingExecutor retry = (methodId,
-        targetId,
-        message,
-        function,
-        requestDeliveryOptions,
-        vxmsShared, t,
-        errorMethodHandler,
-        requestMessage,
-        supplier,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        responseDeliveryOptions,
-        retryCount,
-        timeout, delay, circuitBreakerTimeout) -> {
-      int retryValue = retryCount - 1;
-      mapToObjectResponse(methodId,
-          targetId,
-          message, function,
-          requestDeliveryOptions,
-          vxmsShared,
-          t,
-          errorMethodHandler,
-          requestMessage,
-          null,
-          encoder,
-          errorHandler,
-          onFailureRespond,
-          responseDeliveryOptions,
-          retryValue,
-          timeout,
-          delay, circuitBreakerTimeout).
-          execute();
-
-    };
-
-    final RecursiveBlockingExecutor executor = (methodId,
-        vxmsShared, t,
-        errorMethodHandler,
-        requestMessage,
-        supplier,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        responseDeliveryOptions,
-        retryCount,
-        timeout, delay, circuitBreakerTimeout) ->
-        new ExecuteEventbusObjectResponse(methodId,
-            vxmsShared, t,
+    final DeliveryOptions deliveryOptions =
+        Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
+    final RetryBlockingExecutor retry =
+        (methodId,
+            targetId,
+            message,
+            function,
+            requestDeliveryOptions,
+            vxmsShared,
+            t,
             errorMethodHandler,
             requestMessage,
             supplier,
-            null,
             encoder,
             errorHandler,
             onFailureRespond,
             responseDeliveryOptions,
             retryCount,
-            timeout, delay,
-            circuitBreakerTimeout).execute();
+            timeout,
+            delay,
+            circuitBreakerTimeout) -> {
+          int retryValue = retryCount - 1;
+          mapToObjectResponse(
+                  methodId,
+                  targetId,
+                  message,
+                  function,
+                  requestDeliveryOptions,
+                  vxmsShared,
+                  t,
+                  errorMethodHandler,
+                  requestMessage,
+                  null,
+                  encoder,
+                  errorHandler,
+                  onFailureRespond,
+                  responseDeliveryOptions,
+                  retryValue,
+                  timeout,
+                  delay,
+                  circuitBreakerTimeout)
+              .execute();
+        };
 
-    final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply = (methodId,
-        vxmsShared,
-        errorMethodHandler,
-        requestMessage,
-        encoder,
-        errorHandler,
-        errorHandlerObject,
-        responseDeliveryOptions,
-        retryCount, timeout,
-        delay, circuitBreakerTimeout) ->
-        EventbusBridgeBlockingExecution.sendMessageAndSupplyHandler(
-            methodId,
-            _targetId,
-            _message,
-            _objectFunction,
-            deliveryOptions,
+    final RecursiveBlockingExecutor executor =
+        (methodId,
+            vxmsShared,
+            t,
+            errorMethodHandler,
+            requestMessage,
+            supplier,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            responseDeliveryOptions,
+            retryCount,
+            timeout,
+            delay,
+            circuitBreakerTimeout) ->
+            new ExecuteEventbusObjectResponse(
+                    methodId,
+                    vxmsShared,
+                    t,
+                    errorMethodHandler,
+                    requestMessage,
+                    supplier,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    responseDeliveryOptions,
+                    retryCount,
+                    timeout,
+                    delay,
+                    circuitBreakerTimeout)
+                .execute();
+
+    final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply =
+        (methodId,
             vxmsShared,
             errorMethodHandler,
             requestMessage,
@@ -170,11 +171,29 @@ public class EventbusObjectExecutionBlockingUtil {
             retryCount,
             timeout,
             delay,
-            circuitBreakerTimeout,
-            executor,
-            retry);
+            circuitBreakerTimeout) ->
+            EventbusBridgeBlockingExecution.sendMessageAndSupplyHandler(
+                methodId,
+                _targetId,
+                _message,
+                _objectFunction,
+                deliveryOptions,
+                vxmsShared,
+                errorMethodHandler,
+                requestMessage,
+                encoder,
+                errorHandler,
+                errorHandlerObject,
+                responseDeliveryOptions,
+                retryCount,
+                timeout,
+                delay,
+                circuitBreakerTimeout,
+                executor,
+                retry);
 
-    return new ExecuteEventbusObjectResponse(_methodId,
+    return new ExecuteEventbusObjectResponse(
+        _methodId,
         _vxmsShared,
         _failure,
         _errorMethodHandler,
@@ -190,6 +209,4 @@ public class EventbusObjectExecutionBlockingUtil {
         _delay,
         _circuitBreakerTimeout);
   }
-
-
 }

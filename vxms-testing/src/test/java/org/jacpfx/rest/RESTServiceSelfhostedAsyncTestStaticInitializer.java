@@ -16,7 +16,6 @@
 
 package org.jacpfx.rest;
 
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
@@ -41,14 +40,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTServiceSelfhostedAsyncTestStaticInitializer extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
   private HttpClient client;
 
@@ -69,7 +66,6 @@ public class RESTServiceSelfhostedAsyncTestStaticInitializer extends VertxTestBa
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -78,50 +74,52 @@ public class RESTServiceSelfhostedAsyncTestStaticInitializer extends VertxTestBa
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
-
   @Test
-
   public void asyncStringResponse() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/asyncStringResponse", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Assert.assertEquals(body.toString(), "test");
+    HttpClientRequest request =
+        client.get(
+            "/wsService/asyncStringResponse",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Assert.assertEquals(body.toString(), "test");
+                    });
+                testComplete();
+              }
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
 
   @Test
@@ -129,90 +127,105 @@ public class RESTServiceSelfhostedAsyncTestStaticInitializer extends VertxTestBa
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/asyncStringResponseParameter/123", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              System.out.println("Got a createResponse: " + body.toString());
-              Assert.assertEquals(body.toString(), "123");
+    HttpClientRequest request =
+        client.get(
+            "/wsService/asyncStringResponseParameter/123",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Assert.assertEquals(body.toString(), "123");
+                    });
+                testComplete();
+              }
             });
-            testComplete();
-          }
-        });
     request.end();
     await();
-
   }
-
 
   public HttpClient getClient() {
     return client;
   }
 
-
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  public class WsServiceOne  extends AbstractVerticle {
+  public class WsServiceOne extends AbstractVerticle {
 
     @Override
     public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-      VxmsEndpoint.start(startFuture,this);
+      VxmsEndpoint.start(startFuture, this);
     }
 
     @Path("/asyncStringResponse")
     @GET
     public void rsAsyncStringResponse(RestHandler reply) throws InterruptedException {
       System.out.println("asyncStringResponse: " + reply);
-      reply.response().blocking().stringResponse(() -> {
-        System.out.println("WAIT");
-        Thread.sleep(2500);
-        System.out.println("WAIT END");
-        return "test";
-      }).execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return "test";
+              })
+          .execute();
     }
 
     @Path("/asyncByteResponse")
     @GET
     public void rsAsyncByteResponse(RestHandler reply) throws InterruptedException {
       System.out.println("asyncStringResponse: " + reply);
-      reply.response().blocking().byteResponse(() -> {
-        System.out.println("WAIT");
-        Thread.sleep(2500);
-        System.out.println("WAIT END");
-        return "test".getBytes();
-      }).execute();
+      reply
+          .response()
+          .blocking()
+          .byteResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return "test".getBytes();
+              })
+          .execute();
     }
 
     @Path("/asyncObjectResponse")
     @GET
     public void rsAsyncObjectResponse(RestHandler reply) throws InterruptedException {
       System.out.println("asyncStringResponse: " + reply);
-      reply.response().blocking().objectResponse(() -> {
-        System.out.println("WAIT");
-        Thread.sleep(2500);
-        System.out.println("WAIT END");
-        return new Payload<String>("test");
-      }, new ExampleStringEncoder()).execute();
+      reply
+          .response()
+          .blocking()
+          .objectResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return new Payload<String>("test");
+              },
+              new ExampleStringEncoder())
+          .execute();
     }
-
 
     @Path("/asyncStringResponseParameter/:help")
     @GET
     public void rsAsyncStringResponseParameter(RestHandler handler) {
       String productType = handler.request().param("help");
       System.out.println("asyncStringResponseParameter: " + handler);
-      handler.response().blocking().stringResponse(() -> {
-        System.out.println("WAIT");
-        Thread.sleep(2500);
-        System.out.println("WAIT END");
-        return productType;
-      }).execute();
+      handler
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return productType;
+              })
+          .execute();
     }
-
-
   }
-
-
 }

@@ -20,9 +20,7 @@ import com.google.gson.Gson;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.vxms.common.encoder.Encoder;
 
-/**
- * Created by Andy Moncsek on 25.11.15.
- */
+/** Created by Andy Moncsek on 25.11.15. */
 public class ExampleStringEncoder implements Encoder.StringEncoder<Payload<String>> {
 
   @Override

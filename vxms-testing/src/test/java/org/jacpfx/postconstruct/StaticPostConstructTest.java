@@ -16,7 +16,6 @@
 
 package org.jacpfx.postconstruct;
 
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -43,18 +42,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class StaticPostConstructTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   public static final int PORT_2 = 9988;
   public static final int PORT_3 = 9999;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
-  private static final String HOST = "127.0.0.1";
   public static final String POST_VAL = "post";
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
+  private static final String HOST = "127.0.0.1";
   private HttpClient client;
 
   protected int getNumNodes() {
@@ -74,7 +71,6 @@ public class StaticPostConstructTest extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -83,115 +79,118 @@ public class StaticPostConstructTest extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(2);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
+    getVertx()
+        .deployVerticle(
+            new WsServiceTwo(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-    getVertx().deployVerticle(new WsServiceTwo(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+              latch2.countDown();
+            });
 
-      latch2.countDown();
-
-    });
-
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
-
   @Test
-
   public void stringGETResponse() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringGETResponse");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponse");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, POST_VAL);
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, POST_VAL);
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     latch.await();
     testComplete();
-
   }
-  @Test
 
+  @Test
   public void stringGETResponse2() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT_2)
-        .path("/wsService/stringGETResponse");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT_2).path("/wsService/stringGETResponse");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, POST_VAL);
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, POST_VAL);
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     latch.await();
     testComplete();
-
   }
-
-
-
 
   public HttpClient getClient() {
     return client;
   }
 
-
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
   public class WsServiceOne extends AbstractVerticle {
 
+    String postVal;
+
     @Override
     public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-      VxmsEndpoint.start(startFuture,this);
+      VxmsEndpoint.start(startFuture, this);
     }
 
-    String postVal;
     public void postConstruct(final io.vertx.core.Future<Void> startFuture) {
-      postVal=POST_VAL;
+      postVal = POST_VAL;
       startFuture.complete();
     }
 
@@ -201,20 +200,20 @@ public class StaticPostConstructTest extends VertxTestBase {
       System.out.println("stringResponse: " + reply);
       reply.response().stringResponse((future) -> future.complete(postVal)).execute();
     }
-
-
   }
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT_2)
   public class WsServiceTwo extends AbstractVerticle {
 
+    String postVal;
+
     @Override
     public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-      VxmsEndpoint.start(startFuture,this);
+      VxmsEndpoint.start(startFuture, this);
     }
-    String postVal;
-    public void postConstruct(Router router,final io.vertx.core.Future<Void> startFuture) {
-      postVal=POST_VAL;
+
+    public void postConstruct(Router router, final io.vertx.core.Future<Void> startFuture) {
+      postVal = POST_VAL;
       startFuture.complete();
     }
 
@@ -224,9 +223,5 @@ public class StaticPostConstructTest extends VertxTestBase {
       System.out.println("stringResponse: " + reply);
       reply.response().stringResponse((future) -> future.complete(postVal)).execute();
     }
-
-
   }
-
-
 }

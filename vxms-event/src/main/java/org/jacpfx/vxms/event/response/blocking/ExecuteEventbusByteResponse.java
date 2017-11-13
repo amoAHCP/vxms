@@ -25,34 +25,34 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusByteCallBlocking;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
-
 
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
    * @param byteSupplier the supplier, producing the byte response
    * @param excecuteAsyncEventBusAndReply the response of an event-bus call which is passed to the
-   * fluent API
+   *     fluent API
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusByteResponse(String methodId,
+  public ExecuteEventbusByteResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -66,7 +66,8 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -91,7 +92,8 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
    */
   public ExecuteEventbusByte onFailureRespond(
       ThrowableFunction<Throwable, byte[]> onFailureRespond) {
-    return new ExecuteEventbusByte(methodId,
+    return new ExecuteEventbusByte(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -114,7 +116,8 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
    * @return the createResponse chain {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteEventbusByteResponse(methodId,
+    return new ExecuteEventbusByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -137,7 +140,8 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
    * @return the createResponse chain {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteCircuitBreaker retry(int retryCount) {
-    return new ExecuteEventbusByteCircuitBreaker(methodId,
+    return new ExecuteEventbusByteCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -160,7 +164,8 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
    * @return the createResponse chain {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteResponse timeout(long timeout) {
-    return new ExecuteEventbusByteResponse(methodId,
+    return new ExecuteEventbusByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -183,7 +188,8 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
    * @return the createResponse chain {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteResponse delay(long delay) {
-    return new ExecuteEventbusByteResponse(methodId,
+    return new ExecuteEventbusByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -198,5 +204,4 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         delay,
         circuitBreakerTimeout);
   }
-
 }

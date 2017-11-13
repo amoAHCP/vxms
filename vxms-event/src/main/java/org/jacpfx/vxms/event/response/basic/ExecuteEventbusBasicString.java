@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
-import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusStringCall;
 
@@ -36,7 +35,7 @@ import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusStringCall;
  * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
  * data collected to execute the chain.
  */
-public class ExecuteEventbusBasicString {
+public class ExecuteEventbusBasicString extends AbstractResponse<String> {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -179,97 +178,66 @@ public class ExecuteEventbusBasicString {
                           }
                         });
                   });
-        });
 
-    ofNullable(chain)
-        .ifPresent(
-            chainList -> {
-              if (!chainList.isEmpty()) {
-                final ExecutionStep executionStep = chainList.get(0);
-                ofNullable(executionStep.getChainconsumer())
-                    .ifPresent(
-                        initialConsumer -> {
-                          int retry = retryCount;
-                          ResponseExecution.createResponse(
-                              methodId,
-                              retry,
-                              timeout,
-                              circuitBreakerTimeout,
-                              initialConsumer,
-                              errorHandler,
-                              onFailureRespond,
-                              errorMethodHandler,
-                              vxmsShared,
-                              failure,
-                              value -> {
-                                if (value.succeeded()) {
-                                  final Object result = value.getResult();
-                                  if (chainList.size() > 1 && !value.handledError()) {
-                                    final ExecutionStep executionStepAndThan = chainList.get(1);
-                                    ofNullable(executionStepAndThan.getStep())
-                                        .ifPresent(
-                                            step ->
-                                                executeStep(
-                                                    chainList,
-                                                    retry,
-                                                    result,
-                                                    executionStepAndThan,
-                                                    step));
-                                  } else {
-                                    respond(value.getResult());
-                                  }
-                                } else {
-                                  fail(
-                                      value.getCause().getMessage(),
-                                      HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                                }
+          ofNullable(chain)
+              .ifPresent(
+                  chainList -> {
+                    if (!chainList.isEmpty()) {
+                      final ExecutionStep executionStep = chainList.get(0);
+                      ofNullable(executionStep.getChainconsumer())
+                          .ifPresent(
+                              initialConsumer -> {
+                                int retry = retryCount;
+                                ResponseExecution.createResponse(
+                                    methodId,
+                                    retry,
+                                    timeout,
+                                    circuitBreakerTimeout,
+                                    initialConsumer,
+                                    errorHandler,
+                                    onFailureRespond,
+                                    errorMethodHandler,
+                                    vxmsShared,
+                                    failure,
+                                    value -> {
+                                      if (value.succeeded()) {
+                                        final Object result = value.getResult();
+                                        if (chainList.size() > 1 && !value.handledError()) {
+                                          final ExecutionStep executionStepAndThan =
+                                              chainList.get(1);
+                                          ofNullable(executionStepAndThan.getStep())
+                                              .ifPresent(
+                                                  step ->
+                                                      executeStep(
+                                                          methodId,
+                                                          vxmsShared,
+                                                          failure,
+                                                          errorMethodHandler,
+                                                          chainList,
+                                                          result,
+                                                          executionStepAndThan,
+                                                          step,
+                                                          errorHandler,
+                                                          onFailureRespond,
+                                                          timeout,
+                                                          circuitBreakerTimeout,
+                                                          retry));
+                                        } else {
+                                          respond(value.getResult());
+                                        }
+                                      } else {
+                                        fail(
+                                            value.getCause().getMessage(),
+                                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                                      }
+                                    });
                               });
-                        });
-              }
-            });
-  }
-
-  private void executeStep(
-      List<ExecutionStep> chainList,
-      int retry,
-      Object result,
-      ExecutionStep element,
-      ThrowableFutureBiConsumer step) {
-    StepExecution.createResponse(
-        methodId,
-        retry,
-        timeout,
-        circuitBreakerTimeout,
-        step,
-        result,
-        errorHandler,
-        onFailureRespond,
-        errorMethodHandler,
-        vxmsShared,
-        failure,
-        value -> {
-          final int index = chainList.indexOf(element);
-          final int size = chainList.size();
-          if (value.succeeded()) {
-            if (index == size - 1 ||  value.handledError()) {
-              // handle last element
-              respond(value.getResult());
-            } else {
-              // call recursive
-              final ExecutionStep executionStepAndThan = chainList.get(index + 1);
-              ofNullable(executionStepAndThan.getStep())
-                  .ifPresent(
-                      nextStep ->
-                          executeStep(
-                              chainList, retry, value.getResult(), executionStepAndThan, nextStep));
-            }
-
-          } else {
-            fail(value.getCause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-          }
+                    }
+                  });
         });
   }
 
+  @Override
   protected void respond(String result) {
     if (result != null) {
       if (deliveryOptions != null) {
@@ -280,6 +248,7 @@ public class ExecuteEventbusBasicString {
     }
   }
 
+  @Override
   protected void fail(String result, int statuscode) {
     if (result != null) {
       message.fail(statuscode, result);

@@ -25,14 +25,14 @@ import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventChaineResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventChainResponse;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByteResponse;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
+ * the output of your task.
  */
 public class EventbusResponse {
 
@@ -48,12 +48,16 @@ public class EventbusResponse {
    * @param methodId the method identifier
    * @param message the event-bus message to respond to
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    */
-  public EventbusResponse(String methodId, Message<Object> message, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public EventbusResponse(
+      String methodId,
+      Message<Object> message,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -70,17 +74,17 @@ public class EventbusResponse {
     return new EventbusResponseBlocking(methodId, message, vxmsShared, failure, errorMethodHandler);
   }
 
-
   /**
    * starts a supply chain to create a response
+   *
    * @param chainconsumer the initial supplier
    * @param <T> the type of the return value
-   * @return {@link ExecuteEventChaineResponse}
+   * @return {@link ExecuteEventChainResponse}
    */
-  public <T> ExecuteEventChaineResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
+  public <T> ExecuteEventChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));
-    return new ExecuteEventChaineResponse<>(
+    return new ExecuteEventChainResponse<>(
         methodId, vxmsShared, failure, errorMethodHandler, message, chain);
   }
 
@@ -92,8 +96,8 @@ public class EventbusResponse {
    */
   public ExecuteEventbusBasicByteResponse byteResponse(
       ThrowableFutureConsumer<byte[]> byteConsumer) {
-    return new ExecuteEventbusBasicByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, null,byteConsumer);
+    return new ExecuteEventbusBasicByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, null, byteConsumer);
   }
 
   /**
@@ -104,23 +108,21 @@ public class EventbusResponse {
    */
   public ExecuteEventbusBasicStringResponse stringResponse(
       ThrowableFutureConsumer<String> stringConsumer) {
-    return new ExecuteEventbusBasicStringResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message,null, stringConsumer);
+    return new ExecuteEventbusBasicStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, null, stringConsumer);
   }
 
   /**
    * Returns a Serializable to the target type
    *
    * @param objectConsumer consumes a io.vertx.core.Future to compleate with a Serialized Object
-   * response
+   *     response
    * @param encoder the encoder to serialize the response object
    * @return {@link ExecuteEventbusBasicObjectResponse}
    */
   public ExecuteEventbusBasicObjectResponse objectResponse(
       ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
-    return new ExecuteEventbusBasicObjectResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, objectConsumer,encoder);
+    return new ExecuteEventbusBasicObjectResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, null, objectConsumer, encoder);
   }
-
-
 }

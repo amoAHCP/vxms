@@ -31,10 +31,7 @@ import org.jacpfx.vxms.event.util.EventbusByteExecutionBlockingUtil;
 import org.jacpfx.vxms.event.util.EventbusObjectExecutionBlockingUtil;
 import org.jacpfx.vxms.event.util.EventbusStringExecutionBlockingUtil;
 
-/**
- * Created by Andy Moncsek on 14.03.16.
- * Represents the start of a blocking execution chain
- */
+/** Created by Andy Moncsek on 14.03.16. Represents the start of a blocking execution chain */
 public class EventbusBridgeBlockingResponse {
 
   private final String methodId;
@@ -52,14 +49,15 @@ public class EventbusBridgeBlockingResponse {
    * @param methodId the method identifier
    * @param requestmessage the message to responde
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the last failure
    * @param errorMethodHandler the error-method handler
    * @param targetId the event-bus message target-targetId
    * @param message the event-bus message
    * @param options the event-bus delivery serverOptions
    */
-  public EventbusBridgeBlockingResponse(String methodId,
+  public EventbusBridgeBlockingResponse(
+      String methodId,
       Message<Object> requestmessage,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -81,58 +79,66 @@ public class EventbusBridgeBlockingResponse {
    * Maps the event-bus response to a String response for the REST request
    *
    * @param stringFunction the function, that takes the response message from the event bus and that
-   * maps it to a valid eventbus response
+   *     maps it to a valid eventbus response
    * @return the execution chain {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse mapToStringResponse(
       ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-    return EventbusStringExecutionBlockingUtil.mapToStringResponse(methodId,
+    return EventbusStringExecutionBlockingUtil.mapToStringResponse(
+        methodId,
         targetId,
         message,
         stringFunction,
         options,
-        vxmsShared, t,
+        vxmsShared,
+        t,
         errorMethodHandler,
         requestmessage,
         null,
         null,
         null,
         null,
-        0, 0l,
-        0l, 0l);
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
    * Maps the event-bus response to a byte response for the REST request
    *
    * @param byteFunction the function, that takes the response message from the event bus and that
-   * maps it to a valid eventbus response
+   *     maps it to a valid eventbus response
    * @return the execution chain {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteResponse mapToByteResponse(
       ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-    return EventbusByteExecutionBlockingUtil.mapToByteResponse(methodId,
+    return EventbusByteExecutionBlockingUtil.mapToByteResponse(
+        methodId,
         targetId,
         message,
         byteFunction,
         options,
-        vxmsShared, t,
+        vxmsShared,
+        t,
         errorMethodHandler,
         requestmessage,
         null,
         null,
         null,
         null,
-        0, 0l,
-        0l, 0l);
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
    * Maps the event-bus response to a byte response for the REST request
    *
    * @param objectFunction the function, that takes the response message from the event bus and that
-   * maps it to a valid eventbus response
+   *     maps it to a valid eventbus response
    * @param encoder the encoder to serialize your object response
    * @return the execution chain {@link ExecuteEventbusObjectResponse}
    */
@@ -140,20 +146,24 @@ public class EventbusBridgeBlockingResponse {
       ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 
-    return EventbusObjectExecutionBlockingUtil.mapToObjectResponse(methodId, targetId,
+    return EventbusObjectExecutionBlockingUtil.mapToObjectResponse(
+        methodId,
+        targetId,
         message,
         objectFunction,
         options,
-        vxmsShared, t,
+        vxmsShared,
+        t,
         errorMethodHandler,
         requestmessage,
-        null, encoder,
+        null,
+        encoder,
         null,
         null,
         null,
-        0, 0l,
-        0l, 0l);
+        0,
+        0l,
+        0l,
+        0l);
   }
-
-
 }

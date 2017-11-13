@@ -22,8 +22,8 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 
 /**
- * Created by Andy Moncsek on 14.03.16.
- * Defines an event-bus request as the beginning of your (blocking) execution chain
+ * Created by Andy Moncsek on 14.03.16. Defines an event-bus request as the beginning of your
+ * (blocking) execution chain
  */
 public class EventbusBridgeBlockingRequest {
 
@@ -39,11 +39,12 @@ public class EventbusBridgeBlockingRequest {
    * @param methodId the method identifier
    * @param requestmessage the message to responde
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the vertx instance
    * @param errorMethodHandler the error-method handler
    */
-  public EventbusBridgeBlockingRequest(String methodId,
+  public EventbusBridgeBlockingRequest(
+      String methodId,
       Message<Object> requestmessage,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -63,8 +64,8 @@ public class EventbusBridgeBlockingRequest {
    * @return the execution chain {@link EventbusBridgeBlockingResponse}
    */
   public EventbusBridgeBlockingResponse send(String id, Object message) {
-    return new EventbusBridgeBlockingResponse(methodId, requestmessage, vxmsShared, failure,
-        errorMethodHandler, id, message, null);
+    return new EventbusBridgeBlockingResponse(
+        methodId, requestmessage, vxmsShared, failure, errorMethodHandler, id, message, null);
   }
 
   /**
@@ -75,9 +76,16 @@ public class EventbusBridgeBlockingRequest {
    * @param requestOptions the delivery serverOptions for the event bus request
    * @return the execution chain {@link EventbusBridgeBlockingResponse}
    */
-  public EventbusBridgeBlockingResponse send(String id, Object message,
-      DeliveryOptions requestOptions) {
-    return new EventbusBridgeBlockingResponse(methodId, requestmessage, vxmsShared, failure,
-        errorMethodHandler, id, message, requestOptions);
+  public EventbusBridgeBlockingResponse send(
+      String id, Object message, DeliveryOptions requestOptions) {
+    return new EventbusBridgeBlockingResponse(
+        methodId,
+        requestmessage,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        id,
+        message,
+        requestOptions);
   }
 }

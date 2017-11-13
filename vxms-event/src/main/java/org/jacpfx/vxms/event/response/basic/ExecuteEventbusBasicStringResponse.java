@@ -27,33 +27,33 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusStringCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for String responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for String responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicString {
-
 
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
    * @param stringConsumer the consumer, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicStringResponse(String methodId,
+  public ExecuteEventbusBasicStringResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -67,12 +67,14 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
       int retryCount,
       long timeout,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-        chain, stringConsumer,
+        chain,
+        stringConsumer,
         excecuteEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -82,16 +84,22 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         circuitBreakerTimeout);
   }
 
-  public ExecuteEventbusBasicStringResponse(String methodId, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler, Message<Object> message,
+  public ExecuteEventbusBasicStringResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message,
       List<ExecutionStep> chain,
       ThrowableFutureConsumer<String> stringConsumer) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-        chain, stringConsumer,
+        chain,
+        stringConsumer,
         null,
         null,
         null,
@@ -101,7 +109,6 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         0L);
   }
 
-
   /**
    * intermediate error handler which will be called on each error (at least 1 time, in case on N
    * retries... up to N times)
@@ -110,7 +117,8 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
    * @return the response chain {@link ExecuteEventbusBasicStringResponse}
    */
   public ExecuteEventbusBasicStringResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteEventbusBasicStringResponse(methodId,
+    return new ExecuteEventbusBasicStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -133,7 +141,8 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
    * @return the response chain {@link ExecuteEventbusBasicStringResponse}
    */
   public ExecuteEventbusBasicStringResponse timeout(long timeout) {
-    return new ExecuteEventbusBasicStringResponse(methodId,
+    return new ExecuteEventbusBasicStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -156,7 +165,8 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
    * @return the response chain {@link ExecuteEventbusBasicStringCircuitBreaker}
    */
   public ExecuteEventbusBasicStringCircuitBreaker retry(int retryCount) {
-    return new ExecuteEventbusBasicStringCircuitBreaker(methodId,
+    return new ExecuteEventbusBasicStringCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -182,7 +192,8 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
    */
   public ExecuteEventbusBasicStringResponse onFailureRespond(
       ThrowableErrorConsumer<Throwable, String> onFailureRespond) {
-    return new ExecuteEventbusBasicStringResponse(methodId,
+    return new ExecuteEventbusBasicStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -197,6 +208,4 @@ public class ExecuteEventbusBasicStringResponse extends ExecuteEventbusBasicStri
         timeout,
         circuitBreakerTimeout);
   }
-
-
 }

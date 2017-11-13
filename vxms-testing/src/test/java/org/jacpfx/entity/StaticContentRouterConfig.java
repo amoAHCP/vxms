@@ -21,11 +21,8 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
-/**
- * Created by Andy Moncsek on 18.02.16.
- */
+/** Created by Andy Moncsek on 18.02.16. */
 public class StaticContentRouterConfig implements RouterConfiguration {
-
 
   public void staticHandler(Router router) {
     router.route("/static/*").handler(StaticHandler.create());

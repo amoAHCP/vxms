@@ -34,8 +34,8 @@ import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCallBlocki
 import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicString;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class is the end of the blocking fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16. This class is the end of the blocking fluent API, all data
+ * collected to execute the chain.
  */
 public class ExecuteEventbusString extends ExecuteEventbusBasicString {
 
@@ -49,23 +49,24 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
    * @param stringSupplier the supplier, producing the byte response
    * @param excecuteAsyncEventBusAndReply handles the response execution after event-bus bridge
-   * reply
+   *     reply
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response deliver serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusString(String methodId,
+  public ExecuteEventbusString(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -79,13 +80,14 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-
-        null, null,
+        null,
+        null,
         null,
         errorHandler,
         null,
@@ -102,57 +104,64 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
   @Override
   public void execute(DeliveryOptions deliveryOptions) {
     Objects.requireNonNull(deliveryOptions);
-    new ExecuteEventbusString(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        message,
-        stringSupplier,
-        excecuteAsyncEventBusAndReply,
-        errorHandler,
-        onFailureRespond,
-        deliveryOptions,
-        retryCount,
-        timeout,
-        delay,
-        circuitBreakerTimeout).execute();
-  }
-
-
-  @Override
-  public void execute() {
-    Optional.ofNullable(excecuteAsyncEventBusAndReply).ifPresent(evFunction -> {
-      try {
-        evFunction.execute(methodId,
+    new ExecuteEventbusString(
+            methodId,
             vxmsShared,
+            failure,
             errorMethodHandler,
             message,
+            stringSupplier,
+            excecuteAsyncEventBusAndReply,
             errorHandler,
             onFailureRespond,
             deliveryOptions,
             retryCount,
             timeout,
             delay,
-            circuitBreakerTimeout);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
-    });
-    Optional.ofNullable(stringSupplier).
-        ifPresent(supplier -> {
-              int retry = retryCount;
-              final Vertx vertx = vxmsShared.getVertx();
-              vertx.executeBlocking(handler -> executeAsync(supplier, retry, handler), false,
-                  getAsyncResultHandler(retry));
-            }
-
-        );
+            circuitBreakerTimeout)
+        .execute();
   }
 
-  private void executeAsync(ThrowableSupplier<String> supplier, int retry,
+  @Override
+  public void execute() {
+    Optional.ofNullable(excecuteAsyncEventBusAndReply)
+        .ifPresent(
+            evFunction -> {
+              try {
+                evFunction.execute(
+                    methodId,
+                    vxmsShared,
+                    errorMethodHandler,
+                    message,
+                    errorHandler,
+                    onFailureRespond,
+                    deliveryOptions,
+                    retryCount,
+                    timeout,
+                    delay,
+                    circuitBreakerTimeout);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            });
+    Optional.ofNullable(stringSupplier)
+        .ifPresent(
+            supplier -> {
+              int retry = retryCount;
+              final Vertx vertx = vxmsShared.getVertx();
+              vertx.executeBlocking(
+                  handler -> executeAsync(supplier, retry, handler),
+                  false,
+                  getAsyncResultHandler(retry));
+            });
+  }
+
+  private void executeAsync(
+      ThrowableSupplier<String> supplier,
+      int retry,
       Future<ExecutionResult<String>> blockingHandler) {
-    ResponseBlockingExecution.createResponseBlocking(methodId,
+    ResponseBlockingExecution.createResponseBlocking(
+        methodId,
         supplier,
         blockingHandler,
         errorHandler,
@@ -178,5 +187,4 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
       }
     };
   }
-
 }

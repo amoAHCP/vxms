@@ -30,28 +30,32 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 public interface ExecuteEventbusStringCallBlocking {
 
   /**
-   * Execute  chain when event-bus response handler is executed
+   * Execute chain when event-bus response handler is executed
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param errorMethodHandler the error-method handler
    * @param requestMessage the message to reply
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param responseDeliveryOptions the delivery serverOptions for the response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  void execute(String methodId,
+  void execute(
+      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, String> onFailureRespond,
       DeliveryOptions responseDeliveryOptions,
-      int retryCount, long timeout, long delay, long circuitBreakerTimeout);
+      int retryCount,
+      long timeout,
+      long delay,
+      long circuitBreakerTimeout);
 }

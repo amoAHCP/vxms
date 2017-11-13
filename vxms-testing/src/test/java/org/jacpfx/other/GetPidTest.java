@@ -19,9 +19,7 @@ package org.jacpfx.other;
 import org.junit.Ignore;
 import org.junit.Test;
 
-/**
- * Created by amo on 17.01.17.
- */
+/** Created by amo on 17.01.17. */
 public class GetPidTest {
 
   public static String getPID() {

@@ -31,10 +31,7 @@ import org.jacpfx.vxms.event.util.EventbusByteExecutionUtil;
 import org.jacpfx.vxms.event.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vxms.event.util.EventbusStringExecutionUtil;
 
-/**
- * Created by Andy Moncsek on 14.03.16.
- * Represents the start of a non- blocking execution chain
- */
+/** Created by Andy Moncsek on 14.03.16. Represents the start of a non- blocking execution chain */
 public class EventbusBridgeResponse {
 
   private final String methodId;
@@ -46,21 +43,21 @@ public class EventbusBridgeResponse {
   private final Object message;
   private final DeliveryOptions requestOptions;
 
-
   /**
    * Pass all parameters to execute the chain
    *
    * @param methodId the method identifier
    * @param requestmessage the message to responde
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the last failure
    * @param errorMethodHandler the error-method handler
    * @param targetId the event-bus message target-targetId
    * @param message the event-bus message
    * @param requestOptions the event-bus delivery serverOptions
    */
-  public EventbusBridgeResponse(String methodId,
+  public EventbusBridgeResponse(
+      String methodId,
       Message<Object> requestmessage,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -87,7 +84,8 @@ public class EventbusBridgeResponse {
   public ExecuteEventbusBasicStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-    return EventbusStringExecutionUtil.mapToStringResponse(methodId,
+    return EventbusStringExecutionUtil.mapToStringResponse(
+        methodId,
         targetId,
         message,
         stringFunction,
@@ -114,7 +112,8 @@ public class EventbusBridgeResponse {
   public ExecuteEventbusBasicByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-    return EventbusByteExecutionUtil.mapToByteResponse(methodId,
+    return EventbusByteExecutionUtil.mapToByteResponse(
+        methodId,
         targetId,
         message,
         byteFunction,
@@ -143,7 +142,8 @@ public class EventbusBridgeResponse {
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 
-    return EventbusObjectExecutionUtil.mapToObjectResponse(methodId,
+    return EventbusObjectExecutionUtil.mapToObjectResponse(
+        methodId,
         targetId,
         message,
         objectFunction,
@@ -161,6 +161,4 @@ public class EventbusBridgeResponse {
         0l,
         0l);
   }
-
-
 }
