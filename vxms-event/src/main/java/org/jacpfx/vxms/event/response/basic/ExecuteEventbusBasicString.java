@@ -30,6 +30,7 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusStringCall;
+import org.jacpfx.vxms.event.response.AbstractResponse;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
@@ -199,43 +200,24 @@ public class ExecuteEventbusBasicString extends AbstractResponse<String> {
                                     errorMethodHandler,
                                     vxmsShared,
                                     failure,
-                                    value -> {
-                                      if (value.succeeded()) {
-                                        final Object result = value.getResult();
-                                        if (chainList.size() > 1 && !value.handledError()) {
-                                          final ExecutionStep executionStepAndThan =
-                                              chainList.get(1);
-                                          ofNullable(executionStepAndThan.getStep())
-                                              .ifPresent(
-                                                  step ->
-                                                      executeStep(
-                                                          methodId,
-                                                          vxmsShared,
-                                                          failure,
-                                                          errorMethodHandler,
-                                                          chainList,
-                                                          result,
-                                                          executionStepAndThan,
-                                                          step,
-                                                          errorHandler,
-                                                          onFailureRespond,
-                                                          timeout,
-                                                          circuitBreakerTimeout,
-                                                          retry));
-                                        } else {
-                                          respond(value.getResult());
-                                        }
-                                      } else {
-                                        fail(
-                                            value.getCause().getMessage(),
-                                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                                      }
-                                    });
+                                    value -> getResultHandler(
+                                        methodId,
+                                        vxmsShared,
+                                        failure,
+                                        errorMethodHandler,
+                                        chainList,
+                                        errorHandler,
+                                        onFailureRespond,
+                                        timeout,
+                                        circuitBreakerTimeout,
+                                        retry,
+                                        value));
                               });
                     }
                   });
         });
   }
+
 
   @Override
   protected void respond(String result) {

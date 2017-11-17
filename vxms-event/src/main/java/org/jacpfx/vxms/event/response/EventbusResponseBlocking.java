@@ -18,10 +18,14 @@ package org.jacpfx.vxms.event.response;
 
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
+import org.jacpfx.vxms.event.response.blocking.ExecuteEventChainResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusByteResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusObjectResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusStringResponse;
@@ -61,6 +65,22 @@ public class EventbusResponseBlocking {
     this.message = message;
   }
 
+
+  /**
+   * starts a supply chain to create a response
+   *
+   * @param chainconsumer the initial supplier
+   * @param <T> the type of the return value
+   * @return {@link ExecuteEventChainResponse}
+   */
+  public <T> ExecuteEventChainResponse<T> supply(ThrowableSupplier<T> chainconsumer) {
+    final List<BlockingExecutionStep> chain = new ArrayList<>();
+    chain.add(new BlockingExecutionStep(chainconsumer));
+    return new ExecuteEventChainResponse<>(
+        methodId, vxmsShared, failure, errorMethodHandler, message, chain);
+  }
+
+
   /**
    * Retunrs a byte array to the target type
    *
@@ -74,15 +94,8 @@ public class EventbusResponseBlocking {
         failure,
         errorMethodHandler,
         message,
-        byteSupplier,
         null,
-        null,
-        null,
-        null,
-        0,
-        0l,
-        0l,
-        0l);
+        byteSupplier);
   }
 
   /**
@@ -98,15 +111,8 @@ public class EventbusResponseBlocking {
         failure,
         errorMethodHandler,
         message,
-        stringSupplier,
         null,
-        null,
-        null,
-        null,
-        0,
-        0l,
-        0l,
-        0l);
+        stringSupplier);
   }
 
   /**
@@ -124,15 +130,8 @@ public class EventbusResponseBlocking {
         failure,
         errorMethodHandler,
         message,
+        null,
         objectSupplier,
-        null,
-        encoder,
-        null,
-        null,
-        null,
-        0,
-        0,
-        0l,
-        0l);
+        encoder);
   }
 }

@@ -23,9 +23,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -42,23 +44,24 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
   protected final long delay;
   protected final ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply;
   protected final ThrowableSupplier<byte[]> byteSupplier;
+  protected final List<BlockingExecutionStep> chain;
   protected final ThrowableFunction<Throwable, byte[]> onFailureRespond;
 
   /**
    * The constructor to pass all needed members
-   *
-   * @param methodId the method identifier
+   *  @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param byteSupplier the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   *     API
+ *     API
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   *     case of failure
+*     case of failure
    * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
@@ -71,6 +74,7 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<byte[]> byteSupplier,
       ExecuteEventbusByteCallBlocking excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -95,6 +99,7 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
         retryCount,
         timeout,
         circuitBreakerTimeout);
+    this.chain = chain;
     this.delay = delay;
     this.excecuteAsyncEventBusAndReply = excecuteEventBusAndReply;
     this.byteSupplier = byteSupplier;
@@ -110,7 +115,7 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
             failure,
             errorMethodHandler,
             message,
-            byteSupplier,
+        chain, byteSupplier,
             excecuteAsyncEventBusAndReply,
             errorHandler,
             onFailureRespond,
@@ -150,13 +155,13 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
               int retry = retryCount;
               final Vertx vertx = vxmsShared.getVertx();
               vertx.executeBlocking(
-                  handler -> executeAsync(supplier, retry, handler),
+                  handler -> typedExecute(supplier, retry, handler),
                   false,
-                  getAsyncResultHandler(retry));
+                  getTypedResultHandler(retry));
             });
   }
 
-  private void executeAsync(
+  private void typedExecute(
       ThrowableSupplier<byte[]> supplier, int retry, Future<ExecutionResult<byte[]>> handler) {
     ResponseBlockingExecution.createResponseBlocking(
         methodId,
@@ -173,7 +178,7 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
         delay);
   }
 
-  private Handler<AsyncResult<ExecutionResult<byte[]>>> getAsyncResultHandler(int retry) {
+  private Handler<AsyncResult<ExecutionResult<byte[]>>> getTypedResultHandler(int retry) {
     return value -> {
       if (!value.failed()) {
         respond(value.result().getResult());

@@ -24,9 +24,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
@@ -45,24 +47,25 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
   protected final long timeout;
   protected final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply;
   protected final ThrowableSupplier<Serializable> objectSupplier;
+  protected final List<BlockingExecutionStep> chain;
   protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
 
   /**
    * The constructor to pass all needed members
-   *
-   * @param methodId the method identifier
+   *  @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param objectSupplier the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   *     API
+ *     API
    * @param encoder the encoder to serialize your object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   *     case of failure
+*     case of failure
    * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
@@ -75,6 +78,7 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<Serializable> objectSupplier,
       ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
       Encoder encoder,
@@ -101,6 +105,7 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
         retryCount,
         timeout,
         circuitBreakerTimeout);
+    this.chain = chain;
     this.delay = delay;
     this.timeout = timeout;
     this.excecuteEventBusAndReply = excecuteEventBusAndReply;
@@ -117,7 +122,7 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
             failure,
             errorMethodHandler,
             message,
-            objectSupplier,
+        chain, objectSupplier,
             excecuteEventBusAndReply,
             encoder,
             errorHandler,

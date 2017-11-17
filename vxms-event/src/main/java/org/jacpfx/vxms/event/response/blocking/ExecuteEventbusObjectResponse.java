@@ -19,7 +19,9 @@ package org.jacpfx.vxms.event.response.blocking;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -41,6 +43,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param objectSupplier the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    *     API
@@ -60,6 +63,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<Serializable> objectSupplier,
       ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
       Encoder encoder,
@@ -77,7 +81,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         failure,
         errorMethodHandler,
         message,
-        objectSupplier,
+        chain, objectSupplier,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -87,6 +91,40 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         timeout,
         delay,
         circuitBreakerTimeout);
+  }
+
+  /**
+   * The constructor to pass all needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   *     objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to responde to
+   * @param chain the execution chain
+   * @param objectSupplier the supplier, producing the byte response
+   * @param encoder the encoder to serialize your object
+   */
+  public ExecuteEventbusObjectResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, Message<Object> message,List<BlockingExecutionStep> chain,
+      ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+    super(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        chain, objectSupplier,
+        null,
+        encoder,
+        null,
+        null,
+        null,
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
@@ -105,7 +143,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         failure,
         errorMethodHandler,
         message,
-        objectSupplier,
+        chain, objectSupplier,
         excecuteEventBusAndReply,
         encoder,
         errorHandler,
@@ -130,6 +168,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,
@@ -155,6 +194,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,
@@ -180,6 +220,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,
@@ -205,6 +246,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,

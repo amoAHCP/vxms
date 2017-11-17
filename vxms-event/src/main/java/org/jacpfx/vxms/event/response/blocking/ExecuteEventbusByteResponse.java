@@ -18,7 +18,9 @@ package org.jacpfx.vxms.event.response.blocking;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
@@ -39,6 +41,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param byteSupplier the supplier, producing the byte response
    * @param excecuteAsyncEventBusAndReply the response of an event-bus call which is passed to the
    *     fluent API
@@ -57,6 +60,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<byte[]> byteSupplier,
       ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -72,7 +76,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         failure,
         errorMethodHandler,
         message,
-        byteSupplier,
+        chain, byteSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -81,6 +85,38 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         timeout,
         delay,
         circuitBreakerTimeout);
+  }
+
+  /**
+   * The constructor to pass needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   *     objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to responde to
+   * @param chain the execution chain
+   * @param byteSupplier the supplier, producing the byte response
+   */
+  public ExecuteEventbusByteResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, Message<Object> message,List<BlockingExecutionStep> chain,
+      ThrowableSupplier<byte[]> byteSupplier) {
+    super(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        chain, byteSupplier,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
@@ -98,7 +134,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         failure,
         errorMethodHandler,
         message,
-        byteSupplier,
+        chain, byteSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -122,6 +158,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -146,6 +183,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -170,6 +208,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -194,6 +233,7 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         failure,
         errorMethodHandler,
         message,
+        chain,
         byteSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,

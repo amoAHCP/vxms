@@ -19,7 +19,9 @@ package org.jacpfx.vxms.event.response.blocking;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -41,6 +43,7 @@ public class ExecuteEventbusObjectCircuitBreaker extends ExecuteEventbusObjectRe
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param objectSupplier the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    *     API
@@ -60,6 +63,7 @@ public class ExecuteEventbusObjectCircuitBreaker extends ExecuteEventbusObjectRe
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<Serializable> objectSupplier,
       ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
       Encoder encoder,
@@ -76,6 +80,7 @@ public class ExecuteEventbusObjectCircuitBreaker extends ExecuteEventbusObjectRe
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,
@@ -103,6 +108,7 @@ public class ExecuteEventbusObjectCircuitBreaker extends ExecuteEventbusObjectRe
         failure,
         errorMethodHandler,
         message,
+        chain,
         objectSupplier,
         excecuteEventBusAndReply,
         encoder,

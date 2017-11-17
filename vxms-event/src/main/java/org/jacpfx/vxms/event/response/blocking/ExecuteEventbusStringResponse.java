@@ -18,7 +18,9 @@ package org.jacpfx.vxms.event.response.blocking;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
@@ -39,6 +41,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param stringSupplier the supplier, producing the byte response
    * @param excecuteAsyncEventBusAndReply the response of an event-bus call which is passed to the
    *     fluent API
@@ -57,6 +60,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<String> stringSupplier,
       ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -72,7 +76,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         failure,
         errorMethodHandler,
         message,
-        stringSupplier,
+        chain, stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -81,6 +85,39 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         timeout,
         delay,
         circuitBreakerTimeout);
+  }
+
+  /**
+   *
+   * The constructor to pass minimal needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   *     objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to responde to
+   * @param chain the execution chain
+   * @param stringSupplier the supplier, producing the byte response
+   */
+  public ExecuteEventbusStringResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, Message<Object> message,List<BlockingExecutionStep> chain,
+      ThrowableSupplier<String> stringSupplier) {
+    super(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        chain, stringSupplier,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0l,
+        0l,
+        0l);
   }
 
   /**
@@ -98,7 +135,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         failure,
         errorMethodHandler,
         message,
-        stringSupplier,
+        chain, stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -123,6 +160,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -147,6 +185,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -171,6 +210,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -195,6 +235,7 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,

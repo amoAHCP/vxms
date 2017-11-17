@@ -16,17 +16,16 @@
 
 package org.jacpfx.vxms.event.response.blocking;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import static java.util.Optional.ofNullable;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.jacpfx.vxms.common.ExecutionResult;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
@@ -42,6 +41,7 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
   protected final long delay;
   protected final ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply;
   protected final ThrowableSupplier<String> stringSupplier;
+  protected final List<BlockingExecutionStep> chain;
   protected final ThrowableFunction<Throwable, String> onFailureRespond;
 
   /**
@@ -53,6 +53,7 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
+   * @param chain the execution chain
    * @param stringSupplier the supplier, producing the byte response
    * @param excecuteAsyncEventBusAndReply handles the response execution after event-bus bridge
    *     reply
@@ -71,6 +72,7 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<String> stringSupplier,
       ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
       Consumer<Throwable> errorHandler,
@@ -95,6 +97,7 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
         retryCount,
         timeout,
         circuitBreakerTimeout);
+    this.chain = chain;
     this.delay = delay;
     this.excecuteAsyncEventBusAndReply = excecuteAsyncEventBusAndReply;
     this.stringSupplier = stringSupplier;
@@ -110,6 +113,7 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
             failure,
             errorMethodHandler,
             message,
+            chain,
             stringSupplier,
             excecuteAsyncEventBusAndReply,
             errorHandler,
@@ -150,41 +154,65 @@ public class ExecuteEventbusString extends ExecuteEventbusBasicString {
               int retry = retryCount;
               final Vertx vertx = vxmsShared.getVertx();
               vertx.executeBlocking(
-                  handler -> executeAsync(supplier, retry, handler),
+                  handler ->
+                      executeBlocking(
+                          methodId,
+                          supplier,
+                          handler,
+                          errorHandler,
+                          onFailureRespond,
+                          errorMethodHandler,
+                          vxmsShared,
+                          failure,
+                          retry,
+                          timeout,
+                          circuitBreakerTimeout,
+                          delay),
                   false,
-                  getAsyncResultHandler(retry));
+                  getBlockingResultHandler(retry));
             });
-  }
 
-  private void executeAsync(
-      ThrowableSupplier<String> supplier,
-      int retry,
-      Future<ExecutionResult<String>> blockingHandler) {
-    ResponseBlockingExecution.createResponseBlocking(
-        methodId,
-        supplier,
-        blockingHandler,
-        errorHandler,
-        onFailureRespond,
-        errorMethodHandler,
-        vxmsShared,
-        failure,
-        retry,
-        timeout,
-        circuitBreakerTimeout,
-        delay);
-  }
-
-  private Handler<AsyncResult<ExecutionResult<String>>> getAsyncResultHandler(int retry) {
-    return value -> {
-      if (!value.failed()) {
-        ExecutionResult<String> result = value.result();
-        respond(result.getResult());
-      } else {
-        if (retry == 0) {
-          fail(value.cause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-        }
-      }
-    };
+    ofNullable(chain)
+        .ifPresent(
+            (List<BlockingExecutionStep> chainList) -> {
+              if (!chainList.isEmpty()) {
+                final BlockingExecutionStep executionStep = chainList.get(0);
+                ofNullable(executionStep.getChainsupplier())
+                    .ifPresent(
+                        (initialConsumer) -> {
+                          int retry = retryCount;
+                          final Vertx vertx = vxmsShared.getVertx();
+                          vertx.executeBlocking(
+                              handler ->
+                                  executeBlocking(
+                                      methodId,
+                                      initialConsumer,
+                                      handler,
+                                      errorHandler,
+                                      onFailureRespond,
+                                      errorMethodHandler,
+                                      vxmsShared,
+                                      failure,
+                                      retry,
+                                      timeout,
+                                      circuitBreakerTimeout,
+                                      delay),
+                              false,
+                              getBlockingResultHandler(
+                                  methodId,
+                                  executionStep,
+                                  chainList,
+                                  errorHandler,
+                                  onFailureRespond,
+                                  errorMethodHandler,
+                                  vxmsShared,
+                                  failure,
+                                  retry,
+                                  timeout,
+                                  circuitBreakerTimeout,
+                                  delay));
+                        });
+              }
+            });
   }
 }
