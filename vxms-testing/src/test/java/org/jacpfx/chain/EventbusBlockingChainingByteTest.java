@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jacpfx.entity.Payload;
-import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.event.annotation.Consume;
@@ -39,7 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /** Created by Andy Moncsek on 23.04.15. */
-public class EventbusChainingObjectTest extends VertxTestBase {
+public class EventbusBlockingChainingByteTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -479,16 +478,14 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("simpleStringResponse: " + reply);
       reply
           .response()
+          .blocking()
           .<Integer>supply(
-              (future) -> {
-                future.complete(1);
-              })
-          .mapToObjectResponse(
-              (val, future) -> {
+              () -> 1)
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
 
@@ -497,20 +494,18 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("simpleStringResponse: " + reply);
       reply
           .response()
+          .blocking()
           .<Integer>supply(
-              (future) -> {
-                future.complete(1);
-              })
+              () -> 1)
           .<String>andThen(
-              (value, future) -> {
-                future.complete(value + 1 + "");
+              (value) -> {
+                return value + 1 + "";
               })
-          .mapToObjectResponse(
-              (val, future) -> {
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
 
@@ -519,22 +514,23 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("simpleStringResponse: " + reply);
       reply
           .response()
+          .blocking()
           .<Integer>supply(
-              (future) -> {
+              () -> {
                 throw new NullPointerException("test error");
               })
-          .mapToObjectResponse(
-              (val, future) -> {
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .onFailureRespond(
-              (t, f) -> {
+              (t) -> {
                 Payload<String> pp = new Payload<>("error " + t.getMessage());
-                f.complete(pp);
-              },
-              new ExampleByteEncoder())
+                System.out.println(t.getMessage());
+                return Serializer.serialize(pp);
+
+              })
           .execute();
     }
 
@@ -543,27 +539,24 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("simpleStringResponse: " + reply);
       reply
           .response()
-          .<Integer>supply(
-              (future) -> {
-                future.complete(1);
-              })
+          .blocking()
+          .<Integer>supply(() -> 1)
           .<String>andThen(
-              (value, future) -> {
+              (value) -> {
                 throw new NullPointerException("test error");
               })
-          .mapToObjectResponse(
-              (val, future) -> {
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .onFailureRespond(
-              (t, f) -> {
+              (t) -> {
                 Payload<String> pp = new Payload<>("error " + t.getMessage());
-                f.complete(pp);
                 System.out.println(t.getMessage());
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+
+              })
           .execute();
     }
 
@@ -572,16 +565,16 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("simpleStringResponse: " + reply);
       reply
           .response()
+          .blocking()
           .<Integer>supply(
-              (future) -> {
+              () -> {
                 throw new NullPointerException("test error");
               })
-          .mapToObjectResponse(
-              (val, future) -> {
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
 
@@ -591,28 +584,27 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       AtomicInteger counter = new AtomicInteger(0);
       reply
           .response()
+          .blocking()
           .<Integer>supply(
-              (future) -> {
+              () -> {
                 counter.incrementAndGet();
                 throw new NullPointerException("test error");
               })
-          .mapToObjectResponse(
-              (val, future) -> {
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .onError(
               t -> {
                 System.out.println(t.getMessage() + " counter:" + counter.get());
               })
           .retry(3)
           .onFailureRespond(
-              (t, f) -> {
+              (t) -> {
                 Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
-                f.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
 
@@ -622,33 +614,32 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       AtomicInteger counter = new AtomicInteger(1);
       reply
           .response()
+          .blocking()
           .<Integer>supply(
-              (future) -> {
+              () -> {
                 counter.decrementAndGet();
-                future.complete(1);
+                return 1;
               })
           .<String>andThen(
-              (value, future) -> {
+              (value) -> {
                 counter.incrementAndGet();
                 throw new NullPointerException("test error");
               })
-          .mapToObjectResponse(
-              (val, future) -> {
+          .mapToByteResponse(
+              (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .onError(
               t -> {
                 System.out.println(t.getMessage() + " counter:" + counter.get());
               })
           .retry(3)
           .onFailureRespond(
-              (t, f) -> {
+              (t) -> {
                 Payload<String> pp = new Payload<>("error " + counter.get() + " " + t.getMessage());
-                f.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
 
@@ -658,28 +649,27 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("stringResponse: " + val);
       reply
           .response()
+          .blocking()
           .<String>supply(
-              (future) -> {
+              () -> {
                 if (val.equals("crash")) {
                   throw new NullPointerException("test-123");
                 }
-                future.complete(val);
+                return val;
               })
-          .mapToObjectResponse(
-              (v, future) -> {
+          .mapToByteResponse(
+              (v) -> {
                 Payload<String> pp = new Payload<>(v);
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .onError(e -> System.out.println(e.getMessage()))
           .retry(3)
           .closeCircuitBreaker(2000)
           .onFailureRespond(
-              (error, future) -> {
+              (error) -> {
                 Payload<String> pp = new Payload<>("failure");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
 
@@ -689,32 +679,29 @@ public class EventbusChainingObjectTest extends VertxTestBase {
       System.out.println("stringResponse: " + val);
       reply
           .response()
+          .blocking()
           .<String>supply(
-              (future) -> {
-                future.complete(val);
-              })
+              () -> val)
           .<String>andThen(
-              (v, f) -> {
+              (v) -> {
                 if (v.equals("crash")) {
                   throw new NullPointerException("test-123");
                 }
-                f.complete(v);
+                return v;
               })
-          .mapToObjectResponse(
-              (v, future) -> {
+          .mapToByteResponse(
+              (v) -> {
                 Payload<String> pp = new Payload<>(v);
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .onError(e -> System.out.println(e.getMessage()))
           .retry(3)
           .closeCircuitBreaker(2000)
           .onFailureRespond(
-              (error, future) -> {
+              (error) -> {
                 Payload<String> pp = new Payload<>("failure");
-                future.complete(pp);
-              },
-              new ExampleByteEncoder())
+                return Serializer.serialize(pp);
+              })
           .execute();
     }
   }

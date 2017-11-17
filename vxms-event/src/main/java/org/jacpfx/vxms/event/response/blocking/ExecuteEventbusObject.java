@@ -16,10 +16,8 @@
 
 package org.jacpfx.vxms.event.response.blocking;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import static java.util.Optional.ofNullable;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
@@ -29,7 +27,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.BlockingExecutionStep;
-import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -52,7 +49,8 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
 
   /**
    * The constructor to pass all needed members
-   *  @param methodId the method identifier
+   *
+   * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the failure thrown while task execution
@@ -61,11 +59,11 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
    * @param chain the execution chain
    * @param objectSupplier the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
- *     API
+   *     API
    * @param encoder the encoder to serialize your object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-*     case of failure
+   *     case of failure
    * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
@@ -122,7 +120,8 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
             failure,
             errorMethodHandler,
             message,
-        chain, objectSupplier,
+            chain,
+            objectSupplier,
             excecuteEventBusAndReply,
             encoder,
             errorHandler,
@@ -165,40 +164,65 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
               int retry = retryCount;
               final Vertx vertx = vxmsShared.getVertx();
               vertx.executeBlocking(
-                  handler -> executeAsync(supplier, retry, handler),
+                  handler ->
+                      executeBlocking(
+                          methodId,
+                          supplier,
+                          handler,
+                          errorHandler,
+                          onFailureRespond,
+                          errorMethodHandler,
+                          vxmsShared,
+                          failure,
+                          retry,
+                          timeout,
+                          circuitBreakerTimeout,
+                          delay),
                   false,
-                  getAsyncResultHandler(retry));
+                  getBlockingResultHandler(retry));
             });
-  }
 
-  private void executeAsync(
-      ThrowableSupplier<Serializable> supplier,
-      int retry,
-      Future<ExecutionResult<Serializable>> handler) {
-    ResponseBlockingExecution.createResponseBlocking(
-        methodId,
-        supplier,
-        handler,
-        errorHandler,
-        onFailureRespond,
-        errorMethodHandler,
-        vxmsShared,
-        failure,
-        retry,
-        timeout,
-        circuitBreakerTimeout,
-        delay);
-  }
-
-  private Handler<AsyncResult<ExecutionResult<Serializable>>> getAsyncResultHandler(int retry) {
-    return value -> {
-      if (!value.failed()) {
-        respond(value.result().getResult());
-      } else {
-        if (retry == 0) {
-          fail(value.cause().getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-        }
-      }
-    };
+    ofNullable(chain)
+        .ifPresent(
+            (List<BlockingExecutionStep> chainList) -> {
+              if (!chainList.isEmpty()) {
+                final BlockingExecutionStep executionStep = chainList.get(0);
+                ofNullable(executionStep.getChainsupplier())
+                    .ifPresent(
+                        (initialConsumer) -> {
+                          int retry = retryCount;
+                          final Vertx vertx = vxmsShared.getVertx();
+                          vertx.executeBlocking(
+                              handler ->
+                                  executeBlocking(
+                                      methodId,
+                                      initialConsumer,
+                                      handler,
+                                      errorHandler,
+                                      onFailureRespond,
+                                      errorMethodHandler,
+                                      vxmsShared,
+                                      failure,
+                                      retry,
+                                      timeout,
+                                      circuitBreakerTimeout,
+                                      delay),
+                              false,
+                              getBlockingResultHandler(
+                                  methodId,
+                                  executionStep,
+                                  chainList,
+                                  errorHandler,
+                                  onFailureRespond,
+                                  errorMethodHandler,
+                                  vxmsShared,
+                                  failure,
+                                  retry,
+                                  timeout,
+                                  circuitBreakerTimeout,
+                                  delay));
+                        });
+              }
+            });
   }
 }
