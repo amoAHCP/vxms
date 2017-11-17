@@ -24,7 +24,7 @@ import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusByteCallBlocking;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusByteCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
@@ -62,7 +62,7 @@ public class ExecuteEventbusByteCircuitBreaker extends ExecuteEventbusByteRespon
       Message<Object> message,
       List<BlockingExecutionStep> chain,
       ThrowableSupplier<byte[]> byteSupplier,
-      ExecuteEventbusByteCallBlocking excecuteEventBusAndReply,
+      ExecuteEventbusByteCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, byte[]> onFailureRespond,
       DeliveryOptions deliveryOptions,

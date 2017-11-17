@@ -27,7 +27,7 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
  * execution will be handled as blocking code.
  */
 @FunctionalInterface
-public interface ExecuteEventbusStringCallBlocking {
+public interface ExecuteEventbusStringCall {
 
   /**
    * Execute chain when event-bus response handler is executed

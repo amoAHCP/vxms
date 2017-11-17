@@ -22,23 +22,21 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
-import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusObjectCall;
+import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusByteCall;
 import org.jacpfx.vxms.event.response.AbstractResponse;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
  * data collected to execute the chain.
  */
-public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
+public class ExecuteEventbusByte extends AbstractResponse<byte[]> {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -47,10 +45,9 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
   protected final List<ExecutionStep> chain;
   protected final Consumer<Throwable> errorHandler;
   protected final Consumer<Throwable> errorMethodHandler;
-  protected final ThrowableFutureConsumer<Serializable> objectConsumer;
-  protected final ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond;
-  protected final ExecuteEventbusObjectCall excecuteEventBusAndReply;
-  protected final Encoder encoder;
+  protected final ThrowableFutureConsumer<byte[]> byteConsumer;
+  protected final ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond;
+  protected final ExecuteEventbusByteCall excecuteEventBusAndReply;
   protected final DeliveryOptions deliveryOptions;
   protected final int retryCount;
   protected final long timeout;
@@ -65,10 +62,9 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
-   * @param chain the execution chain
-   * @param objectConsumer the consumer, producing the byte response
+   * @param chain
+   * @param byteConsumer the consumer, producing the byte response
    * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
-   * @param encoder the encoder to serialize the response object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    *     case of failure
@@ -77,18 +73,17 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicObject(
+  public ExecuteEventbusByte(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
       List<ExecutionStep> chain,
-      ThrowableFutureConsumer<Serializable> objectConsumer,
-      ExecuteEventbusObjectCall excecuteEventBusAndReply,
-      Encoder encoder,
+      ThrowableFutureConsumer<byte[]> byteConsumer,
+      ExecuteEventbusByteCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
+      ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond,
       DeliveryOptions deliveryOptions,
       int retryCount,
       long timeout,
@@ -99,11 +94,10 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
     this.errorMethodHandler = errorMethodHandler;
     this.message = message;
     this.chain = chain;
-    this.objectConsumer = objectConsumer;
-    this.encoder = encoder;
-    this.deliveryOptions = deliveryOptions;
+    this.byteConsumer = byteConsumer;
     this.errorHandler = errorHandler;
     this.onFailureRespond = onFailureRespond;
+    this.deliveryOptions = deliveryOptions;
     this.retryCount = retryCount;
     this.excecuteEventBusAndReply = excecuteEventBusAndReply;
     this.timeout = timeout;
@@ -111,22 +105,21 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
   }
 
   /**
-   * Execute the reply chain with given http status code and content-type
+   * Execute the reply chain with given http status code
    *
-   * @param deliveryOptions, the eventbus delivery serverOptions
+   * @param deliveryOptions, the event b us deliver serverOptions
    */
   public void execute(DeliveryOptions deliveryOptions) {
     Objects.requireNonNull(deliveryOptions);
-    new ExecuteEventbusBasicObject(
+    new ExecuteEventbusByte(
             methodId,
             vxmsShared,
             failure,
             errorMethodHandler,
             message,
             chain,
-            objectConsumer,
+            byteConsumer,
             excecuteEventBusAndReply,
-            encoder,
             errorHandler,
             onFailureRespond,
             deliveryOptions,
@@ -150,7 +143,6 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
                           vxmsShared,
                           errorMethodHandler,
                           message,
-                          encoder,
                           errorHandler,
                           onFailureRespond,
                           deliveryOptions,
@@ -161,7 +153,8 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
                       e.printStackTrace();
                     }
                   });
-          ofNullable(objectConsumer)
+
+          ofNullable(byteConsumer)
               .ifPresent(
                   userOperation -> {
                     int retry = retryCount;
@@ -234,17 +227,13 @@ public class ExecuteEventbusBasicObject extends AbstractResponse<Serializable> {
   }
 
   @Override
-  protected void respond(Serializable result) {
+  protected void respond(byte[] result) {
     if (result != null) {
-      ResponseExecution.encode(result, encoder)
-          .ifPresent(
-              value -> {
-                if (deliveryOptions != null) {
-                  message.reply(value, deliveryOptions);
-                } else {
-                  message.reply(value);
-                }
-              });
+      if (deliveryOptions != null) {
+        message.reply(result, deliveryOptions);
+      } else {
+        message.reply(result);
+      }
     }
   }
 }

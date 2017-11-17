@@ -24,9 +24,9 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByteResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusByteResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusObjectResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusStringResponse;
 import org.jacpfx.vxms.event.util.EventbusByteExecutionUtil;
 import org.jacpfx.vxms.event.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vxms.event.util.EventbusStringExecutionUtil;
@@ -79,9 +79,9 @@ public class EventbusBridgeResponse {
    * Map Response from event-bus call to REST response
    *
    * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
-   * @return the response chain {@link ExecuteEventbusBasicStringResponse}
+   * @return the response chain {@link ExecuteEventbusStringResponse}
    */
-  public ExecuteEventbusBasicStringResponse mapToStringResponse(
+  public ExecuteEventbusStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
     return EventbusStringExecutionUtil.mapToStringResponse(
@@ -107,9 +107,9 @@ public class EventbusBridgeResponse {
    * Map Response from event-bus call to REST response
    *
    * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
-   * @return the response chain {@link ExecuteEventbusBasicByteResponse}
+   * @return the response chain {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse mapToByteResponse(
+  public ExecuteEventbusByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
     return EventbusByteExecutionUtil.mapToByteResponse(
@@ -136,9 +136,9 @@ public class EventbusBridgeResponse {
    *
    * @param objectFunction pass io.vertx.core.AsyncResult and future to complete with a Object
    * @param encoder the Object encoder
-   * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the response chain {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse mapToObjectResponse(
+  public ExecuteEventbusObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 

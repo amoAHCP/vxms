@@ -18,18 +18,16 @@ package org.jacpfx.vxms.event.interfaces.blocking;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import java.io.Serializable;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
-import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 
 /**
- * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response.The
+ * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response. The
  * execution will be handled as blocking code.
  */
 @FunctionalInterface
-public interface ExecuteEventbusObjectCallBlocking {
+public interface ExecuteEventbusByteCall {
 
   /**
    * Execute chain when event-bus response handler is executed
@@ -39,7 +37,6 @@ public interface ExecuteEventbusObjectCallBlocking {
    *     objects per instance
    * @param errorMethodHandler the error-method handler
    * @param requestMessage the message to reply
-   * @param encoder the encoder to serialize te response message
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    *     case of failure
@@ -54,9 +51,8 @@ public interface ExecuteEventbusObjectCallBlocking {
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
-      Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction<Throwable, Serializable> onFailureRespond,
+      ThrowableFunction<Throwable, byte[]> onFailureRespond,
       DeliveryOptions responseDeliveryOptions,
       int retryCount,
       long timeout,

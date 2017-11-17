@@ -20,23 +20,28 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
+import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
+import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
 /**
- * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response. The
- * execution will be handled as blocking code.
+ * Created by amo on 31.01.17. Generic Functional interface for handling typed execution of fluid
+ * API
  */
 @FunctionalInterface
-public interface ExecuteEventbusByteCallBlocking {
+public interface RecursiveExecutor<T> {
 
   /**
-   * Execute chain when event-bus response handler is executed
+   * Execute typed execution handling
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
+   * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
    * @param requestMessage the message to reply
+   * @param supplier the result supplier
+   * @param encoder the encoder to serialize the result object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    *     case of failure
@@ -49,10 +54,13 @@ public interface ExecuteEventbusByteCallBlocking {
   void execute(
       String methodId,
       VxmsShared vxmsShared,
+      Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
+      ThrowableSupplier<T> supplier,
+      Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction<Throwable, byte[]> onFailureRespond,
+      ThrowableFunction<Throwable, T> onFailureRespond,
       DeliveryOptions responseDeliveryOptions,
       int retryCount,
       long timeout,

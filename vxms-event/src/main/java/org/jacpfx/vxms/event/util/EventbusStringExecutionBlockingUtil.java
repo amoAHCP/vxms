@@ -24,10 +24,10 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeBlockingExecution;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
-import org.jacpfx.vxms.event.interfaces.blocking.RecursiveBlockingExecutor;
-import org.jacpfx.vxms.event.interfaces.blocking.RetryBlockingExecutor;
+import org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeExecution;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCall;
+import org.jacpfx.vxms.event.interfaces.blocking.RecursiveExecutor;
+import org.jacpfx.vxms.event.interfaces.blocking.RetryExecutor;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusStringResponse;
 
 /**
@@ -82,7 +82,7 @@ public class EventbusStringExecutionBlockingUtil {
     final DeliveryOptions deliveryOptions =
         Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
 
-    final RetryBlockingExecutor retry =
+    final RetryExecutor retry =
         (methodId,
             targetId,
             message,
@@ -123,7 +123,7 @@ public class EventbusStringExecutionBlockingUtil {
               .execute();
         };
 
-    final RecursiveBlockingExecutor executor =
+    final RecursiveExecutor executor =
         (methodId,
             vxmsShared,
             failure,
@@ -156,7 +156,7 @@ public class EventbusStringExecutionBlockingUtil {
                     circuitBreakerTimeout)
                 .execute();
 
-    final ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply =
+    final ExecuteEventbusStringCall excecuteAsyncEventBusAndReply =
         (methodId,
             vxmsShared,
             errorMethodHandler,
@@ -168,7 +168,7 @@ public class EventbusStringExecutionBlockingUtil {
             timeout,
             delay,
             circuitBreakerTimeout) ->
-            EventbusBridgeBlockingExecution.sendMessageAndSupplyHandler(
+            EventbusBridgeExecution.sendMessageAndSupplyHandler(
                 methodId,
                 _targetId,
                 _message,

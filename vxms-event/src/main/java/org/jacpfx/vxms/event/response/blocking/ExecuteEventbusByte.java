@@ -29,17 +29,16 @@ import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusByteCallBlocking;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByte;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusByteCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class is the end of the blocking fluent API, all data
  * collected to execute the chain.
  */
-public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
+public class ExecuteEventbusByte extends org.jacpfx.vxms.event.response.basic.ExecuteEventbusByte {
 
   protected final long delay;
-  protected final ExecuteEventbusByteCallBlocking excecuteAsyncEventBusAndReply;
+  protected final ExecuteEventbusByteCall excecuteAsyncEventBusAndReply;
   protected final ThrowableSupplier<byte[]> byteSupplier;
   protected final List<BlockingExecutionStep> chain;
   protected final ThrowableFunction<Throwable, byte[]> onFailureRespond;
@@ -74,7 +73,7 @@ public class ExecuteEventbusByte extends ExecuteEventbusBasicByte {
       Message<Object> message,
       List<BlockingExecutionStep> chain,
       ThrowableSupplier<byte[]> byteSupplier,
-      ExecuteEventbusByteCallBlocking excecuteEventBusAndReply,
+      ExecuteEventbusByteCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, byte[]> onFailureRespond,
       DeliveryOptions deliveryOptions,

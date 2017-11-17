@@ -25,7 +25,7 @@ import org.jacpfx.vxms.common.VxmsShared;
  * Created by Andy Moncsek on 14.03.16. Defines an event-bus request as the beginning of your
  * (blocking) execution chain
  */
-public class EventbusBridgeBlockingRequest {
+public class EventbusBridgeRequest {
 
   private final String methodId;
   private final VxmsShared vxmsShared;
@@ -43,7 +43,7 @@ public class EventbusBridgeBlockingRequest {
    * @param failure the vertx instance
    * @param errorMethodHandler the error-method handler
    */
-  public EventbusBridgeBlockingRequest(
+  public EventbusBridgeRequest(
       String methodId,
       Message<Object> requestmessage,
       VxmsShared vxmsShared,
@@ -61,10 +61,10 @@ public class EventbusBridgeBlockingRequest {
    *
    * @param id the target id to send to
    * @param message the message to send
-   * @return the execution chain {@link EventbusBridgeBlockingResponse}
+   * @return the execution chain {@link EventbusBridgeResponse}
    */
-  public EventbusBridgeBlockingResponse send(String id, Object message) {
-    return new EventbusBridgeBlockingResponse(
+  public EventbusBridgeResponse send(String id, Object message) {
+    return new EventbusBridgeResponse(
         methodId, requestmessage, vxmsShared, failure, errorMethodHandler, id, message, null);
   }
 
@@ -74,11 +74,11 @@ public class EventbusBridgeBlockingRequest {
    * @param id the target id to send to
    * @param message the message to send
    * @param requestOptions the delivery serverOptions for the event bus request
-   * @return the execution chain {@link EventbusBridgeBlockingResponse}
+   * @return the execution chain {@link EventbusBridgeResponse}
    */
-  public EventbusBridgeBlockingResponse send(
+  public EventbusBridgeResponse send(
       String id, Object message, DeliveryOptions requestOptions) {
-    return new EventbusBridgeBlockingResponse(
+    return new EventbusBridgeResponse(
         methodId,
         requestmessage,
         vxmsShared,

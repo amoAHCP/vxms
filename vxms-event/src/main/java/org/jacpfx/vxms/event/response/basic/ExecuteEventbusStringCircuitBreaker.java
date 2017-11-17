@@ -18,21 +18,19 @@ package org.jacpfx.vxms.event.response.basic;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import java.io.Serializable;
 import java.util.List;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
-import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusObjectCall;
+import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusStringCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
  * of time after the circuit breaker will be closed again
  */
-public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBasicObjectResponse {
+public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringResponse {
 
   /**
    * The constructor to pass all needed members
@@ -43,10 +41,9 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
-   * @param objectConsumer the supplier, producing the byte response
+   * @param stringConsumer the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    *     API
-   * @param encoder the encoder to serialize the response object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    *     case of failure
@@ -55,18 +52,17 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicObjectCircuitBreaker(
+  public ExecuteEventbusStringCircuitBreaker(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
       List<ExecutionStep> chain,
-      ThrowableFutureConsumer<Serializable> objectConsumer,
-      ExecuteEventbusObjectCall excecuteEventBusAndReply,
-      Encoder encoder,
+      ThrowableFutureConsumer<String> stringConsumer,
+      ExecuteEventbusStringCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
+      ThrowableErrorConsumer<Throwable, String> onFailureRespond,
       DeliveryOptions deliveryOptions,
       int retryCount,
       long timeout,
@@ -78,9 +74,8 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
         errorMethodHandler,
         message,
         chain,
-        objectConsumer,
+        stringConsumer,
         excecuteEventBusAndReply,
-        encoder,
         errorHandler,
         onFailureRespond,
         deliveryOptions,
@@ -96,19 +91,18 @@ public class ExecuteEventbusBasicObjectCircuitBreaker extends ExecuteEventbusBas
    * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
    *     "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
    *     faster)
-   * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the response chain {@link ExecuteEventbusStringResponse}
    */
-  public ExecuteEventbusBasicObjectResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteEventbusBasicObjectResponse(
+  public ExecuteEventbusStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+    return new ExecuteEventbusStringResponse(
         methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
         chain,
-        objectConsumer,
+        stringConsumer,
         excecuteEventBusAndReply,
-        encoder,
         errorHandler,
         onFailureRespond,
         deliveryOptions,

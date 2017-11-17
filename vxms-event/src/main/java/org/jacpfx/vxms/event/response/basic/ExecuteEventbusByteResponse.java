@@ -30,9 +30,9 @@ import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusByteCall;
  * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
  * data collected to execute the chain.
  */
-public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
+public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
 
-  public ExecuteEventbusBasicByteResponse(
+  public ExecuteEventbusByteResponse(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -64,7 +64,7 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
         circuitBreakerTimeout);
   }
 
-  public ExecuteEventbusBasicByteResponse(
+  public ExecuteEventbusByteResponse(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -94,11 +94,11 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * alternate createResponse value
    *
    * @param onFailureRespond the handler (function) to execute on error
-   * @return the createResponse chain {@link ExecuteEventbusBasicByteResponse}
+   * @return the createResponse chain {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse onFailureRespond(
+  public ExecuteEventbusByteResponse onFailureRespond(
       ThrowableErrorConsumer<Throwable, byte[]> onFailureRespond) {
-    return new ExecuteEventbusBasicByteResponse(
+    return new ExecuteEventbusByteResponse(
         methodId,
         vxmsShared,
         failure,
@@ -120,10 +120,10 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * or simply an error)
    *
    * @param errorHandler , a consumer that holds the error
-   * @return the response chain {@link ExecuteEventbusBasicByteResponse}
+   * @return the response chain {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteEventbusBasicByteResponse(
+  public ExecuteEventbusByteResponse onError(Consumer<Throwable> errorHandler) {
+    return new ExecuteEventbusByteResponse(
         methodId,
         vxmsShared,
         failure,
@@ -144,10 +144,10 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * Defines how long a method can be executed before aborted.
    *
    * @param timeout the amount of timeout in ms
-   * @return the response chain {@link ExecuteEventbusBasicByteResponse}
+   * @return the response chain {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse timeout(long timeout) {
-    return new ExecuteEventbusBasicByteResponse(
+  public ExecuteEventbusByteResponse timeout(long timeout) {
+    return new ExecuteEventbusByteResponse(
         methodId,
         vxmsShared,
         failure,
@@ -168,10 +168,10 @@ public class ExecuteEventbusBasicByteResponse extends ExecuteEventbusBasicByte {
    * retry execution N times before
    *
    * @param retryCount the amount of retries
-   * @return the response chain {@link ExecuteEventbusBasicByteCircuitBreaker}
+   * @return the response chain {@link ExecuteEventbusByteCircuitBreaker}
    */
-  public ExecuteEventbusBasicByteCircuitBreaker retry(int retryCount) {
-    return new ExecuteEventbusBasicByteCircuitBreaker(
+  public ExecuteEventbusByteCircuitBreaker retry(int retryCount) {
+    return new ExecuteEventbusByteCircuitBreaker(
         methodId,
         vxmsShared,
         failure,

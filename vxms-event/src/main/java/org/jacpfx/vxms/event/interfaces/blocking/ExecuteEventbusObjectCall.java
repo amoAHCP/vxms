@@ -16,41 +16,34 @@
 
 package org.jacpfx.vxms.event.interfaces.blocking;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.io.Serializable;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
-import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
 /**
- * Created by amo on 31.01.17. Generic Functional interface to pass typed executions steps in case
- * of retry operations
+ * Created by Andy Moncsek on 21.03.16. Typed functional interface called on event-bus response.The
+ * execution will be handled as blocking code.
  */
 @FunctionalInterface
-public interface RetryBlockingExecutor<T> {
+public interface ExecuteEventbusObjectCall {
 
   /**
-   * Execute typed retry handling
+   * Execute chain when event-bus response handler is executed
    *
    * @param methodId the method identifier
-   * @param targetId event-bus target id
-   * @param message the event-bus message
-   * @param function the function to execute on message
-   * @param requestDeliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
-   * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
-   * @param requestMessage the message to responde to
-   * @param supplier the supplier to generate the response
-   * @param encoder the encoder to encode your objects
+   * @param requestMessage the message to reply
+   * @param encoder the encoder to serialize te response message
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    *     case of failure
-   * @param responseDeliveryOptions the response delivery serverOptions
+   * @param responseDeliveryOptions the delivery serverOptions for the response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param delay the delay time in ms between an execution error and the retry
@@ -58,18 +51,12 @@ public interface RetryBlockingExecutor<T> {
    */
   void execute(
       String methodId,
-      String targetId,
-      Object message,
-      ThrowableFunction<AsyncResult<Message<Object>>, T> function,
-      DeliveryOptions requestDeliveryOptions,
       VxmsShared vxmsShared,
-      Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
-      ThrowableSupplier<T> supplier,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction<Throwable, T> onFailureRespond,
+      ThrowableFunction<Throwable, Serializable> onFailureRespond,
       DeliveryOptions responseDeliveryOptions,
       int retryCount,
       long timeout,

@@ -123,13 +123,13 @@ public class ExecuteEventChainResponse<T> {
    * Returns a byte array to the target type
    *
    * @param step the execution step to map the response to byte[] response
-   * @return {@link ExecuteEventbusBasicByteResponse}
+   * @return {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse mapToByteResponse(
+  public ExecuteEventbusByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<T, byte[]> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteEventbusBasicByteResponse(
+    return new ExecuteEventbusByteResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, chainTmp, null);
   }
 
@@ -137,13 +137,13 @@ public class ExecuteEventChainResponse<T> {
    * Returns a String to the target type
    *
    * @param step the execution step to map the response to String response
-   * @return {@link ExecuteEventbusBasicStringResponse}
+   * @return {@link ExecuteEventbusStringResponse}
    */
-  public ExecuteEventbusBasicStringResponse mapToStringResponse(
+  public ExecuteEventbusStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<T, String> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteEventbusBasicStringResponse(
+    return new ExecuteEventbusStringResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, chainTmp, null);
   }
 
@@ -152,13 +152,13 @@ public class ExecuteEventChainResponse<T> {
    *
    * @param step the execution step to map the response to Object response
    * @param encoder the encoder to serialize the response object
-   * @return {@link ExecuteEventbusBasicObjectResponse}
+   * @return {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse mapToObjectResponse(
+  public ExecuteEventbusObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<T, Serializable> step, Encoder encoder) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteEventbusBasicObjectResponse(
+    return new ExecuteEventbusObjectResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, chainTmp, null, encoder);
   }
 }

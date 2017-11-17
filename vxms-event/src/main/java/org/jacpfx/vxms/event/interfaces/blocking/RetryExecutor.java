@@ -16,6 +16,7 @@
 
 package org.jacpfx.vxms.event.interfaces.blocking;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import java.util.function.Consumer;
@@ -25,27 +26,31 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
 /**
- * Created by amo on 31.01.17. Generic Functional interface for handling typed execution of fluid
- * API
+ * Created by amo on 31.01.17. Generic Functional interface to pass typed executions steps in case
+ * of retry operations
  */
 @FunctionalInterface
-public interface RecursiveBlockingExecutor<T> {
+public interface RetryExecutor<T> {
 
   /**
-   * Execute typed execution handling
+   * Execute typed retry handling
    *
    * @param methodId the method identifier
+   * @param targetId event-bus target id
+   * @param message the event-bus message
+   * @param function the function to execute on message
+   * @param requestDeliveryOptions the event-bus delivery serverOptions
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
-   * @param requestMessage the message to reply
-   * @param supplier the result supplier
-   * @param encoder the encoder to serialize the result object
+   * @param requestMessage the message to responde to
+   * @param supplier the supplier to generate the response
+   * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
    *     case of failure
-   * @param responseDeliveryOptions the delivery serverOptions for the response
+   * @param responseDeliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param delay the delay time in ms between an execution error and the retry
@@ -53,6 +58,10 @@ public interface RecursiveBlockingExecutor<T> {
    */
   void execute(
       String methodId,
+      String targetId,
+      Object message,
+      ThrowableFunction<AsyncResult<Message<Object>>, T> function,
+      DeliveryOptions requestDeliveryOptions,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,

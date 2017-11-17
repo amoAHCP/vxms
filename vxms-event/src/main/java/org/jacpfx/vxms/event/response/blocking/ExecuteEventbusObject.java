@@ -31,18 +31,18 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObject;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusObjectCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class is the end of the blocking fluent API, all data
  * collected to execute the chain.
  */
-public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
+public class ExecuteEventbusObject extends
+    org.jacpfx.vxms.event.response.basic.ExecuteEventbusObject {
 
   protected final long delay;
   protected final long timeout;
-  protected final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply;
+  protected final ExecuteEventbusObjectCall excecuteEventBusAndReply;
   protected final ThrowableSupplier<Serializable> objectSupplier;
   protected final List<BlockingExecutionStep> chain;
   protected final ThrowableFunction<Throwable, Serializable> onFailureRespond;
@@ -78,7 +78,7 @@ public class ExecuteEventbusObject extends ExecuteEventbusBasicObject {
       Message<Object> message,
       List<BlockingExecutionStep> chain,
       ThrowableSupplier<Serializable> objectSupplier,
-      ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
+      ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, Serializable> onFailureRespond,

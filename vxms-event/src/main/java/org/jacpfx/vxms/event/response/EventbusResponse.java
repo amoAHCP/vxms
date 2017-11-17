@@ -26,9 +26,9 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.event.response.basic.ExecuteEventChainResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByteResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusByteResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusObjectResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusStringResponse;
 
 /**
  * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
@@ -92,11 +92,11 @@ public class EventbusResponse {
    * Returns a byte array to the target type
    *
    * @param byteConsumer consumes a io.vertx.core.Future to compleate with a byte response
-   * @return {@link ExecuteEventbusBasicByteResponse}
+   * @return {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse byteResponse(
+  public ExecuteEventbusByteResponse byteResponse(
       ThrowableFutureConsumer<byte[]> byteConsumer) {
-    return new ExecuteEventbusBasicByteResponse(
+    return new ExecuteEventbusByteResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, null, byteConsumer);
   }
 
@@ -104,11 +104,11 @@ public class EventbusResponse {
    * Returns a String to the target type
    *
    * @param stringConsumer consumes a io.vertx.core.Future to compleate with a String response
-   * @return {@link ExecuteEventbusBasicStringResponse}
+   * @return {@link ExecuteEventbusStringResponse}
    */
-  public ExecuteEventbusBasicStringResponse stringResponse(
+  public ExecuteEventbusStringResponse stringResponse(
       ThrowableFutureConsumer<String> stringConsumer) {
-    return new ExecuteEventbusBasicStringResponse(
+    return new ExecuteEventbusStringResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, null, stringConsumer);
   }
 
@@ -118,11 +118,11 @@ public class EventbusResponse {
    * @param objectConsumer consumes a io.vertx.core.Future to compleate with a Serialized Object
    *     response
    * @param encoder the encoder to serialize the response object
-   * @return {@link ExecuteEventbusBasicObjectResponse}
+   * @return {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse objectResponse(
+  public ExecuteEventbusObjectResponse objectResponse(
       ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
-    return new ExecuteEventbusBasicObjectResponse(
+    return new ExecuteEventbusObjectResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, null, objectConsumer, encoder);
   }
 }

@@ -26,10 +26,10 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeBlockingExecution;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
-import org.jacpfx.vxms.event.interfaces.blocking.RecursiveBlockingExecutor;
-import org.jacpfx.vxms.event.interfaces.blocking.RetryBlockingExecutor;
+import org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeExecution;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusObjectCall;
+import org.jacpfx.vxms.event.interfaces.blocking.RecursiveExecutor;
+import org.jacpfx.vxms.event.interfaces.blocking.RetryExecutor;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusObjectResponse;
 
 /**
@@ -84,7 +84,7 @@ public class EventbusObjectExecutionBlockingUtil {
       long _circuitBreakerTimeout) {
     final DeliveryOptions deliveryOptions =
         Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
-    final RetryBlockingExecutor retry =
+    final RetryExecutor retry =
         (methodId,
             targetId,
             message,
@@ -126,7 +126,7 @@ public class EventbusObjectExecutionBlockingUtil {
               .execute();
         };
 
-    final RecursiveBlockingExecutor executor =
+    final RecursiveExecutor executor =
         (methodId,
             vxmsShared,
             t,
@@ -160,7 +160,7 @@ public class EventbusObjectExecutionBlockingUtil {
                     circuitBreakerTimeout)
                 .execute();
 
-    final ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply =
+    final ExecuteEventbusObjectCall excecuteEventBusAndReply =
         (methodId,
             vxmsShared,
             errorMethodHandler,
@@ -173,7 +173,7 @@ public class EventbusObjectExecutionBlockingUtil {
             timeout,
             delay,
             circuitBreakerTimeout) ->
-            EventbusBridgeBlockingExecution.sendMessageAndSupplyHandler(
+            EventbusBridgeExecution.sendMessageAndSupplyHandler(
                 methodId,
                 _targetId,
                 _message,

@@ -30,7 +30,7 @@ import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusByteCall;
  * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
  * of time after the circuit breaker will be closed again
  */
-public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasicByteResponse {
+public class ExecuteEventbusByteCircuitBreaker extends ExecuteEventbusByteResponse {
 
   /**
    * The constructor to pass all needed members
@@ -52,7 +52,7 @@ public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasic
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicByteCircuitBreaker(
+  public ExecuteEventbusByteCircuitBreaker(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -91,10 +91,10 @@ public class ExecuteEventbusBasicByteCircuitBreaker extends ExecuteEventbusBasic
    * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
    *     "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
    *     faster)
-   * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the response chain {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteEventbusBasicByteResponse(
+  public ExecuteEventbusByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
+    return new ExecuteEventbusByteResponse(
         methodId,
         vxmsShared,
         failure,

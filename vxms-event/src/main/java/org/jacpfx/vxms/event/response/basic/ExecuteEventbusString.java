@@ -36,7 +36,7 @@ import org.jacpfx.vxms.event.response.AbstractResponse;
  * Created by Andy Moncsek on 12.01.16. This class is the end of the non blocking fluent API, all
  * data collected to execute the chain.
  */
-public class ExecuteEventbusBasicString extends AbstractResponse<String> {
+public class ExecuteEventbusString extends AbstractResponse<String> {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -73,7 +73,7 @@ public class ExecuteEventbusBasicString extends AbstractResponse<String> {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicString(
+  public ExecuteEventbusString(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -111,7 +111,7 @@ public class ExecuteEventbusBasicString extends AbstractResponse<String> {
    */
   public void execute(DeliveryOptions deliveryOptions) {
     Objects.requireNonNull(deliveryOptions);
-    new ExecuteEventbusBasicString(
+    new ExecuteEventbusString(
             methodId,
             vxmsShared,
             failure,

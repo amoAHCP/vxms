@@ -32,7 +32,7 @@ import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusObjectCall;
  * Created by Andy Moncsek on 12.01.16. Fluent API for Object responses, defines access to failure
  * handling, timeouts,...
  */
-public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObject {
+public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
 
   /**
    * The constructor to pass all needed members
@@ -55,7 +55,7 @@ public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObje
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusBasicObjectResponse(
+  public ExecuteEventbusObjectResponse(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -89,7 +89,7 @@ public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObje
         circuitBreakerTimeout);
   }
 
-  public ExecuteEventbusBasicObjectResponse(
+  public ExecuteEventbusObjectResponse(
       String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -122,11 +122,11 @@ public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObje
    *
    * @param onFailureRespond the handler (function) to execute on error
    * @param encoder the encoder to serialize the response Object
-   * @return the createResponse chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the createResponse chain {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse onFailureRespond(
+  public ExecuteEventbusObjectResponse onFailureRespond(
       ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-    return new ExecuteEventbusBasicObjectResponse(
+    return new ExecuteEventbusObjectResponse(
         methodId,
         vxmsShared,
         failure,
@@ -149,10 +149,10 @@ public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObje
    * retries... up to N times)
    *
    * @param errorHandler the handler to be executed on each error
-   * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the response chain {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteEventbusBasicObjectResponse(
+  public ExecuteEventbusObjectResponse onError(Consumer<Throwable> errorHandler) {
+    return new ExecuteEventbusObjectResponse(
         methodId,
         vxmsShared,
         failure,
@@ -174,10 +174,10 @@ public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObje
    * Defines how long a method can be executed before aborted.
    *
    * @param timeout the amount of timeout in ms
-   * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the response chain {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse timeout(long timeout) {
-    return new ExecuteEventbusBasicObjectResponse(
+  public ExecuteEventbusObjectResponse timeout(long timeout) {
+    return new ExecuteEventbusObjectResponse(
         methodId,
         vxmsShared,
         failure,
@@ -199,10 +199,10 @@ public class ExecuteEventbusBasicObjectResponse extends ExecuteEventbusBasicObje
    * retry execution N times before
    *
    * @param retryCount the amount of retries
-   * @return the response chain {@link ExecuteEventbusBasicObjectCircuitBreaker}
+   * @return the response chain {@link ExecuteEventbusObjectCircuitBreaker}
    */
-  public ExecuteEventbusBasicObjectCircuitBreaker retry(int retryCount) {
-    return new ExecuteEventbusBasicObjectCircuitBreaker(
+  public ExecuteEventbusObjectCircuitBreaker retry(int retryCount) {
+    return new ExecuteEventbusObjectCircuitBreaker(
         methodId,
         vxmsShared,
         failure,

@@ -26,7 +26,6 @@ import io.vertx.core.json.JsonObject;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
-import org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeBlockingRequest;
 
 /**
  * Created by Andy Moncsek on 14.03.16. Defines an event-bus request as the beginning of your
@@ -164,10 +163,10 @@ public class EventbusBridgeRequest {
   /**
    * perform blocking task execution
    *
-   * @return the blockingexecution chain {@link EventbusBridgeBlockingRequest}
+   * @return the blockingexecution chain {@link org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeRequest}
    */
-  public EventbusBridgeBlockingRequest blocking() {
-    return new EventbusBridgeBlockingRequest(
+  public org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeRequest blocking() {
+    return new org.jacpfx.vxms.event.eventbus.blocking.EventbusBridgeRequest(
         methodId, requestmessage, vxmsShared, failure, errorMethodHandler);
   }
 }

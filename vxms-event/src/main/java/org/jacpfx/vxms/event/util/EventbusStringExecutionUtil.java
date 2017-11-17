@@ -29,7 +29,7 @@ import org.jacpfx.vxms.event.eventbus.basic.EventbusBridgeExecution;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusStringCall;
 import org.jacpfx.vxms.event.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vxms.event.interfaces.basic.RetryExecutor;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusStringResponse;
 
 /** Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and string response */
 public class EventbusStringExecutionUtil {
@@ -56,9 +56,9 @@ public class EventbusStringExecutionUtil {
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
-   * @return the execution chain {@link ExecuteEventbusBasicStringResponse}
+   * @return the execution chain {@link ExecuteEventbusStringResponse}
    */
-  public static ExecuteEventbusBasicStringResponse mapToStringResponse(
+  public static ExecuteEventbusStringResponse mapToStringResponse(
       String _methodId,
       String _targetId,
       Object _message,
@@ -92,7 +92,7 @@ public class EventbusStringExecutionUtil {
             retryCount,
             timeout,
             circuitBreakerTimeout) ->
-            new ExecuteEventbusBasicStringResponse(
+            new ExecuteEventbusStringResponse(
                     methodId,
                     vxmsShared,
                     t,
@@ -176,7 +176,7 @@ public class EventbusStringExecutionUtil {
                 executor,
                 retry);
 
-    return new ExecuteEventbusBasicStringResponse(
+    return new ExecuteEventbusStringResponse(
         _methodId,
         _vxmsShared,
         _failure,

@@ -26,7 +26,7 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusObjectCallBlocking;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusObjectCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
@@ -65,7 +65,7 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
       Message<Object> message,
       List<BlockingExecutionStep> chain,
       ThrowableSupplier<Serializable> objectSupplier,
-      ExecuteEventbusObjectCallBlocking excecuteEventBusAndReply,
+      ExecuteEventbusObjectCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, Serializable> onFailureRespond,

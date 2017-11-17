@@ -32,7 +32,7 @@ import org.jacpfx.vxms.event.util.EventbusObjectExecutionBlockingUtil;
 import org.jacpfx.vxms.event.util.EventbusStringExecutionBlockingUtil;
 
 /** Created by Andy Moncsek on 14.03.16. Represents the start of a blocking execution chain */
-public class EventbusBridgeBlockingResponse {
+public class EventbusBridgeResponse {
 
   private final String methodId;
   private final VxmsShared vxmsShared;
@@ -56,7 +56,7 @@ public class EventbusBridgeBlockingResponse {
    * @param message the event-bus message
    * @param options the event-bus delivery serverOptions
    */
-  public EventbusBridgeBlockingResponse(
+  public EventbusBridgeResponse(
       String methodId,
       Message<Object> requestmessage,
       VxmsShared vxmsShared,
