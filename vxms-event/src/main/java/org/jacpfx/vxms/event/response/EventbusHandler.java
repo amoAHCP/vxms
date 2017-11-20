@@ -35,20 +35,17 @@ public class EventbusHandler {
 
   /**
    * The constructor initialize the Eventbus Handler
-   *
-   * @param methodId the method identifier
-   * @param message the message to respond to
+   *  @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
+   * @param message the message to respond to
    */
   public EventbusHandler(
       String methodId,
-      Message<Object> message,
-      VxmsShared vxmsShared,
-      Throwable failure,
-      Consumer<Throwable> errorMethodHandler) {
+      VxmsShared vxmsShared, Throwable failure, Consumer<Throwable> errorMethodHandler,
+      Message<Object> message) {
     this.methodId = methodId;
     this.message = message;
     this.vxmsShared = vxmsShared;
@@ -80,7 +77,7 @@ public class EventbusHandler {
    * @return {@link EventbusResponse}
    */
   public EventbusResponse response() {
-    return new EventbusResponse(methodId, message, vxmsShared, failure, errorMethodHandler);
+    return new EventbusResponse(methodId, vxmsShared, failure, errorMethodHandler, message);
   }
 
   /**
@@ -90,6 +87,6 @@ public class EventbusHandler {
    * @return {@link EventbusBridgeRequest}
    */
   public EventbusBridgeRequest eventBusRequest() {
-    return new EventbusBridgeRequest(methodId, message, vxmsShared, failure, errorMethodHandler);
+    return new EventbusBridgeRequest(methodId, vxmsShared, failure, errorMethodHandler, message);
   }
 }

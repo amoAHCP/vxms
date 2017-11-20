@@ -111,10 +111,9 @@ public class EventbusStringExecutionUtil {
 
     final RetryExecutor retry =
         (targetId,
-            message,
+            methodId, message,
             function,
             requestOptions,
-            methodId,
             vxmsShared,
             t,
             errorMethodHandler,

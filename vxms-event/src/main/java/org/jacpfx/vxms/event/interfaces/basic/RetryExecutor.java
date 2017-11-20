@@ -35,14 +35,13 @@ public interface RetryExecutor<T> {
 
   /**
    * Execute typed retry handling
-   *
-   * @param targetId event-bus target id
+   *  @param targetId event-bus target id
+   * @param methodId the method identifier
    * @param message the message to reply
    * @param function the function to execute and to create a response object
    * @param requestDeliveryOptions the request delivery serverOptions
-   * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   *     objects per instance
+*     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
    * @param requestMessage the message to reply to
@@ -50,7 +49,7 @@ public interface RetryExecutor<T> {
    * @param encoder the encoder to serialize the response object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   *     case of failure
+*     case of failure
    * @param responseDeliveryOptions the delivery serverOptions for the response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
@@ -58,10 +57,10 @@ public interface RetryExecutor<T> {
    */
   void execute(
       String targetId,
+      String methodId,
       Object message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions requestDeliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,

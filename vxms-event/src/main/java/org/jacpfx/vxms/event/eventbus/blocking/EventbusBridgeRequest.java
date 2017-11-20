@@ -35,20 +35,17 @@ public class EventbusBridgeRequest {
 
   /**
    * Pass all members to execute the chain
-   *
-   * @param methodId the method identifier
-   * @param requestmessage the message to responde
+   *  @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the vertx instance
    * @param errorMethodHandler the error-method handler
+   * @param requestmessage the message to responde
    */
   public EventbusBridgeRequest(
       String methodId,
-      Message<Object> requestmessage,
-      VxmsShared vxmsShared,
-      Throwable failure,
-      Consumer<Throwable> errorMethodHandler) {
+      VxmsShared vxmsShared, Throwable failure, Consumer<Throwable> errorMethodHandler,
+      Message<Object> requestmessage) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;

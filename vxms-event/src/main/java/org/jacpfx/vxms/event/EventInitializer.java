@@ -154,7 +154,7 @@ public class EventInitializer {
     return ReflectionUtil.invokeParameters(
         restMethod,
         null,
-        new EventbusHandler(methodId, eventbusHandler, vxmsShared, null, throwableConsumer));
+        new EventbusHandler(methodId, vxmsShared, null, throwableConsumer, eventbusHandler));
   }
 
   private static void handleEventBusError(
@@ -188,7 +188,7 @@ public class EventInitializer {
                         errorMethod,
                         throwable,
                         new EventbusHandler(
-                            methodId, eventbusHandler, vxmsShared, throwable, null)),
+                            methodId, vxmsShared, throwable, null, eventbusHandler)),
                 service);
           } catch (Throwable t) {
             failRequest(eventbusHandler, t);

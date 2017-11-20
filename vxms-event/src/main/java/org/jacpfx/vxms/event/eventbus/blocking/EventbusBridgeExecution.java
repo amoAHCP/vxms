@@ -93,11 +93,10 @@ public class EventbusBridgeExecution {
 
     if (circuitBreakerTimeout == 0l) {
       executeDefaultState(
-          targetId,
+          methodId, targetId,
           message,
           function,
           deliveryOptions,
-          methodId,
           vxmsShared,
           errorMethodHandler,
           requestMessage,
@@ -114,11 +113,10 @@ public class EventbusBridgeExecution {
           null);
     } else {
       executeStateful(
-          targetId,
+          methodId, targetId,
           message,
           function,
           deliveryOptions,
-          methodId,
           vxmsShared,
           errorMethodHandler,
           requestMessage,
@@ -136,11 +134,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void executeStateful(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> byteFunction,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -162,11 +160,10 @@ public class EventbusBridgeExecution {
                   long currentVal = counterHandler.result();
                   if (currentVal == 0) {
                     executeInitialState(
-                        targetId,
+                        methodId, targetId,
                         message,
                         byteFunction,
                         deliveryOptions,
-                        methodId,
                         vxmsShared,
                         errorMethodHandler,
                         requestMessage,
@@ -184,11 +181,10 @@ public class EventbusBridgeExecution {
                         counter);
                   } else if (currentVal > 0) {
                     executeDefaultState(
-                        targetId,
+                        methodId, targetId,
                         message,
                         byteFunction,
                         deliveryOptions,
-                        methodId,
                         vxmsShared,
                         errorMethodHandler,
                         requestMessage,
@@ -237,11 +233,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void executeInitialState(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> byteFunction,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -262,11 +258,10 @@ public class EventbusBridgeExecution {
         Integer.valueOf(incrementCounter).longValue(),
         rHandler ->
             executeDefaultState(
-                targetId,
+                methodId, targetId,
                 message,
                 byteFunction,
                 deliveryOptions,
-                methodId,
                 vxmsShared,
                 errorMethodHandler,
                 requestMessage,
@@ -284,11 +279,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void executeDefaultState(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -314,11 +309,10 @@ public class EventbusBridgeExecution {
             deliveryOptions,
             event ->
                 createSupplierAndExecute(
-                    targetId,
+                    methodId, targetId,
                     message,
                     function,
                     deliveryOptions,
-                    methodId,
                     vxmsShared,
                     errorMethodHandler,
                     requestMessage,
@@ -370,11 +364,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void createSupplierAndExecute(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -391,11 +385,10 @@ public class EventbusBridgeExecution {
       AsyncResult<Message<Object>> event) {
     final ThrowableSupplier<T> supplier =
         createSupplier(
-            targetId,
+            methodId, targetId,
             message,
             function,
             deliveryOptions,
-            methodId,
             vxmsShared,
             errorMethodHandler,
             requestMessage,
@@ -412,11 +405,10 @@ public class EventbusBridgeExecution {
 
     if (circuitBreakerTimeout == NO_TIMEOUT) {
       statelessExecution(
-          targetId,
+          methodId, targetId,
           message,
           function,
           deliveryOptions,
-          methodId,
           vxmsShared,
           errorMethodHandler,
           requestMessage,
@@ -434,11 +426,10 @@ public class EventbusBridgeExecution {
           supplier);
     } else {
       statefulExecution(
-          targetId,
+          methodId, targetId,
           message,
           function,
           deliveryOptions,
-          methodId,
           vxmsShared,
           errorMethodHandler,
           requestMessage,
@@ -458,11 +449,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void statelessExecution(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -496,11 +487,10 @@ public class EventbusBridgeExecution {
           circuitBreakerTimeout);
     } else if (event.failed() && retryCount > 0) {
       retryFunction(
-          targetId,
+          methodId, targetId,
           message,
           function,
           deliveryOptions,
-          methodId,
           vxmsShared,
           event.cause(),
           errorMethodHandler,
@@ -518,11 +508,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void statefulExecution(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -556,11 +546,10 @@ public class EventbusBridgeExecution {
           circuitBreakerTimeout);
     } else {
       statefulErrorHandling(
-          targetId,
+          methodId, targetId,
           message,
           function,
           deliveryOptions,
-          methodId,
           vxmsShared,
           errorMethodHandler,
           requestMessage,
@@ -579,11 +568,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void statefulErrorHandling(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -627,11 +616,10 @@ public class EventbusBridgeExecution {
                       lock.release();
                       final Throwable cause = event.cause();
                       retryFunction(
-                          targetId,
+                          methodId, targetId,
                           message,
                           function,
                           deliveryOptions,
-                          methodId,
                           vxmsShared,
                           cause,
                           errorMethodHandler,
@@ -775,11 +763,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> void retryFunction(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions requestDeliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -816,11 +804,11 @@ public class EventbusBridgeExecution {
   }
 
   private static <T> ThrowableSupplier<T> createSupplier(
+      String methodId,
       String targetId,
       Object message,
       ThrowableFunction<AsyncResult<Message<Object>>, T> function,
       DeliveryOptions deliveryOptions,
-      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -839,11 +827,10 @@ public class EventbusBridgeExecution {
       if (event.failed()) {
         if (retryCount > 0) {
           retryFunction(
-              targetId,
+              methodId, targetId,
               message,
               function,
               deliveryOptions,
-              methodId,
               vxmsShared,
               event.cause(),
               errorMethodHandler,

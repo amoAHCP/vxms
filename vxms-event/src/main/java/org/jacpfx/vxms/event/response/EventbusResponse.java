@@ -46,18 +46,18 @@ public class EventbusResponse {
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
-   * @param message the event-bus message to respond to
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
    *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
+   * @param message the event-bus message to respond to
    */
   public EventbusResponse(
       String methodId,
-      Message<Object> message,
       VxmsShared vxmsShared,
       Throwable failure,
-      Consumer<Throwable> errorMethodHandler) {
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -91,11 +91,10 @@ public class EventbusResponse {
   /**
    * Returns a byte array to the target type
    *
-   * @param byteConsumer consumes a io.vertx.core.Future to compleate with a byte response
+   * @param byteConsumer consumes a io.vertx.core.Future to complete with a byte response
    * @return {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusByteResponse byteResponse(
-      ThrowableFutureConsumer<byte[]> byteConsumer) {
+  public ExecuteEventbusByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
     return new ExecuteEventbusByteResponse(
         methodId, vxmsShared, failure, errorMethodHandler, message, null, byteConsumer);
   }
@@ -103,7 +102,7 @@ public class EventbusResponse {
   /**
    * Returns a String to the target type
    *
-   * @param stringConsumer consumes a io.vertx.core.Future to compleate with a String response
+   * @param stringConsumer consumes a io.vertx.core.Future to complete with a String response
    * @return {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse stringResponse(
@@ -115,7 +114,7 @@ public class EventbusResponse {
   /**
    * Returns a Serializable to the target type
    *
-   * @param objectConsumer consumes a io.vertx.core.Future to compleate with a Serialized Object
+   * @param objectConsumer consumes a io.vertx.core.Future to complete with a Serialized Object
    *     response
    * @param encoder the encoder to serialize the response object
    * @return {@link ExecuteEventbusObjectResponse}
