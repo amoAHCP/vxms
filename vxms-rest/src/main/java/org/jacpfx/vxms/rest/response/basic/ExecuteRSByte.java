@@ -35,12 +35,13 @@ import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
+import org.jacpfx.vxms.rest.response.AbstractResponse;
 
 /**
  * Created by Andy Moncsek on 12.01.16.
  * This class is the end of the fluent API, all data collected to execute the chain.
  */
-public class ExecuteRSByte {
+public class ExecuteRSByte extends AbstractResponse<byte[]> {
 
   protected final String methodId;
   protected final VxmsShared vxmsShared;
@@ -161,7 +162,7 @@ public class ExecuteRSByte {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        updateContentType(headers, contentType),
         byteConsumer,
         chain,
         excecuteEventBusAndReply,
@@ -188,7 +189,7 @@ public class ExecuteRSByte {
         failure,
         errorMethodHandler,
         context,
-        ResponseExecution.updateContentType(headers, contentType),
+        updateContentType(headers, contentType),
         byteConsumer,
         chain,
         excecuteEventBusAndReply,
@@ -250,7 +251,7 @@ public class ExecuteRSByte {
                         }
 
                       } else {
-                        respond(value.getCause().getMessage(),
+                        errorRespond(value.getCause().getMessage(),
                             HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                       }
                       checkAndCloseResponse(retry);
@@ -277,7 +278,22 @@ public class ExecuteRSByte {
                       final Object result = value.getResult();
                       if (chainList.size() > 1) {
                         final ExecutionStep executionStepAndThan = chainList.get(1);
-                        ofNullable(executionStepAndThan.getStep()).ifPresent(step -> executeStep(chainList, retry, result, executionStepAndThan, step));
+                        ofNullable(executionStepAndThan.getStep()).ifPresent(step ->
+                            executeStep(
+                                methodId,
+                                vxmsShared,
+                                failure,
+                                errorMethodHandler,
+                                errorHandler,
+                                onFailureRespond,
+                                chainList,
+                                retry,
+                                httpErrorCode,
+                                timeout,
+                                circuitBreakerTimeout,
+                                result,
+                                executionStepAndThan,
+                                step));
                       }else {
                         respond(value.getResult());
                       }
@@ -288,7 +304,7 @@ public class ExecuteRSByte {
 
                   } else {
                     // reply unhandled error
-                    respond(value.getCause().getMessage(),
+                    errorRespond(value.getCause().getMessage(),
                         HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                   }
                   checkAndCloseResponse(retry);
@@ -302,46 +318,14 @@ public class ExecuteRSByte {
   }
 
 
-  private void executeStep(List<ExecutionStep> chainList, int retry, Object result,
-      ExecutionStep element, ThrowableFutureBiConsumer step) {
-    StepExecution.createResponse(methodId,
-        step,
-        result,
-        errorHandler,
-        onFailureRespond,
-        errorMethodHandler,
-        vxmsShared,
-        failure, v -> {
-          final int index = chainList.indexOf(element);
-          final int size = chainList.size();
-          if (v.succeeded()) {
-            if (!v.handledError()) {
-              if (index == size - 1) {
-                // handle last element
-                respond(v.getResult());
-              } else {
-                // call recursive
-                final ExecutionStep executionStepAndThan = chainList.get(index + 1);
-                ofNullable(executionStepAndThan.getStep()).ifPresent(nextStep -> executeStep(chainList, retry, v.getResult(), executionStepAndThan, nextStep));
-              }
-            } else {
-              respond(v.getResult(), httpErrorCode);
-            }
-          } else {
-            respond(v.getCause().getMessage(),
-                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-          }
-
-        }, retry, timeout, circuitBreakerTimeout);
-  }
-
+  @Override
   protected void checkAndCloseResponse(int retry) {
     final HttpServerResponse response = context.response();
     if (retry == 0 && !response.ended()) {
       response.end();
     }
   }
-
+  @Override
   protected void respond(byte[] result, int statuscode) {
     final HttpServerResponse response = context.response();
     if (!response.ended()) {
@@ -354,8 +338,8 @@ public class ExecuteRSByte {
     }
   }
 
-
-  protected void respond(String result, int statuscode) {
+  @Override
+  protected void errorRespond(String result, int statuscode) {
     final HttpServerResponse response = context.response();
     if (!response.ended()) {
       ResponseExecution.updateHeaderAndStatuscode(headers, statuscode, response);
@@ -366,7 +350,7 @@ public class ExecuteRSByte {
       }
     }
   }
-
+  @Override
   protected void respond(byte[] result) {
     respond(result, httpStatusCode);
   }

@@ -438,19 +438,7 @@ public class ResponseExecution {
 
   }
 
-  /**
-   * Add a http content type to request header
-   *
-   * @param header the current header map
-   * @param contentType the content type to add
-   * @return as new header map instance
-   */
-  public static Map<String, String> updateContentType(Map<String, String> header,
-      String contentType) {
-    Map<String, String> headerMap = new HashMap<>(header);
-    headerMap.put("content-type", contentType);
-    return headerMap;
-  }
+
 
   /**
    * Checks the type of result and reply response
