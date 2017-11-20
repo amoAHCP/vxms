@@ -272,7 +272,7 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
                 errorMethodHandler,
                 vxmsShared,
                 failure,
-                (ExecutionResult<byte[]> value) -> {
+                (value) -> {
                   if (value.succeeded()) {
                     if (!value.handledError()) {
                       final Object result = value.getResult();
