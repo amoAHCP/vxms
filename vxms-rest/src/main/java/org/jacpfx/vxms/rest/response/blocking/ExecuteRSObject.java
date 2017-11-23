@@ -158,8 +158,7 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
             failure,
             errorMethodHandler,
             context,
-            updateContentType(
-                headers, contentType),
+            updateContentType(headers, contentType),
             objectSupplier,
             chain,
             excecuteEventBusAndReply,
@@ -189,8 +188,7 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
             failure,
             errorMethodHandler,
             context,
-            updateContentType(
-                headers, contentType),
+            updateContentType(headers, contentType),
             objectSupplier,
             chain,
             excecuteEventBusAndReply,
@@ -207,6 +205,7 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute() {
     Optional.ofNullable(excecuteEventBusAndReply)
         .ifPresent(

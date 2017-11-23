@@ -29,8 +29,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusByteCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteRSByteResponse extends ExecuteRSByte {
 
@@ -39,18 +39,18 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param byteSupplier the supplier, producing the byte response
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
-   * the fluent API
+   *     the fluent API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
@@ -58,7 +58,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSByteResponse(String methodId,
+  public ExecuteRSByteResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -76,7 +77,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -96,10 +98,17 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
         circuitBreakerTimeout);
   }
 
-  public ExecuteRSByteResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
-      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-      ThrowableSupplier<byte[]> byteSupplier,List<BlockingExecutionStep> chain) {
-    super(methodId,
+  public ExecuteRSByteResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      RoutingContext context,
+      Map<String, String> headers,
+      ThrowableSupplier<byte[]> byteSupplier,
+      List<BlockingExecutionStep> chain) {
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -128,7 +137,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    */
   public ExecuteRSByteOnFailureCode onFailureRespond(
       ThrowableFunction<Throwable, byte[]> onFailureRespond) {
-    return new ExecuteRSByteOnFailureCode(methodId,
+    return new ExecuteRSByteOnFailureCode(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -155,7 +165,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    * @return the createResponse chain {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteRSByteResponse(methodId,
+    return new ExecuteRSByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -182,7 +193,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    * @return the createResponse chain {@link ExecuteRSByteCircuitBreaker}
    */
   public ExecuteRSByteCircuitBreaker retry(int retryCount) {
-    return new ExecuteRSByteCircuitBreaker(methodId,
+    return new ExecuteRSByteCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -209,7 +221,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    * @return the createResponse chain {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse timeout(long timeout) {
-    return new ExecuteRSByteResponse(methodId,
+    return new ExecuteRSByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -236,7 +249,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
    * @return the createResponse chain {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse delay(long delay) {
-    return new ExecuteRSByteResponse(methodId,
+    return new ExecuteRSByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -266,7 +280,8 @@ public class ExecuteRSByteResponse extends ExecuteRSByte {
   public ExecuteRSByteResponse putHeader(String key, String value) {
     Map<String, String> headerMap = new HashMap<>(headers);
     headerMap.put(key, value);
-    return new ExecuteRSByteResponse(methodId,
+    return new ExecuteRSByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

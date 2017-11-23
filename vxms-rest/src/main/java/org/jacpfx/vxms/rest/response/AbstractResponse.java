@@ -59,7 +59,7 @@ public abstract class AbstractResponse<T> {
       long circuitBreakerTimeout,
       long delay,
       Future<ExecutionResult<T>> blockingHandler,
-      ThrowableFunction onFailureRespond) {
+      ThrowableFunction<Throwable, T> onFailureRespond) {
     ResponseExecution.executeRetryAndCatchAsync(
         methodId,
         supplier,
@@ -88,7 +88,7 @@ public abstract class AbstractResponse<T> {
       long timeout,
       long circuitBreakerTimeout,
       long delay,
-      ThrowableFunction onFailureRespond) {
+      ThrowableFunction<Throwable, T> onFailureRespond) {
     return value -> {
       if (!value.failed()) {
         ExecutionResult<T> result = value.result();
@@ -147,12 +147,13 @@ public abstract class AbstractResponse<T> {
     };
   }
 
+  @SuppressWarnings("unchecked")
   private void executeBlockingStep(
       String methodId,
       ThrowableFunction stepNext,
       Object res,
       Future<ExecutionResult<T>> handler,
-      ThrowableFunction onFailureRespond,
+      ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Consumer<Throwable> errorHandler,
       VxmsShared vxmsShared,
@@ -180,7 +181,8 @@ public abstract class AbstractResponse<T> {
 
   protected abstract void checkAndCloseResponse(int retry);
 
-  protected Handler<AsyncResult<ExecutionResult<T>>> getResultHandler(int retry, int httpErrorCode) {
+  protected Handler<AsyncResult<ExecutionResult<T>>> getResultHandler(
+      int retry, int httpErrorCode) {
     return value -> {
       if (!value.failed()) {
         ExecutionResult<T> result = value.result();
@@ -195,6 +197,7 @@ public abstract class AbstractResponse<T> {
     };
   }
 
+  @SuppressWarnings("unchecked")
   protected void executeStep(
       String methodId,
       VxmsShared vxmsShared,
@@ -292,8 +295,7 @@ public abstract class AbstractResponse<T> {
    * @param contentType the content type to add
    * @return as new header map instance
    */
-  protected Map<String, String> updateContentType(Map<String, String> header,
-      String contentType) {
+  protected Map<String, String> updateContentType(Map<String, String> header, String contentType) {
     Map<String, String> headerMap = new HashMap<>(header);
     headerMap.put("content-type", contentType);
     return headerMap;

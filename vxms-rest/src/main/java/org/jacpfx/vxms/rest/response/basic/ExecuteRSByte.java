@@ -27,19 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
-import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
 import org.jacpfx.vxms.rest.response.AbstractResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class is the end of the fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16. This class is the end of the fluent API, all data collected
+ * to execute the chain.
  */
 public class ExecuteRSByte extends AbstractResponse<byte[]> {
 
@@ -66,7 +64,7 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
@@ -74,18 +72,19 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
    * @param byteConsumer the consumer that takes a Future to complete, producing the byte response
    * @param chain the list of execution steps
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSByte(String methodId,
+  public ExecuteRSByte(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -128,24 +127,25 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
    */
   public void execute(HttpResponseStatus status) {
     Objects.requireNonNull(status);
-    new ExecuteRSByte(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        byteConsumer,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        status.code(),
-        httpErrorCode,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
+    new ExecuteRSByte(
+            methodId,
+            vxmsShared,
+            failure,
+            errorMethodHandler,
+            context,
+            headers,
+            byteConsumer,
+            chain,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            status.code(),
+            httpErrorCode,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
   }
 
   /**
@@ -157,24 +157,25 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
   public void execute(HttpResponseStatus status, String contentType) {
     Objects.requireNonNull(status);
     Objects.requireNonNull(contentType);
-    new ExecuteRSByte(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        updateContentType(headers, contentType),
-        byteConsumer,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        status.code(),
-        httpErrorCode,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
+    new ExecuteRSByte(
+            methodId,
+            vxmsShared,
+            failure,
+            errorMethodHandler,
+            context,
+            updateContentType(headers, contentType),
+            byteConsumer,
+            chain,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            status.code(),
+            httpErrorCode,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
   }
 
   /**
@@ -184,139 +185,154 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
    */
   public void execute(String contentType) {
     Objects.requireNonNull(contentType);
-    new ExecuteRSByte(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        updateContentType(headers, contentType),
-        byteConsumer,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode,
-        httpErrorCode,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
+    new ExecuteRSByte(
+            methodId,
+            vxmsShared,
+            failure,
+            errorMethodHandler,
+            context,
+            updateContentType(headers, contentType),
+            byteConsumer,
+            chain,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            httpStatusCode,
+            httpErrorCode,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
   }
 
-
-  /**
-   * Execute the reply chain
-   */
+  /** Execute the reply chain */
+  @SuppressWarnings("unchecked")
   public void execute() {
     final Vertx vertx = vxmsShared.getVertx();
-    vertx.runOnContext(action -> {
-      ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
-        try {
-          evFunction.execute(vxmsShared,
-              failure,
-              errorMethodHandler,
-              context,
-              headers,
-              encoder,
-              errorHandler,
-              onFailureRespond,
-              httpStatusCode,
-              httpErrorCode,
-              retryCount,
-              timeout,
-              circuitBreakerTimeout);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-
-      });
-
-      ofNullable(byteConsumer).
-          ifPresent(userOperation -> {
-                int retry = retryCount;
-                ResponseExecution.createResponse(methodId,
-                    userOperation,
-                    errorHandler,
-                    onFailureRespond,
-                    errorMethodHandler,
-                    vxmsShared,
-                    failure,
-                    value -> {
-                      if (value.succeeded()) {
-                        if (!value.handledError()) {
-                          respond(value.getResult());
-                        } else {
-                          respond(value.getResult(), httpErrorCode);
-                        }
-
-                      } else {
-                        errorRespond(value.getCause().getMessage(),
-                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                      }
-                      checkAndCloseResponse(retry);
-                    }, retry, timeout, circuitBreakerTimeout);
-              }
-          );
-
-
-      ofNullable(chain).ifPresent(chainList -> {
-        if (!chainList.isEmpty()) {
-          final ExecutionStep executionStep = chainList.get(0);
-          ofNullable(executionStep.getChainconsumer()).ifPresent(initialConsumer -> {
-            int retry = retryCount;
-            ResponseExecution.createResponse(methodId,
-                initialConsumer,
-                errorHandler,
-                onFailureRespond,
-                errorMethodHandler,
-                vxmsShared,
-                failure,
-                (value) -> {
-                  if (value.succeeded()) {
-                    if (!value.handledError()) {
-                      final Object result = value.getResult();
-                      if (chainList.size() > 1) {
-                        final ExecutionStep executionStepAndThan = chainList.get(1);
-                        ofNullable(executionStepAndThan.getStep()).ifPresent(step ->
-                            executeStep(
-                                methodId,
-                                vxmsShared,
-                                failure,
-                                errorMethodHandler,
-                                errorHandler,
-                                onFailureRespond,
-                                chainList,
-                                retry,
-                                httpErrorCode,
-                                timeout,
-                                circuitBreakerTimeout,
-                                result,
-                                executionStepAndThan,
-                                step));
-                      }else {
-                        respond(value.getResult());
-                      }
-                    } else {
-                      // handle on failure response
-                      respond(value.getResult(), httpErrorCode);
+    vertx.runOnContext(
+        action -> {
+          ofNullable(excecuteEventBusAndReply)
+              .ifPresent(
+                  evFunction -> {
+                    try {
+                      evFunction.execute(
+                          vxmsShared,
+                          failure,
+                          errorMethodHandler,
+                          context,
+                          headers,
+                          encoder,
+                          errorHandler,
+                          onFailureRespond,
+                          httpStatusCode,
+                          httpErrorCode,
+                          retryCount,
+                          timeout,
+                          circuitBreakerTimeout);
+                    } catch (Exception e) {
+                      e.printStackTrace();
                     }
+                  });
 
-                  } else {
-                    // reply unhandled error
-                    errorRespond(value.getCause().getMessage(),
-                        HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                  }
-                  checkAndCloseResponse(retry);
-                }, retry, timeout, circuitBreakerTimeout);
-          });
-        }
-      });
+          ofNullable(byteConsumer)
+              .ifPresent(
+                  userOperation -> {
+                    int retry = retryCount;
+                    ResponseExecution.createResponse(
+                        methodId,
+                        userOperation,
+                        errorHandler,
+                        onFailureRespond,
+                        errorMethodHandler,
+                        vxmsShared,
+                        failure,
+                        value -> {
+                          if (value.succeeded()) {
+                            if (!value.handledError()) {
+                              respond(value.getResult());
+                            } else {
+                              respond(value.getResult(), httpErrorCode);
+                            }
 
-    });
+                          } else {
+                            errorRespond(
+                                value.getCause().getMessage(),
+                                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                          }
+                          checkAndCloseResponse(retry);
+                        },
+                        retry,
+                        timeout,
+                        circuitBreakerTimeout);
+                  });
 
+          ofNullable(chain)
+              .ifPresent(
+                  chainList -> {
+                    if (!chainList.isEmpty()) {
+                      final ExecutionStep executionStep = chainList.get(0);
+                      ofNullable(executionStep.getChainconsumer())
+                          .ifPresent(
+                              initialConsumer -> {
+                                int retry = retryCount;
+                                ResponseExecution.createResponse(
+                                    methodId,
+                                    initialConsumer,
+                                    errorHandler,
+                                    onFailureRespond,
+                                    errorMethodHandler,
+                                    vxmsShared,
+                                    failure,
+                                    (value) -> {
+                                      if (value.succeeded()) {
+                                        if (!value.handledError()) {
+                                          final Object result = value.getResult();
+                                          if (chainList.size() > 1) {
+                                            final ExecutionStep executionStepAndThan =
+                                                chainList.get(1);
+                                            ofNullable(executionStepAndThan.getStep())
+                                                .ifPresent(
+                                                    step ->
+                                                        executeStep(
+                                                            methodId,
+                                                            vxmsShared,
+                                                            failure,
+                                                            errorMethodHandler,
+                                                            errorHandler,
+                                                            onFailureRespond,
+                                                            chainList,
+                                                            retry,
+                                                            httpErrorCode,
+                                                            timeout,
+                                                            circuitBreakerTimeout,
+                                                            result,
+                                                            executionStepAndThan,
+                                                            step));
+                                          } else {
+                                            respond(value.getResult());
+                                          }
+                                        } else {
+                                          // handle on failure response
+                                          respond(value.getResult(), httpErrorCode);
+                                        }
+
+                                      } else {
+                                        // reply unhandled error
+                                        errorRespond(
+                                            value.getCause().getMessage(),
+                                            HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                                      }
+                                      checkAndCloseResponse(retry);
+                                    },
+                                    retry,
+                                    timeout,
+                                    circuitBreakerTimeout);
+                              });
+                    }
+                  });
+        });
   }
-
 
   @Override
   protected void checkAndCloseResponse(int retry) {
@@ -325,6 +341,7 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
       response.end();
     }
   }
+
   @Override
   protected void respond(byte[] result, int statuscode) {
     final HttpServerResponse response = context.response();
@@ -350,10 +367,9 @@ public class ExecuteRSByte extends AbstractResponse<byte[]> {
       }
     }
   }
+
   @Override
   protected void respond(byte[] result) {
     respond(result, httpStatusCode);
   }
-
-
 }

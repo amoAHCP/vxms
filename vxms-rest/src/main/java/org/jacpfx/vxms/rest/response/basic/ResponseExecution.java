@@ -25,7 +25,6 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -49,7 +48,7 @@ public class ResponseExecution {
   private static final long LOCK_VALUE = -1L;
 
   /**
-   * Creates the response value based on the flow defined in the fluent API.  The resulting response
+   * Creates the response value based on the flow defined in the fluent API. The resulting response
    * will be passed to an execution consumer.
    *
    * @param methodId, the method name/id to be executed
@@ -57,17 +56,18 @@ public class ResponseExecution {
    * @param timeout, the timeout time for execution
    * @param circuitBreakerTimeout, the stateful circuit breaker release time
    * @param userOperation, the user operation to be executed (mapToStringResponse,
-   * mapToByteResponse, mapToObjectResponse)
+   *     mapToByteResponse, mapToObjectResponse)
    * @param errorHandler, the intermediate error method, executed on each error
    * @param onFailureRespond, the method to be executed on failure
    * @param errorMethodHandler, the fallback method
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param fail, last thrown Exception
    * @param resultConsumer, the consumer of the {@link ExecutionResult}
    * @param <T> the type of response (String, byte, Object)
    */
-  public static <T> void createResponse(String methodId,
+  public static <T> void createResponse(
+      String methodId,
       ThrowableFutureConsumer<T> userOperation,
       Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
@@ -80,16 +80,8 @@ public class ResponseExecution {
       long circuitBreakerTimeout) {
 
     if (circuitBreakerTimeout > DEFAULT_LONG_VALUE) {
-      executeStateful(methodId,
-          retry, timeout,
-          circuitBreakerTimeout,
-          userOperation,
-          errorHandler,
-          onFailureRespond,
-          errorMethodHandler,
-          vxmsShared, fail, resultConsumer);
-    } else {
-      executeStateless(methodId,
+      executeStateful(
+          methodId,
           retry,
           timeout,
           circuitBreakerTimeout,
@@ -97,11 +89,26 @@ public class ResponseExecution {
           errorHandler,
           onFailureRespond,
           errorMethodHandler,
-          vxmsShared, resultConsumer);
+          vxmsShared,
+          fail,
+          resultConsumer);
+    } else {
+      executeStateless(
+          methodId,
+          retry,
+          timeout,
+          circuitBreakerTimeout,
+          userOperation,
+          errorHandler,
+          onFailureRespond,
+          errorMethodHandler,
+          vxmsShared,
+          resultConsumer);
     }
   }
 
-  private static <T> void executeStateless(String _methodId,
+  private static <T> void executeStateless(
+      String _methodId,
       int retry,
       long timeout,
       long release,
@@ -112,37 +119,41 @@ public class ResponseExecution {
       VxmsShared vxmsShared,
       Consumer<ExecutionResult<T>> resultConsumer) {
     final Future<T> operationResult = Future.future();
-    operationResult.setHandler(event -> {
-      if (event.failed()) {
-        int retryTemp = retry - 1;
-        retryOrFail(_methodId,
-            timeout,
-            release,
-            _userOperation,
-            errorHandler,
-            onFailureRespond,
-            errorMethodHandler,
-            vxmsShared, resultConsumer,
-            event, retryTemp);
-      } else {
-        resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
-      }
-    });
+    operationResult.setHandler(
+        event -> {
+          if (event.failed()) {
+            int retryTemp = retry - 1;
+            retryOrFail(
+                _methodId,
+                timeout,
+                release,
+                _userOperation,
+                errorHandler,
+                onFailureRespond,
+                errorMethodHandler,
+                vxmsShared,
+                resultConsumer,
+                event,
+                retryTemp);
+          } else {
+            resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
+          }
+        });
     if (timeout > DEFAULT_LONG_VALUE) {
-      addTimeoutHandler(timeout, vxmsShared.getVertx(), (l) -> {
-        if (!operationResult.isComplete()) {
-          operationResult.fail(new TimeoutException("operation timeout"));
-        }
-      });
-
+      addTimeoutHandler(
+          timeout,
+          vxmsShared.getVertx(),
+          (l) -> {
+            if (!operationResult.isComplete()) {
+              operationResult.fail(new TimeoutException("operation timeout"));
+            }
+          });
     }
     executeAndCompleate(_userOperation, operationResult);
-
-
   }
 
-  private static <T> void executeAndCompleate(ThrowableFutureConsumer<T> userOperation,
-      Future<T> operationResult) {
+  private static <T> void executeAndCompleate(
+      ThrowableFutureConsumer<T> userOperation, Future<T> operationResult) {
 
     try {
       userOperation.accept(operationResult);
@@ -151,7 +162,8 @@ public class ResponseExecution {
     }
   }
 
-  private static <T> void retryOrFail(String methodId,
+  private static <T> void retryOrFail(
+      String methodId,
       long timeout,
       long release,
       ThrowableFutureConsumer<T> _userOperation,
@@ -165,7 +177,8 @@ public class ResponseExecution {
     if (retryTemp < DEFAULT_VALUE) {
       errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, event);
     } else {
-      retry(methodId,
+      retry(
+          methodId,
           retryTemp,
           timeout,
           release,
@@ -179,7 +192,8 @@ public class ResponseExecution {
     }
   }
 
-  private static <T> void executeStateful(String _methodId,
+  private static <T> void executeStateful(
+      String _methodId,
       int retry,
       long timeout,
       long circuitBreakerTimeout,
@@ -191,74 +205,92 @@ public class ResponseExecution {
       Throwable t,
       Consumer<ExecutionResult<T>> resultConsumer) {
     final Future<T> operationResult = Future.future();
-    operationResult.setHandler(event -> {
-      if (event.failed()) {
-        statefulErrorHandling(_methodId,
-            retry,
-            timeout,
-            circuitBreakerTimeout,
-            _userOperation,
-            errorHandler,
-            onFailureRespond,
-            errorMethodHandler,
-            vxmsShared,
-            resultConsumer,
-            event);
-      } else {
-        resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
-      }
-    });
+    operationResult.setHandler(
+        event -> {
+          if (event.failed()) {
+            statefulErrorHandling(
+                _methodId,
+                retry,
+                timeout,
+                circuitBreakerTimeout,
+                _userOperation,
+                errorHandler,
+                onFailureRespond,
+                errorMethodHandler,
+                vxmsShared,
+                resultConsumer,
+                event);
+          } else {
+            resultConsumer.accept(new ExecutionResult<>(event.result(), true, null));
+          }
+        });
 
-    executeLocked((lock, counter) ->
-            counter.get(counterHandler -> {
-              long currentVal = counterHandler.result();
-              if (currentVal == DEFAULT_LONG_VALUE) {
-                executeInitialState(retry,
-                    timeout,
-                    _userOperation,
-                    vxmsShared,
-                    operationResult,
-                    lock,
-                    counter);
-              } else if (currentVal > 0) {
-                executeDefaultState(timeout, _userOperation, vxmsShared, operationResult, lock);
-              } else {
-                releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler,
-                    resultConsumer, lock,
-                    Optional.ofNullable(t).orElse(Future.failedFuture("circuit open").cause()));
-              }
-            }), _methodId, vxmsShared, errorHandler, onFailureRespond, errorMethodHandler,
+    executeLocked(
+        (lock, counter) ->
+            counter.get(
+                counterHandler -> {
+                  long currentVal = counterHandler.result();
+                  if (currentVal == DEFAULT_LONG_VALUE) {
+                    executeInitialState(
+                        retry, timeout, _userOperation, vxmsShared, operationResult, lock, counter);
+                  } else if (currentVal > 0) {
+                    executeDefaultState(timeout, _userOperation, vxmsShared, operationResult, lock);
+                  } else {
+                    releaseLockAndHandleError(
+                        errorHandler,
+                        onFailureRespond,
+                        errorMethodHandler,
+                        resultConsumer,
+                        lock,
+                        Optional.ofNullable(t).orElse(Future.failedFuture("circuit open").cause()));
+                  }
+                }),
+        _methodId,
+        vxmsShared,
+        errorHandler,
+        onFailureRespond,
+        errorMethodHandler,
         resultConsumer);
-
-
   }
 
-
-  private static <T> void releaseLockAndHandleError(Consumer<Throwable> errorHandler,
+  private static <T> void releaseLockAndHandleError(
+      Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Consumer<ExecutionResult<T>> resultConsumer,
-      Lock lock, Throwable cause) {
+      Lock lock,
+      Throwable cause) {
     Optional.ofNullable(lock).ifPresent(Lock::release);
-    errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer,
+    errorHandling(
+        errorHandler,
+        onFailureRespond,
+        errorMethodHandler,
+        resultConsumer,
         Future.failedFuture(cause));
   }
 
-  private static <T> void executeDefaultState(long _timeout,
-      ThrowableFutureConsumer<T> _userOperation, VxmsShared vxmsShared, Future<T> operationResult,
+  private static <T> void executeDefaultState(
+      long _timeout,
+      ThrowableFutureConsumer<T> _userOperation,
+      VxmsShared vxmsShared,
+      Future<T> operationResult,
       Lock lock) {
     lock.release();
     if (_timeout > DEFAULT_LONG_VALUE) {
-      addTimeoutHandler(_timeout, vxmsShared.getVertx(), (l) -> {
-        if (!operationResult.isComplete()) {
-          operationResult.fail(new TimeoutException("operation timeout"));
-        }
-      });
+      addTimeoutHandler(
+          _timeout,
+          vxmsShared.getVertx(),
+          (l) -> {
+            if (!operationResult.isComplete()) {
+              operationResult.fail(new TimeoutException("operation timeout"));
+            }
+          });
     }
     executeAndCompleate(_userOperation, operationResult);
   }
 
-  private static <T> void executeInitialState(int retry,
+  private static <T> void executeInitialState(
+      int retry,
       long timeout,
       ThrowableFutureConsumer<T> _userOperation,
       VxmsShared vxmsShared,
@@ -266,12 +298,14 @@ public class ResponseExecution {
       Lock lock,
       Counter counter) {
     final long initialRetryCounterValue = (long) (retry + 1);
-    counter.addAndGet(initialRetryCounterValue,
-        rHandler -> executeDefaultState(timeout, _userOperation, vxmsShared, operationResult,
-            lock));
+    counter.addAndGet(
+        initialRetryCounterValue,
+        rHandler ->
+            executeDefaultState(timeout, _userOperation, vxmsShared, operationResult, lock));
   }
 
-  private static <T> void statefulErrorHandling(String methodId,
+  private static <T> void statefulErrorHandling(
+      String methodId,
       int retry,
       long timeout,
       long circuitBreakerTimeout,
@@ -283,37 +317,52 @@ public class ResponseExecution {
       Consumer<ExecutionResult<T>> resultConsumer,
       AsyncResult<T> event) {
 
-    executeLocked((lock, counter) ->
-            decrementAndExecute(counter, valHandler -> {
-              if (valHandler.succeeded()) {
-                handleStatefulError(methodId,
-                    retry,
-                    timeout,
-                    circuitBreakerTimeout,
-                    _userOperation,
-                    errorHandler,
-                    onFailureRespond,
-                    errorMethodHandler,
-                    vxmsShared,
-                    resultConsumer,
-                    event,
-                    lock,
-                    counter,
-                    valHandler);
-              } else {
-                releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler,
-                    resultConsumer, lock, valHandler.cause());
-              }
-            }), methodId, vxmsShared, errorHandler, onFailureRespond, errorMethodHandler,
+    executeLocked(
+        (lock, counter) ->
+            decrementAndExecute(
+                counter,
+                valHandler -> {
+                  if (valHandler.succeeded()) {
+                    handleStatefulError(
+                        methodId,
+                        retry,
+                        timeout,
+                        circuitBreakerTimeout,
+                        _userOperation,
+                        errorHandler,
+                        onFailureRespond,
+                        errorMethodHandler,
+                        vxmsShared,
+                        resultConsumer,
+                        event,
+                        lock,
+                        counter,
+                        valHandler);
+                  } else {
+                    releaseLockAndHandleError(
+                        errorHandler,
+                        onFailureRespond,
+                        errorMethodHandler,
+                        resultConsumer,
+                        lock,
+                        valHandler.cause());
+                  }
+                }),
+        methodId,
+        vxmsShared,
+        errorHandler,
+        onFailureRespond,
+        errorMethodHandler,
         resultConsumer);
   }
 
-  private static void decrementAndExecute(Counter counter,
-      Handler<AsyncResult<Long>> asyncResultHandler) {
+  private static void decrementAndExecute(
+      Counter counter, Handler<AsyncResult<Long>> asyncResultHandler) {
     counter.decrementAndGet(asyncResultHandler);
   }
 
-  private static <T> void handleStatefulError(String methodId,
+  private static <T> void handleStatefulError(
+      String methodId,
       int retry,
       long timeout,
       long circuitBreakerTimeout,
@@ -323,68 +372,91 @@ public class ResponseExecution {
       Consumer<Throwable> errorMethodHandler,
       VxmsShared vxmsShared,
       Consumer<ExecutionResult<T>> resultConsumer,
-      AsyncResult<T> event, Lock lock, Counter counter,
+      AsyncResult<T> event,
+      Lock lock,
+      Counter counter,
       AsyncResult<Long> valHandler) {
     long count = valHandler.result();
     if (count <= DEFAULT_LONG_VALUE) {
       setCircuitBreakerReleaseTimer(retry, circuitBreakerTimeout, vxmsShared.getVertx(), counter);
-      openCircuitBreakerAndHandleError(errorHandler, onFailureRespond, errorMethodHandler,
-          resultConsumer, event, lock, counter);
+      openCircuitBreakerAndHandleError(
+          errorHandler, onFailureRespond, errorMethodHandler, resultConsumer, event, lock, counter);
     } else {
       lock.release();
-      retry(methodId, retry, timeout, circuitBreakerTimeout, _userOperation, errorHandler,
-          onFailureRespond, errorMethodHandler, vxmsShared, resultConsumer, event);
+      retry(
+          methodId,
+          retry,
+          timeout,
+          circuitBreakerTimeout,
+          _userOperation,
+          errorHandler,
+          onFailureRespond,
+          errorMethodHandler,
+          vxmsShared,
+          resultConsumer,
+          event);
     }
   }
 
-
-  private static <T> void openCircuitBreakerAndHandleError(Consumer<Throwable> errorHandler,
+  private static <T> void openCircuitBreakerAndHandleError(
+      Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Consumer<ExecutionResult<T>> resultConsumer,
-      AsyncResult<T> event, Lock lock, Counter counter) {
-    counter.addAndGet(LOCK_VALUE, val -> {
-      lock.release();
-      errorHandling(errorHandler, onFailureRespond, errorMethodHandler, resultConsumer,
-          Future.failedFuture(event.cause()));
-    });
-  }
-
-  private static void setCircuitBreakerReleaseTimer(int _retry, long _release, Vertx vertx,
+      AsyncResult<T> event,
+      Lock lock,
       Counter counter) {
-    vertx.setTimer(_release,
-        timer -> counter.addAndGet(Integer.valueOf(_retry + 1).longValue(), val -> {
-        }));
+    counter.addAndGet(
+        LOCK_VALUE,
+        val -> {
+          lock.release();
+          errorHandling(
+              errorHandler,
+              onFailureRespond,
+              errorMethodHandler,
+              resultConsumer,
+              Future.failedFuture(event.cause()));
+        });
   }
 
+  private static void setCircuitBreakerReleaseTimer(
+      int _retry, long _release, Vertx vertx, Counter counter) {
+    vertx.setTimer(
+        _release, timer -> counter.addAndGet(Integer.valueOf(_retry + 1).longValue(), val -> {}));
+  }
 
   private static void addTimeoutHandler(long _timeout, Vertx vertx, Handler<Long> longHandler) {
     vertx.setTimer(_timeout, longHandler);
   }
 
-  private static <T> void errorHandling(Consumer<Throwable> errorHandler,
+  private static <T> void errorHandling(
+      Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Consumer<ExecutionResult<T>> resultConsumer,
       AsyncResult<T> event) {
     try {
       final Future<T> errorResult = Future.future();
-      errorResult.setHandler(resultHandler -> {
-        if (resultHandler.succeeded()) {
-          resultConsumer.accept(new ExecutionResult<>(resultHandler.result(), true, true, null));
-        } else {
-          handleExecutionError(null, errorHandler, null, errorMethodHandler, resultHandler.cause());
-        }
-      });
-      handleExecutionError(errorResult, errorHandler, onFailureRespond, errorMethodHandler,
-          event.cause());
+      errorResult.setHandler(
+          resultHandler -> {
+            if (resultHandler.succeeded()) {
+              resultConsumer.accept(
+                  new ExecutionResult<>(resultHandler.result(), true, true, null));
+            } else {
+              handleExecutionError(
+                  null, errorHandler, null, errorMethodHandler, resultHandler.cause());
+            }
+          });
+      handleExecutionError(
+          errorResult, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
 
     } catch (Exception e) {
       resultConsumer.accept(new ExecutionResult<>(null, false, e));
     }
   }
 
-  private static <T> void retry(String _methodId,
+  private static <T> void retry(
+      String _methodId,
       int retryTemp,
       long timeout,
       long release,
@@ -396,22 +468,26 @@ public class ResponseExecution {
       Consumer<ExecutionResult<T>> resultConsumer,
       AsyncResult<T> event) {
     ResponseExecution.handleError(errorHandler, event.cause());
-    createResponse(_methodId,
+    createResponse(
+        _methodId,
         userOperation,
         errorHandler,
         onFailureRespond,
         errorMethodHandler,
-        vxmsShared, null,
+        vxmsShared,
+        null,
         resultConsumer,
         retryTemp,
         timeout,
         release);
   }
 
-  private static <T> void handleExecutionError(Future<T> errorResult,
+  private static <T> void handleExecutionError(
+      Future<T> errorResult,
       Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
-      Consumer<Throwable> errorMethodHandler, Throwable e) {
+      Consumer<Throwable> errorMethodHandler,
+      Throwable e) {
     ResponseExecution.handleError(errorHandler, e);
     try {
       if (onFailureRespond != null) {
@@ -424,7 +500,6 @@ public class ResponseExecution {
     }
   }
 
-
   /**
    * checks errorHandler for null and passes the throwable
    *
@@ -435,10 +510,7 @@ public class ResponseExecution {
     if (errorHandler != null) {
       errorHandler.accept(e);
     }
-
   }
-
-
 
   /**
    * Checks the type of result and reply response
@@ -461,16 +533,15 @@ public class ResponseExecution {
    * @param statusCode, the http code to set
    * @param response, the http response object
    */
-  public static void updateHeaderAndStatuscode(Map<String, String> headers, int statusCode,
-      HttpServerResponse response) {
+  public static void updateHeaderAndStatuscode(
+      Map<String, String> headers, int statusCode, HttpServerResponse response) {
     updateResponseHaders(headers, response);
     updateResponseStatusCode(statusCode, response);
   }
 
-  private static void updateResponseHaders(Map<String, String> headers,
-      HttpServerResponse response) {
-    Optional.ofNullable(headers).ifPresent(
-        h -> h.forEach(response::putHeader));
+  private static void updateResponseHaders(
+      Map<String, String> headers, HttpServerResponse response) {
+    Optional.ofNullable(headers).ifPresent(h -> h.forEach(response::putHeader));
   }
 
   private static void updateResponseStatusCode(int httpStatusCode, HttpServerResponse response) {
@@ -502,37 +573,52 @@ public class ResponseExecution {
     return Optional.empty();
   }
 
-  private static <T> void executeLocked(LockedConsumer consumer, String methodId,
-      VxmsShared vxmsShared, Consumer<Throwable> errorHandler,
-      ThrowableErrorConsumer<Throwable, T> onFailureRespond, Consumer<Throwable> errorMethodHandler,
+  private static <T> void executeLocked(
+      LockedConsumer consumer,
+      String methodId,
+      VxmsShared vxmsShared,
+      Consumer<Throwable> errorHandler,
+      ThrowableErrorConsumer<Throwable, T> onFailureRespond,
+      Consumer<Throwable> errorMethodHandler,
       Consumer<ExecutionResult<T>> resultConsumer) {
     // final SharedData sharedData = vxmsShared.getVertx().sharedData();
     // TODO make configurable if cluster wide lock is wanted... than use shared data object instead
     final LocalData localData = vxmsShared.getLocalData();
-    localData.getLockWithTimeout(methodId, DEFAULT_LOCK_TIMEOUT, lockHandler -> {
-      final Lock lock = lockHandler.result();
-      if (lockHandler.succeeded()) {
-        localData.getCounter(methodId, resultHandler -> {
-          if (resultHandler.succeeded()) {
-            consumer.execute(lock, resultHandler.result());
+    localData.getLockWithTimeout(
+        methodId,
+        DEFAULT_LOCK_TIMEOUT,
+        lockHandler -> {
+          final Lock lock = lockHandler.result();
+          if (lockHandler.succeeded()) {
+            localData.getCounter(
+                methodId,
+                resultHandler -> {
+                  if (resultHandler.succeeded()) {
+                    consumer.execute(lock, resultHandler.result());
+                  } else {
+                    releaseLockAndHandleError(
+                        errorHandler,
+                        onFailureRespond,
+                        errorMethodHandler,
+                        resultConsumer,
+                        lock,
+                        resultHandler.cause());
+                  }
+                });
           } else {
-            releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler,
-                resultConsumer, lock, resultHandler.cause());
+            releaseLockAndHandleError(
+                errorHandler,
+                onFailureRespond,
+                errorMethodHandler,
+                resultConsumer,
+                lock,
+                lockHandler.cause());
           }
         });
-      } else {
-        releaseLockAndHandleError(errorHandler, onFailureRespond, errorMethodHandler,
-            resultConsumer, lock, lockHandler.cause());
-      }
-
-    });
   }
-
 
   private interface LockedConsumer {
 
     void execute(Lock lock, Counter counter);
   }
-
-
 }

@@ -81,7 +81,7 @@ public class EventbusObjectExecutionUtil {
       long _circuitBreakerTimeout) {
     final DeliveryOptions _deliveryOptions =
         Optional.ofNullable(_requestOptions).orElse(new DeliveryOptions());
-    final RecursiveExecutor executor =
+    final RecursiveExecutor<Serializable> executor =
         (methodId,
             vxmsShared,
             failure,
@@ -113,7 +113,7 @@ public class EventbusObjectExecutionUtil {
                     circuitBreakerTimeout)
                 .execute();
 
-    final RetryExecutor retry =
+    final RetryExecutor<Serializable> retry =
         (targetId,
             methodId, message,
             function,

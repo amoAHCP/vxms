@@ -30,8 +30,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusObjectCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Defines the fluent API to set the http error code in case of the onFailure method is executed
+ * Created by Andy Moncsek on 12.01.16. Defines the fluent API to set the http error code in case of
+ * the onFailure method is executed
  */
 public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
 
@@ -40,18 +40,18 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param objectSupplier the supplier, producing the object response
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
-   * the fluent API
+   *     the fluent API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
@@ -59,7 +59,8 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSObjectOnFailureCode(String methodId,
+  public ExecuteRSObjectOnFailureCode(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -77,7 +78,8 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -97,7 +99,6 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
         circuitBreakerTimeout);
   }
 
-
   /**
    * Define the HTTP Code in case of onFailure execution
    *
@@ -105,7 +106,8 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
    * @return the response chain {@link ExecuteRSObject}
    */
   public ExecuteRSObject httpErrorCode(HttpResponseStatus httpErrorCode) {
-    return new ExecuteRSObject(methodId,
+    return new ExecuteRSObject(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -124,6 +126,4 @@ public class ExecuteRSObjectOnFailureCode extends ExecuteRSObject {
         delay,
         circuitBreakerTimeout);
   }
-
-
 }

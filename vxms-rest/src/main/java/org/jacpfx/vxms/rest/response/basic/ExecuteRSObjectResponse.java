@@ -35,36 +35,37 @@ import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusObjectCall;
  */
 public class ExecuteRSObjectResponse extends ExecuteRSObject {
 
-
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param objectConsumer the consumer that takes a Future to complete, producing the object
-   * response
+   *     response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSObjectResponse(String methodId,
+  public ExecuteRSObjectResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
-      RoutingContext context, Map<String, String> headers,
+      RoutingContext context,
+      Map<String, String> headers,
       ThrowableFutureConsumer<Serializable> objectConsumer,
       List<ExecutionStep> chain,
       ExecuteEventbusObjectCall excecuteEventBusAndReply,
@@ -76,7 +77,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
       int retryCount,
       long timeout,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -95,7 +97,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         circuitBreakerTimeout);
   }
 
-  public ExecuteRSObjectResponse(String methodId,
+  public ExecuteRSObjectResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -105,7 +108,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
       List<ExecutionStep> chain,
       Encoder encoder) {
 
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -122,9 +126,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
         0,
         0L,
         0L);
-
   }
-
 
   /**
    * defines an action for errors in byte responses, you can handle the error and return an
@@ -136,7 +138,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
    */
   public ExecuteRSObjectOnFailureCode onFailureRespond(
       ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond, Encoder encoder) {
-    return new ExecuteRSObjectOnFailureCode(methodId,
+    return new ExecuteRSObjectOnFailureCode(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -163,7 +166,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
    * @return the response chain {@link ExecuteRSObjectResponse}
    */
   public ExecuteRSObjectResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteRSObjectResponse(methodId,
+    return new ExecuteRSObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -189,7 +193,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
    * @return the response chain {@link ExecuteRSObjectResponse}
    */
   public ExecuteRSObjectResponse timeout(long timeout) {
-    return new ExecuteRSObjectResponse(methodId,
+    return new ExecuteRSObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -215,7 +220,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
    * @return the response chain {@link ExecuteRSObjectResponse}
    */
   public ExecuteRSObjectCircuitBreaker retry(int retryCount) {
-    return new ExecuteRSObjectCircuitBreaker(methodId,
+    return new ExecuteRSObjectCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -244,7 +250,8 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
   public ExecuteRSObjectResponse putHeader(String key, String value) {
     Map<String, String> headerMap = new HashMap<>(headers);
     headerMap.put(key, value);
-    return new ExecuteRSObjectResponse(methodId,
+    return new ExecuteRSObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,

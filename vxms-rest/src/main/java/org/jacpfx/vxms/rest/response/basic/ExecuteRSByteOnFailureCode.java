@@ -39,25 +39,26 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByteResponse {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param byteConsumer the consumer that takes a Future to complete, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSByteOnFailureCode(String methodId,
+  public ExecuteRSByteOnFailureCode(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -74,7 +75,8 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByteResponse {
       int retryCount,
       long timeout,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -93,7 +95,6 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByteResponse {
         circuitBreakerTimeout);
   }
 
-
   /**
    * Define the HTTP Code in case of onFailure execution
    *
@@ -101,7 +102,8 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByteResponse {
    * @return the response chain {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse httpErrorCode(HttpResponseStatus httpErrorCode) {
-    return new ExecuteRSByteResponse(methodId,
+    return new ExecuteRSByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -119,6 +121,4 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByteResponse {
         timeout,
         circuitBreakerTimeout);
   }
-
-
 }

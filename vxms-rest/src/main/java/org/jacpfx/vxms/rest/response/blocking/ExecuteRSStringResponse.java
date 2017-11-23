@@ -29,8 +29,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusStringCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteRSStringResponse extends ExecuteRSString {
 
@@ -39,18 +39,18 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param stringSupplier the supplier, producing the byte response
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
-   * the fluent API
+   *     the fluent API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
@@ -58,7 +58,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSStringResponse(String methodId,
+  public ExecuteRSStringResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -76,7 +77,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -96,10 +98,17 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         circuitBreakerTimeout);
   }
 
-  public ExecuteRSStringResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
-      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
-      ThrowableSupplier<String> stringSupplier,List<BlockingExecutionStep> chain) {
-    super(methodId,
+  public ExecuteRSStringResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      RoutingContext context,
+      Map<String, String> headers,
+      ThrowableSupplier<String> stringSupplier,
+      List<BlockingExecutionStep> chain) {
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -119,7 +128,6 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         0L);
   }
 
-
   /**
    * defines an action for errors in byte responses, you can handle the error and return an
    * alternate createResponse value
@@ -129,7 +137,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    */
   public ExecuteRSStringOnFailureCode onFailureRespond(
       ThrowableFunction<Throwable, String> onFailureRespond) {
-    return new ExecuteRSStringOnFailureCode(methodId,
+    return new ExecuteRSStringOnFailureCode(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -157,7 +166,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    * @return the response chain {@link ExecuteRSStringResponse}
    */
   public ExecuteRSStringResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteRSStringResponse(methodId,
+    return new ExecuteRSStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -184,7 +194,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    * @return the createResponse chain {@link ExecuteRSStringCircuitBreaker}
    */
   public ExecuteRSStringCircuitBreaker retry(int retryCount) {
-    return new ExecuteRSStringCircuitBreaker(methodId,
+    return new ExecuteRSStringCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -211,7 +222,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    * @return the createResponse chain {@link ExecuteRSStringResponse}
    */
   public ExecuteRSStringResponse timeout(long timeout) {
-    return new ExecuteRSStringResponse(methodId,
+    return new ExecuteRSStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -238,7 +250,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
    * @return the createResponse chain {@link ExecuteRSStringResponse}
    */
   public ExecuteRSStringResponse delay(long delay) {
-    return new ExecuteRSStringResponse(methodId,
+    return new ExecuteRSStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -268,7 +281,8 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
   public ExecuteRSStringResponse putHeader(String key, String value) {
     Map<String, String> headerMap = new HashMap<>(headers);
     headerMap.put(key, value);
-    return new ExecuteRSStringResponse(methodId,
+    return new ExecuteRSStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -287,5 +301,4 @@ public class ExecuteRSStringResponse extends ExecuteRSString {
         delay,
         circuitBreakerTimeout);
   }
-
 }

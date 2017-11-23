@@ -89,7 +89,7 @@ public class RESTResponse {
    */
   public ExecuteRSByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
     return new ExecuteRSByteResponse(
-        methodId, vxmsShared, failure, errorMethodHandler, context, headers, byteConsumer,null);
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, byteConsumer, null);
   }
 
   /**
@@ -98,18 +98,19 @@ public class RESTResponse {
    * @param stringConsumer consumes a io.vertx.core.Future to complete with a String response
    * @return {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSStringResponse stringResponse(
-      ThrowableFutureConsumer<String> stringConsumer) {
+  public ExecuteRSStringResponse stringResponse(ThrowableFutureConsumer<String> stringConsumer) {
     return new ExecuteRSStringResponse(
         methodId, vxmsShared, failure, errorMethodHandler, context, headers, stringConsumer, null);
   }
 
   /**
    * starts a supply chain to create a response
+   *
    * @param chainconsumer the initial supplier
    * @param <T> the type of the return value
    * @return {@link ExecuteRSChainResponse}
    */
+  @SuppressWarnings("unchecked")
   public <T> ExecuteRSChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));

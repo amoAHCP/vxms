@@ -207,6 +207,7 @@ public class ExecuteRSString extends AbstractResponse<String> {
   }
 
   /** Execute the reply chain */
+  @SuppressWarnings("unchecked")
   public void execute() {
     final Vertx vertx = vxmsShared.getVertx();
     vertx.runOnContext(
@@ -334,6 +335,7 @@ public class ExecuteRSString extends AbstractResponse<String> {
                   });
         });
   }
+
   @Override
   protected void checkAndCloseResponse(int retry) {
     final HttpServerResponse response = context.response();

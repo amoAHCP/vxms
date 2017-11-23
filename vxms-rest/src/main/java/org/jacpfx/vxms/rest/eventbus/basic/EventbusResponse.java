@@ -32,10 +32,7 @@ import org.jacpfx.vxms.rest.util.EventbusByteExecutionUtil;
 import org.jacpfx.vxms.rest.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vxms.rest.util.EventbusStringExecutionUtil;
 
-/**
- * Created by Andy Moncsek on 14.03.16.
- * Represents the start of a non-blocking execution chain
- */
+/** Created by Andy Moncsek on 14.03.16. Represents the start of a non-blocking execution chain */
 public class EventbusResponse {
 
   private final String methodId;
@@ -52,7 +49,7 @@ public class EventbusResponse {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the last exception
    * @param errorMethodHandler the error-method handler
    * @param context the vertx routing context
@@ -60,7 +57,8 @@ public class EventbusResponse {
    * @param message the event-bus message
    * @param options the event-bus delivery serverOptions
    */
-  public EventbusResponse(String methodId,
+  public EventbusResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -87,7 +85,8 @@ public class EventbusResponse {
   public ExecuteRSStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-    return EventbusStringExecutionUtil.mapToStringResponse(methodId,
+    return EventbusStringExecutionUtil.mapToStringResponse(
+        methodId,
         targetId,
         message,
         stringFunction,
@@ -107,7 +106,8 @@ public class EventbusResponse {
   public ExecuteRSByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-    return EventbusByteExecutionUtil.mapToByteResponse(methodId,
+    return EventbusByteExecutionUtil.mapToByteResponse(
+        methodId,
         targetId,
         message,
         byteFunction,
@@ -129,7 +129,8 @@ public class EventbusResponse {
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 
-    return EventbusObjectExecutionUtil.mapToObjectResponse(methodId,
+    return EventbusObjectExecutionUtil.mapToObjectResponse(
+        methodId,
         targetId,
         message,
         objectFunction,
@@ -140,6 +141,4 @@ public class EventbusResponse {
         context,
         encoder);
   }
-
-
 }

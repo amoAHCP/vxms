@@ -148,8 +148,7 @@ public class ExecuteRSByte extends org.jacpfx.vxms.rest.response.basic.ExecuteRS
             failure,
             errorMethodHandler,
             context,
-            updateContentType(
-                headers, contentType),
+            updateContentType(headers, contentType),
             byteSupplier,
             chain,
             excecuteAsyncEventBusAndReply,
@@ -174,8 +173,7 @@ public class ExecuteRSByte extends org.jacpfx.vxms.rest.response.basic.ExecuteRS
             failure,
             errorMethodHandler,
             context,
-            updateContentType(
-                headers, contentType),
+            updateContentType(headers, contentType),
             byteSupplier,
             chain,
             excecuteAsyncEventBusAndReply,
@@ -192,6 +190,7 @@ public class ExecuteRSByte extends org.jacpfx.vxms.rest.response.basic.ExecuteRS
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute() {
     Optional.ofNullable(excecuteAsyncEventBusAndReply)
         .ifPresent(

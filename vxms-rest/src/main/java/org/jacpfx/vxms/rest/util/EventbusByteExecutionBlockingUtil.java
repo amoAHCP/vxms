@@ -35,8 +35,8 @@ import org.jacpfx.vxms.rest.response.blocking.ExecuteRSByteResponse;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSStringResponse;
 
 /**
- * Created by Andy Moncsek on 05.04.16.
- * Typed execution of event-bus calls and blocking byte response
+ * Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and blocking byte
+ * response
  */
 public class EventbusByteExecutionBlockingUtil {
 
@@ -49,7 +49,7 @@ public class EventbusByteExecutionBlockingUtil {
    * @param _byteFunction the function to process the result message
    * @param _options the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
    * @param _context the vertx routing context
@@ -58,7 +58,7 @@ public class EventbusByteExecutionBlockingUtil {
    * @param _encoder the encoder to encode your objects
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param _httpStatusCode the http status code to set for response
    * @param _httpErrorCode the http error code to set in case of failure handling
    * @param _retryCount the amount of retries before failure execution is triggered
@@ -68,7 +68,8 @@ public class EventbusByteExecutionBlockingUtil {
    * @return the execution chain {@link ExecuteRSStringResponse}
    */
   @SuppressWarnings("unchecked")
-  public static ExecuteRSByteResponse mapToByteResponse(String _methodId,
+  public static ExecuteRSByteResponse mapToByteResponse(
+      String _methodId,
       String _targetId,
       Object _message,
       DeliveryOptions _options,
@@ -89,100 +90,148 @@ public class EventbusByteExecutionBlockingUtil {
       long _delay,
       long _circuitBreakerTimeout) {
 
-    final DeliveryOptions _deliveryOptions = Optional.ofNullable(_options)
-        .orElse(new DeliveryOptions());
+    final DeliveryOptions _deliveryOptions =
+        Optional.ofNullable(_options).orElse(new DeliveryOptions());
 
-    final RetryExecutor retry = (methodId,
-        targetId,
-        message,
-        byteFunction,
-        deliveryOptions,
-        vxmsShared, failure,
-        errorMethodHandler,
-        context,
-        headers,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode,
-        httpErrorCode, retryCount,
-        timeout, delay, circuitBreakerTimeout) -> {
-      final int decrementedCount = retryCount - 1;
-      mapToByteResponse(methodId,
-          targetId, message,
-          deliveryOptions,
-          byteFunction,
-          vxmsShared, failure,
-          errorMethodHandler,
-          context, headers,
-          null,
-          encoder,
-          errorHandler,
-          onFailureRespond,
-          httpStatusCode,
-          httpErrorCode,
-          decrementedCount,
-          timeout, delay,
-          circuitBreakerTimeout).
-          execute();
-    };
-
-    final RecursiveExecutor executor = (methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        supplier,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode, httpErrorCode,
-        retryCount, timeout, delay, circuitBreakerTimeout) ->
-        new ExecuteRSByteResponse(methodId,
-            vxmsShared, failure,
+    final RetryExecutor<byte[]> retry =
+        (methodId,
+            targetId,
+            message,
+            byteFunction,
+            deliveryOptions,
+            vxmsShared,
+            failure,
             errorMethodHandler,
-            context, headers,
-            supplier,
-            null,
-            null,
-            encoder, errorHandler,
+            context,
+            headers,
+            encoder,
+            errorHandler,
             onFailureRespond,
             httpStatusCode,
             httpErrorCode,
-            retryCount, timeout, delay,
-            circuitBreakerTimeout).
-            execute();
+            retryCount,
+            timeout,
+            delay,
+            circuitBreakerTimeout) -> {
+          final int decrementedCount = retryCount - 1;
+          mapToByteResponse(
+                  methodId,
+                  targetId,
+                  message,
+                  deliveryOptions,
+                  byteFunction,
+                  vxmsShared,
+                  failure,
+                  errorMethodHandler,
+                  context,
+                  headers,
+                  null,
+                  encoder,
+                  errorHandler,
+                  onFailureRespond,
+                  httpStatusCode,
+                  httpErrorCode,
+                  decrementedCount,
+                  timeout,
+                  delay,
+                  circuitBreakerTimeout)
+              .execute();
+        };
 
-    final ExecuteEventbusByteCall excecuteEventBusAndReply = (vxmsShared, failure,
-        errorMethodHandler,
-        context, headers,
-        encoder, errorHandler,
-        errorHandlerByte,
-        httpStatusCode, httpErrorCode,
-        retryCount, timeout,
-        delay, circuitBreakerTimeout) ->
-        EventbusExecution.sendMessageAndSupplyHandler(_methodId,
-            _targetId, _message,
-            _byteFunction,
-            _deliveryOptions,
-            vxmsShared, failure,
+    final RecursiveExecutor<byte[]> executor =
+        (methodId,
+            vxmsShared,
+            failure,
             errorMethodHandler,
-            context, headers,
-            encoder, errorHandler,
+            context,
+            headers,
+            supplier,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            httpStatusCode,
+            httpErrorCode,
+            retryCount,
+            timeout,
+            delay,
+            circuitBreakerTimeout) ->
+            new ExecuteRSByteResponse(
+                    methodId,
+                    vxmsShared,
+                    failure,
+                    errorMethodHandler,
+                    context,
+                    headers,
+                    supplier,
+                    null,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    httpStatusCode,
+                    httpErrorCode,
+                    retryCount,
+                    timeout,
+                    delay,
+                    circuitBreakerTimeout)
+                .execute();
+
+    final ExecuteEventbusByteCall excecuteEventBusAndReply =
+        (vxmsShared,
+            failure,
+            errorMethodHandler,
+            context,
+            headers,
+            encoder,
+            errorHandler,
             errorHandlerByte,
             httpStatusCode,
             httpErrorCode,
             retryCount,
-            timeout, delay,
-            circuitBreakerTimeout,
-            executor, retry);
+            timeout,
+            delay,
+            circuitBreakerTimeout) ->
+            EventbusExecution.sendMessageAndSupplyHandler(
+                _methodId,
+                _targetId,
+                _message,
+                _byteFunction,
+                _deliveryOptions,
+                vxmsShared,
+                failure,
+                errorMethodHandler,
+                context,
+                headers,
+                encoder,
+                errorHandler,
+                errorHandlerByte,
+                httpStatusCode,
+                httpErrorCode,
+                retryCount,
+                timeout,
+                delay,
+                circuitBreakerTimeout,
+                executor,
+                retry);
 
-    return new ExecuteRSByteResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _byteSupplier, null,excecuteEventBusAndReply,
-        _encoder, _errorHandler, _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount,
-        _timeout, _delay, _circuitBreakerTimeout);
+    return new ExecuteRSByteResponse(
+        _methodId,
+        _vxmsShared,
+        _failure,
+        _errorMethodHandler,
+        _context,
+        _headers,
+        _byteSupplier,
+        null,
+        excecuteEventBusAndReply,
+        _encoder,
+        _errorHandler,
+        _onFailureRespond,
+        _httpStatusCode,
+        _httpErrorCode,
+        _retryCount,
+        _timeout,
+        _delay,
+        _circuitBreakerTimeout);
   }
-
-
 }

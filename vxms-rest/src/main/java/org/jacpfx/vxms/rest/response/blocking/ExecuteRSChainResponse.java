@@ -45,20 +45,19 @@ public class ExecuteRSChainResponse<T> {
   protected final long timeout;
   protected final long circuitBreakerTimeout;
 
-
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param chain the list of execution steps
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param httpStatusCode the http status code to set for response
@@ -67,7 +66,8 @@ public class ExecuteRSChainResponse<T> {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSChainResponse(String methodId,
+  public ExecuteRSChainResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -77,8 +77,11 @@ public class ExecuteRSChainResponse<T> {
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      int httpStatusCode, int httpErrorCode,
-      int retryCount, long timeout, long circuitBreakerTimeout) {
+      int httpStatusCode,
+      int httpErrorCode,
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -94,11 +97,15 @@ public class ExecuteRSChainResponse<T> {
     this.httpErrorCode = httpErrorCode;
     this.timeout = timeout;
     this.circuitBreakerTimeout = circuitBreakerTimeout;
-
   }
 
-  public ExecuteRSChainResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
-      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+  public ExecuteRSChainResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      RoutingContext context,
+      Map<String, String> headers,
       List<BlockingExecutionStep> chain) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
@@ -116,11 +123,17 @@ public class ExecuteRSChainResponse<T> {
     this.circuitBreakerTimeout = 0;
     this.chain = chain;
   }
-
-  public <H> ExecuteRSChainResponse<H> andThen(ThrowableFunction<T,H> step) {
+  /**
+   * @param step the step execution function
+   * @param <H> the return type of the step
+   * @return the chain to perform other steps
+   */
+  @SuppressWarnings("unchecked")
+  public <H> ExecuteRSChainResponse<H> andThen(ThrowableFunction<T, H> step) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new BlockingExecutionStep(step));
-    return new ExecuteRSChainResponse<>(methodId,
+    return new ExecuteRSChainResponse<>(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -138,23 +151,17 @@ public class ExecuteRSChainResponse<T> {
   }
 
   /**
-   * Retunrs a String to the target type
+   * Returns a String to the target type
    *
    * @param step supplier which returns the createResponse value as String
    * @return {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSStringResponse mapToStringResponse(ThrowableFunction<T,String> step) {
+  @SuppressWarnings("unchecked")
+  public ExecuteRSStringResponse mapToStringResponse(ThrowableFunction<T, String> step) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new BlockingExecutionStep(step));
-    return new ExecuteRSStringResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        null,
-        chainTmp
-    );
+    return new ExecuteRSStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, null, chainTmp);
   }
 
   /**
@@ -163,17 +170,12 @@ public class ExecuteRSChainResponse<T> {
    * @param step supplier which returns the createResponse value as byte array
    * @return {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<T,byte[]> step) {
+  @SuppressWarnings("unchecked")
+  public ExecuteRSByteResponse mapToByteResponse(ThrowableFunction<T, byte[]> step) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new BlockingExecutionStep(step));
-    return new ExecuteRSByteResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        null,
-        chainTmp);
+    return new ExecuteRSByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, null, chainTmp);
   }
 
   /**
@@ -183,11 +185,13 @@ public class ExecuteRSChainResponse<T> {
    * @param encoder the encoder to serialize the object response
    * @return {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSObjectResponse mapToObjectResponse(ThrowableFunction<T,Serializable> step,
-      Encoder encoder) {
+  @SuppressWarnings("unchecked")
+  public ExecuteRSObjectResponse mapToObjectResponse(
+      ThrowableFunction<T, Serializable> step, Encoder encoder) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new BlockingExecutionStep(step));
-    return new ExecuteRSObjectResponse(methodId,
+    return new ExecuteRSObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -197,5 +201,4 @@ public class ExecuteRSChainResponse<T> {
         chainTmp,
         encoder);
   }
-
 }

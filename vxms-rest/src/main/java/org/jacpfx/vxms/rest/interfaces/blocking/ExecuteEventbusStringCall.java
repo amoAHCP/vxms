@@ -31,10 +31,10 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 public interface ExecuteEventbusStringCall {
 
   /**
-   * Execute  chain when event-bus response handler is executed
+   * Execute chain when event-bus response handler is executed
    *
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
    * @param context the vertx routing context
@@ -42,7 +42,7 @@ public interface ExecuteEventbusStringCall {
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
@@ -50,14 +50,19 @@ public interface ExecuteEventbusStringCall {
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  void execute(VxmsShared vxmsShared,
+  void execute(
+      VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       RoutingContext context,
-      Map<String, String> headers, Encoder encoder,
+      Map<String, String> headers,
+      Encoder encoder,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, String> onFailureRespond,
-      int httpStatusCode, int httpErrorCode,
-      int retryCount, long timeout,
-      long delay, long circuitBreakerTimeout);
+      int httpStatusCode,
+      int httpErrorCode,
+      int retryCount,
+      long timeout,
+      long delay,
+      long circuitBreakerTimeout);
 }

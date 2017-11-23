@@ -32,10 +32,7 @@ import org.jacpfx.vxms.rest.util.EventbusByteExecutionBlockingUtil;
 import org.jacpfx.vxms.rest.util.EventbusObjectExecutionBlockingUtil;
 import org.jacpfx.vxms.rest.util.EventbusStringExecutionBlockingUtil;
 
-/**
- * Created by Andy Moncsek on 14.03.16.
- * Represents the start of a blocking execution chain
- */
+/** Created by Andy Moncsek on 14.03.16. Represents the start of a blocking execution chain */
 public class EventbusResponse {
 
   private final String methodId;
@@ -47,13 +44,12 @@ public class EventbusResponse {
   private final Object message;
   private final DeliveryOptions options;
 
-
   /**
    * Pass all parameters to execute the chain
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the vertx instance
    * @param errorMethodHandler the error-method handler
    * @param context the vertx routing context
@@ -61,7 +57,8 @@ public class EventbusResponse {
    * @param message the event-bus message
    * @param options the event-bus delivery serverOptions
    */
-  public EventbusResponse(String methodId,
+  public EventbusResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -79,17 +76,17 @@ public class EventbusResponse {
     this.options = options;
   }
 
-
   /**
    * Maps the event-bus response to a String response for the REST request
    *
    * @param stringFunction the function, that takes the response message from the event bus and that
-   * maps it to a valid response for the REST request
+   *     maps it to a valid response for the REST request
    * @return the execution chain {@link ExecuteRSStringResponse}
    */
   public ExecuteRSStringResponse mapToStringResponse(
       ThrowableFunction<AsyncResult<Message<Object>>, String> stringFunction) {
-    return EventbusStringExecutionBlockingUtil.mapToStringResponse(methodId,
+    return EventbusStringExecutionBlockingUtil.mapToStringResponse(
+        methodId,
         targetId,
         message,
         options,
@@ -115,13 +112,14 @@ public class EventbusResponse {
    * Maps the event-bus response to a byte response for the REST request
    *
    * @param byteFunction the function, that takes the response message from the event bus and that
-   * maps it to a valid response for the REST request
+   *     maps it to a valid response for the REST request
    * @return the execution chain {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse mapToByteResponse(
       ThrowableFunction<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-    return EventbusByteExecutionBlockingUtil.mapToByteResponse(methodId,
+    return EventbusByteExecutionBlockingUtil.mapToByteResponse(
+        methodId,
         targetId,
         message,
         options,
@@ -147,7 +145,7 @@ public class EventbusResponse {
    * Maps the event-bus response to a byte response for the REST request
    *
    * @param objectFunction the function, that takes the response message from the event bus and that
-   * maps it to a valid response for the REST request
+   *     maps it to a valid response for the REST request
    * @param encoder the encoder to serialize your object response
    * @return the execution chain {@link ExecuteRSObjectResponse}
    */
@@ -155,7 +153,8 @@ public class EventbusResponse {
       ThrowableFunction<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 
-    return EventbusObjectExecutionBlockingUtil.mapToObjectResponse(methodId,
+    return EventbusObjectExecutionBlockingUtil.mapToObjectResponse(
+        methodId,
         targetId,
         message,
         options,
@@ -176,6 +175,4 @@ public class EventbusResponse {
         0L,
         0L);
   }
-
-
 }

@@ -78,7 +78,7 @@ public class EventbusByteExecutionUtil {
 
     final DeliveryOptions deliveryOptions =
         Optional.ofNullable(_requestOptions).orElse(new DeliveryOptions());
-    final RecursiveExecutor executor =
+    final RecursiveExecutor<byte[]> executor =
         (methodId,
             vxmsShared,
             failure,
@@ -109,7 +109,7 @@ public class EventbusByteExecutionUtil {
                     circuitBreakerTimeout)
                 .execute();
 
-    final RetryExecutor retry =
+    final RetryExecutor<byte[]> retry =
         (targetId,
             methodId, message,
             function,

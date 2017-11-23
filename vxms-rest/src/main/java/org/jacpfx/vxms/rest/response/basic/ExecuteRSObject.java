@@ -208,6 +208,7 @@ public class ExecuteRSObject extends AbstractResponse<Serializable> {
   }
 
   /** Execute the reply chain */
+  @SuppressWarnings("unchecked")
   public void execute() {
     final Vertx vertx = vxmsShared.getVertx();
     vertx.runOnContext(
@@ -254,7 +255,8 @@ public class ExecuteRSObject extends AbstractResponse<Serializable> {
                               respond(value.getResult(), httpErrorCode);
                             }
                           } else {
-                            respond(
+                            // reply unhandled error
+                            errorRespond(
                                 value.getCause().getMessage(),
                                 HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
                           }
@@ -331,6 +333,7 @@ public class ExecuteRSObject extends AbstractResponse<Serializable> {
                   });
         });
   }
+
   @Override
   protected void checkAndCloseResponse(int retry) {
     final HttpServerResponse response = context.response();

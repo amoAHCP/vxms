@@ -18,12 +18,12 @@ package org.jacpfx.vxms.rest;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.ext.web.Router;
-import org.jacpfx.vxms.spi.RESThandlerSPI;
 import org.jacpfx.vxms.common.VxmsShared;
+import org.jacpfx.vxms.spi.RESThandlerSPI;
 
 /**
- * Created by amo on 05.08.16.
- * Implements teh RESThandlerSPI and calls the initializer to bootstrap the rest API
+ * Created by amo on 05.08.16. Implements teh RESThandlerSPI and calls the initializer to bootstrap
+ * the rest API
  */
 public class RESThandler implements RESThandlerSPI {
 

@@ -149,8 +149,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
             failure,
             errorMethodHandler,
             context,
-            updateContentType(
-                headers, contentType),
+            updateContentType(headers, contentType),
             stringSupplier,
             chain,
             excecuteAsyncEventBusAndReply,
@@ -175,8 +174,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
             failure,
             errorMethodHandler,
             context,
-            updateContentType(
-                headers, contentType),
+            updateContentType(headers, contentType),
             stringSupplier,
             chain,
             excecuteAsyncEventBusAndReply,
@@ -193,6 +191,7 @@ public class ExecuteRSString extends org.jacpfx.vxms.rest.response.basic.Execute
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute() {
     Optional.ofNullable(excecuteAsyncEventBusAndReply)
         .ifPresent(
