@@ -126,6 +126,7 @@ public class ExecuteEventbusByte extends org.jacpfx.vxms.event.response.basic.Ex
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute() {
     Optional.ofNullable(excecuteAsyncEventBusAndReply)
         .ifPresent(

@@ -99,6 +99,13 @@ public class ExecuteEventChainResponse<T> {
     this.circuitBreakerTimeout = 0L;
   }
 
+  /**
+   * add an other step to execution chain
+   * @param step the execution step
+   * @param <H> the return type of the step
+   * @return the chain to perform other steps
+   */
+  @SuppressWarnings("unchecked")
   public <H> ExecuteEventChainResponse<H> andThen(ThrowableFutureBiConsumer<T, H> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
@@ -125,6 +132,7 @@ public class ExecuteEventChainResponse<T> {
    * @param step the execution step to map the response to byte[] response
    * @return {@link ExecuteEventbusByteResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteEventbusByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<T, byte[]> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
@@ -139,6 +147,7 @@ public class ExecuteEventChainResponse<T> {
    * @param step the execution step to map the response to String response
    * @return {@link ExecuteEventbusStringResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteEventbusStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<T, String> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
@@ -154,6 +163,7 @@ public class ExecuteEventChainResponse<T> {
    * @param encoder the encoder to serialize the response object
    * @return {@link ExecuteEventbusObjectResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteEventbusObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<T, Serializable> step, Encoder encoder) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);

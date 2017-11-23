@@ -81,6 +81,8 @@ public class EventbusResponse {
    * @param <T> the type of the return value
    * @return {@link ExecuteEventChainResponse}
    */
+
+  @SuppressWarnings("unchecked")
   public <T> ExecuteEventChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));

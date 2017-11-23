@@ -63,6 +63,7 @@ public abstract class AbstractResponse<T> {
    * @param circuitBreakerTimeout the time after the circuit breaker will be closed
    * @param retry the amount of retries
    */
+  @SuppressWarnings("unchecked")
   protected void executeStep(
       String methodId,
       VxmsShared vxmsShared,
@@ -170,7 +171,7 @@ public abstract class AbstractResponse<T> {
       ThrowableSupplier<T> supplier,
       Future<ExecutionResult<T>> blockingHandler,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction onFailureRespond,
+      ThrowableFunction<Throwable,T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -192,14 +193,14 @@ public abstract class AbstractResponse<T> {
         circuitBreakerTimeout,
         delay);
   }
-
+  @SuppressWarnings("unchecked")
   protected void executeBlockingStep(
       String methodId,
       ThrowableFunction stepNext,
       Object result,
       Future<ExecutionResult<T>> handler,
       Consumer<Throwable> errorHandler,
-      ThrowableFunction onFailureRespond,
+      ThrowableFunction<Throwable,T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       VxmsShared vxmsShared,
       Throwable failure,

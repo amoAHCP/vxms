@@ -99,8 +99,8 @@ public class EventbusBridgeResponse {
         null,
         null,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
 
   /**
@@ -127,8 +127,8 @@ public class EventbusBridgeResponse {
         null,
         null,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
 
   /**
@@ -158,7 +158,7 @@ public class EventbusBridgeResponse {
         null,
         null,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
 }

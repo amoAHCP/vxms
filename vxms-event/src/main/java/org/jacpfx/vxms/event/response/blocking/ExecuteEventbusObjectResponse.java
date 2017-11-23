@@ -122,9 +122,9 @@ public class ExecuteEventbusObjectResponse extends ExecuteEventbusObject {
         null,
         null,
         0,
-        0l,
-        0l,
-        0l);
+        0L,
+        0L,
+        0L);
   }
 
   /**

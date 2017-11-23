@@ -73,6 +73,7 @@ public class EventbusResponseBlocking {
    * @param <T> the type of the return value
    * @return {@link ExecuteEventChainResponse}
    */
+  @SuppressWarnings("unchecked")
   public <T> ExecuteEventChainResponse<T> supply(ThrowableSupplier<T> chainconsumer) {
     final List<BlockingExecutionStep> chain = new ArrayList<>();
     chain.add(new BlockingExecutionStep(chainconsumer));

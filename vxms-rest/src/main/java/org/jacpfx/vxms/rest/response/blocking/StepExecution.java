@@ -31,7 +31,7 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.concurrent.LocalData;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 
-/** Created by Andy Moncsek on 19.01.16. Performs blocking Executions and prepares response */
+/** Created by Andy Moncsek on 01.11.2017 Performs blocking step Executions */
 public class StepExecution {
 
   private static final int DEFAULT_VALUE = 0;

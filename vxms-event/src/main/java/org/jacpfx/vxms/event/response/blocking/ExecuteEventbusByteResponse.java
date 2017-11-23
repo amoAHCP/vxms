@@ -114,9 +114,9 @@ public class ExecuteEventbusByteResponse extends ExecuteEventbusByte {
         null,
         null,
         0,
-        0l,
-        0l,
-        0l);
+        0L,
+        0L,
+        0L);
   }
 
   /**

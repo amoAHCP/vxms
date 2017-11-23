@@ -40,7 +40,7 @@ public class ResponseBlockingExecution {
   private static final long DEFAULT_LONG_VALUE = 0;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
   private static final int STOP_CONDITION = -1;
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
 
   /**
    * Executes the response creation and handles failures

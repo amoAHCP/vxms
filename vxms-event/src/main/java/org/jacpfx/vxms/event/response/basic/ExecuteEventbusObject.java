@@ -137,6 +137,7 @@ public class ExecuteEventbusObject extends AbstractResponse<Serializable> {
   }
 
   /** Execute the reply chain */
+  @SuppressWarnings("unchecked")
   public void execute() {
     final Vertx vertx = vxmsShared.getVertx();
     vertx.runOnContext(
@@ -163,29 +164,26 @@ public class ExecuteEventbusObject extends AbstractResponse<Serializable> {
                   });
           ofNullable(objectConsumer)
               .ifPresent(
-                  userOperation -> {
-                    int retry = retryCount;
-                    ResponseExecution.createResponse(
-                        methodId,
-                        retry,
-                        timeout,
-                        circuitBreakerTimeout,
-                        userOperation,
-                        errorHandler,
-                        onFailureRespond,
-                        errorMethodHandler,
-                        vxmsShared,
-                        failure,
-                        value -> {
-                          if (value.succeeded()) {
-                            respond(value.getResult());
-                          } else {
-                            fail(
-                                value.getCause().getMessage(),
-                                HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-                          }
-                        });
-                  });
+                  userOperation -> ResponseExecution.createResponse(
+                      methodId,
+                      retryCount,
+                      timeout,
+                      circuitBreakerTimeout,
+                      userOperation,
+                      errorHandler,
+                      onFailureRespond,
+                      errorMethodHandler,
+                      vxmsShared,
+                      failure,
+                      value -> {
+                        if (value.succeeded()) {
+                          respond(value.getResult());
+                        } else {
+                          fail(
+                              value.getCause().getMessage(),
+                              HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+                        }
+                      }));
 
           ofNullable(chain)
               .ifPresent(

@@ -63,13 +63,16 @@ public class EventInitializer {
   public static void initEventbusMethod(
       VxmsShared vxmsShared, Object service, Method eventBusMethod) {
     final Consume path = eventBusMethod.getAnnotation(Consume.class);
-    final Optional<Method> errorMethod =
-        getEventbusMethods(service, path.value())
-            .stream()
-            .filter(method -> method.isAnnotationPresent(OnEventError.class))
-            .findFirst();
     Optional.ofNullable(path)
-        .ifPresent(g -> initCallback(vxmsShared, service, eventBusMethod, path, errorMethod));
+        .ifPresent(
+            p -> {
+              final Optional<Method> errorMethod =
+                  getEventbusMethods(service, p.value())
+                      .stream()
+                      .filter(method -> method.isAnnotationPresent(OnEventError.class))
+                      .findFirst();
+              initCallback(vxmsShared, service, eventBusMethod, path, errorMethod);
+            });
   }
 
   protected static void initCallback(

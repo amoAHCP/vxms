@@ -127,6 +127,7 @@ public class ExecuteEventbusString extends
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute() {
     Optional.ofNullable(excecuteAsyncEventBusAndReply)
         .ifPresent(

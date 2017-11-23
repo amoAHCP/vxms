@@ -37,9 +37,9 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 public class ResponseExecution {
 
   private static final int DEFAULT_VALUE = 0;
-  private static final long DEFAULT_LONG_VALUE = 0l;
+  private static final long DEFAULT_LONG_VALUE = 0L;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
 
   /**
    * Executes the response creation and handles failures

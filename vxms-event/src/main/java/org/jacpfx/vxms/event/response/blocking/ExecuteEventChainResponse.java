@@ -100,6 +100,13 @@ public class ExecuteEventChainResponse<T> {
     this.circuitBreakerTimeout = 0L;
   }
 
+  /**
+   * add an other step to execution chain
+   * @param step the execution step
+   * @param <H> the return type of the step
+   * @return the chain to perform other steps
+   */
+  @SuppressWarnings("unchecked")
   public <H> ExecuteEventChainResponse<H> andThen(ThrowableFunction<T, H> step) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new BlockingExecutionStep(step));
@@ -126,6 +133,7 @@ public class ExecuteEventChainResponse<T> {
    * @param step the execution step to map the response to byte[] response
    * @return {@link ExecuteEventbusByteResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteEventbusByteResponse mapToByteResponse(
       ThrowableFunction<T, byte[]> step) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
@@ -140,6 +148,7 @@ public class ExecuteEventChainResponse<T> {
    * @param step the execution step to map the response to String response
    * @return {@link ExecuteEventbusStringResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteEventbusStringResponse mapToStringResponse(
       ThrowableFunction<T, String> step) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);
@@ -155,6 +164,7 @@ public class ExecuteEventChainResponse<T> {
    * @param encoder the encoder to serialize the response object
    * @return {@link ExecuteEventbusObjectResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteEventbusObjectResponse mapToObjectResponse(
       ThrowableFunction<T, Serializable> step, Encoder encoder) {
     final List<BlockingExecutionStep> chainTmp = new ArrayList<>(chain);

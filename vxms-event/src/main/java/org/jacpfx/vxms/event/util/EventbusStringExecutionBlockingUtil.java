@@ -82,7 +82,7 @@ public class EventbusStringExecutionBlockingUtil {
     final DeliveryOptions deliveryOptions =
         Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
 
-    final RetryExecutor retry =
+    final RetryExecutor<String> retry =
         (methodId,
             targetId,
             message,
@@ -123,7 +123,7 @@ public class EventbusStringExecutionBlockingUtil {
               .execute();
         };
 
-    final RecursiveExecutor executor =
+    final RecursiveExecutor<String> executor =
         (methodId,
             vxmsShared,
             failure,

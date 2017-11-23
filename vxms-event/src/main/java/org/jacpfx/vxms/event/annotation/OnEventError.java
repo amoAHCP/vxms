@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-/** makrs fallback methods to be executed wenn an exception in method occurred and not handled */
+/** marks fallback methods to be executed wenn an exception in method occurred and not handled **/
 public @interface OnEventError {
 
   /**

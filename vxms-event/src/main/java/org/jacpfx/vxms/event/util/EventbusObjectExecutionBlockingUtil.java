@@ -84,7 +84,7 @@ public class EventbusObjectExecutionBlockingUtil {
       long _circuitBreakerTimeout) {
     final DeliveryOptions deliveryOptions =
         Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
-    final RetryExecutor retry =
+    final RetryExecutor<Serializable> retry =
         (methodId,
             targetId,
             message,
@@ -126,7 +126,7 @@ public class EventbusObjectExecutionBlockingUtil {
               .execute();
         };
 
-    final RecursiveExecutor executor =
+    final RecursiveExecutor<Serializable> executor =
         (methodId,
             vxmsShared,
             t,

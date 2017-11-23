@@ -82,7 +82,7 @@ public class EventbusByteExecutionBlockingUtil {
     final DeliveryOptions deliveryOptions =
         Optional.ofNullable(_requestDeliveryOptions).orElse(new DeliveryOptions());
 
-    final RetryExecutor retry =
+    final RetryExecutor<byte[]> retry =
         (methodId,
             targetId,
             message,
@@ -123,7 +123,7 @@ public class EventbusByteExecutionBlockingUtil {
               .execute();
         };
 
-    final RecursiveExecutor executor =
+    final RecursiveExecutor<byte[]> executor =
         (methodId,
             vxmsShared,
             t,

@@ -41,9 +41,9 @@ import org.jacpfx.vxms.event.response.basic.ResponseExecution;
  */
 public class EventbusBridgeExecution {
 
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  private static final long NO_TIMEOUT = 0l;
+  private static final long NO_TIMEOUT = 0L;
 
   /**
    * Send event-bus message and process the result in the passed function for blocking execution
@@ -88,10 +88,10 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retryExecutor) {
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retryExecutor) {
 
-    if (circuitBreakerTimeout == 0l) {
+    if (circuitBreakerTimeout == 0L) {
       executeDefaultState(
           methodId, targetId,
           message,
@@ -150,8 +150,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry) {
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry) {
 
     executeLocked(
         ((lock, counter) ->
@@ -249,8 +249,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry,
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry,
       Lock lock,
       Counter counter) {
     int incrementCounter = retryCount + 1;
@@ -295,8 +295,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry,
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry,
       Lock lock) {
 
     Optional.ofNullable(lock).ifPresent(Lock::release);
@@ -342,7 +342,7 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
+      RecursiveExecutor<T> executor,
       Lock lock) {
     final Throwable cause = Future.failedFuture("circuit open").cause();
     handleError(
@@ -380,8 +380,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry,
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry,
       AsyncResult<Message<Object>> event) {
     final ThrowableSupplier<T> supplier =
         createSupplier(
@@ -465,8 +465,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry,
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry,
       AsyncResult<Message<Object>> event,
       ThrowableSupplier<T> byteSupplier) {
     if (event.succeeded() || (event.failed() && retryCount <= 0)) {
@@ -524,8 +524,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry,
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry,
       AsyncResult<Message<Object>> event,
       ThrowableSupplier<T> supplier) {
     if (event.succeeded()) {
@@ -584,8 +584,8 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
-      RetryExecutor retry,
+      RecursiveExecutor<T> executor,
+      RetryExecutor<T> retry,
       AsyncResult<Message<Object>> event) {
 
     executeLocked(
@@ -682,7 +682,7 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
+      RecursiveExecutor<T> executor,
       AsyncResult<Message<Object>> event,
       Lock lock,
       Counter counter) {
@@ -736,7 +736,7 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor,
+      RecursiveExecutor<T> executor,
       Lock lock,
       Throwable cause) {
     Optional.ofNullable(lock).ifPresent(Lock::release);
@@ -780,7 +780,7 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RetryExecutor retry) {
+      RetryExecutor<T> retry) {
     ResponseExecution.handleError(errorHandler, failure);
     retry.execute(
         methodId,
@@ -820,7 +820,7 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RetryExecutor retry,
+      RetryExecutor<T> retry,
       AsyncResult<Message<Object>> event) {
     return () -> {
       T resp = null;
@@ -869,7 +869,7 @@ public class EventbusBridgeExecution {
       long timeout,
       long delay,
       long circuitBreakerTimeout,
-      RecursiveExecutor executor) {
+      RecursiveExecutor<T> executor) {
 
     final LocalData sharedData = vxmsShared.getLocalData();
     sharedData.getLockWithTimeout(
