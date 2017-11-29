@@ -62,7 +62,7 @@ public class ExecuteEventbusByte extends AbstractResponse<byte[]> {
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
-   * @param chain
+   * @param chain the execution chain
    * @param byteConsumer the consumer, producing the byte response
    * @param excecuteEventBusAndReply handles the response execution after event-bus bridge reply
    * @param errorHandler the error handler

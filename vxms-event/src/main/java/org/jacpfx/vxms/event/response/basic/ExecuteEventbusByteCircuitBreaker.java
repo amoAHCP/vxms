@@ -41,6 +41,7 @@ public class ExecuteEventbusByteCircuitBreaker extends ExecuteEventbusByteRespon
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
+   * @param chain the execution chain
    * @param byteConsumer the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
    *     API

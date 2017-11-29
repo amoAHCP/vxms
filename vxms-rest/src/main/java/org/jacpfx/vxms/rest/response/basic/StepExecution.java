@@ -59,7 +59,8 @@ public class StepExecution {
    *     objects per instance
    * @param fail, last thrown Exception
    * @param resultConsumer, the consumer of the {@link ExecutionResult}
-   * @param <T> the type of response (String, byte, Object)
+   * @param <T> the type of input value
+   * @param <V> the type of response
    */
   public static <T, V> void createResponse(
       String methodId,

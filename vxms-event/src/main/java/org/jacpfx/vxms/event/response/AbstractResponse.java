@@ -223,7 +223,7 @@ public abstract class AbstractResponse<T> {
         circuitBreakerTimeout,
         delay);
   }
-
+  @SuppressWarnings("unchecked")
   protected Handler<AsyncResult<ExecutionResult<T>>> getBlockingResultHandler(
       String methodId,
       BlockingExecutionStep step,

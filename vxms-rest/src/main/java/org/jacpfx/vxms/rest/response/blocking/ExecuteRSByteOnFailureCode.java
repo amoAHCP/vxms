@@ -45,6 +45,7 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param byteSupplier the supplier, producing the byte response
+   * @param chain the execution chain
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
    *     the fluent API
    * @param encoder the encoder to encode your objects

@@ -46,6 +46,7 @@ public class ExecuteRSObjectResponse extends ExecuteRSObject {
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param objectSupplier the supplier, producing the object response
+   * @param chain the execution chain
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
    *     the fluent API
    * @param encoder the encoder to encode your objects

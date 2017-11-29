@@ -56,6 +56,7 @@ public class ExecuteRSByte extends org.jacpfx.vxms.rest.response.basic.ExecuteRS
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param byteSupplier the supplier, producing the byte response
+   * @param chain the execution chain
    * @param excecuteAsyncEventBusAndReply the response of an event-bus call which is passed to the
    *     fluent API
    * @param encoder the encoder to encode your objects

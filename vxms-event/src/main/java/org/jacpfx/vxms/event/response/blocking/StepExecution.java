@@ -58,7 +58,8 @@ public class StepExecution {
    * @param timeout the max timeout time for the method execution
    * @param circuitBreakerTimeout the stateful circuit breaker release time
    * @param delay the delay time between retry
-   * @param <T> the type of response (String, byte, Object)
+   * @param <T> the type of input value
+   * @param <V> the type of response
    */
   public static <T, V> void createResponseBlocking(
       String methodId,

@@ -210,6 +210,7 @@ public class ConfigurationUtil {
    * extract the endpoint configuration fro service
    *
    * @param clazz the service class annotated with {@link ServiceEndpoint}
+   * @param config the vertx configuration
    * @return the {@link RouterConfiguration}
    */
   public static RouterConfiguration getRouterConfiguration(final JsonObject config, Class clazz) {

@@ -55,7 +55,8 @@ public class StepExecution {
    *     objects per instance
    * @param failure last thrown Exception
    * @param resultConsumer the consumer that takes the execution resultz
-   * @param <T> the type of response
+   * @param <T> the type of input value
+   * @param <V> the type of response
    */
   public static <T, V> void createResponse(
       String methodId,
