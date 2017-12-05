@@ -91,6 +91,6 @@ The vxms core module provides some properties, that you can define inside the co
  | port          |  the port number to bind http socket |  8080 
  | host          |  the host name/interface to bind to  | 0.0.0.0 
  | contextRoot  |  the context-route for your service  | "/" 
- | serverOptions  |  the HttpServer options, provide a fully qualified class name implementing org.org.jacpfx.vxms.common.CustomServerOptions  | org.org.jacpfx.vxms.common.DefaultServerOptions
- | routerConf  |  the Vert.x Router configuration , provide a fully qualified class name implementing org.org.jacpfx.vxms.common.configuration.RouterConfiguration  | org.org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration
+ | serverOptions  |  the HttpServer options, provide a fully qualified class name implementing org.jacpfx.vxms.common.CustomServerOptions  | org.jacpfx.vxms.common.DefaultServerOptions
+ | routerConf  |  the Vert.x Router configuration , provide a fully qualified class name implementing org.jacpfx.vxms.common.configuration.RouterConfiguration  | org.jacpfx.vxms.common.configuration.DefaultRouterConfiguration
  

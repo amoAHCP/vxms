@@ -35,7 +35,7 @@ public class Testverticl2 extends AbstractVerticle {
             .setConfig(
                 new JsonObject()
                     .put("host", "localhost")
-                    .put("serverOptions", "org.org.jacpfx.verticle.MyCustomServerOptions"));
+                    .put("serverOptions", "org.jacpfx.verticle.MyCustomServerOptions"));
     Vertx.vertx().deployVerticle(Testverticl2.class.getName(), options);
   }
 

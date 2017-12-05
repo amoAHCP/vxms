@@ -73,7 +73,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>org.org.jacpfx.vxms.k8sfrontend.verticles.VxmsGateway</Main-Verticle>
+                                        <Main-Verticle>org.jacpfx.vxms.k8sfrontend.verticles.VxmsGateway</Main-Verticle>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
