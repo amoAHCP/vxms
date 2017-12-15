@@ -81,6 +81,7 @@
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
+                <module>vxms-k8sdiscovery</module>
                 <module>vxms-testing</module>
             </modules>
         </profile>
@@ -90,6 +91,7 @@
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
+                <module>vxms-k8sdiscovery</module>
                 <module>vxms-testing</module>
             </modules>
         </profile>
