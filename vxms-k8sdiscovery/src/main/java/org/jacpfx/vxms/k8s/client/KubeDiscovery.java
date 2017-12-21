@@ -16,6 +16,7 @@
 
 package org.jacpfx.vxms.k8s.client;
 
+import io.fabric8.annotations.PortName;
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.annotations.WithLabel;
 import io.fabric8.annotations.WithLabels;
@@ -26,6 +27,7 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
@@ -51,21 +53,23 @@ public class KubeDiscovery {
 
   /**
    * Resolves discovery annotation in AbstractVerticles
+   *
    * @param service the service where to resolve the annotations
    * @param kubeConfig the kubernetes config
    */
   public static void resolveBeanAnnotations(AbstractVerticle service, Config kubeConfig) {
     final JsonObject env = service.config();
     final List<Field> serviceNameFields = findServiceFields(service);
-    final DefaultKubernetesClient client = new DefaultKubernetesClient(kubeConfig); // TODO be aware of OpenShiftClient
+    final DefaultKubernetesClient client =
+        new DefaultKubernetesClient(kubeConfig); // TODO be aware of OpenShiftClient
     if (!serviceNameFields.isEmpty()) {
-      findServiceEntryAndSetValue(
-          service, serviceNameFields, env, client);
+      findServiceEntryAndSetValue(service, serviceNameFields, env, client);
     }
   }
 
   private static void findServiceEntryAndSetValue(
-      Object bean, List<Field> serverNameFields, JsonObject env, KubernetesClient client) {
+      Object bean, List<Field> serverNameFields, JsonObject env, KubernetesClient client)
+      throws KubernetesClientException {
     Objects.requireNonNull(client, "no client available");
     serverNameFields.forEach(
         serviceNameField -> {
@@ -95,22 +99,42 @@ public class KubeDiscovery {
 
   private static void resolveHostAndSetValue(
       Object bean, Field serviceNameField, Service serviceEntry) {
-    final String hostString = getHostString(serviceEntry);
+    final String hostString = getHostString(serviceEntry, serviceNameField);
     FieldUtil.setFieldValue(bean, serviceNameField, hostString);
   }
 
-  private static String getHostString(Service serviceEntry) {
+  private static String getHostString(Service serviceEntry, Field serviceNameField) {
     String hostString = "";
     final String clusterIP = serviceEntry.getSpec().getClusterIP();
     final List<ServicePort> ports = serviceEntry.getSpec().getPorts();
-    if (ports.size()==1) { // only resolve port if unique
-      String protocol =ports.get(0).getProtocol();
-      if(StringUtil.isNullOrEmpty(protocol)) {
-        hostString = clusterIP + SEPERATOR + ports.get(0).getPort();
-      } else {
-        hostString = protocol+"://"+clusterIP + SEPERATOR + ports.get(0).getPort();
+    if (serviceNameField.isAnnotationPresent(PortName.class)) {
+      final PortName portNameAnnotation = serviceNameField.getAnnotation(PortName.class);
+      final String portName = portNameAnnotation.value();
+      final Optional<ServicePort> portMatch =
+          ports.stream().filter(port -> port.getName().equalsIgnoreCase(portName)).findFirst();
+
+      if (portMatch.isPresent()) {
+        final ServicePort port = portMatch.get();
+        final String protocol = port.getProtocol();
+        hostString = buildHostString(clusterIP, port, protocol);
       }
 
+    } else {
+      if (ports.size() >= 1) {
+        final ServicePort servicePort = ports.get(0);
+        final String protocol = servicePort.getProtocol();
+        hostString = buildHostString(clusterIP, servicePort, protocol);
+      }
+    }
+    return hostString;
+  }
+
+  private static String buildHostString(String clusterIP, ServicePort port, String protocol) {
+    String hostString;
+    if (StringUtil.isNullOrEmpty(protocol)) {
+      hostString = clusterIP + SEPERATOR + port.getPort();
+    } else {
+      hostString = protocol + "://" + clusterIP + SEPERATOR + port.getPort();
     }
     return hostString;
   }
@@ -121,17 +145,29 @@ public class KubeDiscovery {
       KubernetesClient client,
       Field serviceNameField,
       boolean withLabel,
-      boolean withLabels) {
+      boolean withLabels)
+      throws KubernetesClientException {
     final Map<String, String> labels =
         getLabelsFromAnnotation(env, serviceNameField, withLabel, withLabels);
-    final Optional<ServiceList> serviceList = getServicesByLabel(labels, client);
-    serviceList.ifPresent(
-        list -> {
-          if (!list.getItems().isEmpty()) {
-            final Service serviceEntry = list.getItems().get(0);
-            resolveHostAndSetValue(bean, serviceNameField, serviceEntry);
-          }
-        });
+    final ServiceList serviceListResult = getServicesByLabel(labels, client);
+    Optional.ofNullable(serviceListResult)
+        .ifPresent(
+            list -> {
+              if (!list.getItems().isEmpty() && list.getItems().size() == 1) {
+                final Service serviceEntry = list.getItems().get(0);
+                resolveHostAndSetValue(bean, serviceNameField, serviceEntry);
+              } else if (!list.getItems().isEmpty() && list.getItems().size() > 1) {
+                final String entries =
+                    labels
+                        .entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + ":" + entry.getValue() + " ")
+                        .reduce((a, b) -> a + b)
+                        .get();
+                throw new KubernetesClientException(
+                    "labels " + entries + " returns a non unique result");
+              }
+            });
   }
 
   private static Map<String, String> getLabelsFromAnnotation(
@@ -151,8 +187,8 @@ public class KubeDiscovery {
     return labels;
   }
 
-  private static Optional<ServiceList> getServicesByLabel(
-      Map<String, String> labels, KubernetesClient client) {
+  private static ServiceList getServicesByLabel(Map<String, String> labels, KubernetesClient client)
+      throws KubernetesClientException {
     Objects.requireNonNull(client, "no client available");
     MixedOperation<Service, ServiceList, DoneableService, Resource<Service, DoneableService>>
         services = client.services();
@@ -165,7 +201,7 @@ public class KubeDiscovery {
               ? services.withLabel(entry.getKey(), entry.getValue())
               : listable.withLabel(entry.getKey(), entry.getValue());
     }
-    return Optional.ofNullable(listable.list());
+    return listable.list();
   }
 
   private static List<Field> findServiceFields(Object bean) {

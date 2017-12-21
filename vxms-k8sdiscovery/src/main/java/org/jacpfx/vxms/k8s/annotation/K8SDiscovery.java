@@ -20,12 +20,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.jacpfx.vxms.k8s.api.CustomClientConfig;
+import org.jacpfx.vxms.k8s.api.DefaultCustomClientConfig;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-/**
- * The Kubernetes discovery annotation
- */
+/** The Kubernetes discovery annotation */
 public @interface K8SDiscovery {
 
   /**
@@ -62,4 +62,13 @@ public @interface K8SDiscovery {
    * @return the namespace where to discover
    */
   String namespace() default "default";
+
+  /**
+   * Returns a custom Kubernetes Client Configuration handler. If you define this, all other
+   * properties will be ignored
+   *
+   * @return the customer kubernetes client configuration handler
+   */
+  Class<? extends CustomClientConfig> customClientConfiguration() default
+      DefaultCustomClientConfig.class;
 }

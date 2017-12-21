@@ -18,12 +18,12 @@ package org.jacpfx.kuberenetes;
 
 
 
+import io.fabric8.annotations.PortName;
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServiceListBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -31,8 +31,6 @@ import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.kubernetes.api.model.ServiceSpecBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.http.HttpClient;
@@ -41,25 +39,18 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.test.core.VertxTestBase;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.k8s.annotation.K8SDiscovery;
 import org.jacpfx.vxms.k8s.client.VxmsDiscoveryK8SImpl;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ResolveServicesByNameTest extends VertxTestBase {
+public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final String HOST = "127.0.0.1";
@@ -91,14 +82,16 @@ public class ResolveServicesByNameTest extends VertxTestBase {
 
   public void initService() {
     final ObjectMeta buildmyTestService = new ObjectMetaBuilder().addToLabels("test", "test").withName("myTestService").build();
-    final ServicePort portmyTestService = new ServicePortBuilder().withPort(8080).withProtocol("http").build();
+    final ServicePort portmyTestService_1 = new ServicePortBuilder().withName("mainhttp").withPort(8080).withProtocol("http").build();
+    final ServicePort portmyTestService_2 = new ServicePortBuilder().withName("mytcp").withPort(9090).withProtocol("tcp").build();
     final ServiceSpec specmyTestService = new ServiceSpecBuilder().addNewPort().and()
-        .withClusterIP("192.168.1.1").withPorts(portmyTestService).build();
+        .withClusterIP("192.168.1.1").withPorts(portmyTestService_1,portmyTestService_2).build();
 
     final ObjectMeta buildmyTestService2 = new ObjectMetaBuilder().addToLabels("test", "test2").withName("myTestService2").build();
-    final ServicePort portmyTestService2 = new ServicePortBuilder().withPort(9080).withProtocol("http").build();
+    final ServicePort portmyTestService2_1 = new ServicePortBuilder().withPort(9080).withProtocol("http").build();
+    final ServicePort portmyTestService2_2 = new ServicePortBuilder().withName("test").withPort(9090).withProtocol("http").build();
     final ServiceSpec specmyTestService2 = new ServiceSpecBuilder().addNewPort().and()
-        .withClusterIP("192.168.1.2").withPorts(portmyTestService2).build();
+        .withClusterIP("192.168.1.2").withPorts(portmyTestService2_1,portmyTestService2_2).build();
 
     final Service servicemyTestService = new ServiceBuilder().withMetadata(buildmyTestService).withSpec(specmyTestService).build();
     final Service servicemyTestService2 = new ServiceBuilder().withMetadata(buildmyTestService2).withSpec(specmyTestService2).build();
@@ -139,7 +132,7 @@ public class ResolveServicesByNameTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    io.vertx.core.http.HttpClient client = vertx.createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
     HttpClientRequest request =
         client.get(
             "/wsService/myTestService",
@@ -149,7 +142,7 @@ public class ResolveServicesByNameTest extends VertxTestBase {
                 System.out.println("Response entity '" + response + "' received.");
                 vertx.runOnContext(
                     context -> {
-                      failed.set(!response.equalsIgnoreCase("http://192.168.1.1:8080/http://192.168.1.2:9080"));
+                      failed.set(!response.equalsIgnoreCase("tcp://192.168.1.1:9090/http://192.168.1.2:9080"));
 
                       latch.countDown();
 
@@ -173,6 +166,7 @@ public class ResolveServicesByNameTest extends VertxTestBase {
   public class WsServiceOne extends VxmsEndpoint {
 
     @ServiceName("myTestService")
+    @PortName("mytcp")
     private String service1;
 
     @ServiceName("myTestService2")
