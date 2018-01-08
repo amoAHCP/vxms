@@ -64,6 +64,8 @@ public class KubeDiscovery {
         new DefaultKubernetesClient(kubeConfig); // TODO be aware of OpenShiftClient
     if (!serviceNameFields.isEmpty()) {
       findServiceEntryAndSetValue(service, serviceNameFields, env, client);
+    } else {
+      // TODO check and handle Endpoints & Pods
     }
   }
 
@@ -94,22 +96,23 @@ public class KubeDiscovery {
       String serviceName) {
     final Optional<Service> serviceEntryOptional = findServiceEntry(env, client, serviceName);
     serviceEntryOptional.ifPresent(
-        serviceEntry -> resolveHostAndSetValue(bean, serviceNameField, serviceEntry));
+        serviceEntry -> resolveHostAndSetValue(bean, env, serviceNameField, serviceEntry));
   }
 
   private static void resolveHostAndSetValue(
-      Object bean, Field serviceNameField, Service serviceEntry) {
-    final String hostString = getHostString(serviceEntry, serviceNameField);
+      Object bean, JsonObject env, Field serviceNameField, Service serviceEntry) {
+    final String hostString = getHostString(serviceEntry, env, serviceNameField);
     FieldUtil.setFieldValue(bean, serviceNameField, hostString);
   }
 
-  private static String getHostString(Service serviceEntry, Field serviceNameField) {
+  private static String getHostString(
+      Service serviceEntry, JsonObject env, Field serviceNameField) {
     String hostString = "";
     final String clusterIP = serviceEntry.getSpec().getClusterIP();
     final List<ServicePort> ports = serviceEntry.getSpec().getPorts();
     if (serviceNameField.isAnnotationPresent(PortName.class)) {
       final PortName portNameAnnotation = serviceNameField.getAnnotation(PortName.class);
-      final String portName = portNameAnnotation.value();
+      final String portName = resolveProperty(env, portNameAnnotation.value());
       final Optional<ServicePort> portMatch =
           ports.stream().filter(port -> port.getName().equalsIgnoreCase(portName)).findFirst();
 
@@ -155,19 +158,23 @@ public class KubeDiscovery {
             list -> {
               if (!list.getItems().isEmpty() && list.getItems().size() == 1) {
                 final Service serviceEntry = list.getItems().get(0);
-                resolveHostAndSetValue(bean, serviceNameField, serviceEntry);
+                resolveHostAndSetValue(bean, env, serviceNameField, serviceEntry);
               } else if (!list.getItems().isEmpty() && list.getItems().size() > 1) {
-                final String entries =
-                    labels
-                        .entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + ":" + entry.getValue() + " ")
-                        .reduce((a, b) -> a + b)
-                        .get();
-                throw new KubernetesClientException(
-                    "labels " + entries + " returns a non unique result");
+                handleNonUniqueLabelsError(labels);
               }
             });
+  }
+
+  private static void handleNonUniqueLabelsError(Map<String, String> labels) {
+    final String entries =
+        labels
+            .entrySet()
+            .stream()
+            .map(entry -> entry.getKey() + ":" + entry.getValue() + " ")
+            .reduce((a, b) -> a + b)
+            .get();
+    throw new KubernetesClientException(
+        "labels " + entries + " returns a non unique result");
   }
 
   private static Map<String, String> getLabelsFromAnnotation(
