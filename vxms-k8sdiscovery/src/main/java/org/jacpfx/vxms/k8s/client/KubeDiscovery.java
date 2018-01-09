@@ -35,7 +35,9 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,13 +62,47 @@ public class KubeDiscovery {
   public static void resolveBeanAnnotations(AbstractVerticle service, Config kubeConfig) {
     final JsonObject env = service.config();
     final List<Field> serviceNameFields = findServiceFields(service);
-    final DefaultKubernetesClient client =
-        new DefaultKubernetesClient(kubeConfig); // TODO be aware of OpenShiftClient
-    if (!serviceNameFields.isEmpty()) {
-      findServiceEntryAndSetValue(service, serviceNameFields, env, client);
+    if (!env.getBoolean("kube.offline",false)) { // online
+      final DefaultKubernetesClient client =
+          new DefaultKubernetesClient(kubeConfig); // TODO be aware of OpenShiftClient
+      if (!serviceNameFields.isEmpty()) {
+        findServiceEntryAndSetValue(service, serviceNameFields, env, client);
+      } else {
+        // TODO check and handle Endpoints & Pods
+      }
     } else {
-      // TODO check and handle Endpoints & Pods
+      // resolve properties offline
+      if (!serviceNameFields.isEmpty()) {
+        resolveServicesOffline(service, serviceNameFields, env);
+      } else {
+        // TODO check and handle Endpoints & Pods
+      }
     }
+  }
+
+  private static boolean available(String host, int port) {
+    try (Socket ignored = new Socket(host, port)) {
+      return false;
+    } catch (IOException ignored) {
+      return true;
+    }
+  }
+
+  private static void resolveServicesOffline(
+      Object bean, List<Field> serverNameFields, JsonObject env) throws KubernetesClientException {
+    serverNameFields.forEach(
+        serviceNameField -> {
+          final ServiceName serviceNameAnnotation =
+              serviceNameField.getAnnotation(ServiceName.class);
+          final String serviceName = serviceNameAnnotation.value();
+          final boolean withLabel = serviceNameField.isAnnotationPresent(WithLabel.class);
+          final boolean withLabels = serviceNameField.isAnnotationPresent(WithLabels.class);
+          if (!withLabel && !withLabels) {
+            resolveOfflineByServiceName(bean, env, serviceNameField, serviceName);
+          } else {
+            // resoveServiceByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
+          }
+        });
   }
 
   private static void findServiceEntryAndSetValue(
@@ -83,9 +119,16 @@ public class KubeDiscovery {
           if (!withLabel && !withLabels) {
             resolveByServiceName(bean, env, client, serviceNameField, serviceName);
           } else {
-            resoveByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
+            resoveServiceByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
           }
         });
+  }
+
+  private static void resolveOfflineByServiceName(
+      Object bean, JsonObject env, Field serviceNameField, String serviceName) {
+    final Optional<String> serviceEntryOptional = findOfflineServiceEntry(env, serviceName);
+    serviceEntryOptional.ifPresent(
+        serviceEntry -> resolveOfflibneHostAndSetValue(bean, env, serviceNameField, serviceEntry));
   }
 
   private static void resolveByServiceName(
@@ -105,34 +148,85 @@ public class KubeDiscovery {
     FieldUtil.setFieldValue(bean, serviceNameField, hostString);
   }
 
+  private static void resolveOfflibneHostAndSetValue(
+      Object bean, JsonObject env, Field serviceNameField, String serviceEntry) {
+    final String hostString = getOfflineHostString(serviceEntry, env, serviceNameField);
+    FieldUtil.setFieldValue(bean, serviceNameField, hostString);
+  }
+
   private static String getHostString(
       Service serviceEntry, JsonObject env, Field serviceNameField) {
     String hostString = "";
     final String clusterIP = serviceEntry.getSpec().getClusterIP();
     final List<ServicePort> ports = serviceEntry.getSpec().getPorts();
     if (serviceNameField.isAnnotationPresent(PortName.class)) {
-      final PortName portNameAnnotation = serviceNameField.getAnnotation(PortName.class);
-      final String portName = resolveProperty(env, portNameAnnotation.value());
-      final Optional<ServicePort> portMatch =
-          ports.stream().filter(port -> port.getName().equalsIgnoreCase(portName)).findFirst();
-
-      if (portMatch.isPresent()) {
-        final ServicePort port = portMatch.get();
-        final String protocol = port.getProtocol();
-        hostString = buildHostString(clusterIP, port, protocol);
-      }
-
+      hostString = resolveServiceWithPortName(env, serviceNameField, clusterIP, ports);
     } else {
-      if (ports.size() >= 1) {
-        final ServicePort servicePort = ports.get(0);
-        final String protocol = servicePort.getProtocol();
-        hostString = buildHostString(clusterIP, servicePort, protocol);
-      }
+      hostString = resolveService(hostString, clusterIP, ports);
     }
     return hostString;
   }
 
-  private static String buildHostString(String clusterIP, ServicePort port, String protocol) {
+  private static String getOfflineHostString(
+      String serviceEntry, JsonObject env, Field serviceNameField) {
+    String hostString = "";
+    if (serviceNameField.isAnnotationPresent(PortName.class)) {
+      hostString = resolveOfflineServiceWithPortName(env, serviceNameField, serviceEntry);
+    } else {
+      hostString = serviceEntry;
+    }
+    return hostString;
+  }
+
+  private static String resolveService(
+      String hostString, String clusterIP, List<ServicePort> ports) {
+    if (ports.size() >= 1) {
+      final ServicePort servicePort = ports.get(0);
+      final String protocol = servicePort.getProtocol();
+      hostString = buildServiceHostString(clusterIP, servicePort, protocol);
+    }
+    return hostString;
+  }
+
+  private static String resolveServiceWithPortName(
+      JsonObject env, Field serviceNameField, String clusterIP, List<ServicePort> ports) {
+    String hostString = null;
+    final PortName portNameAnnotation = serviceNameField.getAnnotation(PortName.class);
+    final String portName = resolveProperty(env, portNameAnnotation.value());
+    final Optional<ServicePort> portMatch = findPortByName(ports, portName);
+    if (portMatch.isPresent()) {
+      final ServicePort port = portMatch.get();
+      final String protocol = port.getProtocol();
+      hostString = buildServiceHostString(clusterIP, port, protocol);
+    }
+    return hostString;
+  }
+
+  private static String resolveOfflineServiceWithPortName(
+      JsonObject env, Field serviceNameField, String serviceEntry) {
+    final PortName portNameAnnotation = serviceNameField.getAnnotation(PortName.class);
+    final String portName = resolveProperty(env, portNameAnnotation.value());
+    final String portValue = ConfigurationUtil.getStringConfiguration(env, portName, null);
+    return buildOfflineServiceHostString(serviceEntry, portValue, null);
+  }
+
+  private static Optional<ServicePort> findPortByName(List<ServicePort> ports, String portName) {
+    return ports.stream().filter(port -> port.getName().equalsIgnoreCase(portName)).findFirst();
+  }
+
+  private static String buildOfflineServiceHostString(
+      String clusterIP, String port, String protocol) {
+    String hostString;
+    if (StringUtil.isNullOrEmpty(protocol)) {
+      hostString = clusterIP + SEPERATOR + port;
+    } else {
+      hostString = protocol + "://" + clusterIP + SEPERATOR + port;
+    }
+    return hostString;
+  }
+
+  private static String buildServiceHostString(
+      String clusterIP, ServicePort port, String protocol) {
     String hostString;
     if (StringUtil.isNullOrEmpty(protocol)) {
       hostString = clusterIP + SEPERATOR + port.getPort();
@@ -142,7 +236,7 @@ public class KubeDiscovery {
     return hostString;
   }
 
-  private static void resoveByLabelOnly(
+  private static void resoveServiceByLabelOnly(
       Object bean,
       JsonObject env,
       KubernetesClient client,
@@ -173,23 +267,21 @@ public class KubeDiscovery {
             .map(entry -> entry.getKey() + ":" + entry.getValue() + " ")
             .reduce((a, b) -> a + b)
             .get();
-    throw new KubernetesClientException(
-        "labels " + entries + " returns a non unique result");
+    throw new KubernetesClientException("labels " + entries + " returns a non unique result");
   }
 
   private static Map<String, String> getLabelsFromAnnotation(
       JsonObject env, Field serviceNameField, boolean withLabel, boolean withLabels) {
     final Map<String, String> labels = new HashMap<>();
     if (withLabel) {
-      WithLabel wl = serviceNameField.getAnnotation(WithLabel.class);
+      final WithLabel wl = serviceNameField.getAnnotation(WithLabel.class);
       labels.put(resolveProperty(env, wl.name()), resolveProperty(env, wl.value()));
     }
     if (withLabels) {
-      WithLabels wl = serviceNameField.getAnnotation(WithLabels.class);
-      Stream.of(wl.value())
+      final WithLabels wls = serviceNameField.getAnnotation(WithLabels.class);
+      Stream.of(wls.value())
           .forEach(
-              wle ->
-                  labels.put(resolveProperty(env, wle.name()), resolveProperty(env, wle.value())));
+              wl -> labels.put(resolveProperty(env, wl.name()), resolveProperty(env, wl.value())));
     }
     return labels;
   }
@@ -197,9 +289,18 @@ public class KubeDiscovery {
   private static ServiceList getServicesByLabel(Map<String, String> labels, KubernetesClient client)
       throws KubernetesClientException {
     Objects.requireNonNull(client, "no client available");
-    MixedOperation<Service, ServiceList, DoneableService, Resource<Service, DoneableService>>
+    final MixedOperation<Service, ServiceList, DoneableService, Resource<Service, DoneableService>>
         services = client.services();
+    final FilterWatchListDeletable<Service, ServiceList, Boolean, Watch, Watcher<Service>>
+        listable = createLabelFilterQuery(labels, services);
+    return listable.list();
+  }
 
+  private static FilterWatchListDeletable<Service, ServiceList, Boolean, Watch, Watcher<Service>>
+      createLabelFilterQuery(
+          Map<String, String> labels,
+          MixedOperation<Service, ServiceList, DoneableService, Resource<Service, DoneableService>>
+              services) {
     FilterWatchListDeletable<Service, ServiceList, Boolean, Watch, Watcher<Service>> listable =
         null;
     for (Entry<String, String> entry : labels.entrySet()) {
@@ -208,7 +309,7 @@ public class KubeDiscovery {
               ? services.withLabel(entry.getKey(), entry.getValue())
               : listable.withLabel(entry.getKey(), entry.getValue());
     }
-    return listable.list();
+    return listable;
   }
 
   private static List<Field> findServiceFields(Object bean) {
@@ -239,6 +340,13 @@ public class KubeDiscovery {
         .stream()
         .filter(item -> item.getMetadata().getName().equalsIgnoreCase(resolvedServiceName))
         .findFirst();
+  }
+
+  private static Optional<String> findOfflineServiceEntry(JsonObject env, String serviceName) {
+    final String resolvedServiceName = resolveProperty(env, serviceName);
+    final String resolvedValue =
+        ConfigurationUtil.getStringConfiguration(env, resolvedServiceName, resolvedServiceName);
+    return Optional.ofNullable(resolvedValue);
   }
 
   private static String resolveProperty(JsonObject env, String serviceName) {
