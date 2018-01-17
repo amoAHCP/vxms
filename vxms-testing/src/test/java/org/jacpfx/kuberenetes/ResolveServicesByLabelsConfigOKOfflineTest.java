@@ -18,8 +18,9 @@ package org.jacpfx.kuberenetes;
 
 
 
-import io.fabric8.annotations.PortName;
 import io.fabric8.annotations.ServiceName;
+import io.fabric8.annotations.WithLabel;
+import io.fabric8.annotations.WithLabels;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Service;
@@ -51,7 +52,7 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBase {
+public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final String HOST = "127.0.0.1";
@@ -83,12 +84,13 @@ public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBas
     initKubernetes();
     CountDownLatch latch2 = new CountDownLatch(1);
     JsonObject conf = new JsonObject();
-    conf.put("service1.name","myTestService").put("service1.port","mytcp");
-    conf.put("service2.name","myTestService2");
+    conf.put("service1.1.name","version").put("service1.1.value","v1");
+    conf.put("service2.1.name","version").put("service2.1.value","v2");
+    conf.put("service1.0.name","name").put("service1.0.value","myTestService");
+    conf.put("service2.0.name","name").put("service2.0.value","myTestService");
+    conf.put("version.v1.name.myTestService","http://192.168.1.1:8080");
+    conf.put("version.v2.name.myTestService","http://192.168.1.2:9080");
     conf.put("kube.offline",true);
-    conf.put("myTestService","tcp://192.168.1.1");
-    conf.put("myTestService2","http://192.168.1.2:9080");
-    conf.put("mytcp","9090");
     DeploymentOptions options = new DeploymentOptions().setConfig(conf).setInstances(1);
 
     vertx.deployVerticle(
@@ -128,7 +130,7 @@ public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBas
                 System.out.println("Response entity '" + response + "' received.");
                 vertx.runOnContext(
                     context -> {
-                      failed.set(!response.equalsIgnoreCase("tcp://192.168.1.1:9090/http://192.168.1.2:9080"));
+                      failed.set(!response.equalsIgnoreCase("http://192.168.1.1:8080/http://192.168.1.2:9080"));
 
                       latch.countDown();
 
@@ -151,11 +153,12 @@ public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBas
   @K8SDiscovery
   public class WsServiceOne extends VxmsEndpoint {
 
-    @ServiceName("${service1.name}")
-    @PortName("${service1.port}")
+    @ServiceName()
+    @WithLabels( value={ @WithLabel(name="${service1.0.name}",value="${service1.0.value}"), @WithLabel(name="${service1.1.name}",value="${service1.1.value}")})
     private String service1;
 
-    @ServiceName("${service2.name}")
+    @ServiceName()
+    @WithLabels( value={ @WithLabel(name="${service2.0.name}",value="${service2.0.value}"), @WithLabel(name="${service2.1.name}",value="${service2.1.value}")})
     private String service2;
     public Config config;
 

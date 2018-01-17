@@ -35,9 +35,8 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +61,7 @@ public class KubeDiscovery {
   public static void resolveBeanAnnotations(AbstractVerticle service, Config kubeConfig) {
     final JsonObject env = service.config();
     final List<Field> serviceNameFields = findServiceFields(service);
-    if (!env.getBoolean("kube.offline",false)) { // online
+    if (!env.getBoolean("kube.offline", false)) { // online
       final DefaultKubernetesClient client =
           new DefaultKubernetesClient(kubeConfig); // TODO be aware of OpenShiftClient
       if (!serviceNameFields.isEmpty()) {
@@ -80,14 +79,6 @@ public class KubeDiscovery {
     }
   }
 
-  private static boolean available(String host, int port) {
-    try (Socket ignored = new Socket(host, port)) {
-      return false;
-    } catch (IOException ignored) {
-      return true;
-    }
-  }
-
   private static void resolveServicesOffline(
       Object bean, List<Field> serverNameFields, JsonObject env) throws KubernetesClientException {
     serverNameFields.forEach(
@@ -97,10 +88,10 @@ public class KubeDiscovery {
           final String serviceName = serviceNameAnnotation.value();
           final boolean withLabel = serviceNameField.isAnnotationPresent(WithLabel.class);
           final boolean withLabels = serviceNameField.isAnnotationPresent(WithLabels.class);
-          if (!withLabel && !withLabels) {
+          if (isServiceNameOnly(withLabel, withLabels)) {
             resolveOfflineByServiceName(bean, env, serviceNameField, serviceName);
           } else {
-            // resoveServiceByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
+            resoveOfflineServiceByLabelOnly(bean, env, serviceNameField, withLabel, withLabels);
           }
         });
   }
@@ -116,7 +107,7 @@ public class KubeDiscovery {
           final String serviceName = serviceNameAnnotation.value();
           final boolean withLabel = serviceNameField.isAnnotationPresent(WithLabel.class);
           final boolean withLabels = serviceNameField.isAnnotationPresent(WithLabels.class);
-          if (!withLabel && !withLabels) {
+          if (isServiceNameOnly(withLabel, withLabels)) {
             resolveByServiceName(bean, env, client, serviceNameField, serviceName);
           } else {
             resoveServiceByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
@@ -124,11 +115,50 @@ public class KubeDiscovery {
         });
   }
 
+  private static boolean isServiceNameOnly(boolean withLabel, boolean withLabels) {
+    return !withLabel && !withLabels;
+  }
+
   private static void resolveOfflineByServiceName(
       Object bean, JsonObject env, Field serviceNameField, String serviceName) {
     final Optional<String> serviceEntryOptional = findOfflineServiceEntry(env, serviceName);
     serviceEntryOptional.ifPresent(
         serviceEntry -> resolveOfflibneHostAndSetValue(bean, env, serviceNameField, serviceEntry));
+  }
+
+  private static void resoveOfflineServiceByLabelOnly(
+      Object bean, JsonObject env, Field serviceNameField, boolean withLabel, boolean withLabels) {
+
+    final Map<String, String> labelsFromAnnotation =
+        getLabelsFromAnnotation(env, serviceNameField, withLabel, withLabels);
+
+    final Optional<String> localAccessKey =
+        labelsFromAnnotation
+            .entrySet()
+            .stream()
+            .map(entry -> entry.getKey().concat(".").concat(entry.getValue()))
+            .collect(
+                ArrayList<String>::new,
+                (list, e) -> list.add(0, e),
+                (list1, list2) -> list1.addAll(0, list2))
+            .stream()
+            .reduce(
+                (a, b) -> {
+                  String val = "";
+                  if (b != null) {
+                    val += a.concat(".").concat(b);
+                  } else {
+                    val += a;
+                  }
+                  return val;
+                });
+
+    localAccessKey.ifPresent(
+        accessKey -> {
+          String serviceValue = ConfigurationUtil.getStringConfiguration(env, accessKey, accessKey);
+          String hostString = getOfflineHostString(serviceValue, env, serviceNameField);
+          FieldUtil.setFieldValue(bean, serviceNameField, hostString);
+        });
   }
 
   private static void resolveByServiceName(
@@ -279,9 +309,12 @@ public class KubeDiscovery {
     }
     if (withLabels) {
       final WithLabels wls = serviceNameField.getAnnotation(WithLabels.class);
-      Stream.of(wls.value())
-          .forEach(
-              wl -> labels.put(resolveProperty(env, wl.name()), resolveProperty(env, wl.value())));
+      labels.putAll(
+          Stream.of(wls.value())
+              .collect(
+                  Collectors.toMap(
+                      wl -> resolveProperty(env, wl.name()),
+                      wl -> resolveProperty(env, wl.value()))));
     }
     return labels;
   }

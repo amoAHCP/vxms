@@ -18,8 +18,9 @@ package org.jacpfx.kuberenetes;
 
 
 
-import io.fabric8.annotations.PortName;
 import io.fabric8.annotations.ServiceName;
+import io.fabric8.annotations.WithLabel;
+import io.fabric8.annotations.WithLabels;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Service;
@@ -51,7 +52,7 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBase {
+public class ResolveServicesByLabelsConfigOKTest extends VertxTestBase {
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final String HOST = "127.0.0.1";
@@ -61,34 +62,53 @@ public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBas
  // public DefaultKubernetesClient client;
 
   public void initKubernetes() {
-
+    KubernetesMockServer plainServer = new KubernetesMockServer(false);
+    plainServer.init();
+    String host = plainServer.getHostName();
+    Integer port = plainServer.getPort();
     ClassLoader classLoader = getClass().getClassLoader();
     File ca = new File(classLoader.getResource("ca.crt").getFile());
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
-    System.out.println("port: "+0+"  host:"+0);
+    System.out.println("port: "+port+"  host:"+host);
     config = new ConfigBuilder()
-        .withMasterUrl(0 + ":" +0)
+        .withMasterUrl(host + ":" +port)
         .withNamespace(null)
         .withCaCertFile(ca.getAbsolutePath())
         .withClientCertFile(clientcert.getAbsolutePath())
         .withClientKeyFile(clientkey.getAbsolutePath())
         .build();
-
+  //  client = new DefaultKubernetesClient(config);
+    server = plainServer;
   }
 
+  public void initService() {
+    final ObjectMeta buildmyTestService = new ObjectMetaBuilder().addToLabels("name", "myTestService").addToLabels("version", "v1").withName("myTestService").build();
+    final ServicePort portmyTestService = new ServicePortBuilder().withPort(8080).withProtocol("http").build();
+    final ServiceSpec specmyTestService = new ServiceSpecBuilder().addNewPort().and()
+        .withClusterIP("192.168.1.1").withPorts(portmyTestService).build();
 
+    final ObjectMeta buildmyTestService2 = new ObjectMetaBuilder().addToLabels("name", "myTestService").addToLabels("version", "v2").withName("myTestService2").build();
+    final ServicePort portmyTestService2 = new ServicePortBuilder().withPort(9080).withProtocol("http").build();
+    final ServiceSpec specmyTestService2 = new ServiceSpecBuilder().addNewPort().and()
+        .withClusterIP("192.168.1.2").withPorts(portmyTestService2).build();
+
+    final Service servicemyTestService = new ServiceBuilder().withMetadata(buildmyTestService).withSpec(specmyTestService).build();
+    final Service servicemyTestService2 = new ServiceBuilder().withMetadata(buildmyTestService2).withSpec(specmyTestService2).build();
+    server.expect().withPath("/api/v1/namespaces/default/services?labelSelector=name%3DmyTestService,version%3Dv1").andReturn(200, new ServiceListBuilder().addToItems(servicemyTestService).build()).times(1);
+    server.expect().withPath("/api/v1/namespaces/default/services?labelSelector=name%3DmyTestService,version%3Dv2").andReturn(200, new ServiceListBuilder().addToItems(servicemyTestService2).build()).times(1);
+
+  }
   @Before
   public void startVerticles() throws InterruptedException {
     initKubernetes();
+    initService();
     CountDownLatch latch2 = new CountDownLatch(1);
     JsonObject conf = new JsonObject();
-    conf.put("service1.name","myTestService").put("service1.port","mytcp");
-    conf.put("service2.name","myTestService2");
-    conf.put("kube.offline",true);
-    conf.put("myTestService","tcp://192.168.1.1");
-    conf.put("myTestService2","http://192.168.1.2:9080");
-    conf.put("mytcp","9090");
+    conf.put("service1.1.name","version").put("service1.1.value","v1");
+    conf.put("service2.1.name","version").put("service2.1.value","v2");
+    conf.put("service1.0.name","name").put("service1.0.value","myTestService");
+    conf.put("service2.0.name","name").put("service2.0.value","myTestService");
     DeploymentOptions options = new DeploymentOptions().setConfig(conf).setInstances(1);
 
     vertx.deployVerticle(
@@ -128,7 +148,7 @@ public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBas
                 System.out.println("Response entity '" + response + "' received.");
                 vertx.runOnContext(
                     context -> {
-                      failed.set(!response.equalsIgnoreCase("tcp://192.168.1.1:9090/http://192.168.1.2:9080"));
+                      failed.set(!response.equalsIgnoreCase("http://192.168.1.1:8080/http://192.168.1.2:9080"));
 
                       latch.countDown();
 
@@ -151,11 +171,12 @@ public class ResolveServicesByLAbelsWithPortNameOfflineTest extends VertxTestBas
   @K8SDiscovery
   public class WsServiceOne extends VxmsEndpoint {
 
-    @ServiceName("${service1.name}")
-    @PortName("${service1.port}")
+    @ServiceName()
+    @WithLabels( value={ @WithLabel(name="${service1.0.name}",value="${service1.0.value}"), @WithLabel(name="${service1.1.name}",value="${service1.1.value}")})
     private String service1;
 
-    @ServiceName("${service2.name}")
+    @ServiceName()
+    @WithLabels( value={ @WithLabel(name="${service2.0.name}",value="${service2.0.value}"), @WithLabel(name="${service2.1.name}",value="${service2.1.value}")})
     private String service2;
     public Config config;
 

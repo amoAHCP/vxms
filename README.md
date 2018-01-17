@@ -66,10 +66,10 @@ public class RESTExample extends VxmsEndpoint {
        String name =  handler.request().param("name");
        handler.
                        response().
-                       <Integer>supply((future) -> getAge()). // start the chain by supplying a value (an Integer)
+                       <Integer>supply((future) -> future.complete(getAge())). // start the chain by supplying a value (an Integer)
                        <Customer>andThen((value, future) -> future.complete(new Customer(value + 1 + "", name))). // take the value (the Integer) from supply and return an other type (the Customer)
-                       mapToStringResponse((cust, response)->
-                               response.complete("hello World "+cust.getName())). // get the return-value from the last chain step and map it to a string-response and complete non-blocking response
+                       mapToStringResponse((customer, response)->
+                               response.complete("hello World "+customer.getName())). // get the return-value from the last chain step and map it to a string-response and complete non-blocking response
                        timeout(2000). // timeout for stringResponse handling. If timeout is reached, error handling will be executed
                        onError(error -> LOG(error.getMessage())).  // intermediate error handling, will be executed on each error
                        onFailureRespond((error, future) -> future.complete("error:"+error.getMessage())). // define final error response when (if no retry is defined or all retries are failing)
