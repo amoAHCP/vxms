@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 /**
  * Created by amo on 13.04.17.
  */
+@Deprecated
 public class Endpoints {
 
   private final KubernetesClient client;

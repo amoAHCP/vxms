@@ -91,7 +91,7 @@ public class KubeDiscovery {
           if (isServiceNameOnly(withLabel, withLabels)) {
             resolveOfflineByServiceName(bean, env, serviceNameField, serviceName);
           } else {
-            resoveOfflineServiceByLabelOnly(bean, env, serviceNameField, withLabel, withLabels);
+            resolveOfflineServiceByLabelOnly(bean, env, serviceNameField, withLabel, withLabels);
           }
         });
   }
@@ -110,7 +110,7 @@ public class KubeDiscovery {
           if (isServiceNameOnly(withLabel, withLabels)) {
             resolveByServiceName(bean, env, client, serviceNameField, serviceName);
           } else {
-            resoveServiceByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
+            resolveServiceByLabelOnly(bean, env, client, serviceNameField, withLabel, withLabels);
           }
         });
   }
@@ -126,7 +126,7 @@ public class KubeDiscovery {
         serviceEntry -> resolveOfflibneHostAndSetValue(bean, env, serviceNameField, serviceEntry));
   }
 
-  private static void resoveOfflineServiceByLabelOnly(
+  private static void resolveOfflineServiceByLabelOnly(
       Object bean, JsonObject env, Field serviceNameField, boolean withLabel, boolean withLabels) {
 
     final Map<String, String> labelsFromAnnotation =
@@ -266,7 +266,7 @@ public class KubeDiscovery {
     return hostString;
   }
 
-  private static void resoveServiceByLabelOnly(
+  private static void resolveServiceByLabelOnly(
       Object bean,
       JsonObject env,
       KubernetesClient client,
@@ -385,7 +385,7 @@ public class KubeDiscovery {
   private static String resolveProperty(JsonObject env, String serviceName) {
     String result = serviceName;
     if (serviceName.contains("$")) {
-      result = serviceName.substring(2, serviceName.length() - 1);
+      result = serviceName.substring(2, serviceName.length() - 1); // scheme: ${value}
       result = ConfigurationUtil.getStringConfiguration(env, result, result);
     }
     return result;

@@ -50,7 +50,6 @@ public class VxmsDiscoveryK8SImpl {
     final CustomClientConfig custConf = getCustomConfiguration(customClientClassName);
     final Config customConfiguration = custConf.createCustomConfiguration(vertx);
     if (customConfiguration == null) {
-
       final String user = ConfigurationUtil.getStringConfiguration(config, USER, annotation.user());
       final String password =
           ConfigurationUtil.getStringConfiguration(config, PASSWORD, annotation.password());

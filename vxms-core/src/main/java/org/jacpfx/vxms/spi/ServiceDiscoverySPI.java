@@ -17,15 +17,10 @@
 package org.jacpfx.vxms.spi;
 
 import io.vertx.core.AbstractVerticle;
-import java.util.function.Consumer;
 
 /**
- * Created by Andy Moncsek on 23.06.16.
+ * @author Andy Moncsek
  */
-public interface ServiceDiscoverySpi {
-
-  void registerService(Runnable onSuccess, Consumer<Throwable> onFail,
-      AbstractVerticle verticleInstance);
-
-  void disconnect();
+public interface ServiceDiscoverySPI {
+   void initDiscovery(AbstractVerticle service);
 }
