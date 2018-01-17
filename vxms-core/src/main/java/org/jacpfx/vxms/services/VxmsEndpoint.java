@@ -108,11 +108,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     config.put("secure", secure);
 
-    initEndoitConfiguration(routerConfiguration, vertx, router, secure, host, port);
+    initEndpointConfiguration(routerConfiguration, vertx, router, secure, host, port);
 
-    initHandlerSPIs(server, router, registrationObject, vxmsShared);
+    initExtensions(server, router, registrationObject, vxmsShared);
 
-    postEndoitConfiguration(routerConfiguration, router);
+    postEndpointConfiguration(routerConfiguration, router);
 
     if (contextRootSet) {
       topRouter
@@ -135,7 +135,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     executePostConstruct(registrationObject, topRouter, startFuture);
   }
 
-  private static void initHandlerSPIs(HttpServer server, Router router,
+  private static void initExtensions(HttpServer server, Router router,
       AbstractVerticle registrationObject, VxmsShared vxmsShared) {
     initWebSocketExtensions(server, registrationObject,vxmsShared);
     initRESTExtensions(router, registrationObject, vxmsShared);
@@ -277,7 +277,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
 
-  private static void initEndoitConfiguration(RouterConfiguration routerConfiguration,
+  private static void initEndpointConfiguration(RouterConfiguration routerConfiguration,
       Vertx vertx,
       Router router, boolean secure, String host, int port) {
     Optional.of(routerConfiguration).ifPresent(endpointConfig -> {
@@ -294,7 +294,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     });
   }
 
-  private static void postEndoitConfiguration(RouterConfiguration routerConfiguration,
+  private static void postEndpointConfiguration(RouterConfiguration routerConfiguration,
       Router router) {
     Optional.of(routerConfiguration)
         .ifPresent(endpointConfig -> endpointConfig.staticHandler(router));
