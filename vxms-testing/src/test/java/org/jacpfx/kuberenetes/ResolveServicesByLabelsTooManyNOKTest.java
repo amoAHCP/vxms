@@ -70,9 +70,9 @@ public class ResolveServicesByLabelsTooManyNOKTest extends VertxTestBase {
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
     System.out.println("port: "+port+"  host:"+host);
-    config = new ConfigBuilder()
+    TestingClientConfig.config = new ConfigBuilder()
         .withMasterUrl(host + ":" +port)
-        .withNamespace(null)
+        .withNamespace("default")
         .withCaCertFile(ca.getAbsolutePath())
         .withClientCertFile(clientcert.getAbsolutePath())
         .withClientKeyFile(clientkey.getAbsolutePath())
@@ -114,7 +114,7 @@ public class ResolveServicesByLabelsTooManyNOKTest extends VertxTestBase {
         new WsServiceOne(config),
         options,
         asyncResult -> {
-          System.out.println("start service: " + asyncResult.cause().getCause().getMessage());
+          System.out.println("start service: " + asyncResult.cause().getMessage());
           assertTrue(asyncResult.failed());
 
           latch2.countDown();
@@ -126,7 +126,7 @@ public class ResolveServicesByLabelsTooManyNOKTest extends VertxTestBase {
   }
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  @K8SDiscovery
+  @K8SDiscovery(customClientConfiguration = TestingClientConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
     @ServiceName()
@@ -141,7 +141,6 @@ public class ResolveServicesByLabelsTooManyNOKTest extends VertxTestBase {
     public WsServiceOne(Config config) {this.config =config;}
 
     public void postConstruct(final io.vertx.core.Future<Void> startFuture) {
-      new VxmsDiscoveryK8SImpl().initDiscovery(this,config);
       startFuture.complete();
     }
 

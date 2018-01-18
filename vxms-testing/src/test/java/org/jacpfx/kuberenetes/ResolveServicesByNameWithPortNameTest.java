@@ -33,9 +33,11 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.json.JsonObject;
 import io.vertx.test.core.VertxTestBase;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
@@ -56,10 +58,10 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
   private static final String HOST = "127.0.0.1";
   private HttpClient httpClient;
   public KubernetesMockServer server;
-  public Config config;
+  public static Config config;
  // public DefaultKubernetesClient client;
 
-  public void initKubernetes() {
+  public void initKubernetes(JsonObject conf) {
     KubernetesMockServer plainServer = new KubernetesMockServer(false);
     plainServer.init();
     String host = plainServer.getHostName();
@@ -69,17 +71,26 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
     System.out.println("port: "+port+"  host:"+host);
-    config = new ConfigBuilder()
+
+    conf.put("withMasterUrl",host + ":" +port);
+    conf.put("withCaCertFile",ca.getAbsolutePath());
+    conf.put("withClientCertFile",clientcert.getAbsolutePath());
+    conf.put("withClientKeyFile",clientkey.getAbsolutePath());
+
+    TestingClientConfig.config = new ConfigBuilder()
         .withMasterUrl(host + ":" +port)
-        .withNamespace(null)
+        .withNamespace("default")
         .withCaCertFile(ca.getAbsolutePath())
         .withClientCertFile(clientcert.getAbsolutePath())
         .withClientKeyFile(clientkey.getAbsolutePath())
         .build();
+
   //  client = new DefaultKubernetesClient(config);
     server = plainServer;
   }
-
+  protected VertxOptions getOptions() {
+    return new VertxOptions().setMaxEventLoopExecuteTime(100000000000l);
+  }
   public void initService() {
     final ObjectMeta buildmyTestService = new ObjectMetaBuilder().addToLabels("test", "test").withName("myTestService").build();
     final ServicePort portmyTestService_1 = new ServicePortBuilder().withName("mainhttp").withPort(8080).withProtocol("http").build();
@@ -100,13 +111,17 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
   }
   @Before
   public void startVerticles() throws InterruptedException {
-    initKubernetes();
+    JsonObject conf = new JsonObject();
+    initKubernetes(conf);
     initService();
     CountDownLatch latch2 = new CountDownLatch(1);
-    DeploymentOptions options = new DeploymentOptions().setInstances(1);
+
+    conf.put("service1.name","version").put("service1.value","v1");
+    conf.put("service2.name","version").put("service2.value","v2");
+    DeploymentOptions options = new DeploymentOptions().setConfig(conf).setInstances(1);
 
     vertx.deployVerticle(
-        new WsServiceOne(config),
+        new WsServiceOne(TestingClientConfig.config),
         options,
         asyncResult -> {
           // Deployment is asynchronous and this this handler will be called when it's complete
@@ -162,7 +177,7 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
   }
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  @K8SDiscovery
+  @K8SDiscovery(customClientConfiguration = TestingClientConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
     @ServiceName("myTestService")
@@ -175,10 +190,7 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
 
     public WsServiceOne(Config config) {this.config =config;}
 
-    public void postConstruct(final io.vertx.core.Future<Void> startFuture) {
-      new VxmsDiscoveryK8SImpl().initDiscovery(this,config);
-      startFuture.complete();
-    }
+
 
     @Path("/myTestService")
     @GET

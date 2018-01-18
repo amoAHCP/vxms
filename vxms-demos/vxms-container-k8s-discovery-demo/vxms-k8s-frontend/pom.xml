@@ -41,8 +41,8 @@
         </dependency>
         <dependency>
             <groupId>org.jacpfx</groupId>
-            <artifactId>sek8sdiscovery</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>vxms-k8sdiscovery</artifactId>
+            <version>${vxms-verticle.version}</version>
         </dependency>
     </dependencies>
     <build>

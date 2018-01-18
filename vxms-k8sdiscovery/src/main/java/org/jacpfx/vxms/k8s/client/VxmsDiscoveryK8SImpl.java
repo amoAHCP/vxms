@@ -26,8 +26,9 @@ import org.jacpfx.vxms.k8s.annotation.K8SDiscovery;
 import org.jacpfx.vxms.k8s.api.CustomClientConfig;
 import org.jacpfx.vxms.k8s.util.StringUtil;
 import org.jacpfx.vxms.k8s.util.TokenUtil;
+import org.jacpfx.vxms.spi.ServiceDiscoverySPI;
 
-public class VxmsDiscoveryK8SImpl {
+public class VxmsDiscoveryK8SImpl implements ServiceDiscoverySPI {
 
   public static final String USER = "user";
   public static final String PASSWORD = "password";
@@ -36,11 +37,12 @@ public class VxmsDiscoveryK8SImpl {
   public static final String NAMESPACE = "namespace";
   public static final String CUSTOM_CLIENT_CONFIGURATION = "customClientConfiguration";
 
+  @Override
   public void initDiscovery(AbstractVerticle service) {
     final JsonObject config = service.config();
     final Vertx vertx = service.getVertx();
     if (!service.getClass().isAnnotationPresent(K8SDiscovery.class))
-      throw new IllegalArgumentException("no @K8SDiscovery annotation found");
+      return;
     final K8SDiscovery annotation = service.getClass().getAnnotation(K8SDiscovery.class);
     final String customClientClassName =
         ConfigurationUtil.getStringConfiguration(
@@ -50,34 +52,26 @@ public class VxmsDiscoveryK8SImpl {
     final CustomClientConfig custConf = getCustomConfiguration(customClientClassName);
     final Config customConfiguration = custConf.createCustomConfiguration(vertx);
     if (customConfiguration == null) {
-      final String user = ConfigurationUtil.getStringConfiguration(config, USER, annotation.user());
-      final String password =
-          ConfigurationUtil.getStringConfiguration(config, PASSWORD, annotation.password());
-      final String api_token =
-          ConfigurationUtil.getStringConfiguration(config, API_TOKEN, annotation.api_token());
       final String master_url =
           ConfigurationUtil.getStringConfiguration(config, MASTER_URL, annotation.master_url());
       final String namespace =
           ConfigurationUtil.getStringConfiguration(config, NAMESPACE, annotation.namespace());
       final Config kubeConfig =
           new ConfigBuilder().withMasterUrl(master_url).withNamespace(namespace).build();
-      if (!StringUtil.isNullOrEmpty(api_token)) kubeConfig.setOauthToken(api_token);
-      if (!StringUtil.isNullOrEmpty(password)) kubeConfig.setPassword(password);
-      if (!StringUtil.isNullOrEmpty(user)) kubeConfig.setUsername(user);
-      // check oauthToken
-      if (StringUtil.isNullOrEmpty(kubeConfig.getOauthToken()))
-        kubeConfig.setOauthToken(TokenUtil.getAccountToken());
+
+      updateKubeConfig(kubeConfig, config, annotation);
       // 1.) Check from K8SDiscovery Annotation
       // 1.1) read properties and from Annotation or from configuration
       // 2.) init KubernetesClient
       KubeDiscovery.resolveBeanAnnotations(service, kubeConfig);
     } else {
+      updateKubeConfig(customConfiguration, config, annotation);
       KubeDiscovery.resolveBeanAnnotations(service, customConfiguration);
     }
   }
 
   private CustomClientConfig getCustomConfiguration(String customClientClassName) {
-    CustomClientConfig custConf=null;
+    CustomClientConfig custConf = null;
     try {
       final Class<? extends CustomClientConfig> optionsClazz =
           (Class<? extends CustomClientConfig>) Class.forName(customClientClassName);
@@ -96,8 +90,16 @@ public class VxmsDiscoveryK8SImpl {
   public void initDiscovery(AbstractVerticle service, Config kubeConfig) {
     final JsonObject config = service.config();
     if (!service.getClass().isAnnotationPresent(K8SDiscovery.class))
-      throw new IllegalArgumentException("no @K8SDiscovery annotation found");
+      return;
     final K8SDiscovery annotation = service.getClass().getAnnotation(K8SDiscovery.class);
+    updateKubeConfig(kubeConfig, config, annotation);
+    // 1.) Check from K8SDiscovery Annotation
+    // 1.1) read properties and from Annotation or from configuration
+    // 2.) init KubernetesClient
+    KubeDiscovery.resolveBeanAnnotations(service, kubeConfig);
+  }
+
+  private void updateKubeConfig(Config kubeConfig, JsonObject config, K8SDiscovery annotation) {
     final String user = ConfigurationUtil.getStringConfiguration(config, USER, annotation.user());
     final String password =
         ConfigurationUtil.getStringConfiguration(config, PASSWORD, annotation.password());
@@ -115,9 +117,5 @@ public class VxmsDiscoveryK8SImpl {
     // check oauthToken
     if (StringUtil.isNullOrEmpty(kubeConfig.getOauthToken()))
       kubeConfig.setOauthToken(TokenUtil.getAccountToken());
-    // 1.) Check from K8SDiscovery Annotation
-    // 1.1) read properties and from Annotation or from configuration
-    // 2.) init KubernetesClient
-    KubeDiscovery.resolveBeanAnnotations(service, kubeConfig);
   }
 }

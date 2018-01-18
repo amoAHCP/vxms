@@ -37,7 +37,7 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 /**
  * Created by Andy Moncsek on 17.02.16.
  */
-@ServiceEndpoint(name = "write-verticle", contextRoot = "/write", port = 8080)
+@ServiceEndpoint(name = "write-verticle", contextRoot = "/write", port = 9090)
 public class UsersWriteToMongo extends VxmsEndpoint {
 
   Logger log = Logger.getLogger(UsersWriteToMongo.class.getName());

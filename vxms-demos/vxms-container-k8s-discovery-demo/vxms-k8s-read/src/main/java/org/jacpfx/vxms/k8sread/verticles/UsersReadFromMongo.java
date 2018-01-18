@@ -37,7 +37,7 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 /**
  * Created by Andy Moncsek on 17.02.16.
  */
-@ServiceEndpoint(name = "read-verticle", contextRoot = "/read", port = 8080)
+@ServiceEndpoint(name = "read-verticle", contextRoot = "/read", port = 7070)
 public class UsersReadFromMongo extends VxmsEndpoint {
 
   Logger log = Logger.getLogger(UsersReadFromMongo.class.getName());

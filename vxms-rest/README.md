@@ -35,7 +35,7 @@ public class RESTExample extends VxmsEndpoint {
 		}
 }
 ```
-By default all your operations must be non-blocking. If you do blocking calls, vxms behaves like  Vert.x typically do (either you block the event-bus or you need to operate in worker mode). 
+By default, all your operations must be non-blocking. If you do blocking calls, vxms behaves like  Vert.x typically do (either you block the event-bus or you need to operate in worker mode). 
 The "RestHandler" gives you the ability to create responses for following types: String, byte[] and Object. For an Object response, you must specify an encoder which maps your response Object to either String or byte[].
 ### byte example
 ```java
@@ -140,7 +140,7 @@ To initialize the blocking API you must call *blocking()* on the response handle
 
 
 ## using the supply/andThen chain
-Since Vxms 1.1 the response handler contains the possibility to create a chain of executions to create a response. 
+Since Vxms 1.1 ,the response handler is able to create a chain of executions for a response. 
 
 ### non-blocking chain example
 ```java
@@ -186,7 +186,7 @@ As before you must map the result of your execution chain to *String*, *byte[]* 
 
 
 ## error handling
-Vxms provides many features for handling errors while creating the REST response (in blocking and non-blocking mode):
+Vxms provides many features to handle errors when building the REST response (in blocking and non-blocking mode):
 - onError((throwable) -> ....)... : this is an intermediate function, called on each error (for example when doing retry operations) and can be used for logging or any other notification
 - onFailureRespond((error,future)-> future.complete("")) : provides a terminal function, that will be called when no other retries or error handling is possible and defines the final response when the default execution fails.
 - timeout(long ms) : define a timeout for creating the response, when the timeout is reached, the error handling will be executed (onError, onFailureResponde)
@@ -220,7 +220,7 @@ with the *@OnRestError* annotation. This annotation **must** contain the same RE
 ```
 
 ## circuit breaker
-Vxms has a simple built-in circuit breaker with two states: open and closed. Currently the circuit beaker is locking each Verticle instance separately. In further releases a locking on JVM Process & Cluster wide is planned. 
+Vxms has a simple, built-in circuit breaker with two states: open and closed. Currently the circuit beaker is locking each Verticle instance separately. In further releases a locking on JVM Process & Cluster wide is planned. 
 To activate the circuit breaker you need first to define a **retry(int amount)** amount on the fluent API, and than you can set the **closeCircuitBreaker(long ms)** time (the time before the circuit breaker will close again). 
 Each request in-between this time will automatically execute the *onFailureResponse* method, 
 without evaluating the *...response* method. Be aware, when you have N instances of your Verticle, each of them counts individually. 

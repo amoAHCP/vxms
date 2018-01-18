@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.services;
 
 import static org.jacpfx.vxms.common.util.ConfigurationUtil.getRouterConfiguration;
+import static org.jacpfx.vxms.common.util.ServiceUtil.getDiscoverySPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getEventBusSPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getRESTSPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getWebSocketSPI;
@@ -137,6 +138,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   private static void initExtensions(HttpServer server, Router router,
       AbstractVerticle registrationObject, VxmsShared vxmsShared) {
+    initDiscoveryxtensions(registrationObject);
     initWebSocketExtensions(server, registrationObject,vxmsShared);
     initRESTExtensions(router, registrationObject, vxmsShared);
     initEventBusExtensions(registrationObject, vxmsShared);
@@ -211,6 +213,16 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
           webSockethandlerSPI
               .registerWebSocketHandler(server, vertx, config, registrationObject);
           log("start websocket extension");
+        });
+  }
+
+  private static void initDiscoveryxtensions(AbstractVerticle registrationObject) {
+    // check for REST extension
+    Optional.
+        ofNullable(getDiscoverySPI()).
+        ifPresent(discoverySPI -> {
+         discoverySPI.initDiscovery(registrationObject);
+          log("start discovery extension");
         });
   }
 

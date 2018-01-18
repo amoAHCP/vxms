@@ -220,4 +220,4 @@
 #    limitations under the License.
 #
 
-org.jacpfx.vxms.rest.RESThandler
+org.jacpfx.vxms.k8s.client.VxmsDiscoveryK8SImpl
