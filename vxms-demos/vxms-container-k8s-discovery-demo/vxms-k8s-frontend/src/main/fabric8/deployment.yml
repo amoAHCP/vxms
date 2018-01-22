@@ -1,0 +1,14 @@
+metadata:
+  annotations:
+    configmap.fabric8.io/update-on-change: frontendconfig
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: vertx
+          envFrom:
+          - configMapRef:
+              name: frontendconfig
+          ports:
+          - containerPort: 8181

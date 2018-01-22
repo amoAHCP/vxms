@@ -46,10 +46,10 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 @K8SDiscovery(namespace = "myproject")
 public class VxmsGateway extends VxmsEndpoint {
 
-  @ServiceName("vxms-k8s-read")
+  @ServiceName("${read}")
   private String read;
 
-  @ServiceName("vxms-k8s-write")
+  @ServiceName("${write}")
   private String write;
 
   Logger log = Logger.getLogger(VxmsGateway.class.getName());
@@ -59,6 +59,18 @@ public class VxmsGateway extends VxmsEndpoint {
     // for demo purposes
     InitMongoDB.initMongoData(vertx, config());
     startFuture.complete();
+  }
+
+  @Path("/health")
+  @GET
+  public void health(RestHandler handler) {
+    handler
+        .response()
+        .stringResponse((future) -> future.complete("Ready"))
+        .onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage()))
+        .onFailureRespond((onError, future) -> future.complete(""))
+        .httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE)
+        .execute(HttpResponseStatus.OK);
   }
 
   @Path("/api/users")
@@ -80,7 +92,7 @@ public class VxmsGateway extends VxmsEndpoint {
   public void requestAllUsers(Future<String> future) {
     vertx
         .createHttpClient()
-        .requestAbs(HttpMethod.GET, read + "/read/api/users")
+        .requestAbs(HttpMethod.GET, "http://" + read + "/read/api/users")
         .handler(resp -> writeResponse(future, resp))
         .exceptionHandler(th -> future.fail(th))
         .end();
@@ -108,7 +120,7 @@ public class VxmsGateway extends VxmsEndpoint {
   public void requestUserById(String id, Future<String> future) {
     vertx
         .createHttpClient()
-        .requestAbs(HttpMethod.GET, read + "/read/api/users/" + id)
+        .requestAbs(HttpMethod.GET, "http://" + read + "/read/api/users/" + id)
         .handler(resp -> writeResponse(future, resp))
         .exceptionHandler(th -> future.fail(th))
         .end();
@@ -145,7 +157,7 @@ public class VxmsGateway extends VxmsEndpoint {
   public void insertUser(Buffer body, Future<String> future) {
     vertx
         .createHttpClient()
-        .requestAbs(HttpMethod.POST, write + "/write/api/users")
+        .requestAbs(HttpMethod.POST, "http://" + write + "/write/api/users")
         .handler(resp -> writeResponse(future, resp))
         .exceptionHandler(th -> future.fail(th))
         .end(body);
@@ -178,7 +190,7 @@ public class VxmsGateway extends VxmsEndpoint {
   public void updateUser(JsonObject user, Future<String> future) {
     vertx
         .createHttpClient()
-        .requestAbs(HttpMethod.PUT, write + "/write/api/users")
+        .requestAbs(HttpMethod.PUT, "http://" + write + "/write/api/users")
         .handler(resp -> writeResponse(future, resp))
         .exceptionHandler(th -> future.fail(th))
         .end(Buffer.buffer(user.encode()));
@@ -209,7 +221,7 @@ public class VxmsGateway extends VxmsEndpoint {
   public void deleteUser(String id, Future<String> future) {
     vertx
         .createHttpClient()
-        .requestAbs(HttpMethod.DELETE, write + "/write/api/users/" + id)
+        .requestAbs(HttpMethod.DELETE, "http://" + write + "/write/api/users/" + id)
         .handler(resp -> writeResponse(future, resp))
         .exceptionHandler(th -> future.fail(th))
         .end();
@@ -224,6 +236,8 @@ public class VxmsGateway extends VxmsEndpoint {
                 new JsonObject()
                     .put("kube.offline", true)
                     .put("local", true)
+                    .put("read", "vxms-k8s-read")
+                    .put("write", "vxms-k8s-write")
                     .put("vxms-k8s-read", "http://localhost:7070")
                     .put("vxms-k8s-write", "http://localhost:9090"));
 

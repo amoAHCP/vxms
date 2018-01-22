@@ -1,10 +1,7 @@
-metadata:
-  labels:
-    expose: true
-
+kind: Service
+apiVersion: v1
 spec:
   type: LoadBalancer
   ports:
-    - port: 80
-      protocol: http
-      targetPort: 8181
+  - port: 80
+    targetPort: 8181

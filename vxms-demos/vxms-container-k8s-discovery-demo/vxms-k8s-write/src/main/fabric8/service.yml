@@ -3,7 +3,6 @@ metadata:
     expose: true
 
 spec:
-  type: LoadBalancer
   ports:
     - port: 80
       targetPort: 9090

@@ -32,6 +32,10 @@
     <name>vxms-k8s-frontend</name>
     <url>http://maven.apache.org</url>
 
+    <properties>
+        <vertx.health.path>/health</vertx.health.path>
+        <vertx.health.port>8181</vertx.health.port>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -83,6 +87,19 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>fabric8-maven-plugin</artifactId>
+              <!--  <configuration>
+                    <resources>
+                        <env>
+
+                            <READ>vxms-k8s-read</READ>
+                            <WRITE>vxms-k8s-write</WRITE>
+                        </env>
+                    </resources>
+                </configuration>-->
             </plugin>
         </plugins>
     </build>

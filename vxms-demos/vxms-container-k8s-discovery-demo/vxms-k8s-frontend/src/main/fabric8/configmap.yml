@@ -1,0 +1,5 @@
+metadata:
+  name: frontendconfig
+data:
+  READ: vxms-k8s-read
+  WRITE: vxms-k8s-write
