@@ -192,7 +192,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   private static void initEventBusExtensions(AbstractVerticle registrationObject,
       VxmsShared vxmsShared) {
-    // check for REST extension
+    // check for Eventbus extension
     Optional.
         ofNullable(getEventBusSPI()).
         ifPresent(eventbusHandlerSPI -> {
@@ -217,7 +217,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
   private static void initDiscoveryxtensions(AbstractVerticle registrationObject) {
-    // check for REST extension
+    // check for service discovery extension
     Optional.
         ofNullable(getDiscoverySPI()).
         ifPresent(discoverySPI -> {
@@ -236,7 +236,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * @param stopFuture a future which should be called when verticle clean-up is complete.
    * @throws Exception exception while stopping the verticle
    */
-  public final void stop(Future<Void> stopFuture) throws Exception {
+  public final void stop(Future<Void> stopFuture) {
     if (!stopFuture.isComplete()) {
       stopFuture.complete();
     }

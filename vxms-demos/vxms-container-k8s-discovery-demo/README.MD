@@ -13,3 +13,7 @@ have a running Kubernetes (simply use minikube)
 7. access the application (minikube service vxms-k8s-frontend --url --> in browser put ip:port/index.html)
 
 
+## using it locally
+The vxms-k8sdiscovery modules provides an easy way to run your application in kubernetes as well as locally
+
+
