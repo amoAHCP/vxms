@@ -19,8 +19,14 @@ package org.jacpfx.vxms.spi;
 import io.vertx.core.AbstractVerticle;
 
 /**
+ * SPI for Service discovery in vxms
  * @author Andy Moncsek
  */
 public interface ServiceDiscoverySPI {
+
+   /**
+    * Initialize the service discovery for a provided AbstractVerticle
+    * @param service  {@see io.vertx.core.AbstractVerticle}
+    */
    void initDiscovery(AbstractVerticle service);
 }

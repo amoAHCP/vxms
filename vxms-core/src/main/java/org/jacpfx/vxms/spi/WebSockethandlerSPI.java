@@ -22,10 +22,18 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 
 /**
+ * WebSocket SPI for vxms
  * Created by amo on 05.08.16.
  */
 public interface WebSockethandlerSPI {
 
+  /**
+   * Initialize the WebSocket implementation
+   * @param server the preconfigured HttpServer provided by vxms
+   * @param vertx the Vert.x iunstance
+   * @param config the Verticle configuration
+   * @param service the Service
+   */
   void registerWebSocketHandler(HttpServer server, Vertx vertx, JsonObject config,
       AbstractVerticle service);
 }
