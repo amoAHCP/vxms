@@ -1,5 +1,10 @@
 kind: Service
 apiVersion: v1
+metadata:
+  labels:
+    expose: true
+    name: ${project.artifactId}
+    version: ${project.parent.version}
 spec:
   type: LoadBalancer
   ports:

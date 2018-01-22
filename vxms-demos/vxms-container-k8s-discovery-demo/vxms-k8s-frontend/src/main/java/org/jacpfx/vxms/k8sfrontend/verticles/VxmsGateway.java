@@ -17,6 +17,8 @@
 package org.jacpfx.vxms.k8sfrontend.verticles;
 
 import io.fabric8.annotations.ServiceName;
+import io.fabric8.annotations.WithLabel;
+import io.fabric8.annotations.WithLabels;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -46,10 +48,18 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 @K8SDiscovery(namespace = "myproject")
 public class VxmsGateway extends VxmsEndpoint {
 
-  @ServiceName("${read}")
+  @ServiceName()
+  @WithLabels({
+    @WithLabel(name = "name", value = "${read_name}"),
+    @WithLabel(name = "version", value = "${read_version}")
+  })
   private String read;
 
-  @ServiceName("${write}")
+  @ServiceName()
+  @WithLabels({
+    @WithLabel(name = "name", value = "${write_name}"),
+    @WithLabel(name = "version", value = "${write_version}")
+  })
   private String write;
 
   Logger log = Logger.getLogger(VxmsGateway.class.getName());
@@ -61,17 +71,7 @@ public class VxmsGateway extends VxmsEndpoint {
     startFuture.complete();
   }
 
-  @Path("/health")
-  @GET
-  public void health(RestHandler handler) {
-    handler
-        .response()
-        .stringResponse((future) -> future.complete("Ready"))
-        .onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage()))
-        .onFailureRespond((onError, future) -> future.complete(""))
-        .httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE)
-        .execute(HttpResponseStatus.OK);
-  }
+
 
   @Path("/api/users")
   @GET
@@ -130,9 +130,6 @@ public class VxmsGateway extends VxmsEndpoint {
     resp.bodyHandler(body -> future.complete(body.getString(0, body.length())));
   }
 
-  public void handleRequestError(Future<String> future, HttpClientResponse resp) {
-    resp.exceptionHandler(fail -> future.fail(fail));
-  }
 
   @Path("/api/users")
   @POST
@@ -227,6 +224,22 @@ public class VxmsGateway extends VxmsEndpoint {
         .end();
   }
 
+  @Path("/health")
+  @GET
+  public void health(RestHandler handler) {
+    handler
+        .response()
+        .stringResponse(this::checkHealth)
+        .onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage()))
+        .onFailureRespond((onError, future) -> future.complete(""))
+        .httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE)
+        .execute(HttpResponseStatus.OK);
+  }
+
+  private void checkHealth(Future<String> future) {
+    future.complete("Ready");
+  }
+
   // Convenience method so you can run it in your IDE
   public static void main(String[] args) {
     DeploymentOptions options =
@@ -236,10 +249,12 @@ public class VxmsGateway extends VxmsEndpoint {
                 new JsonObject()
                     .put("kube.offline", true)
                     .put("local", true)
-                    .put("read", "vxms-k8s-read")
-                    .put("write", "vxms-k8s-write")
-                    .put("vxms-k8s-read", "http://localhost:7070")
-                    .put("vxms-k8s-write", "http://localhost:9090"));
+                    .put("read_name", "vxms-k8s-read")
+                    .put("read_version", "1.1-SNAPSHOT")
+                    .put("write_name", "vxms-k8s-write")
+                    .put("write_version", "1.1-SNAPSHOT")
+                    .put("name.vxms-k8s-read.version.1.1-SNAPSHOT", "http://localhost:7070")
+                    .put("name.vxms-k8s-write.version.1.1-SNAPSHOT", "http://localhost:9090"));
 
     Vertx.vertx().deployVerticle(VxmsGateway.class.getName(), options);
   }
