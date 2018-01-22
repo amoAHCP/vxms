@@ -213,7 +213,7 @@ public class KubeDiscovery {
     if (ports.size() >= 1) {
       final ServicePort servicePort = ports.get(0);
       final String protocol = servicePort.getProtocol();
-      hostString = buildServiceHostString(clusterIP, servicePort, protocol);
+      hostString = buildServiceHostString(clusterIP, servicePort, null);
     }
     return hostString;
   }
@@ -227,7 +227,8 @@ public class KubeDiscovery {
     if (portMatch.isPresent()) {
       final ServicePort port = portMatch.get();
       final String protocol = port.getProtocol();
-      hostString = buildServiceHostString(clusterIP, port, protocol);
+      // TODO check out how http can get resolved
+      hostString = buildServiceHostString(clusterIP, port, null);
     }
     return hostString;
   }

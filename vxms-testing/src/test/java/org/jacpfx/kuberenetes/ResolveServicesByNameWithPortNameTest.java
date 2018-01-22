@@ -99,8 +99,8 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
         .withClusterIP("192.168.1.1").withPorts(portmyTestService_1,portmyTestService_2).build();
 
     final ObjectMeta buildmyTestService2 = new ObjectMetaBuilder().addToLabels("test", "test2").withName("myTestService2").build();
-    final ServicePort portmyTestService2_1 = new ServicePortBuilder().withPort(9080).withProtocol("http").build();
-    final ServicePort portmyTestService2_2 = new ServicePortBuilder().withName("test").withPort(9090).withProtocol("http").build();
+    final ServicePort portmyTestService2_1 = new ServicePortBuilder().withPort(9080).withProtocol("http1").build();
+    final ServicePort portmyTestService2_2 = new ServicePortBuilder().withName("test").withPort(9090).withProtocol("http1").build();
     final ServiceSpec specmyTestService2 = new ServiceSpecBuilder().addNewPort().and()
         .withClusterIP("192.168.1.2").withPorts(portmyTestService2_1,portmyTestService2_2).build();
 
@@ -157,7 +157,7 @@ public class ResolveServicesByNameWithPortNameTest extends VertxTestBase {
                 System.out.println("Response entity '" + response + "' received.");
                 vertx.runOnContext(
                     context -> {
-                      failed.set(!response.equalsIgnoreCase("tcp://192.168.1.1:9090/http://192.168.1.2:9080"));
+                      failed.set(!response.equalsIgnoreCase("192.168.1.1:9090/192.168.1.2:9080"));
 
                       latch.countDown();
 

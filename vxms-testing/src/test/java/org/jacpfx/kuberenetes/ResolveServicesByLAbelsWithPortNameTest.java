@@ -146,7 +146,7 @@ public class ResolveServicesByLAbelsWithPortNameTest extends VertxTestBase {
                 System.out.println("Response entity '" + response + "' received.");
                 vertx.runOnContext(
                     context -> {
-                      failed.set(!response.equalsIgnoreCase("tcp://192.168.1.1:9090/http://192.168.1.2:9080"));
+                      failed.set(!response.equalsIgnoreCase("192.168.1.1:9090/192.168.1.2:9080"));
 
                       latch.countDown();
 
