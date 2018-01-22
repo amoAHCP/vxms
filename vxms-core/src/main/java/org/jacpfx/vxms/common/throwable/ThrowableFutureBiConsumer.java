@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import io.vertx.core.Future;
 /**
  * Created by Andy Moncsek on 21.01.16.
  * A bi function that throws a throwable, so vxms can handle the exceptions
+ * @param <H> the type of the input value
+ * @param <T> the type of the output value
  */
+@FunctionalInterface
 public interface ThrowableFutureBiConsumer<H, T> {
 
   /**

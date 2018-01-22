@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,11 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
+/**
+ * Represtens an execution step in a blocking supply/andThen chain
+ * @param <V> the input value of a step
+ * @param <T> the return type of a step
+ */
 public class BlockingExecutionStep<V, T> {
 
 
@@ -39,23 +44,21 @@ public class BlockingExecutionStep<V, T> {
     this.chainsupplier = null;
   }
 
+  /**
+   * Returns the blocking supplier of the first step (supply)
+   * @return the supplier
+   */
   public ThrowableSupplier<T> getChainsupplier() {
     return chainsupplier;
   }
 
+  /**
+   * returns an execution step (andThen)
+   * @return the single step
+   */
   public ThrowableFunction<T, V> getStep() {
     return step;
   }
 
-  public Handler<AsyncResult<ExecutionResult<T>>> getAsyncResultHandler(
-      Consumer<ExecutionResult> resultConsumer, Runnable errorHandling) {
-    return value -> {
-      if (!value.failed()) {
-        resultConsumer.accept(value.result());
-      } else {
-        errorHandling.run();
-      }
 
-    };
-  }
 }

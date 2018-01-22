@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,13 @@ public class CommonReflectionUtil {
     }
   }
 
+  /**
+   * Finds a speciffic method of the provided Objects by parameters and method name
+   * @param methodName the method name to look for
+   * @param parameters the parameters of the method signature
+   * @param invokeTo the Object
+   * @return the Optional of the Method to look for
+   */
   public static Optional<Method> findMethodBySignature(String methodName, Object[] parameters,
       Object invokeTo) {
 

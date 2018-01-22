@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class ExecutionResult<T> {
 
 
   /**
-   * The default constructor
+   * The  constructor
    *
    * @param result the result value
    * @param succeeded the connection status
