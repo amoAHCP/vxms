@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,16 @@ package org.jacpfx.vxms.k8s.api;
 import io.fabric8.kubernetes.client.Config;
 import io.vertx.core.Vertx;
 
+/**
+ * interface to define a custom implementation for a kubernetes client configuration
+ */
 public interface CustomClientConfig {
 
+  /**
+   * Return a custom client implementation to connect to the kubernetes Master
+   * @param vertx the vert.x instance
+   * @return the configuration object
+   */
   default Config createCustomConfiguration(Vertx vertx){
     return  null;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,9 @@ import org.jacpfx.vxms.common.util.ConfigurationUtil;
 import org.jacpfx.vxms.k8s.util.FieldUtil;
 import org.jacpfx.vxms.k8s.util.StringUtil;
 
+/**
+ * The Kubernetes service discovery implementation
+ */
 public class KubeDiscovery {
   private static final String SEPERATOR = ":";
 

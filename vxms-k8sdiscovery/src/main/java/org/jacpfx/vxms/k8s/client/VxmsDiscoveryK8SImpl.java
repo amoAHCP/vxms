@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,11 @@ import org.jacpfx.vxms.k8s.util.StringUtil;
 import org.jacpfx.vxms.k8s.util.TokenUtil;
 import org.jacpfx.vxms.spi.ServiceDiscoverySPI;
 
+/**
+ *
+ * The Kubernetes service discovery implementation for vxms
+ * @author Andy Moncsek
+ */
 public class VxmsDiscoveryK8SImpl implements ServiceDiscoverySPI {
 
   public static final String USER = "user";
@@ -87,6 +92,11 @@ public class VxmsDiscoveryK8SImpl implements ServiceDiscoverySPI {
     return custConf;
   }
 
+  /**
+   * Init discovery with provided Kubernetes Client configuration
+   * @param service the service to initialize
+   * @param kubeConfig the kubernetes client configuration
+   */
   public void initDiscovery(AbstractVerticle service, Config kubeConfig) {
     final JsonObject config = service.config();
     if (!service.getClass().isAnnotationPresent(K8SDiscovery.class))

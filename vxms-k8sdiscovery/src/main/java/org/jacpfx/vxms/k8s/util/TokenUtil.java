@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Utility class to get default account token in a container
+ * @author Andy Moncsek
+ */
 public class TokenUtil {
   private static final String IO_SERVICEACCOUNT_TOKEN = "/var/run/secrets/kubernetes.io/serviceaccount/token";
   private static Logger log = Logger.getLogger(TokenUtil.class.getName());

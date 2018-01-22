@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.k8s.util;
 
 /**
+ * Simple String util
  * Created by amo on 06.04.17.
  */
 public class StringUtil {
