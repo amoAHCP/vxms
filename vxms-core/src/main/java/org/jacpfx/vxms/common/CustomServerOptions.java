@@ -27,8 +27,8 @@ public interface CustomServerOptions {
 
   /**
    * Return the HttpServerOptions for a specific vxms service
-   * @param config
-   * @return the server options, {@see HttpServerOptions}
+   * @param config the verticle configuration object
+   * @return the serverOptions {@link io.vertx.core.http.HttpServerOptions}
    */
   default HttpServerOptions getServerOptions(JsonObject config) {
     return new HttpServerOptions();

@@ -16,9 +16,6 @@
 
 package org.jacpfx.vxms.common;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import java.util.function.Consumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 

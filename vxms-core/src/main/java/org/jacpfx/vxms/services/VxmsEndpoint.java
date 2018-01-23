@@ -234,7 +234,6 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * complete.
    *
    * @param stopFuture a future which should be called when verticle clean-up is complete.
-   * @throws Exception exception while stopping the verticle
    */
   public final void stop(Future<Void> stopFuture) {
     if (!stopFuture.isComplete()) {

@@ -26,7 +26,7 @@ public interface ServiceDiscoverySPI {
 
    /**
     * Initialize the service discovery for a provided AbstractVerticle
-    * @param service  {@see io.vertx.core.AbstractVerticle}
+    * @param service, the service {@link io.vertx.core.AbstractVerticle}
     */
    void initDiscovery(AbstractVerticle service);
 }

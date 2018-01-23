@@ -19,6 +19,8 @@ package org.jacpfx.vxms.common.util;
 import io.vertx.core.Future;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Andy Moncsek
@@ -82,9 +84,10 @@ public class ReflectionExecutionWrapper {
    * @return the requested method
    */
   public Method getMethod() {
-    return CommonReflectionUtil
+    final Optional<Method> methodBySignature = CommonReflectionUtil
         .findMethodBySignature(methodName, parameters,
-            objectToInvoke).get();
+            objectToInvoke);
+    return methodBySignature.isPresent()?methodBySignature.get():null;
   }
 
   /**
@@ -92,6 +95,7 @@ public class ReflectionExecutionWrapper {
    */
   public void invoke() {
     final Method method = getMethod();
+    Objects.requireNonNull(method, "no valid method signature was found");
     final Object[] param = getParameters();
     try {
       if (param != null && param.length > 0) {
