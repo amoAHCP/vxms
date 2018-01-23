@@ -1,6 +1,6 @@
-# vxms container demo
+# vxms container eventbus demo
 
-This applications demonstrates the usage of vxms-rest and vxms-event in an container ready application. It consists of 3 sub-projects:
+This applications demonstrates the usage of vxms-rest and vxms-event modules in a container ready application. It consists of 3 sub-projects:
 
 - vxms-frontend is serving the static html pages and is using vxms-rest to create a rest gateway. All rest requests are passed to either the vxms-read or vxms-write project by using events.
 - vxms-read is using vxms-event to provide all read methods like "getAllUsers" or "getUserById"
