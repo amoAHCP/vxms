@@ -110,8 +110,8 @@ public class ResolveServicesByLabelsConfigAndPortOKOfflineTest extends VertxTest
     conf.put("service2.1.name","version").put("service2.1.value","v2");
     conf.put("service1.0.name","name").put("service1.0.value","myTestService");
     conf.put("service2.0.name","name").put("service2.0.value","myTestService");
-    conf.put("version.v1.name.myTestService","tcp://192.168.1.1");
-    conf.put("version.v2.name.myTestService","http://192.168.1.2:9080");
+    conf.put("name.myTestService.version.v1","tcp://192.168.1.1");
+    conf.put("name.myTestService.version.v2","http://192.168.1.2:9080");
     conf.put("service1.port","mytcp");
     conf.put("mytcp","8080");
     conf.put("kube.offline",true);

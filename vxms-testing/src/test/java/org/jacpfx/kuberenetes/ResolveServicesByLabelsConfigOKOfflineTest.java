@@ -88,8 +88,8 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
     conf.put("service2.1.name","version").put("service2.1.value","v2");
     conf.put("service1.0.name","name").put("service1.0.value","myTestService");
     conf.put("service2.0.name","name").put("service2.0.value","myTestService");
-    conf.put("version.v1.name.myTestService","http://192.168.1.1:8080");
-    conf.put("version.v2.name.myTestService","http://192.168.1.2:9080");
+    conf.put("name.myTestService.version.v1","http://192.168.1.1:8080");
+    conf.put("name.myTestService.version.v2","http://192.168.1.2:9080");
     conf.put("kube.offline",true);
     DeploymentOptions options = new DeploymentOptions().setConfig(conf).setInstances(1);
 

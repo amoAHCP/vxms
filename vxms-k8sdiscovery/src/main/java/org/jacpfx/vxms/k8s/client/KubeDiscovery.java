@@ -36,7 +36,6 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +48,7 @@ import org.jacpfx.vxms.common.util.ConfigurationUtil;
 import org.jacpfx.vxms.k8s.util.FieldUtil;
 import org.jacpfx.vxms.k8s.util.StringUtil;
 
-/**
- * The Kubernetes service discovery implementation
- */
+/** The Kubernetes service discovery implementation */
 public class KubeDiscovery {
   private static final String SEPERATOR = ":";
 
@@ -140,26 +137,13 @@ public class KubeDiscovery {
             .entrySet()
             .stream()
             .map(entry -> entry.getKey().concat(".").concat(entry.getValue()))
-            .collect(
-                ArrayList<String>::new,
-                (list, e) -> list.add(0, e),
-                (list1, list2) -> list1.addAll(0, list2))
-            .stream()
-            .reduce(
-                (a, b) -> {
-                  String val = "";
-                  if (b != null) {
-                    val += a.concat(".").concat(b);
-                  } else {
-                    val += a;
-                  }
-                  return val;
-                });
+            .reduce((a, b) -> StringUtil.isNullOrEmpty(b) ? a : a.concat(".").concat(b));
 
     localAccessKey.ifPresent(
         accessKey -> {
-          String serviceValue = ConfigurationUtil.getStringConfiguration(env, accessKey, accessKey);
-          String hostString = getOfflineHostString(serviceValue, env, serviceNameField);
+          final String serviceValue =
+              ConfigurationUtil.getStringConfiguration(env, accessKey, accessKey);
+          final String hostString = getOfflineHostString(serviceValue, env, serviceNameField);
           FieldUtil.setFieldValue(bean, serviceNameField, hostString);
         });
   }
@@ -189,33 +173,24 @@ public class KubeDiscovery {
 
   private static String getHostString(
       Service serviceEntry, JsonObject env, Field serviceNameField) {
-    String hostString = "";
     final String clusterIP = serviceEntry.getSpec().getClusterIP();
     final List<ServicePort> ports = serviceEntry.getSpec().getPorts();
-    if (serviceNameField.isAnnotationPresent(PortName.class)) {
-      hostString = resolveServiceWithPortName(env, serviceNameField, clusterIP, ports);
-    } else {
-      hostString = resolveService(hostString, clusterIP, ports);
-    }
-    return hostString;
+    return serviceNameField.isAnnotationPresent(PortName.class)
+        ? resolveServiceWithPortName(env, serviceNameField, clusterIP, ports)
+        : resolveService("", clusterIP, ports);
   }
 
   private static String getOfflineHostString(
       String serviceEntry, JsonObject env, Field serviceNameField) {
-    String hostString = "";
-    if (serviceNameField.isAnnotationPresent(PortName.class)) {
-      hostString = resolveOfflineServiceWithPortName(env, serviceNameField, serviceEntry);
-    } else {
-      hostString = serviceEntry;
-    }
-    return hostString;
+    return serviceNameField.isAnnotationPresent(PortName.class)
+        ? resolveOfflineServiceWithPortName(env, serviceNameField, serviceEntry)
+        : serviceEntry;
   }
 
   private static String resolveService(
       String hostString, String clusterIP, List<ServicePort> ports) {
     if (ports.size() >= 1) {
       final ServicePort servicePort = ports.get(0);
-      final String protocol = servicePort.getProtocol();
       hostString = buildServiceHostString(clusterIP, servicePort, null);
     }
     return hostString;

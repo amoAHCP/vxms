@@ -24,6 +24,9 @@ public class StringUtil {
 
   /**
    * Determine if a string is {@code null} or {@link String#isEmpty()} returns {@code true}.
+   *
+   * @param s, the String to test
+   * @return true if String is null or empty
    */
   public static boolean isNullOrEmpty(String s) {
     return s == null || s.isEmpty();
