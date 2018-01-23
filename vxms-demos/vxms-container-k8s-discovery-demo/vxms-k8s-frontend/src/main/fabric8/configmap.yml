@@ -5,3 +5,4 @@ data:
   READ_VERSION: 1.1-SNAPSHOT
   WRITE_NAME: vxms-k8s-write
   WRITE_VERSION: 1.1-SNAPSHOT
+  NAMESPACE: myproject

@@ -45,7 +45,7 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /** Created by Andy Moncsek on 11.05.17. */
 @ServiceEndpoint(port = 8181, name = "vxms-frontend", routerConf = CustomRouterConfig.class)
-@K8SDiscovery(namespace = "myproject")
+@K8SDiscovery()
 public class VxmsGateway extends VxmsEndpoint {
 
   @ServiceName()
