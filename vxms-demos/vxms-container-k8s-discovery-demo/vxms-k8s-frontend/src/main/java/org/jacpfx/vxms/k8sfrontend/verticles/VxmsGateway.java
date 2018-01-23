@@ -253,8 +253,8 @@ public class VxmsGateway extends VxmsEndpoint {
                     .put("read_version", "1.1-SNAPSHOT")
                     .put("write_name", "vxms-k8s-write")
                     .put("write_version", "1.1-SNAPSHOT")
-                    .put("name.vxms-k8s-read.version.1.1-SNAPSHOT", "http://localhost:7070")
-                    .put("name.vxms-k8s-write.version.1.1-SNAPSHOT", "http://localhost:9090"));
+                    .put("name.vxms-k8s-read.version.1.1-SNAPSHOT", "localhost:7070")
+                    .put("name.vxms-k8s-write.version.1.1-SNAPSHOT", "localhost:9090"));
 
     Vertx.vertx().deployVerticle(VxmsGateway.class.getName(), options);
   }
