@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    expose: true
+    name: ${project.artifactId}
+    version: ${project.parent.version}
+    service-label-name: cluster01
+    service-label-value: true
+
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8181

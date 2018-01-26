@@ -1,0 +1,24 @@
+metadata:
+  annotations:
+    configmap.fabric8.io/update-on-change: hazelcastconfig
+spec:
+  replicas: 1
+  template:
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: hazelcastconfig
+            items:
+              - key: hazelcast.xml
+                path: hazelcast.xml
+      containers:
+        - name: vertx
+          ports:
+          - containerPort: 8181
+          volumeMounts:
+           - name: config
+             mountPath: /usr/src/app/config
+          env:
+          - name: JAVA_ARGS
+            value: '-cluster -cp /usr/src/app/config'

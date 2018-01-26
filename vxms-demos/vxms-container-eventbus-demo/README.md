@@ -23,4 +23,7 @@ This applications demonstrates the usage of vxms-rest and vxms-event modules in 
 
 ## run the application in kubernetes
 
-TODO
+- deploy a mongoDB (kubectl apply -f kube/)
+- deploy the frontent: cd vxms-frontend && mvn clean install fabric8:deploy
+- deploy the read: cd vxms-read && mvn clean install fabric8:deploy
+- deploy the write: cd vxms-write && mvn clean install fabric8:deploy

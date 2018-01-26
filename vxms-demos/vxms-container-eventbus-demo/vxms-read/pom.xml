@@ -36,8 +36,6 @@
         <vertx.version>3.4.2</vertx.version>
         <junit.version>4.11</junit.version>
         <vxms-verticle.version>1.1-SNAPSHOT</vxms-verticle.version>
-        <hazelcast.version>3.6.2</hazelcast.version>
-        <hazelcast-kubernetes-discovery.version>0.9.3-SNAPSHOT</hazelcast-kubernetes-discovery.version>
         <slf4j-api.version>1.7.16</slf4j-api.version>
     </properties>
 
@@ -62,6 +60,19 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>fabric8-maven-plugin</artifactId>
+                <version>3.5.33</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resource</goal>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
