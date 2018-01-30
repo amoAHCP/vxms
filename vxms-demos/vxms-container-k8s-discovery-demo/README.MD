@@ -23,6 +23,7 @@ This applications demonstrates the usage of the vxms-rest module in a Kubernetes
 
 ### additional notes
 - when using Kubernetes, basically replace "oc" with "kubectl"
+- in plain kubernetes you do not need to update any policies (step 4)
 - in vxms-k8s-frontend/src/main/fabric8/configmap.yml you can set the correct namespace name (in OpenShift the project name)
 
 ## run the application locally
@@ -34,4 +35,5 @@ This applications demonstrates the usage of the vxms-rest module in a Kubernetes
 ### additional notes
 The main method of the VxmsGateway service adds some properties to bypass the Kubernetes discovery locally and to resolve the service ip addresses, 
 without changing the annotation properties. Basically you need to create a chain of you annotations key.value pairs, with a value defining the ip 
-address locally for the service. If you build a fat-jar with maven shade you have to externalize the configuration value to properties or environmental variables. 
+address locally for the service. 
+If you build a fat-jar with maven shade you have to externalize the configuration value to properties or environmental variables. 

@@ -20,7 +20,7 @@
 
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-secure-spa-demo</artifactId>
-    <version>${vxms.version}</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>vxms-secure-spa-demo</name>

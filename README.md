@@ -16,7 +16,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
       <groupId>org.jacpfx</groupId>
       <artifactId>vxms-core</artifactId>
-      <version>1.1-M1</version>
+      <version>1.1-M2</version>
  </dependency>
 ```   
 ### vxms-rest  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-rest)
@@ -24,7 +24,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
   <dependency>
        <groupId>org.jacpfx</groupId>
        <artifactId>vxms-rest</artifactId>
-       <version>1.1-M1</version>
+       <version>1.1-M2</version>
   </dependency>
 ```   
 ### vxms-event bus  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-event)
@@ -32,9 +32,19 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-event</artifactId>
-        <version>1.1-M1</version>
+        <version>1.1-M2</version>
   </dependency>
 ```   
+
+### vxms-k8s-discovery [link](https://github.com/amoAHCP/vxms/tree/master/vxms-k8sdiscovery)
+```xml
+ <dependency>
+        <groupId>org.jacpfx</groupId>
+        <artifactId>vxms-k8sdiscovery</artifactId>
+        <version>1.1-M2</version>
+  </dependency>
+```   
+
 
 ## vxms-rest example
 
@@ -176,6 +186,51 @@ public class EventbusExample extends VxmsEndpoint {
     }
 }
 ```
+
+## vxms-k8s-discovery example
+
+```java
+@ServiceEndpoint(port=8090)
+@K8SDiscovery
+public class RESTExample extends VxmsEndpoint {
+
+     @ServiceName()
+     @WithLabels({
+       @WithLabel(name = "name", value = "${read_name}"),
+       @WithLabel(name = "version", value = "${read_version}")
+     })
+     private String read;
+   
+     @ServiceName()
+     @WithLabels({
+       @WithLabel(name = "name", value = "${write_name}"),
+       @WithLabel(name = "version", value = "${write_version}")
+     })
+     private String write;
+     
+     
+     ...
+
+
+    public static void main(String[] args) {
+       // this is only for local discovery to bypass Kubernetes in local environments
+       DeploymentOptions options =
+              new DeploymentOptions()
+                  .setInstances(1)
+                  .setConfig(
+                      new JsonObject()
+                          .put("kube.offline", true)
+                          .put("local", true)
+                          .put("read_name", "vxms-k8s-read")
+                          .put("read_version", "1.1-SNAPSHOT")
+                          .put("write_name", "vxms-k8s-write")
+                          .put("write_version", "1.1-SNAPSHOT")
+                          .put("name.vxms-k8s-read.version.1.1-SNAPSHOT", "localhost:7070")
+                          .put("name.vxms-k8s-write.version.1.1-SNAPSHOT", "localhost:9090"));
+        Vertx.vertx().deployVerticle(RESTExample.class.getName(), options);
+    }
+}
+``` 
 
 ## vxms-core example
 

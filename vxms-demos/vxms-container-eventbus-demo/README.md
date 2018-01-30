@@ -9,7 +9,7 @@ This applications demonstrates the usage of vxms-rest and vxms-event modules in 
 
 ## run the application locally
 
-- the applicastion assumes you run mongodb on the same host (default port)
+- the application assumes you run mongodb on the same host (default port)
 - you can use the the main methods in each project to start the services (multicast must work on your machine)
 - OR: you can build the whole project (mvn clean package) and run each service like this: ("java -jar target/*-fat.jar -cluster)
 - when the vxms-frontend project is running you can access the application on http://localhost:8181
@@ -24,6 +24,6 @@ This applications demonstrates the usage of vxms-rest and vxms-event modules in 
 ## run the application in kubernetes
 
 - deploy a mongoDB (kubectl apply -f kube/)
-- deploy the frontent: cd vxms-frontend && mvn clean install fabric8:deploy
+- deploy the frontend: cd vxms-frontend && mvn clean install fabric8:deploy
 - deploy the read: cd vxms-read && mvn clean install fabric8:deploy
 - deploy the write: cd vxms-write && mvn clean install fabric8:deploy
