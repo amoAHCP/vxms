@@ -35,7 +35,7 @@ import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.event.response.basic.StepExecution;
-import org.jacpfx.vxms.event.response.blocking.ResponseBlockingExecution;
+import org.jacpfx.vxms.event.response.blocking.ResponseExecution;
 
 /**
  * The Abstract response defines all common methods used by concrete String, byte and Object
@@ -179,7 +179,7 @@ public abstract class AbstractResponse<T> {
       long timeout,
       long circuitBreakerTimeout,
       long delay) {
-    ResponseBlockingExecution.createResponseBlocking(
+    ResponseExecution.createResponseBlocking(
         methodId,
         supplier,
         blockingHandler,
