@@ -6,7 +6,10 @@ Vxms is a modular micro-service framework, based 100% on Vert.x 3. While Vert.x 
 Since Vxms is extending Vert.x you can still use all capabilities of Vert.x and mix it with Vxms wherever you like/need. 
 
 The intention for Vxms was to create a framework on top of the powerful Vert.x framework, allowing developers quickly to create services with the focus on writeability, readability and resilience. 
-Basically, most of todays service endpoints need to handle requests, process data and be aware of the error handling. This is the focus of Vxms. Vert.x is very powerful, but many developers still struggling with the reactive style and the callback handling in Vert.x, This is the keypoint of Vxms, which provides an easy to use API for "everyday" endpoint development.
+Basically, most of todays service endpoints need to handle requests, process data and be aware of the error handling. This is the focus of Vxms. 
+
+Vert.x is very powerful, but many developers still struggling with the reactive style and the callback handling in Vert.x. This is the keypoint of Vxms, which provides an easy to use API for "everyday" endpoint development.
+
 Currently vxms consists of 1 base module and 3 extension modules, helping the developer to write Jax-RS like REST services, EventBus endpoints and doing service discovery in Kubernetes. The *core module* is using a Java SPIs to include the REST and EventBus modules, so you can adopt the API easily for your needs.
 Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any other Vert.x extension will work in vxms out of the box.
     

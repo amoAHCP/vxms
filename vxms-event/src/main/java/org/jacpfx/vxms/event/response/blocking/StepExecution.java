@@ -465,10 +465,8 @@ public class StepExecution {
         }
       }
     }
-    if (!errorHandling || result != null) {
-      if (!_blockingHandler.isComplete()) {
-        _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
-      }
+    if (!_blockingHandler.isComplete()) {
+      _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
     }
   }
 

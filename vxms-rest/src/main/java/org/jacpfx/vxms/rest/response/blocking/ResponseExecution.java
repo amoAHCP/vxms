@@ -49,7 +49,7 @@ public class ResponseExecution {
    * @param _methodId the method name/id to be executed
    * @param _supplier the user defined supply method to be executed (mapToStringResponse,
    *     mapToByteResponse, mapToObjectResponse)
-   * @param _resultHandler the result handler, that takes the result
+   * @param _blockingHandler the result handler, that takes the result
    * @param _errorHandler the intermediate error method, executed on each error
    * @param _onFailureRespond the method to be executed on failure
    * @param _errorMethodHandler the fallback method
@@ -65,7 +65,7 @@ public class ResponseExecution {
   public static <T> void executeRetryAndCatchAsync(
       String _methodId,
       ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _resultHandler,
+      Future<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -85,7 +85,7 @@ public class ResponseExecution {
                       executeInitialState(
                           _methodId,
                           _supplier,
-                          _resultHandler,
+                          _blockingHandler,
                           _errorHandler,
                           _onFailureRespond,
                           _errorMethodHandler,
@@ -101,7 +101,7 @@ public class ResponseExecution {
                       executeDefault(
                           _methodId,
                           _supplier,
-                          _resultHandler,
+                          _blockingHandler,
                           _errorHandler,
                           _onFailureRespond,
                           _errorMethodHandler,
@@ -114,7 +114,7 @@ public class ResponseExecution {
                           lock);
                     } else {
                       executeErrorState(
-                          _resultHandler,
+                          _blockingHandler,
                           _errorHandler,
                           _onFailureRespond,
                           _errorMethodHandler,
@@ -124,7 +124,7 @@ public class ResponseExecution {
                   }),
           _methodId,
           vxmsShared,
-          _resultHandler,
+          _blockingHandler,
           _errorHandler,
           _onFailureRespond,
           _errorMethodHandler,
@@ -132,7 +132,7 @@ public class ResponseExecution {
     } else {
       executeStateless(
           _supplier,
-          _resultHandler,
+          _blockingHandler,
           _errorHandler,
           _onFailureRespond,
           _errorMethodHandler,
@@ -456,10 +456,8 @@ public class ResponseExecution {
         }
       }
     }
-    if (!errorHandling || result != null) {
-      if (!_blockingHandler.isComplete()) {
-        _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
-      }
+    if (!_blockingHandler.isComplete()) {
+      _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
     }
   }
 
