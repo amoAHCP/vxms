@@ -210,6 +210,7 @@ public class ExecuteRSString extends AbstractResponse<String> {
   @SuppressWarnings("unchecked")
   public void execute() {
     final Vertx vertx = vxmsShared.getVertx();
+    //noinspection Duplicates
     vertx.runOnContext(
         action -> {
           ofNullable(excecuteEventBusAndReply)
