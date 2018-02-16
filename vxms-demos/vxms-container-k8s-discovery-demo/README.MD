@@ -16,7 +16,7 @@ This applications demonstrates the usage of the vxms-rest module in a Kubernetes
 2. create mongodb service: oc create -f kube/mongoservice.yml 
 3. start a mongodb:  oc create -f kube/mongodeployment.yml
 4. when using OpenShift: grant rights: oadm policy add-role-to-user view system:serviceaccount:myproject:default -n myproject
-5. mvn clean install fabric8:deploy
+5. mvn clean install 
 6. when using OpenShift: get service URL: minishift openshift service list -n myproject --> find both frontend service urls
 7. verify frontend: curl $ROUTE-URL/index.html
 8. verify frontend: curl $ROUTE-URL/index.html (supports only read operations)
