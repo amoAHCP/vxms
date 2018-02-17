@@ -1,6 +1,8 @@
 # vxms core module
-The vxms-core module contains the *abstract VxmsEndpoint* class which extends *AbstractVerticle" class (from Vert.x). 
-This class must be extended by every vxms service, to be able to use all other modules. The core module didn't add much extra functionality, but it provides some convenience function (especially configuration wise ) over a plain Verticle. 
+The vxms-core module contains the *abstract VxmsEndpoint* class which extends the *AbstractVerticle" class (from Vert.x). This is the entrypoint to use Vxms and it's modules.
+A vxms service must extend the VxmsEndpoint class (since v1.1 you can use a static method) and contain the "@ServiceEndpoint" annotation, to enable all other modules. The core module didn't add much additional APIs to Vert.x, 
+but it provides some convenience function (especially configuration wise ) over a plain Verticle. You basically get rid of all the boilerplate code, to initialize a Vert.x http endpoint and creating a *io.vertx.ext.web.Router*.
+ 
 A minimal vxms (core) endpoint looks like this:
 ```java
    @ServiceEndpoint
@@ -16,7 +18,7 @@ A minimal vxms (core) endpoint looks like this:
    } 
 ```
 
-Since Vxms 1.1 you can use a static initializer to activate Vxms on a plain Vert.x *Verticle*. Keep in mind, that the initialization must be the the last step in you configuration and that the verticle must be annotated with *@ServiceEndpoint*
+Since Vxms 1.1 you can use a static initializer, to activate Vxms on a plain Vert.x *Verticle*. Keep in mind, that the initialization must be the the last step in you configuration and that the verticle must be annotated with *@ServiceEndpoint*
 
 ```java
    @ServiceEndpoint
