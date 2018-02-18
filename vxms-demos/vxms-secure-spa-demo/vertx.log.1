@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2017-08-24T16:06:26</date>
+  <millis>1503583586307</millis>
+  <sequence>0</sequence>
+  <logger>org.jacpfx.vxms.services.VxmsEndpoint</logger>
+  <level>INFO</level>
+  <thread>15</thread>
+  <message>create http server: localhost:8443</message>
+</record>
+<record>
+  <date>2017-08-24T16:06:26</date>
+  <millis>1503583586524</millis>
+  <sequence>1</sequence>
+  <logger>io.vertx.core.impl.launcher.commands.VertxIsolatedDeployer</logger>
+  <level>SEVERE</level>
+  <thread>18</thread>
+  <message>Failed in deploying verticle</message>
+  <exception>
+    <message>java.net.BindException: Address already in use</message>
+    <frame>
+      <class>sun.nio.ch.Net</class>
+      <method>bind0</method>
+    </frame>
+    <frame>
+      <class>sun.nio.ch.Net</class>
+      <method>bind</method>
+      <line>433</line>
+    </frame>
+    <frame>
+      <class>sun.nio.ch.Net</class>
+      <method>bind</method>
+      <line>425</line>
+    </frame>
+    <frame>
+      <class>sun.nio.ch.ServerSocketChannelImpl</class>
+      <method>bind</method>
+      <line>223</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.socket.nio.NioServerSocketChannel</class>
+      <method>doBind</method>
+      <line>128</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.AbstractChannel$AbstractUnsafe</class>
+      <method>bind</method>
+      <line>554</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.DefaultChannelPipeline$HeadContext</class>
+      <method>bind</method>
+      <line>1258</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.AbstractChannelHandlerContext</class>
+      <method>invokeBind</method>
+      <line>502</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.AbstractChannelHandlerContext</class>
+      <method>bind</method>
+      <line>487</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.DefaultChannelPipeline</class>
+      <method>bind</method>
+      <line>980</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.AbstractChannel</class>
+      <method>bind</method>
+      <line>250</line>
+    </frame>
+    <frame>
+      <class>io.netty.bootstrap.AbstractBootstrap$2</class>
+      <method>run</method>
+      <line>365</line>
+    </frame>
+    <frame>
+      <class>io.netty.util.concurrent.AbstractEventExecutor</class>
+      <method>safeExecute</method>
+      <line>163</line>
+    </frame>
+    <frame>
+      <class>io.netty.util.concurrent.SingleThreadEventExecutor</class>
+      <method>runAllTasksFrom</method>
+      <line>379</line>
+    </frame>
+    <frame>
+      <class>io.netty.util.concurrent.SingleThreadEventExecutor</class>
+      <method>runAllTasks</method>
+      <line>354</line>
+    </frame>
+    <frame>
+      <class>io.netty.channel.nio.NioEventLoop</class>
+      <method>run</method>
+      <line>436</line>
+    </frame>
+    <frame>
+      <class>io.netty.util.concurrent.SingleThreadEventExecutor$5</class>
+      <method>run</method>
+      <line>858</line>
+    </frame>
+    <frame>
+      <class>java.lang.Thread</class>
+      <method>run</method>
+      <line>745</line>
+    </frame>
+  </exception>
+</record>
+</log>

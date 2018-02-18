@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2017-08-25T09:01:17</date>
+  <millis>1503644477346</millis>
+  <sequence>0</sequence>
+  <logger>org.jacpfx.vxms.services.VxmsEndpoint</logger>
+  <level>INFO</level>
+  <thread>15</thread>
+  <message>create http server: localhost:8443</message>
+</record>
+<record>
+  <date>2017-08-25T09:01:17</date>
+  <millis>1503644477532</millis>
+  <sequence>1</sequence>
+  <logger>org.jacpfx.vxms.services.VxmsEndpoint</logger>
+  <level>INFO</level>
+  <thread>15</thread>
+  <message>started on PORT: 8443 host: localhost</message>
+</record>
+</log>
