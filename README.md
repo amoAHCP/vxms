@@ -20,7 +20,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
       <groupId>org.jacpfx</groupId>
       <artifactId>vxms-core</artifactId>
-      <version>1.1-RC3</version>
+      <version>1.1</version>
  </dependency>
 ```   
 ### vxms-rest  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-rest)
@@ -28,7 +28,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
   <dependency>
        <groupId>org.jacpfx</groupId>
        <artifactId>vxms-rest</artifactId>
-       <version>1.1-RC3</version>
+       <version>1.1</version>
   </dependency>
 ```   
 ### vxms-event bus  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-event)
@@ -36,7 +36,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-event</artifactId>
-        <version>1.1-RC3</version>
+        <version>1.1</version>
   </dependency>
 ```   
 
@@ -45,7 +45,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-k8sdiscovery</artifactId>
-        <version>1.1-RC3</version>
+        <version>1.1</version>
   </dependency>
 ```   
 
