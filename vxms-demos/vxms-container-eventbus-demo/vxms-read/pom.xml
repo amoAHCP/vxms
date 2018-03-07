@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-container-eventbus-demo</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
     <artifactId>vxms-read</artifactId>
@@ -33,7 +33,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms-verticle.version>1.1-SNAPSHOT</vxms-verticle.version>
+        <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
     </properties>
 
     <dependencies>

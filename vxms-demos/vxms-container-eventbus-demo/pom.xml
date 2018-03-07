@@ -22,7 +22,7 @@
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-container-eventbus-demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <name>vxms-container-eventbus-demo</name>
     <url>http://maven.apache.org</url>
 
@@ -37,7 +37,7 @@
 
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
-        <vxms-verticle.version>1.1-SNAPSHOT</vxms-verticle.version>
+        <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
         <hazelcast-kubernetes-discovery.version>0.9.3-SNAPSHOT</hazelcast-kubernetes-discovery.version>
         <slf4j-api.version>1.7.16</slf4j-api.version>
         <hazelcast-kubernetes.version>1.1.0</hazelcast-kubernetes.version>

@@ -20,7 +20,7 @@
 
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-core-demo</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>vxms-core-demo</name>
@@ -28,7 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.1-SNAPSHOT</vxms.version>
+        <vxms.version>1.2-SNAPSHOT</vxms.version>
         <main.verticle>org.jacpfx.vxms.verticle.SimpleREST</main.verticle>
     </properties>
 

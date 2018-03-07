@@ -23,7 +23,7 @@
   <groupId>org.jacpfx</groupId>
   <artifactId>vxms-container-k8s-discovery-demo</artifactId>
   <packaging>pom</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <name>vxms-container-k8s-discovery-demo</name>
   <url>http://maven.apache.org</url>
 
@@ -35,7 +35,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <vxms-verticle.version>1.1-SNAPSHOT</vxms-verticle.version>
+    <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
     <!--Plugin versions-->
     <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
     <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>

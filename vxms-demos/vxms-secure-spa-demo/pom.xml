@@ -20,7 +20,7 @@
 
     <groupId>org.jacpfx</groupId>
     <artifactId>vxms-secure-spa-demo</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>vxms-secure-spa-demo</name>
@@ -28,7 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.1-SNAPSHOT</vxms.version>
+        <vxms.version>1.2-SNAPSHOT</vxms.version>
         <main.verticle>org.jacpfx.vxms.spa.verticle.SecureEndpoint</main.verticle>
         <vertx-spring-ext.version>2.2</vertx-spring-ext.version>
 

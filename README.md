@@ -20,7 +20,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
       <groupId>org.jacpfx</groupId>
       <artifactId>vxms-core</artifactId>
-      <version>1.1-RC3</version>
+      <version>1.1</version>
  </dependency>
 ```   
 ### vxms-rest  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-rest)
@@ -28,7 +28,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
   <dependency>
        <groupId>org.jacpfx</groupId>
        <artifactId>vxms-rest</artifactId>
-       <version>1.1-RC3</version>
+       <version>1.1</version>
   </dependency>
 ```   
 ### vxms-event bus  [link](https://github.com/amoAHCP/vxms/tree/master/vxms-event)
@@ -36,7 +36,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-event</artifactId>
-        <version>1.1-RC3</version>
+        <version>1.1</version>
   </dependency>
 ```   
 
@@ -45,7 +45,7 @@ Vxms only uses Vert.x-core and Vert.x-web extension as dependencies and any othe
  <dependency>
         <groupId>org.jacpfx</groupId>
         <artifactId>vxms-k8sdiscovery</artifactId>
-        <version>1.1-RC2</version>
+        <version>1.1</version>
   </dependency>
 ```   
 
@@ -226,11 +226,11 @@ public class RESTExample extends VxmsEndpoint {
                           .put("kube.offline", true)
                           .put("local", true)
                           .put("read_name", "vxms-k8s-read")
-                          .put("read_version", "1.1-SNAPSHOT")
+                          .put("read_version", "1.2-SNAPSHOT")
                           .put("write_name", "vxms-k8s-write")
-                          .put("write_version", "1.1-SNAPSHOT")
-                          .put("name.vxms-k8s-read.version.1.1-SNAPSHOT", "localhost:7070")
-                          .put("name.vxms-k8s-write.version.1.1-SNAPSHOT", "localhost:9090"));
+                          .put("write_version", "1.2-SNAPSHOT")
+                          .put("name.vxms-k8s-read.version.1.2-SNAPSHOT", "localhost:7070")
+                          .put("name.vxms-k8s-write.version.1.2-SNAPSHOT", "localhost:9090"));
         Vertx.vertx().deployVerticle(RESTExample.class.getName(), options);
     }
 }

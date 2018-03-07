@@ -142,11 +142,11 @@ We have two key/value pairs defining the Service to discover in Kubernetes. The 
   - by providing the configuration hint "new JsonObject().put("kube.offline", true)", no connection to the Kubernetes Master will be established
 2.) resolve the key/value pairs to point to a local address
   - new JsonObject().put("read_name", "vxms-k8s-read")
-                        .put("read_version", "1.1-SNAPSHOT")
+                        .put("read_version", "1.1")
                         .put("write_name", "vxms-k8s-write")
-                        .put("write_version", "1.1-SNAPSHOT")
-                        .put("name.vxms-k8s-read.version.1.1-SNAPSHOT", "localhost:7070")
-                        .put("name.vxms-k8s-write.version.1.1-SNAPSHOT", "localhost:9090"));
+                        .put("write_version", "1.1")
+                        .put("name.vxms-k8s-read.version.1.1", "localhost:7070")
+                        .put("name.vxms-k8s-write.version.1.1", "localhost:9090"));
   - as you can see, the first step is to resolve the placeholders (${read_name} & ${read_version}), the next step is to concat the compleate Label definition and to point to a local address (key1.value1.key2.value2 ... and so on)                      
 ## examples
 [vxms-container-k8s-discovery-demo](https://github.com/amoAHCP/vxms/tree/master/vxms-demos/vxms-container-k8s-discovery-demo)
