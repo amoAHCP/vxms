@@ -79,6 +79,9 @@ public class VxmsGateway extends VxmsEndpoint {
     handler
         .response()
         .stringResponse(this::requestAllUsers)
+        .timeout(2000)
+        .retry(1)
+        .closeCircuitBreaker(5000)
         .onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage()))
         .onFailureRespond(
             (onError, future) ->
@@ -109,6 +112,9 @@ public class VxmsGateway extends VxmsEndpoint {
     handler
         .response()
         .stringResponse(future -> requestUserById(id, future))
+        .timeout(2000)
+        .retry(1)
+        .closeCircuitBreaker(5000)
         .onError(error -> log.log(Level.WARNING, "ERROR: " + error.getMessage()))
         .onFailureRespond(
             (onError, future) ->
