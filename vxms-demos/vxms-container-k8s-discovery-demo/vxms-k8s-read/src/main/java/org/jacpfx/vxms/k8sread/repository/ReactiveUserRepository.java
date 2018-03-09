@@ -17,13 +17,13 @@
 package org.jacpfx.vxms.k8sread.repository;
 
 
-import org.jacpfx.vxms.k8sread.entity.Person;
+import org.jacpfx.vxms.k8sread.entity.Users;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 /**
  * Created by Andy Moncsek on 22.06.17.
  */
 
-public interface ReactiveUserRepository extends ReactiveCrudRepository<Person, String> {
+public interface ReactiveUserRepository extends ReactiveCrudRepository<Users, String> {
 
 }

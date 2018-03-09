@@ -25,7 +25,7 @@ import java.util.Objects;
 /**
  * @author Andy Moncsek
  */
-public class Person {
+public class Users {
 
   private String _id;
 
@@ -38,11 +38,11 @@ public class Person {
   private String address;
 
 
-  public Person() {
+  public Users() {
   }
 
 
-  public Person(String id,String username, String firstName, String lastName, String address) {
+  public Users(String id,String username, String firstName, String lastName, String address) {
     this._id = id;
     this.username = username;
     this.firstName = firstName;
@@ -98,12 +98,12 @@ public class Person {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Person person = (Person) o;
-    return Objects.equals(_id, person._id) &&
-        Objects.equals(username, person.username) &&
-        Objects.equals(firstName, person.firstName) &&
-        Objects.equals(lastName, person.lastName) &&
-        Objects.equals(address, person.address);
+    Users users = (Users) o;
+    return Objects.equals(_id, users._id) &&
+        Objects.equals(username, users.username) &&
+        Objects.equals(firstName, users.firstName) &&
+        Objects.equals(lastName, users.lastName) &&
+        Objects.equals(address, users.address);
   }
 
   @Override
@@ -114,10 +114,10 @@ public class Person {
 
   @Override
   public String toString() {
-    return "Person{" +
+    return "Users{" +
         "id='" + _id + '\'' +
         ", username='" + username + '\'' +
-        ", firstname='" + firstName + '\'' +
+        ", firstName='" + firstName + '\'' +
         ", lastname='" + lastName + '\'' +
         ", address='" + address + '\'' +
         '}';

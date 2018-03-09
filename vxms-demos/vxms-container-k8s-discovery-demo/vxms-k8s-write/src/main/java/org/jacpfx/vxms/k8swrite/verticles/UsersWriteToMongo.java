@@ -16,13 +16,10 @@
 
 package org.jacpfx.vxms.k8swrite.verticles;
 
-import org.jacpfx.vxms.k8swrite.util.DefaultResponses;
-import org.jacpfx.vxms.k8swrite.util.InitMongoDB;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClient;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.DELETE;
@@ -30,23 +27,22 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.k8swrite.service.UserService;
+import org.jacpfx.vxms.k8swrite.util.DefaultResponses;
+import org.jacpfx.vxms.k8swrite.util.InitMongoDB;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
-
-/**
- * Created by Andy Moncsek on 17.02.16.
- */
+/** Created by Andy Moncsek on 17.02.16. */
 @ServiceEndpoint(name = "write-verticle", contextRoot = "/write", port = 9090)
 public class UsersWriteToMongo extends VxmsEndpoint {
 
   Logger log = Logger.getLogger(UsersWriteToMongo.class.getName());
-  private MongoClient mongo;
-
+  private UserService service;
 
   @Override
   public void postConstruct(final Future<Void> startFuture) {
-    mongo = InitMongoDB.initMongoData(vertx, config());
+    service = new UserService(InitMongoDB.initMongoData(vertx, config()));
     startFuture.complete();
   }
 
@@ -55,51 +51,23 @@ public class UsersWriteToMongo extends VxmsEndpoint {
   public void inertUser(RestHandler handler) {
     final JsonObject body = handler.request().body().toJsonObject();
     if (body == null || body.isEmpty()) {
-      handler.response()
+      handler
+          .response()
           .stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse("no content").encode()))
           .execute();
       return;
     }
-    handler.
-        response().
-        stringResponse(future -> handleInsert(body, future)).
-        retry(2).
-        timeout(1000).
-        onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage())).
-        onFailureRespond((onError, future) ->
-            future.complete(DefaultResponses.
-                defaultErrorResponse(onError.getMessage()).
-                encode())
-        ).
-        execute();
-  }
-
-  private void handleInsert(final JsonObject newUser, Future<String> future) {
-    mongo.findOne("users", new JsonObject().put("username", newUser.getString("username")), null,
-        lookup -> {
-          // error handling
-          if (lookup.failed()) {
-            future.fail(lookup.cause());
-            return;
-          }
-
-          JsonObject user = lookup.result();
-          if (user != null) {
-            // already exists
-            future.fail("user already exists");
-          } else {
-            mongo.insert("users", newUser, insert -> {
-              // error handling
-              if (insert.failed()) {
-                future.fail("lookup failed");
-                return;
-              }
-              // add the generated id to the user object
-              newUser.put("_id", insert.result());
-              future.complete(newUser.encode());
-            });
-          }
-        });
+    handler
+        .response()
+        .stringResponse(future -> service.handleInsert(body, future))
+        .retry(2)
+        .timeout(1000)
+        .onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage()))
+        .onFailureRespond(
+            (onError, future) ->
+                future.complete(
+                    DefaultResponses.defaultErrorResponse(onError.getMessage()).encode()))
+        .execute();
   }
 
   @Path("/api/users")
@@ -107,54 +75,23 @@ public class UsersWriteToMongo extends VxmsEndpoint {
   public void updateUser(RestHandler handler) {
     final JsonObject user = handler.request().body().toJsonObject();
     if (user == null || user.isEmpty()) {
-      handler.response()
-          .stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse().encode())).execute();
+      handler
+          .response()
+          .stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse().encode()))
+          .execute();
       return;
     }
-    handler.
-        response().
-        stringResponse(future -> handleUpdate(user, future)).
-        retry(2).
-        timeout(1000).
-        onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage())).
-        onFailureRespond((onError, future) ->
-            future.complete(DefaultResponses.
-                defaultErrorResponse(onError.getMessage()).
-                encode())
-        ).
-        execute();
-  }
-
-  private void handleUpdate(final JsonObject user, Future<String> future) {
-    final String id = user.getString("id");
-    mongo.findOne("users", new JsonObject().put("_id", id), null, lookup -> {
-      // error handling
-      if (lookup.failed()) {
-        future.fail(lookup.cause());
-        return;
-      }
-
-      JsonObject existingUser = lookup.result();
-      if (existingUser == null) {
-        // does not exist
-        future.fail("user does not exists");
-      } else {
-        // update the user properties
-        existingUser.put("username", user.getString("username"));
-        existingUser.put("firstName", user.getString("firstName"));
-        existingUser.put("lastName", user.getString("lastName"));
-        existingUser.put("address", user.getString("address"));
-
-        mongo.replace("users", new JsonObject().put("_id", id), existingUser, replace -> {
-          // error handling
-          if (replace.failed()) {
-            future.fail(lookup.cause());
-            return;
-          }
-          future.complete(user.encode());
-        });
-      }
-    });
+    handler
+        .response()
+        .stringResponse(future -> service.handleUpdate(user, future))
+        .retry(2)
+        .timeout(1000)
+        .onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage()))
+        .onFailureRespond(
+            (onError, future) ->
+                future.complete(
+                    DefaultResponses.defaultErrorResponse(onError.getMessage()).encode()))
+        .execute();
   }
 
   @Path("/api/users/:id")
@@ -162,53 +99,30 @@ public class UsersWriteToMongo extends VxmsEndpoint {
   public void deleteUser(RestHandler handler) {
     final String id = handler.request().param("id");
     if (id == null || id.isEmpty()) {
-      handler.response()
-          .stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse().encode())).execute();
+      handler
+          .response()
+          .stringResponse(f -> f.fail(DefaultResponses.defaultErrorResponse().encode()))
+          .execute();
       return;
     }
-    handler.
-        response().
-        stringResponse(future -> handleDelete(id, future)).
-        retry(2).
-        timeout(1000).
-        onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage())).
-        onFailureRespond((onError, future) ->
-            future.complete(DefaultResponses.
-                defaultErrorResponse(onError.getMessage()).
-                encode())
-        ).
-        execute();
-  }
-
-  private void handleDelete(String id, Future<String> future) {
-    mongo.findOne("users", new JsonObject().put("_id", id), null, lookup -> {
-      // error handling
-      if (lookup.failed()) {
-        future.fail(lookup.cause());
-        return;
-      }
-      JsonObject user = lookup.result();
-      if (user == null) {
-        // does not exist
-        future.fail("user does not exists");
-      } else {
-        mongo.remove("users", new JsonObject().put("_id", id), remove -> {
-          // error handling
-          if (remove.failed()) {
-            future.fail("lookup failed");
-            return;
-          }
-          future.complete("end");
-        });
-      }
-    });
+    handler
+        .response()
+        .stringResponse(future -> service.handleDelete(id, future))
+        .retry(2)
+        .timeout(1000)
+        .onError(t -> log.log(Level.WARNING, "ERROR: " + t.getMessage()))
+        .onFailureRespond(
+            (onError, future) ->
+                future.complete(
+                    DefaultResponses.defaultErrorResponse(onError.getMessage()).encode()))
+        .execute();
   }
 
   // Convenience method so you can run it in your IDE
   public static void main(String[] args) {
 
-    DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(
-        new JsonObject().put("local", true));
+    DeploymentOptions options =
+        new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("local", true));
 
     Vertx.vertx().deployVerticle(UsersWriteToMongo.class.getName(), options);
   }

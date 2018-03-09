@@ -31,7 +31,14 @@
 
   <name>vxms-k8s-read</name>
   <url>http://maven.apache.org</url>
-
+  <properties>
+    <vertx.health.path>/read/health</vertx.health.path>
+    <vertx.health.port>7070</vertx.health.port>
+    <vertx-spring-ext.version>2.2</vertx-spring-ext.version>
+    <reactor-core.version>3.1.5.RELEASE</reactor-core.version>
+    <mongodb-driver-reactivestreams.version>1.7.1</mongodb-driver-reactivestreams.version>
+    <spring-data-mongodb.version>2.0.5.RELEASE</spring-data-mongodb.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -42,32 +49,22 @@
     <dependency>
       <groupId>org.jacpfx.vertx.spring</groupId>
       <artifactId>vertx-spring-ext</artifactId>
-      <version>2.2</version>
+      <version>${vertx-spring-ext.version}</version>
     </dependency>
-   <!-- <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-      <version>2.0.0.RELEASE</version>
-    </dependency>-->
-    <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-reactivestreams -->
-    <!-- https://mvnrepository.com/artifact/io.projectreactor/reactor-core -->
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
-      <version>3.1.5.RELEASE</version>
+      <version>${reactor-core.version}</version>
     </dependency>
-
-
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-reactivestreams</artifactId>
-      <version>1.7.1</version>
+      <version>${mongodb-driver-reactivestreams.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-mongodb</artifactId>
-      <version>2.0.5.RELEASE</version>
+      <version>${spring-data-mongodb.version}</version>
     </dependency>
   </dependencies>
 

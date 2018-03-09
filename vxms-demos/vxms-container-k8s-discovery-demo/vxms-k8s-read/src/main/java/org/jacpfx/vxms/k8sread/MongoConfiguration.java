@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
 import org.springframework.data.mongodb.core.mapping.event.LoggingEventListener;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
@@ -36,7 +37,9 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
  */
 
 @Configuration
-@PropertySource("classpath:application.properties")
+@PropertySources({
+    @PropertySource("classpath:application.properties"),
+    @PropertySource("classpath:application-${MYENV:TEST}.properties")})
 @EnableReactiveMongoRepositories
 public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
 
