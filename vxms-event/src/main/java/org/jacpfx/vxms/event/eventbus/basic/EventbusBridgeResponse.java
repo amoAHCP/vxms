@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,14 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByteResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusByteResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusObjectResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusStringResponse;
 import org.jacpfx.vxms.event.util.EventbusByteExecutionUtil;
 import org.jacpfx.vxms.event.util.EventbusObjectExecutionUtil;
 import org.jacpfx.vxms.event.util.EventbusStringExecutionUtil;
 
-/**
- * Created by Andy Moncsek on 14.03.16.
- * Represents the start of a non- blocking execution chain
- */
+/** Created by Andy Moncsek on 14.03.16. Represents the start of a non- blocking execution chain */
 public class EventbusBridgeResponse {
 
   private final String methodId;
@@ -46,21 +43,21 @@ public class EventbusBridgeResponse {
   private final Object message;
   private final DeliveryOptions requestOptions;
 
-
   /**
    * Pass all parameters to execute the chain
    *
    * @param methodId the method identifier
    * @param requestmessage the message to responde
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the last failure
    * @param errorMethodHandler the error-method handler
    * @param targetId the event-bus message target-targetId
    * @param message the event-bus message
    * @param requestOptions the event-bus delivery serverOptions
    */
-  public EventbusBridgeResponse(String methodId,
+  public EventbusBridgeResponse(
+      String methodId,
       Message<Object> requestmessage,
       VxmsShared vxmsShared,
       Throwable failure,
@@ -82,12 +79,13 @@ public class EventbusBridgeResponse {
    * Map Response from event-bus call to REST response
    *
    * @param stringFunction pass io.vertx.core.AsyncResult and future to complete with a String
-   * @return the response chain {@link ExecuteEventbusBasicStringResponse}
+   * @return the response chain {@link ExecuteEventbusStringResponse}
    */
-  public ExecuteEventbusBasicStringResponse mapToStringResponse(
+  public ExecuteEventbusStringResponse mapToStringResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, String> stringFunction) {
 
-    return EventbusStringExecutionUtil.mapToStringResponse(methodId,
+    return EventbusStringExecutionUtil.mapToStringResponse(
+        methodId,
         targetId,
         message,
         stringFunction,
@@ -101,20 +99,21 @@ public class EventbusBridgeResponse {
         null,
         null,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
 
   /**
    * Map Response from event-bus call to REST response
    *
    * @param byteFunction pass io.vertx.core.AsyncResult and future to complete with a byte[] array
-   * @return the response chain {@link ExecuteEventbusBasicByteResponse}
+   * @return the response chain {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse mapToByteResponse(
+  public ExecuteEventbusByteResponse mapToByteResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, byte[]> byteFunction) {
 
-    return EventbusByteExecutionUtil.mapToByteResponse(methodId,
+    return EventbusByteExecutionUtil.mapToByteResponse(
+        methodId,
         targetId,
         message,
         byteFunction,
@@ -128,8 +127,8 @@ public class EventbusBridgeResponse {
         null,
         null,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
 
   /**
@@ -137,13 +136,14 @@ public class EventbusBridgeResponse {
    *
    * @param objectFunction pass io.vertx.core.AsyncResult and future to complete with a Object
    * @param encoder the Object encoder
-   * @return the response chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the response chain {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse mapToObjectResponse(
+  public ExecuteEventbusObjectResponse mapToObjectResponse(
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> objectFunction,
       Encoder encoder) {
 
-    return EventbusObjectExecutionUtil.mapToObjectResponse(methodId,
+    return EventbusObjectExecutionUtil.mapToObjectResponse(
+        methodId,
         targetId,
         message,
         objectFunction,
@@ -158,9 +158,7 @@ public class EventbusBridgeResponse {
         null,
         null,
         0,
-        0l,
-        0l);
+        0L,
+        0L);
   }
-
-
 }

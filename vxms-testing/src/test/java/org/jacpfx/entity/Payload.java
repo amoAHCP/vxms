@@ -18,9 +18,7 @@ package org.jacpfx.entity;
 
 import java.io.Serializable;
 
-/**
- * Created by Andy Moncsek on 25.11.15.
- */
+/** Created by Andy Moncsek on 25.11.15. */
 public class Payload<T extends Serializable> implements Serializable {
 
   private final T value;
@@ -41,7 +39,6 @@ public class Payload<T extends Serializable> implements Serializable {
     Payload<?> payload = (Payload<?>) o;
 
     return !(value != null ? !value.equals(payload.value) : payload.value != null);
-
   }
 
   public T getValue() {

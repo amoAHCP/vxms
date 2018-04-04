@@ -830,7 +830,7 @@ public class RESTServiceBlockingChainByteTest extends VertxTestBase {
           .mapToByteResponse(
               (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
-                return  Serializer.serialize(pp);
+                return Serializer.serialize(pp);
               })
           .onFailureRespond(
               (t) -> {
@@ -867,7 +867,7 @@ public class RESTServiceBlockingChainByteTest extends VertxTestBase {
                 Payload<String> pp = new Payload<>("error " + t.getMessage());
 
                 System.out.println(t.getMessage());
-                return  Serializer.serialize(pp);
+                return Serializer.serialize(pp);
               })
           .execute();
     }
@@ -994,12 +994,12 @@ public class RESTServiceBlockingChainByteTest extends VertxTestBase {
                 if (val.equals("crash")) {
                   throw new NullPointerException("test-123");
                 }
-                return  val;
+                return val;
               })
           .mapToByteResponse(
               (v) -> {
                 Payload<String> pp = new Payload<>(v);
-                return  Serializer.serialize(pp);
+                return Serializer.serialize(pp);
               })
           .onError(e -> System.out.println(e.getMessage()))
           .retry(3)

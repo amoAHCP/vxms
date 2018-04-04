@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.jacpfx.vxms.event.response;
 import io.vertx.core.eventbus.Message;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * his class allows easy access to event-bus message to get the body and the reply address
+ * Created by Andy Moncsek on 12.01.16. his class allows easy access to event-bus message to get the
+ * body and the reply address
  */
 public class EventbusRequest {
 
@@ -34,7 +34,6 @@ public class EventbusRequest {
   public EventbusRequest(Message<Object> message) {
     this.message = message;
   }
-
 
   /**
    * Returns the body of the message
@@ -54,6 +53,4 @@ public class EventbusRequest {
   public String replyAddress() {
     return message.replyAddress();
   }
-
-
 }

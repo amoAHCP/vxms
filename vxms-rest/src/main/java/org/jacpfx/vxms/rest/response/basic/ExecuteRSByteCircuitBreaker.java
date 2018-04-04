@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,31 +33,32 @@ import org.jacpfx.vxms.rest.interfaces.basic.ExecuteEventbusByteCall;
  */
 public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
 
-
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param byteConsumer the consumer that takes a Future to complete, producing the byte response
+   * @param chain the execution chain
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSByteCircuitBreaker(String methodId,
+  public ExecuteRSByteCircuitBreaker(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -74,7 +75,8 @@ public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
       int retryCount,
       long timeout,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -93,22 +95,23 @@ public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
         circuitBreakerTimeout);
   }
 
-
   /**
    * Define a timeout to release the stateful circuit breaker. Depending on your configuration the
    * CircuitBreaker locks either cluster wide, jvm wide or only for the instance
    *
    * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
-   * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
-   * faster)
+   *     "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
+   *     faster)
    * @return the response chain {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteRSByteResponse(methodId,
+    return new ExecuteRSByteResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
-        context, headers,
+        context,
+        headers,
         byteConsumer,
         chain,
         excecuteEventBusAndReply,
@@ -121,6 +124,4 @@ public class ExecuteRSByteCircuitBreaker extends ExecuteRSByteResponse {
         timeout,
         circuitBreakerTimeout);
   }
-
-
 }

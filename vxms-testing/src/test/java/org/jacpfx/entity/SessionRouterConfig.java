@@ -24,11 +24,8 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 
-/**
- * Created by Andy Moncsek on 18.02.16.
- */
+/** Created by Andy Moncsek on 18.02.16. */
 public class SessionRouterConfig implements RouterConfiguration {
-
 
   public void sessionHandler(Vertx vertx, Router router) {
     // Create a clustered session store using defaults
@@ -38,7 +35,6 @@ public class SessionRouterConfig implements RouterConfiguration {
 
     // Make sure all requests are routed through the session handler too
     router.route().handler(sessionHandler);
-
   }
 
   public BodyHandler bodyHandler() {

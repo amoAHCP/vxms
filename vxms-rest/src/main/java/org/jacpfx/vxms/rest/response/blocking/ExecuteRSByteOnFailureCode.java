@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusByteCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Defines the fluent API to set the http error code in case of the onFailure method is executed
+ * Created by Andy Moncsek on 12.01.16. Defines the fluent API to set the http error code in case of
+ * the onFailure method is executed
  */
 public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
 
@@ -39,18 +39,19 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param byteSupplier the supplier, producing the byte response
+   * @param chain the execution chain
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
-   * the fluent API
+   *     the fluent API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
@@ -58,7 +59,8 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSByteOnFailureCode(String methodId,
+  public ExecuteRSByteOnFailureCode(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -67,7 +69,8 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
       ThrowableSupplier<byte[]> byteSupplier,
       List<BlockingExecutionStep> chain,
       ExecuteEventbusByteCall excecuteBlockingEventBusAndReply,
-      Encoder encoder, Consumer<Throwable> errorHandler,
+      Encoder encoder,
+      Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, byte[]> onFailureRespond,
       int httpStatusCode,
       int httpErrorCode,
@@ -75,7 +78,8 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -102,7 +106,8 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
    * @return the response chain {@link ExecuteRSByte}
    */
   public ExecuteRSByte httpErrorCode(HttpResponseStatus httpErrorCode) {
-    return new ExecuteRSByte(methodId,
+    return new ExecuteRSByte(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -110,7 +115,9 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
         headers,
         byteSupplier,
         chain,
-        excecuteAsyncEventBusAndReply, encoder, errorHandler,
+        excecuteAsyncEventBusAndReply,
+        encoder,
+        errorHandler,
         onFailureRespond,
         httpStatusCode,
         httpErrorCode.code(),
@@ -119,6 +126,4 @@ public class ExecuteRSByteOnFailureCode extends ExecuteRSByte {
         delay,
         circuitBreakerTimeout);
   }
-
-
 }

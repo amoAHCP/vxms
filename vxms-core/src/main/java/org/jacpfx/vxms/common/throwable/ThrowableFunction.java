@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package org.jacpfx.vxms.common.throwable;
 /**
  * Created by Andy Moncsek on 12.04.16.
  * A function that throws a throwable, so vxms can handle the exceptions
+ * @param <T> the input type
+ * @param <R> the return type
  */
+@FunctionalInterface
 public interface ThrowableFunction<T, R> {
 
   /**

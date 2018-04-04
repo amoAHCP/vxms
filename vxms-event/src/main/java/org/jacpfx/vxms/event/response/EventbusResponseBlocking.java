@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,21 @@ package org.jacpfx.vxms.event.response;
 
 import io.vertx.core.eventbus.Message;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
+import org.jacpfx.vxms.event.response.blocking.ExecuteEventChainResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusByteResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusObjectResponse;
 import org.jacpfx.vxms.event.response.blocking.ExecuteEventbusStringResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
+ * the output of your task.
  */
 public class EventbusResponseBlocking {
 
@@ -44,18 +48,37 @@ public class EventbusResponseBlocking {
    * @param methodId the method identifier
    * @param message the event-bus message to respond to
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    */
-  public EventbusResponseBlocking(String methodId, Message<Object> message, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public EventbusResponseBlocking(
+      String methodId,
+      Message<Object> message,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
     this.errorMethodHandler = errorMethodHandler;
     this.message = message;
+  }
 
+
+  /**
+   * starts a supply chain to create a response
+   *
+   * @param chainconsumer the initial supplier
+   * @param <T> the type of the return value
+   * @return {@link ExecuteEventChainResponse}
+   */
+  @SuppressWarnings("unchecked")
+  public <T> ExecuteEventChainResponse<T> supply(ThrowableSupplier<T> chainconsumer) {
+    final List<BlockingExecutionStep> chain = new ArrayList<>();
+    chain.add(new BlockingExecutionStep(chainconsumer));
+    return new ExecuteEventChainResponse<>(
+        methodId, vxmsShared, failure, errorMethodHandler, message, chain);
   }
 
 
@@ -66,8 +89,14 @@ public class EventbusResponseBlocking {
    * @return {@link ExecuteEventbusByteResponse}
    */
   public ExecuteEventbusByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-    return new ExecuteEventbusByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, byteSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    return new ExecuteEventbusByteResponse(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        null,
+        byteSupplier);
   }
 
   /**
@@ -77,8 +106,14 @@ public class EventbusResponseBlocking {
    * @return {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-    return new ExecuteEventbusStringResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, stringSupplier, null, null, null, null, 0, 0l, 0l, 0l);
+    return new ExecuteEventbusStringResponse(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        null,
+        stringSupplier);
   }
 
   /**
@@ -90,7 +125,14 @@ public class EventbusResponseBlocking {
    */
   public ExecuteEventbusObjectResponse objectResponse(
       ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
-    return new ExecuteEventbusObjectResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, objectSupplier, null, encoder, null, null, null, 0, 0, 0l, 0l);
+    return new ExecuteEventbusObjectResponse(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        null,
+        objectSupplier,
+        encoder);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@ import io.vertx.core.json.JsonObject;
  */
 public interface CustomServerOptions {
 
+  /**
+   * Return the HttpServerOptions for a specific vxms service
+   * @param config the verticle configuration object
+   * @return the serverOptions {@link io.vertx.core.http.HttpServerOptions}
+   */
   default HttpServerOptions getServerOptions(JsonObject config) {
     return new HttpServerOptions();
   }

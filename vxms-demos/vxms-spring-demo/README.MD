@@ -1,2 +1,3 @@
 # A  vxms REST + Spring endpoint 
-This example demonstrates the usage of the spring-vertx-ext together with vxms. Start the Endpoint either by using the main method or build the project und start the jar file. 
+This example demonstrates the usage of the spring-vertx-ext together with vxms. 
+Start the Endpoint either by using the main method or build the project und start the jar file. 

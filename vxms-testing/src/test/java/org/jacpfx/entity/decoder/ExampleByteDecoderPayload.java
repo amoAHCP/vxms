@@ -22,9 +22,7 @@ import org.jacpfx.entity.Payload;
 import org.jacpfx.vxms.common.decoder.Decoder;
 import org.jacpfx.vxms.common.util.Serializer;
 
-/**
- * Created by Andy Moncsek on 18.11.15.
- */
+/** Created by Andy Moncsek on 18.11.15. */
 public class ExampleByteDecoderPayload implements Decoder.ByteDecoder<Payload<String>> {
 
   @Override

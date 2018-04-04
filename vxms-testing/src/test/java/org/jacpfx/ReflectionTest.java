@@ -24,51 +24,64 @@ import org.jacpfx.vxms.common.util.CommonReflectionUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class ReflectionTest {
 
   @Test
   public void findByNameTest() {
-    Assert.assertTrue(CommonReflectionUtil.findMethodBySignature("postConstruct", new Object[]{},this).isPresent());
+    Assert.assertTrue(
+        CommonReflectionUtil.findMethodBySignature("postConstruct", new Object[] {}, this)
+            .isPresent());
   }
 
   @Test
   public void findByNameTestParam1() {
-    Assert.assertTrue(CommonReflectionUtil.findMethodBySignature("postConstruct", new Object[]{new String("hello"),new Integer(1)},this).isPresent());
+    Assert.assertTrue(
+        CommonReflectionUtil.findMethodBySignature(
+                "postConstruct", new Object[] {new String("hello"), new Integer(1)}, this)
+            .isPresent());
   }
 
   @Test
   public void findByNameTestParam2() {
-    Assert.assertTrue(CommonReflectionUtil.findMethodBySignature("postConstruct", new Object[]{new Integer(1),new String("hello")},this).isPresent());
+    Assert.assertTrue(
+        CommonReflectionUtil.findMethodBySignature(
+                "postConstruct", new Object[] {new Integer(1), new String("hello")}, this)
+            .isPresent());
   }
 
   @Test
   public void notfindByNameTest() {
-    Assert.assertFalse(CommonReflectionUtil.findMethodBySignature("postConstruct1", new Object[]{new Integer(1),new String("hello")},this).isPresent());
+    Assert.assertFalse(
+        CommonReflectionUtil.findMethodBySignature(
+                "postConstruct1", new Object[] {new Integer(1), new String("hello")}, this)
+            .isPresent());
   }
+
   @Test
   public void executeFirst() {
-    final Stream<Optional<Method>> methodsBySignature = Stream.of(CommonReflectionUtil
-        .findMethodBySignature("postConstruct", new Object[]{new Integer(1), new String("hello")},
-            this), CommonReflectionUtil
-        .findMethodBySignature("postConstruct", new Object[]{}, this));
-    final Optional<Optional<Method>> first = methodsBySignature.filter(m -> m.isPresent())
-        .findFirst();
-    first.ifPresent( methodOpt -> {
-      methodOpt.ifPresent(method -> {
-        try {
-          method.invoke(this,1,"hello");
-          Assert.assertTrue(true);
-        } catch (IllegalAccessException e) {
-          e.printStackTrace();
-          Assert.assertTrue(false);
-        } catch (InvocationTargetException e) {
-          e.printStackTrace();
-          Assert.assertTrue(false);
-        }
-      });
-    });
-
+    final Stream<Optional<Method>> methodsBySignature =
+        Stream.of(
+            CommonReflectionUtil.findMethodBySignature(
+                "postConstruct", new Object[] {new Integer(1), new String("hello")}, this),
+            CommonReflectionUtil.findMethodBySignature("postConstruct", new Object[] {}, this));
+    final Optional<Optional<Method>> first =
+        methodsBySignature.filter(m -> m.isPresent()).findFirst();
+    first.ifPresent(
+        methodOpt -> {
+          methodOpt.ifPresent(
+              method -> {
+                try {
+                  method.invoke(this, 1, "hello");
+                  Assert.assertTrue(true);
+                } catch (IllegalAccessException e) {
+                  e.printStackTrace();
+                  Assert.assertTrue(false);
+                } catch (InvocationTargetException e) {
+                  e.printStackTrace();
+                  Assert.assertTrue(false);
+                }
+              });
+        });
   }
 
   public void postConstruct() {
@@ -76,10 +89,10 @@ public class ReflectionTest {
   }
 
   public void postConstruct(String s, Integer i) {
-    System.out.println("postConstruct(String s, Integer i)"+" "+s +" "+ i);
+    System.out.println("postConstruct(String s, Integer i)" + " " + s + " " + i);
   }
 
-  public void postConstruct(Integer i,String s) {
-    System.out.println("postConstruct(Integer i,String s)"+" "+i+" "+s);
+  public void postConstruct(Integer i, String s) {
+    System.out.println("postConstruct(Integer i,String s)" + " " + i + " " + s);
   }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright [2017] [Andy Moncsek]
+  ~ Copyright [2018] [Andy Moncsek]
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.org.jacpfx</groupId>
+    <groupId>org.jacpfx</groupId>
     <artifactId>vxms-container-eventbus-demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <name>vxms-container-eventbus-demo</name>
     <url>http://maven.apache.org</url>
 
@@ -35,24 +35,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-
-        <!--Vertx module name-->
-        <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
-
-        <!--Dependency versions-->
-        <vertx.version>3.4.2</vertx.version>
-
-        <junit.version>4.11</junit.version>
-
-        <!--Plugin versions-->
-        <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
         <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms-verticle.version>1.1-SNAPSHOT</vxms-verticle.version>
-        <hazelcast.version>3.6.2</hazelcast.version>
+        <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
         <hazelcast-kubernetes-discovery.version>0.9.3-SNAPSHOT</hazelcast-kubernetes-discovery.version>
         <slf4j-api.version>1.7.16</slf4j-api.version>
+        <hazelcast-kubernetes.version>1.1.0</hazelcast-kubernetes.version>
+        <vertx-mongo-client.version>3.5.0</vertx-mongo-client.version>
     </properties>
     <licenses>
         <license>
@@ -76,9 +65,9 @@
     </scm>
 
     <modules>
-        <module>vxms-frontend</module>
         <module>vxms-read</module>
         <module>vxms-write</module>
+        <module>vxms-frontend</module>
     </modules>
 
     <repositories>
@@ -90,67 +79,26 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.org.jacpfx</groupId>
-            <artifactId>vxms-core</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-kubernetes</artifactId>
+            <version>${hazelcast-kubernetes.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-mongo-client</artifactId>
-            <version>${vertx.version}</version>
+            <version>${vertx-mongo-client.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-
-        <!--Vertx provided dependencies-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-hazelcast</artifactId>
-            <version>${vertx.version}</version>
+            <version>3.5.0</version>
             <scope>compile</scope>
-        </dependency>
-        <!-- If you're using the Vert.x Java API you need this dependency -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-dropwizard-metrics</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <!-- We use services -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-factory</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-unit</artifactId>
-            <version>${vertx.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -170,34 +118,6 @@
             </plugin>
 
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.7.2</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.3.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.4</version>
-                    <configuration>
-                        <skip>true</skip>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+
     </build>
 </project>

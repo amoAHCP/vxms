@@ -1,0 +1,8 @@
+metadata:
+  name: frontendconfig
+data:
+  READ_NAME: vxms-k8s-read
+  READ_VERSION: 1.2-SNAPSHOT
+  WRITE_NAME: vxms-k8s-write
+  WRITE_VERSION: 1.2-SNAPSHOT
+  NAMESPACE: myproject

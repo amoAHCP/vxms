@@ -1,0 +1,6 @@
+metadata:
+  name: springconfig
+data:
+  application.properties: |
+    mongodb://mongo:27017
+    mongo.database=demo

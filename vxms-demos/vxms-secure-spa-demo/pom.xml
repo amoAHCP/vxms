@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2017] [Andy Moncsek]
+  ~ Copyright [2018] [Andy Moncsek]
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.org.jacpfx</groupId>
+    <groupId>org.jacpfx</groupId>
     <artifactId>vxms-secure-spa-demo</artifactId>
-    <version>${vxms.version}</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>vxms-secure-spa-demo</name>
@@ -28,9 +28,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.1-SNAPSHOT</vxms.version>
-        <main.verticle>org.org.jacpfx.vxms.spa.verticle.SecureEndpoint</main.verticle>
-        <vertx-spring-ext.version>2.1</vertx-spring-ext.version>
+        <vxms.version>1.2-SNAPSHOT</vxms.version>
+        <main.verticle>org.jacpfx.vxms.spa.verticle.SecureEndpoint</main.verticle>
+        <vertx-spring-ext.version>2.2</vertx-spring-ext.version>
 
     </properties>
 
@@ -49,12 +49,12 @@
             <version>1.7.14</version>
         </dependency>
         <dependency>
-            <groupId>org.org.jacpfx</groupId>
+            <groupId>org.jacpfx</groupId>
             <artifactId>vxms-rest</artifactId>
             <version>${vxms.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.org.jacpfx</groupId>
+            <groupId>org.jacpfx</groupId>
             <artifactId>vxms-core</artifactId>
             <version>${vxms.version}</version>
         </dependency>
@@ -65,7 +65,7 @@
             <version>3.4.2</version>
         </dependency>
         <dependency>
-            <groupId>org.org.jacpfx.vertx.spring</groupId>
+            <groupId>org.jacpfx.vertx.spring</groupId>
             <artifactId>vertx-spring-ext</artifactId>
             <version>${vertx-spring-ext.version}</version>
         </dependency>

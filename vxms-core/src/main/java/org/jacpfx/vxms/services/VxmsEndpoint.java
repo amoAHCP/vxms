@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.services;
 
 import static org.jacpfx.vxms.common.util.ConfigurationUtil.getRouterConfiguration;
+import static org.jacpfx.vxms.common.util.ServiceUtil.getDiscoverySPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getEventBusSPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getRESTSPI;
 import static org.jacpfx.vxms.common.util.ServiceUtil.getWebSocketSPI;
@@ -108,11 +109,11 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     config.put("secure", secure);
 
-    initEndoitConfiguration(routerConfiguration, vertx, router, secure, host, port);
+    initEndpointConfiguration(routerConfiguration, vertx, router, secure, host, port);
 
-    initHandlerSPIs(server, router, registrationObject, vxmsShared);
+    initExtensions(server, router, registrationObject, vxmsShared);
 
-    postEndoitConfiguration(routerConfiguration, router);
+    postEndpointConfiguration(routerConfiguration, router);
 
     if (contextRootSet) {
       topRouter
@@ -135,8 +136,9 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     executePostConstruct(registrationObject, topRouter, startFuture);
   }
 
-  private static void initHandlerSPIs(HttpServer server, Router router,
+  private static void initExtensions(HttpServer server, Router router,
       AbstractVerticle registrationObject, VxmsShared vxmsShared) {
+    initDiscoveryxtensions(registrationObject);
     initWebSocketExtensions(server, registrationObject,vxmsShared);
     initRESTExtensions(router, registrationObject, vxmsShared);
     initEventBusExtensions(registrationObject, vxmsShared);
@@ -190,7 +192,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   private static void initEventBusExtensions(AbstractVerticle registrationObject,
       VxmsShared vxmsShared) {
-    // check for REST extension
+    // check for Eventbus extension
     Optional.
         ofNullable(getEventBusSPI()).
         ifPresent(eventbusHandlerSPI -> {
@@ -214,6 +216,16 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
         });
   }
 
+  private static void initDiscoveryxtensions(AbstractVerticle registrationObject) {
+    // check for service discovery extension
+    Optional.
+        ofNullable(getDiscoverySPI()).
+        ifPresent(discoverySPI -> {
+         discoverySPI.initDiscovery(registrationObject);
+          log("start discovery extension");
+        });
+  }
+
 
   /**
    * Stop the service.<p> This is called by Vert.x when the service instance is un-deployed.
@@ -222,9 +234,8 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * complete.
    *
    * @param stopFuture a future which should be called when verticle clean-up is complete.
-   * @throws Exception exception while stopping the verticle
    */
-  public final void stop(Future<Void> stopFuture) throws Exception {
+  public final void stop(Future<Void> stopFuture) {
     if (!stopFuture.isComplete()) {
       stopFuture.complete();
     }
@@ -277,7 +288,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
 
-  private static void initEndoitConfiguration(RouterConfiguration routerConfiguration,
+  private static void initEndpointConfiguration(RouterConfiguration routerConfiguration,
       Vertx vertx,
       Router router, boolean secure, String host, int port) {
     Optional.of(routerConfiguration).ifPresent(endpointConfig -> {
@@ -294,7 +305,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     });
   }
 
-  private static void postEndoitConfiguration(RouterConfiguration routerConfiguration,
+  private static void postEndpointConfiguration(RouterConfiguration routerConfiguration,
       Router router) {
     Optional.of(routerConfiguration)
         .ifPresent(endpointConfig -> endpointConfig.staticHandler(router));

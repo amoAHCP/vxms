@@ -16,7 +16,6 @@
 
 package org.jacpfx.failure;
 
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -42,14 +41,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTJerseyClientErrorTests extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
   private HttpClient client;
 
@@ -70,7 +67,6 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -79,141 +75,141 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
+              latch2.countDown();
+            });
 
-    });
-
-    client = getVertx().
-        createHttpClient(new HttpClientOptions());
+    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
-
   }
 
-
   @Test
-
   public void stringGETResponseSyncAsync() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringGETResponseSyncAsync");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseSyncAsync");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, "test-123");
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "test-123");
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     latch.await();
     testComplete();
-
   }
 
   @Test
-
   public void stringGETResponseAsyncSync() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringGETResponseAsyncSync");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseAsyncSync");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, "test-123");
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "test-123");
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     latch.await();
     testComplete();
-
   }
 
-
   @Test
-
   public void stringGETResponseAsyncAsync() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringGETResponseAsyncAsync");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseAsyncAsync");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response-- entity '" + response + "' received.");
-            Assert.assertEquals(response, "test-123");
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response-- entity '" + response + "' received.");
+                    Assert.assertEquals(response, "test-123");
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     latch.await();
     testComplete();
-
   }
 
   @Test
-
   public void stringGETResponseSyncSync() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT)
-        .path("/wsService/stringGETResponseSyncSync");
-    Future<String> getCallback = target.request(MediaType.APPLICATION_JSON_TYPE).async()
-        .get(new InvocationCallback<String>() {
+    WebTarget target =
+        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseSyncSync");
+    Future<String> getCallback =
+        target
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .get(
+                new InvocationCallback<String>() {
 
-          @Override
-          public void completed(String response) {
-            System.out.println("Response entity '" + response + "' received.");
-            Assert.assertEquals(response, "test-123");
-            latch.countDown();
-          }
+                  @Override
+                  public void completed(String response) {
+                    System.out.println("Response entity '" + response + "' received.");
+                    Assert.assertEquals(response, "test-123");
+                    latch.countDown();
+                  }
 
-          @Override
-          public void failed(Throwable throwable) {
-
-          }
-        });
+                  @Override
+                  public void failed(Throwable throwable) {}
+                });
 
     latch.await();
     testComplete();
-
   }
-
 
   public HttpClient getClient() {
     return client;
@@ -227,20 +223,29 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     @GET
     public void circuitBreakerTest1(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().stringResponse((future) -> {
-        throw new NullPointerException("test-123");
-      }).retry(3).execute();
+      reply
+          .response()
+          .stringResponse(
+              (future) -> {
+                throw new NullPointerException("test-123");
+              })
+          .retry(3)
+          .execute();
     }
 
-    /////------------- sync blocking ----------------
+    ///// ------------- sync blocking ----------------
 
     @Path("/stringGETResponseSyncAsync")
     @GET
     public void rsstringGETResponseSyncAsync(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().stringResponse((future) -> {
-        throw new NullPointerException("test-123");
-      }).execute();
+      reply
+          .response()
+          .stringResponse(
+              (future) -> {
+                throw new NullPointerException("test-123");
+              })
+          .execute();
     }
 
     @OnRestError("/stringGETResponseSyncAsync")
@@ -250,17 +255,22 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
       handler.response().blocking().stringResponse(() -> t.getMessage()).execute();
     }
 
-    /////------------- sync blocking  END----------------
+    ///// ------------- sync blocking  END----------------
 
-    /////------------- blocking sync ----------------
+    ///// ------------- blocking sync ----------------
 
     @Path("/stringGETResponseAsyncSync")
     @GET
     public void rsstringGETResponseAsyncSync(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().blocking().stringResponse(() -> {
-        throw new NullPointerException("test-123");
-      }).execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                throw new NullPointerException("test-123");
+              })
+          .execute();
     }
 
     @OnRestError("/stringGETResponseAsyncSync")
@@ -269,17 +279,22 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
       System.out.println("ERROR stringGETResponseAsyncSync");
       handler.response().stringResponse((future) -> future.complete(t.getMessage())).execute();
     }
-    /////------------- blocking sync  END----------------
+    ///// ------------- blocking sync  END----------------
 
-    /////------------- blocking blocking ----------------
+    ///// ------------- blocking blocking ----------------
 
     @Path("/stringGETResponseAsyncAsync")
     @GET
     public void rsstringGETResponseAsyncAsync(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().blocking().stringResponse(() -> {
-        throw new NullPointerException("test-123");
-      }).execute();
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                throw new NullPointerException("test-123");
+              })
+          .execute();
     }
 
     @OnRestError("/stringGETResponseAsyncAsync")
@@ -290,17 +305,21 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
       handler.response().blocking().stringResponse(() -> t.getMessage()).execute();
     }
 
-    /////------------- blocking blocking END ----------------
+    ///// ------------- blocking blocking END ----------------
 
-    /////------------- sync sync ----------------
+    ///// ------------- sync sync ----------------
 
     @Path("/stringGETResponseSyncSync")
     @GET
     public void rsstringGETResponseSyncSync(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().stringResponse((future) -> {
-        throw new NullPointerException("test-123");
-      }).execute();
+      reply
+          .response()
+          .stringResponse(
+              (future) -> {
+                throw new NullPointerException("test-123");
+              })
+          .execute();
     }
 
     @OnRestError("/stringGETResponseSyncSync")
@@ -310,8 +329,7 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
       handler.response().stringResponse((future) -> future.complete(t.getMessage())).execute();
     }
 
-    /////------------- blocking blocking END ----------------
+    ///// ------------- blocking blocking END ----------------
 
   }
-
 }

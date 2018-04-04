@@ -16,16 +16,10 @@
 
 package org.jacpfx;
 
-import io.vertx.core.Future;
 import org.junit.Test;
 
 public class SupplierTest {
 
   @Test
-  public void testSupplierchain() {
-
-  }
-
-
-
+  public void testSupplierchain() {}
 }

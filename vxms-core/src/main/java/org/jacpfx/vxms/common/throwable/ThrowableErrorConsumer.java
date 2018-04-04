@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,17 @@ import io.vertx.core.Future;
 /**
  * Created by Andy Moncsek on 21.01.16.
  * A consumer that throws a throwable, so vxms can handle the exceptions
+ * @param <R> the type of the response
+ * @param <T> the type of the error value
  */
+@FunctionalInterface
 public interface ThrowableErrorConsumer<T, R> {
 
   /**
    * Performs this operation on the given argument.
    *
    * @param error, the error
-   * @param operationResult the input argument
+   * @param operationResult the response argument
    * @throws Throwable the throwable
    */
   void accept(T error, Future<R> operationResult) throws Throwable;

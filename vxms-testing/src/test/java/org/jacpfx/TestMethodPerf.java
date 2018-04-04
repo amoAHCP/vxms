@@ -16,10 +16,7 @@
 
 package org.jacpfx;
 
-/**
- * Created by Andy Moncsek on 18.12.15.
- */
-
+/** Created by Andy Moncsek on 18.12.15. */
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -36,14 +33,21 @@ public class TestMethodPerf {
     // hold result to prevent too much optimizations
     final int[] dummy = new int[4];
 
-    Method reflected = TestMethodPerf.class
-        .getDeclaredMethod("myMethod", int.class, int.class);
+    Method reflected = TestMethodPerf.class.getDeclaredMethod("myMethod", int.class, int.class);
     final MethodHandles.Lookup lookup = MethodHandles.lookup();
     reflected.setAccessible(true);
     MethodHandle mh = lookup.unreflect(reflected);
-    IntBinaryOperator lambda = (IntBinaryOperator) LambdaMetafactory.metafactory(
-        lookup, "applyAsInt", MethodType.methodType(IntBinaryOperator.class),
-        mh.type(), mh, mh.type()).getTarget().invokeExact();
+    IntBinaryOperator lambda =
+        (IntBinaryOperator)
+            LambdaMetafactory.metafactory(
+                    lookup,
+                    "applyAsInt",
+                    MethodType.methodType(IntBinaryOperator.class),
+                    mh.type(),
+                    mh,
+                    mh.type())
+                .getTarget()
+                .invokeExact();
 
     for (int i = 0; i < WARM_UP; i++) {
       dummy[0] += testDirect(dummy[0]);
@@ -60,7 +64,8 @@ public class TestMethodPerf {
     long t3 = System.nanoTime();
     dummy[3] += testReflection(dummy[2], reflected);
     long t4 = System.nanoTime();
-    System.out.printf("direct: %.2fs, lambda: %.2fs, mh: %.2fs, reflection: %.2fs%n",
+    System.out.printf(
+        "direct: %.2fs, lambda: %.2fs, mh: %.2fs, reflection: %.2fs%n",
         (t1 - t0) * 1e-9, (t2 - t1) * 1e-9, (t3 - t2) * 1e-9, (t4 - t3) * 1e-9);
 
     // do something with the results

@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,14 @@ public @interface ServiceEndpoint {
   String name() default "";
 
 
+  /**
+   * The context root of your service
+   * @return the context root of your service
+   */
   String contextRoot() default "/";
 
   /**
+   * The interface to listen to
    * @return The host name to bind
    */
   String host() default "0.0.0.0";

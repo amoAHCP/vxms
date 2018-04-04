@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.jacpfx.vxms.rest.interfaces.blocking.RetryExecutor;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSStringResponse;
 
 /**
- * Created by Andy Moncsek on 05.04.16.
- * Typed execution of event-bus calls and blocking string response
+ * Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and blocking string
+ * response
  */
 public class EventbusStringExecutionBlockingUtil {
 
@@ -48,7 +48,7 @@ public class EventbusStringExecutionBlockingUtil {
    * @param _stringFunction the function to process the result message
    * @param _options the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
    * @param _context the vertx routing context
@@ -57,7 +57,7 @@ public class EventbusStringExecutionBlockingUtil {
    * @param _encoder the encoder to encode your objects
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param _httpStatusCode the http status code to set for response
    * @param _httpErrorCode the http error code to set in case of failure handling
    * @param _retryCount the amount of retries before failure execution is triggered
@@ -66,7 +66,8 @@ public class EventbusStringExecutionBlockingUtil {
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
    * @return the execution chain {@link ExecuteRSStringResponse}
    */
-  public static ExecuteRSStringResponse mapToStringResponse(String _methodId,
+  public static ExecuteRSStringResponse mapToStringResponse(
+      String _methodId,
       String _targetId,
       Object _message,
       DeliveryOptions _options,
@@ -74,7 +75,8 @@ public class EventbusStringExecutionBlockingUtil {
       VxmsShared _vxmsShared,
       Throwable _failure,
       Consumer<Throwable> _errorMethodHandler,
-      RoutingContext _context, Map<String, String> _headers,
+      RoutingContext _context,
+      Map<String, String> _headers,
       ThrowableSupplier<String> _stringSupplier,
       Encoder _encoder,
       Consumer<Throwable> _errorHandler,
@@ -86,95 +88,131 @@ public class EventbusStringExecutionBlockingUtil {
       long _delay,
       long _circuitBreakerTimeout) {
 
-    final DeliveryOptions _deliveryOptions = Optional.ofNullable(_options)
-        .orElse(new DeliveryOptions());
+    final DeliveryOptions _deliveryOptions =
+        Optional.ofNullable(_options).orElse(new DeliveryOptions());
 
-    final RetryExecutor retry = (methodId,
-        targetId,
-        message,
-        byteFunction,
-        deliveryOptions,
-        vxmsShared, t,
-        errorMethodHandler,
-        context,
-        headers,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode,
-        httpErrorCode, retryCount,
-        timeout, delay, circuitBreakerTimeout) -> {
-      final int decrementedCount = retryCount - 1;
-      mapToStringResponse(methodId,
-          targetId, message,
-          deliveryOptions,
-          byteFunction,
-          vxmsShared, t,
-          errorMethodHandler,
-          context, headers,
-          null,
-          encoder,
-          errorHandler,
-          onFailureRespond,
-          httpStatusCode,
-          httpErrorCode,
-          decrementedCount,
-          timeout, delay,
-          circuitBreakerTimeout).
-          execute();
-    };
-
-    final RecursiveExecutor executor = (methodId,
-        vxmsShared,
-        t,
-        errorMethodHandler,
-        context,
-        headers,
-        supplier,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode, httpErrorCode,
-        retryCount, timeout, delay, circuitBreakerTimeout) ->
-        new ExecuteRSStringResponse(methodId,
-            vxmsShared, t,
+    final RetryExecutor<String> retry =
+        (methodId,
+            targetId,
+            message,
+            byteFunction,
+            deliveryOptions,
+            vxmsShared,
+            t,
             errorMethodHandler,
-            context, headers,
-            supplier,
-            null,
-            null,
-            encoder, errorHandler,
-            onFailureRespond,
-            httpStatusCode,
-            httpErrorCode,
-            retryCount, timeout, delay,
-            circuitBreakerTimeout).
-            execute();
-
-    final ExecuteEventbusStringCall excecuteAsyncEventBusAndReply = (vxmsShared, t,
-        errorMethodHandler,
-        context, headers,
-        encoder, errorHandler,
-        onFailureRespond,
-        httpStatusCode, httpErrorCode,
-        retryCount, timeout,
-        delay, circuitBreakerTimeout) ->
-        EventbusExecution.sendMessageAndSupplyHandler(_methodId,
-            _targetId, _message,
-            _stringFunction,
-            _deliveryOptions,
-            vxmsShared, t,
-            errorMethodHandler,
-            context, headers,
-            encoder, errorHandler,
+            context,
+            headers,
+            encoder,
+            errorHandler,
             onFailureRespond,
             httpStatusCode,
             httpErrorCode,
             retryCount,
-            timeout, delay,
-            circuitBreakerTimeout,
-            executor, retry);
-    return new ExecuteRSStringResponse(_methodId,
+            timeout,
+            delay,
+            circuitBreakerTimeout) -> {
+          final int decrementedCount = retryCount - 1;
+          mapToStringResponse(
+                  methodId,
+                  targetId,
+                  message,
+                  deliveryOptions,
+                  byteFunction,
+                  vxmsShared,
+                  t,
+                  errorMethodHandler,
+                  context,
+                  headers,
+                  null,
+                  encoder,
+                  errorHandler,
+                  onFailureRespond,
+                  httpStatusCode,
+                  httpErrorCode,
+                  decrementedCount,
+                  timeout,
+                  delay,
+                  circuitBreakerTimeout)
+              .execute();
+        };
+
+    final RecursiveExecutor<String> executor =
+        (methodId,
+            vxmsShared,
+            t,
+            errorMethodHandler,
+            context,
+            headers,
+            supplier,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            httpStatusCode,
+            httpErrorCode,
+            retryCount,
+            timeout,
+            delay,
+            circuitBreakerTimeout) ->
+            new ExecuteRSStringResponse(
+                    methodId,
+                    vxmsShared,
+                    t,
+                    errorMethodHandler,
+                    context,
+                    headers,
+                    supplier,
+                    null,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    httpStatusCode,
+                    httpErrorCode,
+                    retryCount,
+                    timeout,
+                    delay,
+                    circuitBreakerTimeout)
+                .execute();
+
+    final ExecuteEventbusStringCall excecuteAsyncEventBusAndReply =
+        (vxmsShared,
+            t,
+            errorMethodHandler,
+            context,
+            headers,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            httpStatusCode,
+            httpErrorCode,
+            retryCount,
+            timeout,
+            delay,
+            circuitBreakerTimeout) ->
+            EventbusExecution.sendMessageAndSupplyHandler(
+                _methodId,
+                _targetId,
+                _message,
+                _stringFunction,
+                _deliveryOptions,
+                vxmsShared,
+                t,
+                errorMethodHandler,
+                context,
+                headers,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                httpStatusCode,
+                httpErrorCode,
+                retryCount,
+                timeout,
+                delay,
+                circuitBreakerTimeout,
+                executor,
+                retry);
+    return new ExecuteRSStringResponse(
+        _methodId,
         _vxmsShared,
         _failure,
         _errorMethodHandler,
@@ -193,7 +231,4 @@ public class EventbusStringExecutionBlockingUtil {
         _delay,
         _circuitBreakerTimeout);
   }
-
-
-
 }

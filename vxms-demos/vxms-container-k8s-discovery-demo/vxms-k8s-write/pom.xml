@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2017] [Andy Moncsek]
+  ~ Copyright [2018] [Andy Moncsek]
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,82 +14,88 @@
   ~ limitations under the License.
   -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.org.jacpfx</groupId>
-        <artifactId>vxms-container-k8s-discovery-demo</artifactId>
-        <version>1.1-SNAPSHOT</version>
-        <relativePath>../</relativePath>
-    </parent>
-    <artifactId>vxms-k8s-write</artifactId>
-    <packaging>jar</packaging>
+  <parent>
+    <groupId>org.jacpfx</groupId>
+    <artifactId>vxms-container-k8s-discovery-demo</artifactId>
+    <version>1.2-SNAPSHOT</version>
+    <relativePath>../</relativePath>
+  </parent>
+  <artifactId>vxms-k8s-write</artifactId>
+  <packaging>jar</packaging>
 
-    <name>vxms-k8s-write</name>
-    <url>http://maven.apache.org</url>
+  <name>vxms-k8s-write</name>
+  <url>http://maven.apache.org</url>
 
 
-    <dependencies>
+  <dependencies>
 
-        <dependency>
-            <groupId>org.org.jacpfx</groupId>
-            <artifactId>vxms-rest</artifactId>
-            <version>${vxms-verticle.version}</version>
-        </dependency>
+    <dependency>
+      <groupId>org.jacpfx</groupId>
+      <artifactId>vxms-rest</artifactId>
+      <version>${vxms-verticle.version}</version>
+    </dependency>
 
-    </dependencies>
-    <build>
-        <plugins>
-            <!-- Other plugins required by the build -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>UsersWriteToMongo</Main-Verticle>
-                                    </manifestEntries>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
-                                </transformer>
-                            </transformers>
-                            <artifactSet/>
-                            <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar
-                            </outputFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-    </repositories>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>io.vertx.core.Launcher</Main-Class>
+                    <Main-Verticle>org.jacpfx.vxms.k8swrite.verticles.UsersWriteToMongo
+                    </Main-Verticle>
+                  </manifestEntries>
+                </transformer>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+                </transformer>
+              </transformers>
+              <artifactSet/>
+              <outputFile>
+                ${project.build.directory}/${project.artifactId}-${project.version}-fat.jar
+              </outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>fabric8-maven-plugin</artifactId>
+        <version>3.5.35</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>resource</goal>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <repositories>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
 
 </project>

@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,6 +210,7 @@ public class ConfigurationUtil {
    * extract the endpoint configuration fro service
    *
    * @param clazz the service class annotated with {@link ServiceEndpoint}
+   * @param config the vertx configuration
    * @return the {@link RouterConfiguration}
    */
   public static RouterConfiguration getRouterConfiguration(final JsonObject config, Class clazz) {

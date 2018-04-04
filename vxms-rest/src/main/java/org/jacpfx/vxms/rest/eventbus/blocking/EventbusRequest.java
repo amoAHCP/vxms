@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.function.Consumer;
 import org.jacpfx.vxms.common.VxmsShared;
 
 /**
- * Created by Andy Moncsek on 14.03.16.
- * Defines an event-bus request as the beginning of your (blocking) execution chain
+ * Created by Andy Moncsek on 14.03.16. Defines an event-bus request as the beginning of your
+ * (blocking) execution chain
  */
 public class EventbusRequest {
 
@@ -38,12 +38,13 @@ public class EventbusRequest {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the vertx instance
    * @param errorMethodHandler the error-method handler
    * @param context the vertx routing context
    */
-  public EventbusRequest(String methodId,
+  public EventbusRequest(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -55,7 +56,6 @@ public class EventbusRequest {
     this.context = context;
   }
 
-
   /**
    * Send message and perform (blocking) task on reply
    *
@@ -64,14 +64,8 @@ public class EventbusRequest {
    * @return the execution chain {@link EventbusResponse}
    */
   public EventbusResponse send(String targetId, Object message) {
-    return new EventbusResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        targetId,
-        message,
-        null);
+    return new EventbusResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, targetId, message, null);
   }
 
   /**
@@ -83,13 +77,7 @@ public class EventbusRequest {
    * @return the execution chain {@link EventbusResponse}
    */
   public EventbusResponse send(String targetId, Object message, DeliveryOptions options) {
-    return new EventbusResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        targetId,
-        message,
-        options);
+    return new EventbusResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, targetId, message, options);
   }
 }

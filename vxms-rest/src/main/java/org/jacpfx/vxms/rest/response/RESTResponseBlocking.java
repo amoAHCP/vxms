@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.jacpfx.vxms.rest.response.blocking.ExecuteRSObjectResponse;
 import org.jacpfx.vxms.rest.response.blocking.ExecuteRSStringResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
+ * the output of your task.
  */
 public class RESTResponseBlocking {
 
@@ -49,13 +49,14 @@ public class RESTResponseBlocking {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    */
-  public RESTResponseBlocking(String methodId,
+  public RESTResponseBlocking(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -69,7 +70,6 @@ public class RESTResponseBlocking {
     this.headers = headers;
   }
 
-
   /**
    * Retunrs a byte array to the target type
    *
@@ -77,14 +77,8 @@ public class RESTResponseBlocking {
    * @return {@link ExecuteRSByteResponse}
    */
   public ExecuteRSByteResponse byteResponse(ThrowableSupplier<byte[]> byteSupplier) {
-    return new ExecuteRSByteResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        byteSupplier,
-        null);
+    return new ExecuteRSByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, byteSupplier, null);
   }
 
   /**
@@ -94,14 +88,8 @@ public class RESTResponseBlocking {
    * @return {@link ExecuteRSStringResponse}
    */
   public ExecuteRSStringResponse stringResponse(ThrowableSupplier<String> stringSupplier) {
-    return new ExecuteRSStringResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        stringSupplier,
-        null);
+    return new ExecuteRSStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, stringSupplier, null);
   }
 
   /**
@@ -111,9 +99,10 @@ public class RESTResponseBlocking {
    * @param encoder the encoder to serialize the object response
    * @return {@link ExecuteRSObjectResponse}
    */
-  public ExecuteRSObjectResponse objectResponse(ThrowableSupplier<Serializable> objectSupplier,
-      Encoder encoder) {
-    return new ExecuteRSObjectResponse(methodId,
+  public ExecuteRSObjectResponse objectResponse(
+      ThrowableSupplier<Serializable> objectSupplier, Encoder encoder) {
+    return new ExecuteRSObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -126,10 +115,12 @@ public class RESTResponseBlocking {
 
   /**
    * starts a supply chain to create a blocking response
+   *
    * @param chainsupplier the first step in the execution chain
    * @param <T> the reutrn type of the supplier
    * @return {@link ExecuteRSChainResponse}
    */
+  @SuppressWarnings("unchecked")
   public <T> ExecuteRSChainResponse<T> supply(ThrowableSupplier<T> chainsupplier) {
     final List<BlockingExecutionStep> chain = new ArrayList<>();
     chain.add(new BlockingExecutionStep(chainsupplier));

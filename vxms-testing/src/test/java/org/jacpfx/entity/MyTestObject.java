@@ -18,9 +18,7 @@ package org.jacpfx.entity;
 
 import java.io.Serializable;
 
-/**
- * Created by Andy Moncsek on 19.11.15.
- */
+/** Created by Andy Moncsek on 19.11.15. */
 public class MyTestObject implements Serializable {
 
   private final String name;
@@ -54,7 +52,6 @@ public class MyTestObject implements Serializable {
       return false;
     }
     return !(lastName != null ? !lastName.equals(that.lastName) : that.lastName != null);
-
   }
 
   @Override

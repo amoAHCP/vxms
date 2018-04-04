@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,7 @@ import org.jacpfx.vxms.rest.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vxms.rest.interfaces.basic.RetryExecutor;
 import org.jacpfx.vxms.rest.response.basic.ExecuteRSObjectResponse;
 
-/**
- * Created by Andy Moncsek on 05.04.16.
- * Typed execution of event-bus calls and string response
- */
+/** Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and string response */
 @SuppressWarnings("unchecked")
 public class EventbusObjectExecutionUtil {
 
@@ -51,28 +48,45 @@ public class EventbusObjectExecutionUtil {
    * @param _objectFunction the function to process the result message
    * @param _options the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
    * @param _context the vertx routing context
    * @param _encoder the encoder to encode your objects
    * @return the execution chain {@link ExecuteRSObjectResponse}
    */
-  public static ExecuteRSObjectResponse mapToObjectResponse(String _methodId,
+  public static ExecuteRSObjectResponse mapToObjectResponse(
+      String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
       DeliveryOptions _options,
-      VxmsShared _vxmsShared, Throwable _failure,
+      VxmsShared _vxmsShared,
+      Throwable _failure,
       Consumer<Throwable> _errorMethodHandler,
       RoutingContext _context,
-      Encoder _encoder
-  ) {
+      Encoder _encoder) {
 
-    return mapToObjectResponse(_methodId, _targetId, _message, _objectFunction, _options,
-        _vxmsShared, _failure, _errorMethodHandler, _context, null, null, _encoder, null, null, 0,
-        0, 0, 0, 0);
-
+    return mapToObjectResponse(
+        _methodId,
+        _targetId,
+        _message,
+        _objectFunction,
+        _options,
+        _vxmsShared,
+        _failure,
+        _errorMethodHandler,
+        _context,
+        null,
+        null,
+        _encoder,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0,
+        0);
   }
 
   /**
@@ -84,17 +98,17 @@ public class EventbusObjectExecutionUtil {
    * @param _objectFunction the function to process the result message
    * @param _options the event-bus delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
    * @param _context the vertx routing context
    * @param _headers the headers to pass to the response
    * @param _objectConsumer the consumer that takes a Future to complete, producing the string
-   * response
+   *     response
    * @param _encoder the encoder to encode your objects
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param _httpStatusCode the http status code to set for response
    * @param _httpErrorCode the http error code to set in case of failure handling
    * @param _retryCount the amount of retries before failure execution is triggered
@@ -102,12 +116,14 @@ public class EventbusObjectExecutionUtil {
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
    * @return the execution chain {@link ExecuteRSObjectResponse}
    */
-  public static ExecuteRSObjectResponse mapToObjectResponse(String _methodId,
+  public static ExecuteRSObjectResponse mapToObjectResponse(
+      String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
       DeliveryOptions _options,
-      VxmsShared _vxmsShared, Throwable _failure,
+      VxmsShared _vxmsShared,
+      Throwable _failure,
       Consumer<Throwable> _errorMethodHandler,
       RoutingContext _context,
       Map<String, String> _headers,
@@ -121,100 +137,142 @@ public class EventbusObjectExecutionUtil {
       long _timeout,
       long _circuitBreakerTimeout) {
 
-    final DeliveryOptions _deliveryOptions = Optional.ofNullable(_options)
-        .orElse(new DeliveryOptions());
+    final DeliveryOptions _deliveryOptions =
+        Optional.ofNullable(_options).orElse(new DeliveryOptions());
 
-    final RetryExecutor retry = (methodId,
-        id,
-        message,
-        stringFunction,
-        deliveryOptions,
-        vxmsShared, t,
-        errorMethodHandler,
-        context,
-        headers,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode,
-        httpErrorCode, retryCount,
-        timeout, circuitBreakerTimeout) -> {
-      final int decrementedCount = retryCount - 1;
-      //noinspection unchecked
-      mapToObjectResponse(methodId,
-          id, message,
-          stringFunction,
-          deliveryOptions,
-          vxmsShared, t,
-          errorMethodHandler,
-          context, headers,
-          null,
-          encoder,
-          errorHandler,
-          onFailureRespond,
-          httpStatusCode,
-          httpErrorCode,
-          decrementedCount,
-          timeout,
-          circuitBreakerTimeout).
-          execute();
-    };
-    final RecursiveExecutor executor = (methodId,
-        vxmsShared,
-        t,
-        errorMethodHandler,
-        context,
-        headers,
-        stringConsumer,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode, httpErrorCode,
-        retryCount, timeout, circuitBreakerTimeout) ->
-        new ExecuteRSObjectResponse(methodId,
-            vxmsShared, t,
-            errorMethodHandler,
-            context, headers,
-            stringConsumer,
-            null,
-            null,
-            encoder, errorHandler,
-            onFailureRespond,
-            httpStatusCode,
-            httpErrorCode,
-            retryCount, timeout,
-            circuitBreakerTimeout).
-            execute();
-
-    final ExecuteEventbusObjectCall excecuteEventBusAndReply = (vxmsShared, t,
-        errorMethodHandler,
-        context, headers,
-        encoder, errorHandler,
-        onFailureRespond, httpStatusCode,
-        httpErrorCode, retryCount,
-        timeout, circuitBreakerTimeout) ->
-        EventbusExecution.sendMessageAndSupplyHandler(_methodId,
-            _targetId,
-            _message,
-            _objectFunction,
-            _deliveryOptions,
+    final RetryExecutor<Serializable> retry =
+        (methodId,
+            id,
+            message,
+            stringFunction,
+            deliveryOptions,
             vxmsShared,
-            t, errorMethodHandler,
-            context, headers,
-            encoder, errorHandler,
+            t,
+            errorMethodHandler,
+            context,
+            headers,
+            encoder,
+            errorHandler,
             onFailureRespond,
             httpStatusCode,
             httpErrorCode,
             retryCount,
             timeout,
-            circuitBreakerTimeout, executor, retry);
+            circuitBreakerTimeout) -> {
+          final int decrementedCount = retryCount - 1;
+          //noinspection unchecked
+          mapToObjectResponse(
+                  methodId,
+                  id,
+                  message,
+                  stringFunction,
+                  deliveryOptions,
+                  vxmsShared,
+                  t,
+                  errorMethodHandler,
+                  context,
+                  headers,
+                  null,
+                  encoder,
+                  errorHandler,
+                  onFailureRespond,
+                  httpStatusCode,
+                  httpErrorCode,
+                  decrementedCount,
+                  timeout,
+                  circuitBreakerTimeout)
+              .execute();
+        };
+    final RecursiveExecutor<Serializable> executor =
+        (methodId,
+            vxmsShared,
+            t,
+            errorMethodHandler,
+            context,
+            headers,
+            stringConsumer,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            httpStatusCode,
+            httpErrorCode,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout) ->
+            new ExecuteRSObjectResponse(
+                    methodId,
+                    vxmsShared,
+                    t,
+                    errorMethodHandler,
+                    context,
+                    headers,
+                    stringConsumer,
+                    null,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    httpStatusCode,
+                    httpErrorCode,
+                    retryCount,
+                    timeout,
+                    circuitBreakerTimeout)
+                .execute();
 
-    return new ExecuteRSObjectResponse(_methodId, _vxmsShared, _failure, _errorMethodHandler,
-        _context, _headers, _objectConsumer, null, excecuteEventBusAndReply, _encoder, _errorHandler,
-        _onFailureRespond, _httpStatusCode, _httpErrorCode, _retryCount, _timeout,
+    final ExecuteEventbusObjectCall excecuteEventBusAndReply =
+        (vxmsShared,
+            t,
+            errorMethodHandler,
+            context,
+            headers,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            httpStatusCode,
+            httpErrorCode,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout) ->
+            EventbusExecution.sendMessageAndSupplyHandler(
+                _methodId,
+                _targetId,
+                _message,
+                _objectFunction,
+                _deliveryOptions,
+                vxmsShared,
+                t,
+                errorMethodHandler,
+                context,
+                headers,
+                encoder,
+                errorHandler,
+                onFailureRespond,
+                httpStatusCode,
+                httpErrorCode,
+                retryCount,
+                timeout,
+                circuitBreakerTimeout,
+                executor,
+                retry);
+
+    return new ExecuteRSObjectResponse(
+        _methodId,
+        _vxmsShared,
+        _failure,
+        _errorMethodHandler,
+        _context,
+        _headers,
+        _objectConsumer,
+        null,
+        excecuteEventBusAndReply,
+        _encoder,
+        _errorHandler,
+        _onFailureRespond,
+        _httpStatusCode,
+        _httpErrorCode,
+        _retryCount,
+        _timeout,
         _circuitBreakerTimeout);
   }
-
-
 }

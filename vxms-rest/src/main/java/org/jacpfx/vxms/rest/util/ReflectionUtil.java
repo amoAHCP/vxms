@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,8 @@ import java.util.function.Supplier;
 import org.jacpfx.vxms.common.util.CommonReflectionUtil;
 import org.jacpfx.vxms.rest.response.RestHandler;
 
-/**
- * Created by Andy Moncsek on 25.11.15.
- * Utility class for handling invocation of vxms methods
- */
+/** Created by Andy Moncsek on 25.11.15. Utility class for handling invocation of vxms methods */
 public class ReflectionUtil {
-
 
   /**
    * Invoke a vxms rest method parameters
@@ -38,8 +34,8 @@ public class ReflectionUtil {
    * @param handler the rest handler instamce
    * @return the array of parameters to pass to method invokation
    */
-  public static Object[] invokeRESTParameters(RoutingContext context, Method method,
-      Throwable failure, RestHandler handler) {
+  public static Object[] invokeRESTParameters(
+      RoutingContext context, Method method, Throwable failure, RestHandler handler) {
     final java.lang.reflect.Parameter[] parameters = method.getParameters();
     final Object[] parameterResult = new Object[parameters.length];
     int i = 0;
@@ -65,10 +61,8 @@ public class ReflectionUtil {
    * @param invokeTo the invokation target
    * @throws Throwable the invocation exception
    */
-  public static void genericMethodInvocation(Method method, Supplier<Object[]> parameters,
-      Object invokeTo) throws Throwable {
+  public static void genericMethodInvocation(
+      Method method, Supplier<Object[]> parameters, Object invokeTo) throws Throwable {
     CommonReflectionUtil.genericMethodInvocation(method, parameters, invokeTo);
   }
-
-
 }

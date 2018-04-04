@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,20 +50,19 @@ public class ExecuteRSChainResponse<T> {
   protected final long timeout;
   protected final long circuitBreakerTimeout;
 
-
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
    * @param headers the headers to pass to the response
    * @param chain the list of execution steps
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param httpStatusCode the http status code to set for response
@@ -72,7 +71,8 @@ public class ExecuteRSChainResponse<T> {
    * @param timeout the amount of time before the execution will be aborted
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSChainResponse(String methodId,
+  public ExecuteRSChainResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -82,8 +82,11 @@ public class ExecuteRSChainResponse<T> {
       ExecuteEventbusStringCall excecuteEventBusAndReply,
       Encoder encoder,
       Consumer<Throwable> errorHandler,
-      int httpStatusCode, int httpErrorCode,
-      int retryCount, long timeout, long circuitBreakerTimeout) {
+      int httpStatusCode,
+      int httpErrorCode,
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -99,11 +102,15 @@ public class ExecuteRSChainResponse<T> {
     this.httpErrorCode = httpErrorCode;
     this.timeout = timeout;
     this.circuitBreakerTimeout = circuitBreakerTimeout;
-
   }
 
-  public ExecuteRSChainResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
-      Consumer<Throwable> errorMethodHandler, RoutingContext context, Map<String, String> headers,
+  public ExecuteRSChainResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      RoutingContext context,
+      Map<String, String> headers,
       List<ExecutionStep> chain) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
@@ -122,11 +129,17 @@ public class ExecuteRSChainResponse<T> {
     this.chain = chain;
   }
 
-
-  public <H>ExecuteRSChainResponse<H> andThen(ThrowableFutureBiConsumer<T,H> step) {
+  /**
+   * @param step the step execution function
+   * @param <H> the return type of the step
+   * @return the chain to perform other steps
+   */
+  @SuppressWarnings("unchecked")
+  public <H> ExecuteRSChainResponse<H> andThen(ThrowableFutureBiConsumer<T, H> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSChainResponse<>(methodId,
+    return new ExecuteRSChainResponse<>(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -143,25 +156,18 @@ public class ExecuteRSChainResponse<T> {
         circuitBreakerTimeout);
   }
 
-
   /**
    * Returns a String to the target type
    *
    * @param step the execution step to map the response to string
    * @return {@link ExecuteRSStringResponse}
    */
-  public ExecuteRSStringResponse mapToStringResponse(
-      ThrowableFutureBiConsumer<T,String> step) {
+  @SuppressWarnings("unchecked")
+  public ExecuteRSStringResponse mapToStringResponse(ThrowableFutureBiConsumer<T, String> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSStringResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        null,
-        chainTmp);
+    return new ExecuteRSStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, null, chainTmp);
   }
 
   /**
@@ -170,18 +176,12 @@ public class ExecuteRSChainResponse<T> {
    * @param step the execution step to map the response to byte[]
    * @return {@link ExecuteRSByteResponse}
    */
-  public ExecuteRSByteResponse mapToByteResponse(ThrowableFutureBiConsumer<T,byte[]> step) {
+  @SuppressWarnings("unchecked")
+  public ExecuteRSByteResponse mapToByteResponse(ThrowableFutureBiConsumer<T, byte[]> step) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSByteResponse(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        null,
-        chainTmp);
-
+    return new ExecuteRSByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, headers, null, chainTmp);
   }
 
   /**
@@ -191,11 +191,13 @@ public class ExecuteRSChainResponse<T> {
    * @param encoder the encoder to serialize the object response
    * @return {@link ExecuteRSObjectResponse}
    */
+  @SuppressWarnings("unchecked")
   public ExecuteRSObjectResponse mapToObjectResponse(
-      ThrowableFutureBiConsumer<T,Serializable> step, Encoder encoder) {
+      ThrowableFutureBiConsumer<T, Serializable> step, Encoder encoder) {
     final List<ExecutionStep> chainTmp = new ArrayList<>(chain);
     chainTmp.add(new ExecutionStep(step));
-    return new ExecuteRSObjectResponse(methodId,
+    return new ExecuteRSObjectResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -205,5 +207,4 @@ public class ExecuteRSChainResponse<T> {
         chainTmp,
         encoder);
   }
-
 }

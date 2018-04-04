@@ -16,7 +16,6 @@
 
 package org.jacpfx.failure;
 
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -43,15 +42,12 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
-
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTServiceExceptionTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
-  private final static int MAX_RESPONSE_ELEMENTS = 4;
+  private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
   private HttpClient client;
 
@@ -72,7 +68,6 @@ public class RESTServiceExceptionTest extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     startNodes(getNumNodes());
-
   }
 
   @Before
@@ -81,24 +76,27 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
+    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // module so you
     // don'failure have to hardecode it in your tests
 
-    getVertx().deployVerticle(new WsServiceOne(), options, asyncResult -> {
-      // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-      System.out.println("start service: " + asyncResult.succeeded());
-      assertTrue(asyncResult.succeeded());
-      assertNotNull("deploymentID should not be null", asyncResult.result());
-      // If deployed correctly then start the tests!
-      //   latch2.countDown();
+    getVertx()
+        .deployVerticle(
+            new WsServiceOne(),
+            options,
+            asyncResult -> {
+              // Deployment is asynchronous and this this handler will be called when it's complete
+              // (or failed)
+              System.out.println("start service: " + asyncResult.succeeded());
+              assertTrue(asyncResult.succeeded());
+              assertNotNull("deploymentID should not be null", asyncResult.result());
+              // If deployed correctly then start the tests!
+              //   latch2.countDown();
 
-      latch2.countDown();
-
-    });
+              latch2.countDown();
+            });
 
     awaitLatch(latch2);
-
-
   }
 
   @Test
@@ -106,54 +104,52 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/noResponse?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println("--------noResponse: " + val);
-              //assertEquals(key, "val");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/noResponse?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------noResponse: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
+              }
             });
-
-
-          }
-        });
 
     request.end();
     await();
     // request.end();
   }
 
-
   @Test
   public void exceptionInMethodBody() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/exceptionInMethodBody?val=123&tmp=456", new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println("--------exceptionInMethodBody: " + val);
-              //assertEquals(key, "val");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInMethodBody?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------exceptionInMethodBody: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
+              }
             });
-
-
-          }
-        });
     request.end();
 
     await();
-
   }
 
   @Test
@@ -161,28 +157,29 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/exceptionInMethodBodyWithErrorHandler?val=123&tmp=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInMethodBodyWithErrorHandler?val=123&tmp=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  String val = body.getString(0, body.length());
-                  System.out.println(
-                      "--------exceptionInMethodBody: " + val + " status:  " + resp.statusCode());
-                  //assertEquals(key, "val");
-                  testComplete();
-                });
-
-
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println(
+                          "--------exceptionInMethodBody: "
+                              + val
+                              + " status:  "
+                              + resp.statusCode());
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
               }
             });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -190,26 +187,25 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/exceptionInStringResponse?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println("--------exceptionInStringResponse: " + val);
-              //assertEquals(key, "val");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInStringResponse?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------exceptionInStringResponse: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
+              }
             });
-
-
-          }
-        });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -217,27 +213,25 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/exceptionInAsyncStringResponse?val=123&tmp=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInAsyncStringResponse?val=123&tmp=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  String val = body.getString(0, body.length());
-                  System.out.println("--------exceptionInStringResponse: " + val);
-                  //assertEquals(key, "val");
-                  testComplete();
-                });
-
-
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------exceptionInStringResponse: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
               }
             });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -245,26 +239,25 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/exceptionInByteResponse?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println("--------exceptionInByteResponse: " + val);
-              //assertEquals(key, "val");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInByteResponse?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------exceptionInByteResponse: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
+              }
             });
-
-
-          }
-        });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -272,28 +265,31 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/exceptionInObjectResponse?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println(
-                  "--------exceptionInObjectResponse: " + val + " resp:" + resp.statusMessage()
-                      + " code:" + resp.statusCode());
-              //assertEquals(key, "val");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInObjectResponse?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println(
+                          "--------exceptionInObjectResponse: "
+                              + val
+                              + " resp:"
+                              + resp.statusMessage()
+                              + " code:"
+                              + resp.statusCode());
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
+              }
             });
-
-
-          }
-        });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -301,27 +297,25 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/exceptionInStringResponseWithErrorHandler?val=123&tmp=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInStringResponseWithErrorHandler?val=123&tmp=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  String val = body.getString(0, body.length());
-                  System.out.println("--------exceptionInStringResponse: " + val);
-                  //assertEquals(key, "val");
-                  testComplete();
-                });
-
-
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------exceptionInStringResponse: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
               }
             });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -329,56 +323,51 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/exceptionInAsyncStringResponseWithErrorHandler?val=123&tmp=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/exceptionInAsyncStringResponseWithErrorHandler?val=123&tmp=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  String val = body.getString(0, body.length());
-                  System.out.println("--------exceptionInStringResponse: " + val);
-                  //assertEquals(key, "val");
-                  testComplete();
-                });
-
-
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------exceptionInStringResponse: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
               }
             });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
-
 
   @Test
   public void catchedAsyncStringErrorDelay() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/catchedAsyncStringErrorDelay?val=123&tmp=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/catchedAsyncStringErrorDelay?val=123&tmp=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  String val = body.getString(0, body.length());
-                  System.out.println("--------catchedAsyncStringErrorDelay: " + val);
-                  //assertEquals(key, "val");
-                  testComplete();
-                });
-
-
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------catchedAsyncStringErrorDelay: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
               }
             });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -386,26 +375,25 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client.get("/wsService/catchedAsyncByteErrorDelay?val=123&tmp=456",
-        new Handler<HttpClientResponse>() {
-          public void handle(HttpClientResponse resp) {
-            resp.bodyHandler(body -> {
-              String val = body.getString(0, body.length());
-              System.out.println("--------catchedAsyncByteErrorDelay: " + val);
-              //assertEquals(key, "val");
-              testComplete();
+    HttpClientRequest request =
+        client.get(
+            "/wsService/catchedAsyncByteErrorDelay?val=123&tmp=456",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------catchedAsyncByteErrorDelay: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
+              }
             });
-
-
-          }
-        });
     request.end();
 
     await(5000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -413,34 +401,30 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
-    HttpClient client = vertx.
-        createHttpClient(options);
+    HttpClient client = vertx.createHttpClient(options);
 
-    HttpClientRequest request = client
-        .get("/wsService/catchedAsyncObjectErrorDelay?val=123&tmp=456",
+    HttpClientRequest request =
+        client.get(
+            "/wsService/catchedAsyncObjectErrorDelay?val=123&tmp=456",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(body -> {
-                  String val = body.getString(0, body.length());
-                  System.out.println("--------catchedAsyncByteErrorDelay: " + val);
-                  //assertEquals(key, "val");
-                  testComplete();
-                });
-
-
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      System.out.println("--------catchedAsyncByteErrorDelay: " + val);
+                      // assertEquals(key, "val");
+                      testComplete();
+                    });
               }
             });
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);
-
   }
-
 
   public HttpClient getClient() {
     return client;
   }
-
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
   public class WsServiceOne extends VxmsEndpoint {
@@ -458,7 +442,6 @@ public class RESTServiceExceptionTest extends VertxTestBase {
       System.out.println("rsexceptionInMethodBody: " + handler);
       throw new NullPointerException("test");
     }
-
 
     @Path("/exceptionInMethodBodyWithErrorHandler")
     @GET
@@ -480,51 +463,73 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @GET
     public void rsexceptionInStringResponse(RestHandler handler) {
       System.out.println("rsexceptionInMethodBody: " + handler);
-      handler.response().stringResponse((future) -> {
-        throw new NullPointerException("Test");
-        //return "";
-      }).execute();
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                throw new NullPointerException("Test");
+                // return "";
+              })
+          .execute();
     }
 
     @Path("/exceptionInAsyncStringResponse")
     @GET
     public void rsexceptionInAsyncStringResponse(RestHandler handler) {
       System.out.println("exceptionInAsyncStringResponse: " + handler);
-      handler.response().blocking().stringResponse(() -> {
-        throw new NullPointerException("Test");
-        //return "";
-      }).execute();
+      handler
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                throw new NullPointerException("Test");
+                // return "";
+              })
+          .execute();
     }
 
     @Path("/exceptionInObjectResponse")
     @GET
     public void rsexceptionInObjectResponse(RestHandler handler) {
       System.out.println("rsexceptionInObjectResponse: " + handler);
-      handler.response().objectResponse((future) -> {
-        System.out.println("Exception-->>>>>><");
-        throw new NullPointerException("Test");
-        //return "";
-      }, new ExampleByteEncoder()).execute();
+      handler
+          .response()
+          .objectResponse(
+              (future) -> {
+                System.out.println("Exception-->>>>>><");
+                throw new NullPointerException("Test");
+                // return "";
+              },
+              new ExampleByteEncoder())
+          .execute();
     }
 
     @Path("/exceptionInByteResponse")
     @GET
     public void rsexceptionInByteResponse(RestHandler handler) {
       System.out.println("exceptionInByteResponse: " + handler);
-      handler.response().byteResponse((future) -> {
-        throw new NullPointerException("Test");
-        //return "";
-      }).execute();
+      handler
+          .response()
+          .byteResponse(
+              (future) -> {
+                throw new NullPointerException("Test");
+                // return "";
+              })
+          .execute();
     }
 
     @Path("/exceptionInStringResponseWithErrorHandler")
     @GET
     public void rsexceptionInStringResponseWithErrorHandler(RestHandler handler) {
       System.out.println("exceptionInStringResponseWithErrorHandler: " + handler);
-      handler.response().stringResponse((future) -> {
-        throw new NullPointerException("Test");
-        //return "";
-      }).execute();
+      handler
+          .response()
+          .stringResponse(
+              (future) -> {
+                throw new NullPointerException("Test");
+                // return "";
+              })
+          .execute();
     }
 
     @OnRestError("/exceptionInStringResponseWithErrorHandler")
@@ -540,16 +545,21 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     @GET
     public void rsexceptionAsyncInStringResponseWithErrorHandler(RestHandler handler) {
       System.out.println("exceptionInStringResponseWithErrorHandler: " + handler);
-      handler.response().blocking().stringResponse(() -> {
-        throw new NullPointerException("Test");
-        //return "";
-      }).execute();
+      handler
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                throw new NullPointerException("Test");
+                // return "";
+              })
+          .execute();
     }
 
     @OnRestError("/exceptionInAsyncStringResponseWithErrorHandler")
     @GET
-    public void exceptionInAsyncStringResponseWithErrorHandlerError(RestHandler handler,
-        Throwable t) {
+    public void exceptionInAsyncStringResponseWithErrorHandlerError(
+        RestHandler handler, Throwable t) {
       System.out.println("+++++++rsexceptionInAsyncStringResponseWithErrorHandler: " + handler);
       t.printStackTrace();
       System.out.println("----------------------------------");
@@ -561,27 +571,29 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     public void rscatchedAsyncStringErrorDelay(RestHandler reply) {
       long startTime = System.currentTimeMillis();
       AtomicInteger count = new AtomicInteger(4);
-      reply.
-          response().
-          blocking().
-          stringResponse(() -> {
-            long estimatedTime = System.currentTimeMillis() - startTime;
-            System.out.println("time: " + estimatedTime);
-            if (count.decrementAndGet() >= 0) {
-              System.out.println("throw");
-              throw new NullPointerException("test");
-            }
+      reply
+          .response()
+          .blocking()
+          .stringResponse(
+              () -> {
+                long estimatedTime = System.currentTimeMillis() - startTime;
+                System.out.println("time: " + estimatedTime);
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw");
+                  throw new NullPointerException("test");
+                }
 
-            return null;
-          }).
-          retry(3).
-          delay(1000).
-          onFailureRespond((t) -> {
-            System.out.print("the stack trace --> ");
-            t.printStackTrace();
-            return "hello world";
-          }).
-          execute();
+                return null;
+              })
+          .retry(3)
+          .delay(1000)
+          .onFailureRespond(
+              (t) -> {
+                System.out.print("the stack trace --> ");
+                t.printStackTrace();
+                return "hello world";
+              })
+          .execute();
     }
 
     @Path("/catchedAsyncByteErrorDelay")
@@ -589,59 +601,61 @@ public class RESTServiceExceptionTest extends VertxTestBase {
     public void rscatchedAsyncByteErrorDelay(RestHandler reply) {
       long startTime = System.currentTimeMillis();
       AtomicInteger count = new AtomicInteger(4);
-      reply.
-          response().
-          blocking().
-          byteResponse(() -> {
-            long estimatedTime = System.currentTimeMillis() - startTime;
-            System.out.println("time: " + estimatedTime);
-            if (count.decrementAndGet() >= 0) {
-              System.out.println("throw");
-              throw new NullPointerException("test");
-            }
+      reply
+          .response()
+          .blocking()
+          .byteResponse(
+              () -> {
+                long estimatedTime = System.currentTimeMillis() - startTime;
+                System.out.println("time: " + estimatedTime);
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw");
+                  throw new NullPointerException("test");
+                }
 
-            return null;
-          }).
-          retry(3).
-          delay(1000).
-          onFailureRespond((t) -> {
-            System.out.print("the stack trace --> ");
-            t.printStackTrace();
-            return "hello world".getBytes();
-          }).
-          execute();
+                return null;
+              })
+          .retry(3)
+          .delay(1000)
+          .onFailureRespond(
+              (t) -> {
+                System.out.print("the stack trace --> ");
+                t.printStackTrace();
+                return "hello world".getBytes();
+              })
+          .execute();
     }
-
 
     @Path("/catchedAsyncObjectErrorDelay")
     @GET
     public void rscatchedAsyncObjectErrorDelay(RestHandler reply) {
       long startTime = System.currentTimeMillis();
       AtomicInteger count = new AtomicInteger(4);
-      reply.
-          response().
-          blocking().
-          objectResponse(() -> {
-            long estimatedTime = System.currentTimeMillis() - startTime;
-            System.out.println("time: " + estimatedTime);
-            if (count.decrementAndGet() >= 0) {
-              System.out.println("throw");
-              throw new NullPointerException("test");
-            }
+      reply
+          .response()
+          .blocking()
+          .objectResponse(
+              () -> {
+                long estimatedTime = System.currentTimeMillis() - startTime;
+                System.out.println("time: " + estimatedTime);
+                if (count.decrementAndGet() >= 0) {
+                  System.out.println("throw");
+                  throw new NullPointerException("test");
+                }
 
-            return null;
-          }, new ExampleStringEncoder()).
-          retry(3).
-          delay(1000).
-          onFailureRespond((t) -> {
-            System.out.print("the stack trace --> ");
-            t.printStackTrace();
-            return new Payload<String>("hello world");
-          }, new ExampleStringEncoder()).
-          execute();
+                return null;
+              },
+              new ExampleStringEncoder())
+          .retry(3)
+          .delay(1000)
+          .onFailureRespond(
+              (t) -> {
+                System.out.print("the stack trace --> ");
+                t.printStackTrace();
+                return new Payload<String>("hello world");
+              },
+              new ExampleStringEncoder())
+          .execute();
     }
-
   }
-
-
 }

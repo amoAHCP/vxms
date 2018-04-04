@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,14 @@ import io.vertx.ext.web.RoutingContext;
 import java.util.Set;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class allows easy access to Request values like Cookies, parameters and attributes.
+ * Created by Andy Moncsek on 12.01.16. This class allows easy access to Request values like
+ * Cookies, parameters and attributes.
  */
 public class RESTRequest {
 
   private final RoutingContext context;
 
-  /**
-   * @param context the Vert.x routing context
-   */
+  /** @param context the Vert.x routing context */
   public RESTRequest(RoutingContext context) {
     this.context = context;
   }
@@ -103,6 +101,4 @@ public class RESTRequest {
   public Buffer body() {
     return context.getBody();
   }
-
-
 }

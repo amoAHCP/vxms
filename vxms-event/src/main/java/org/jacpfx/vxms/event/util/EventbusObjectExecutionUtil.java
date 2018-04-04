@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,9 @@ import org.jacpfx.vxms.event.eventbus.basic.EventbusBridgeExecution;
 import org.jacpfx.vxms.event.interfaces.basic.ExecuteEventbusObjectCall;
 import org.jacpfx.vxms.event.interfaces.basic.RecursiveExecutor;
 import org.jacpfx.vxms.event.interfaces.basic.RetryExecutor;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusObjectResponse;
 
-/**
- * Created by Andy Moncsek on 05.04.16.
- * Typed execution of event-bus calls and object response
- */
+/** Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and object response */
 public class EventbusObjectExecutionUtil {
 
   /**
@@ -48,23 +45,24 @@ public class EventbusObjectExecutionUtil {
    * @param _objectFunction the function to process the result message
    * @param _requestOptions the event-bus (request) delivery serverOptions
    * @param _vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _failure the failure thrown while task execution
    * @param _errorMethodHandler the error-method handler
    * @param _requestMessage the request message to respond to
    * @param _objectConsumer the consumer that takes a Future to complete, producing the string
-   * response
+   *     response
    * @param _encoder the encoder to serialize you response object
    * @param _errorHandler the error handler
    * @param _onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param _responseDeliveryOptions the event-bus (response) delivery serverOptions
    * @param _retryCount the amount of retries before failure execution is triggered
    * @param _timeout the amount of time before the execution will be aborted
    * @param _circuitBreakerTimeout the amount of time before the circuit breaker closed again
-   * @return the execution chain {@link ExecuteEventbusBasicObjectResponse}
+   * @return the execution chain {@link ExecuteEventbusObjectResponse}
    */
-  public static ExecuteEventbusBasicObjectResponse mapToObjectResponse(String _methodId,
+  public static ExecuteEventbusObjectResponse mapToObjectResponse(
+      String _methodId,
       String _targetId,
       Object _message,
       ThrowableFutureBiConsumer<AsyncResult<Message<Object>>, Serializable> _objectFunction,
@@ -81,76 +79,91 @@ public class EventbusObjectExecutionUtil {
       int _retryCount,
       long _timeout,
       long _circuitBreakerTimeout) {
-    final DeliveryOptions _deliveryOptions = Optional.ofNullable(_requestOptions)
-        .orElse(new DeliveryOptions());
-    final RecursiveExecutor executor = (methodId,
-        vxmsShared, failure,
-        errorMethodHandler,
-        requestMessage,
-        consumer,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        responseDeliveryOptions,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout) ->
-        new ExecuteEventbusBasicObjectResponse(methodId,
-            vxmsShared, failure,
+    final DeliveryOptions _deliveryOptions =
+        Optional.ofNullable(_requestOptions).orElse(new DeliveryOptions());
+    final RecursiveExecutor<Serializable> executor =
+        (methodId,
+            vxmsShared,
+            failure,
             errorMethodHandler,
             requestMessage,
             consumer,
-            null,
-            encoder, errorHandler,
+            encoder,
+            errorHandler,
             onFailureRespond,
             responseDeliveryOptions,
-            retryCount, timeout, circuitBreakerTimeout).
-            execute();
+            retryCount,
+            timeout,
+            circuitBreakerTimeout) ->
+            new ExecuteEventbusObjectResponse(
+                    methodId,
+                    vxmsShared,
+                    failure,
+                    errorMethodHandler,
+                    requestMessage,
+                    null,
+                    consumer,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    responseDeliveryOptions,
+                    retryCount,
+                    timeout,
+                    circuitBreakerTimeout)
+                .execute();
 
-    final RetryExecutor retry = (targetId,
-        message,
-        function,
-        requestDeliveryOptions,
-        methodId,
-        vxmsShared, failure,
-        errorMethodHandler,
-        requestMessage,
-        consumer,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        responseDeliveryOptions,
-        retryCount,
-        timeout,
-        circuitBreakerTimeout) ->
-        mapToObjectResponse(methodId,
-            targetId,
-            message,
+    final RetryExecutor<Serializable> retry =
+        (targetId,
+            methodId, message,
             function,
             requestDeliveryOptions,
-            vxmsShared, failure,
+            vxmsShared,
+            failure,
             errorMethodHandler,
             requestMessage,
-            null,
+            consumer,
             encoder,
             errorHandler,
             onFailureRespond,
             responseDeliveryOptions,
-            retryCount - 1,
+            retryCount,
             timeout,
-            circuitBreakerTimeout).
-            execute();
+            circuitBreakerTimeout) ->
+            mapToObjectResponse(
+                    methodId,
+                    targetId,
+                    message,
+                    function,
+                    requestDeliveryOptions,
+                    vxmsShared,
+                    failure,
+                    errorMethodHandler,
+                    requestMessage,
+                    null,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    responseDeliveryOptions,
+                    retryCount - 1,
+                    timeout,
+                    circuitBreakerTimeout)
+                .execute();
 
     final ExecuteEventbusObjectCall excecuteEventBusAndReply =
-        (methodId, vxmsShared,
+        (methodId,
+            vxmsShared,
             errorMethodHandler,
             requestMessage,
             encoder,
             errorHandler,
             onFailureRespond,
             responseDeliveryOptions,
-            retryCount, timeout, circuitBreakerTimeout) -> EventbusBridgeExecution
-            .sendMessageAndSupplyHandler(methodId,
+            retryCount,
+            timeout,
+            circuitBreakerTimeout) ->
+            EventbusBridgeExecution.sendMessageAndSupplyHandler(
+                methodId,
                 _targetId,
                 _message,
                 _objectFunction,
@@ -164,12 +177,25 @@ public class EventbusObjectExecutionUtil {
                 responseDeliveryOptions,
                 retryCount,
                 timeout,
-                circuitBreakerTimeout, executor, retry);
+                circuitBreakerTimeout,
+                executor,
+                retry);
 
-    return new ExecuteEventbusBasicObjectResponse(_methodId, _vxmsShared, _failure,
-        _errorMethodHandler, _requestMessage, _objectConsumer, excecuteEventBusAndReply, _encoder,
+    return new ExecuteEventbusObjectResponse(
+        _methodId,
+        _vxmsShared,
+        _failure,
+        _errorMethodHandler,
+        _requestMessage,
+        null,
+        _objectConsumer,
+        excecuteEventBusAndReply,
+        _encoder,
         _errorHandler,
-        _onFailureRespond, _responseDeliveryOptions, _retryCount, _timeout, _circuitBreakerTimeout);
+        _onFailureRespond,
+        _responseDeliveryOptions,
+        _retryCount,
+        _timeout,
+        _circuitBreakerTimeout);
   }
-
 }

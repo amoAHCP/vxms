@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,12 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.concurrent.LocalData;
-import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableErrorConsumer;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 
@@ -37,9 +35,9 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureBiConsumer;
 public class StepExecution {
 
   private static final int DEFAULT_VALUE = 0;
-  private static final long DEFAULT_LONG_VALUE = 0l;
+  private static final long DEFAULT_LONG_VALUE = 0L;
   private static final int DEFAULT_LOCK_TIMEOUT = 2000;
-  private static final long LOCK_VALUE = -1l;
+  private static final long LOCK_VALUE = -1L;
 
   /**
    * Executes the response creation and handles failures
@@ -57,7 +55,8 @@ public class StepExecution {
    *     objects per instance
    * @param failure last thrown Exception
    * @param resultConsumer the consumer that takes the execution resultz
-   * @param <T> the type of response
+   * @param <T> the type of input value
+   * @param <V> the type of response
    */
   public static <T, V> void createResponse(
       String methodId,
@@ -515,30 +514,13 @@ public class StepExecution {
     }
   }
 
-  public static void handleError(Consumer<Throwable> errorHandler, Throwable e) {
+  private static void handleError(Consumer<Throwable> errorHandler, Throwable e) {
     if (errorHandler != null) {
       errorHandler.accept(e);
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public static Optional<?> encode(Serializable value, Encoder encoder) {
-    try {
-      if (encoder instanceof Encoder.ByteEncoder) {
-        return Optional.ofNullable(((Encoder.ByteEncoder) encoder).encode(value));
-      } else if (encoder instanceof Encoder.StringEncoder) {
-        return Optional.ofNullable(((Encoder.StringEncoder) encoder).encode(value));
-      } else {
-        return Optional.ofNullable(value);
-      }
 
-    } catch (Exception e) {
-      // TODO ignore serialisation currently... log message
-      e.printStackTrace();
-    }
-
-    return Optional.empty();
-  }
 
   private static <T> void executeLocked(
       LockedConsumer consumer,

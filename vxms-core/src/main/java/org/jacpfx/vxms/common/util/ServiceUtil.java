@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.jacpfx.vxms.common.util;
 import java.util.ServiceLoader;
 import org.jacpfx.vxms.spi.EventhandlerSPI;
 import org.jacpfx.vxms.spi.RESThandlerSPI;
+import org.jacpfx.vxms.spi.ServiceDiscoverySPI;
 import org.jacpfx.vxms.spi.WebSockethandlerSPI;
 
 /**
@@ -28,7 +29,18 @@ import org.jacpfx.vxms.spi.WebSockethandlerSPI;
 public class ServiceUtil {
 
 
-
+  /**
+   * Returns all discovery implementations
+   *
+   * @return an implementation of {@link org.jacpfx.vxms.spi.ServiceDiscoverySPI}
+   */
+  public static ServiceDiscoverySPI getDiscoverySPI() {
+    ServiceLoader<ServiceDiscoverySPI> loader = ServiceLoader.load(ServiceDiscoverySPI.class);
+    if (!loader.iterator().hasNext()) {
+      return null;
+    }
+    return loader.iterator().next();
+  }
 
   /**
    * Returns all REST implementations

@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.jacpfx.vxms.rest;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.ext.web.Router;
-import org.jacpfx.vxms.spi.RESThandlerSPI;
 import org.jacpfx.vxms.common.VxmsShared;
+import org.jacpfx.vxms.spi.RESThandlerSPI;
 
 /**
- * Created by amo on 05.08.16.
- * Implements teh RESThandlerSPI and calls the initializer to bootstrap the rest API
+ * Created by amo on 05.08.16. Implements teh RESThandlerSPI and calls the initializer to bootstrap
+ * the rest API
  */
 public class RESThandler implements RESThandlerSPI {
 

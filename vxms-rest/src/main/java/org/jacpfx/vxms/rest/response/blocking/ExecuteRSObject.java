@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@ package org.jacpfx.vxms.rest.response.blocking;
 import static java.util.Optional.ofNullable;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import java.io.Serializable;
@@ -31,7 +28,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.common.BlockingExecutionStep;
-import org.jacpfx.vxms.common.ExecutionResult;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
@@ -39,8 +35,8 @@ import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 import org.jacpfx.vxms.rest.interfaces.blocking.ExecuteEventbusObjectCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * This class is the end of the blocking fluent API, all data collected to execute the chain.
+ * Created by Andy Moncsek on 12.01.16. This class is the end of the blocking fluent API, all data
+ * collected to execute the chain.
  */
 public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.ExecuteRSObject {
 
@@ -56,7 +52,7 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param context the vertx routing context
@@ -64,11 +60,11 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
    * @param objectSupplier the supplier, producing the object response
    * @param chain the chain to execute
    * @param excecuteBlockingEventBusAndReply the response of an event-bus call which is passed to
-   * the fluent API
+   *     the fluent API
    * @param encoder the encoder to encode your objects
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param httpStatusCode the http status code to set for response
    * @param httpErrorCode the http error code to set in case of failure handling
    * @param retryCount the amount of retries before failure execution is triggered
@@ -76,7 +72,8 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteRSObject(String methodId,
+  public ExecuteRSObject(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
@@ -94,7 +91,8 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
@@ -122,25 +120,26 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
   @Override
   public void execute(HttpResponseStatus status) {
     Objects.requireNonNull(status);
-    new ExecuteRSObject(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        headers,
-        objectSupplier,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        status.code(),
-        httpErrorCode,
-        retryCount,
-        delay,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
+    new ExecuteRSObject(
+            methodId,
+            vxmsShared,
+            failure,
+            errorMethodHandler,
+            context,
+            headers,
+            objectSupplier,
+            chain,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            status.code(),
+            httpErrorCode,
+            retryCount,
+            delay,
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
   }
 
   /**
@@ -153,25 +152,26 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
   public void execute(HttpResponseStatus status, String contentType) {
     Objects.requireNonNull(status);
     Objects.requireNonNull(contentType);
-    new ExecuteRSObject(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
-        objectSupplier,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        status.code(),
-        httpErrorCode,
-        retryCount,
-        delay,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
+    new ExecuteRSObject(
+            methodId,
+            vxmsShared,
+            failure,
+            errorMethodHandler,
+            context,
+            updateContentType(headers, contentType),
+            objectSupplier,
+            chain,
+            excecuteEventBusAndReply,
+            encoder,
+            errorHandler,
+            onFailureRespond,
+            status.code(),
+            httpErrorCode,
+            retryCount,
+            delay,
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
   }
 
   /**
@@ -182,61 +182,78 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
   @Override
   public void execute(String contentType) {
     Objects.requireNonNull(contentType);
-    new ExecuteRSObject(methodId,
-        vxmsShared,
-        failure,
-        errorMethodHandler,
-        context,
-        org.jacpfx.vxms.rest.response.basic.ResponseExecution.updateContentType(headers, contentType),
-        objectSupplier,
-        chain,
-        excecuteEventBusAndReply,
-        encoder,
-        errorHandler,
-        onFailureRespond,
-        httpStatusCode,
-        httpErrorCode,
-        retryCount,
-        delay,
-        timeout,
-        circuitBreakerTimeout).
-        execute();
-  }
-
-
-  @Override
-  public void execute() {
-    Optional.ofNullable(excecuteEventBusAndReply).ifPresent(evFunction -> {
-      try {
-        evFunction.execute(vxmsShared,
+    new ExecuteRSObject(
+            methodId,
+            vxmsShared,
             failure,
             errorMethodHandler,
             context,
-            headers,
+            updateContentType(headers, contentType),
+            objectSupplier,
+            chain,
+            excecuteEventBusAndReply,
             encoder,
             errorHandler,
             onFailureRespond,
             httpStatusCode,
             httpErrorCode,
             retryCount,
-            timeout,
             delay,
-            circuitBreakerTimeout);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+            timeout,
+            circuitBreakerTimeout)
+        .execute();
+  }
 
-    });
+  @Override
+  @SuppressWarnings("unchecked")
+  public void execute() {
+    Optional.ofNullable(excecuteEventBusAndReply)
+        .ifPresent(
+            evFunction -> {
+              try {
+                evFunction.execute(
+                    vxmsShared,
+                    failure,
+                    errorMethodHandler,
+                    context,
+                    headers,
+                    encoder,
+                    errorHandler,
+                    onFailureRespond,
+                    httpStatusCode,
+                    httpErrorCode,
+                    retryCount,
+                    timeout,
+                    delay,
+                    circuitBreakerTimeout);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            });
 
-    Optional.ofNullable(objectSupplier).
-        ifPresent(supplier -> {
+    Optional.ofNullable(objectSupplier)
+        .ifPresent(
+            supplier -> {
               int retry = retryCount;
               final Vertx vertx = vxmsShared.getVertx();
-              vertx.executeBlocking(handler -> typedExecute(supplier, retry, handler), false,
-                  getTypedResultHandler(retry));
-            }
-
-        );
+              vertx.executeBlocking(
+                  handler ->
+                      executeBlocking(
+                          methodId,
+                          vxmsShared,
+                          failure,
+                          errorMethodHandler,
+                          errorHandler,
+                          supplier,
+                          retry,
+                          timeout,
+                          circuitBreakerTimeout,
+                          delay,
+                          handler,
+                          onFailureRespond),
+                  false,
+                  getResultHandler(retry, httpErrorCode));
+            });
 
     ofNullable(chain)
         .ifPresent(
@@ -249,107 +266,37 @@ public class ExecuteRSObject extends org.jacpfx.vxms.rest.response.basic.Execute
                           int retry = retryCount;
                           final Vertx vertx = vxmsShared.getVertx();
                           vertx.executeBlocking(
-                              handler -> execute(initialConsumer, retry, handler, onFailureRespond),
+                              handler ->
+                                  executeBlocking(
+                                      methodId,
+                                      vxmsShared,
+                                      failure,
+                                      errorMethodHandler,
+                                      errorHandler,
+                                      initialConsumer,
+                                      retry,
+                                      timeout,
+                                      circuitBreakerTimeout,
+                                      delay,
+                                      handler,
+                                      onFailureRespond),
                               false,
-                              getResultHandler(executionStep, chainList, retry));
+                              getResultHandler(
+                                  methodId,
+                                  vxmsShared,
+                                  failure,
+                                  errorMethodHandler,
+                                  errorHandler,
+                                  executionStep,
+                                  chainList,
+                                  httpErrorCode,
+                                  retry,
+                                  timeout,
+                                  circuitBreakerTimeout,
+                                  delay,
+                                  onFailureRespond));
                         });
               }
             });
-
   }
-
-  private void execute(
-      ThrowableSupplier<Object> supplier,
-      int retry,
-      Future<ExecutionResult<Object>> blockingHandler,
-      ThrowableFunction onFailureRespond) {
-    ResponseExecution.executeRetryAndCatchAsync(
-        methodId,
-        supplier,
-        blockingHandler,
-        errorHandler,
-        onFailureRespond,
-        errorMethodHandler,
-        vxmsShared,
-        failure,
-        retry,
-        timeout,
-        circuitBreakerTimeout,
-        delay);
-  }
-
-  private <T> Handler<AsyncResult<ExecutionResult<T>>> getResultHandler(
-      BlockingExecutionStep step, List<BlockingExecutionStep> chainList, int retry) {
-    return value -> {
-      if (!value.failed()) {
-        ExecutionResult<?> result = value.result();
-        if (!result.handledError()) {
-          final int index = chainList.indexOf(step);
-          final int size = chainList.size();
-          if (index == size - 1) {
-            // handle last element
-            respond((Serializable) result.getResult());
-          } else {
-            // call recursive
-            final BlockingExecutionStep executionStepAndThan = chainList.get(index + 1);
-            final Vertx vertx = vxmsShared.getVertx();
-            final Object res = result.getResult();
-            vertx.executeBlocking(
-                handler ->
-                    Optional.ofNullable(executionStepAndThan.getStep())
-                        .ifPresent(
-                            stepNext ->
-                                executeStep(retry, handler, res, stepNext, onFailureRespond)),
-                false,
-                getResultHandler(executionStepAndThan, chainList, retry));
-          }
-        } else {
-          respond((Serializable) result.getResult(), httpErrorCode);
-        }
-      } else {
-        checkAndCloseResponse(retry);
-      }
-    };
-  }
-
-  private <T, V> void executeStep(
-      int retry,
-      Future<ExecutionResult<V>> handler,
-      T res,
-      ThrowableFunction stepNext,
-      ThrowableFunction onFailureRespond) {
-    StepExecution.executeRetryAndCatchAsync(
-        methodId,
-        stepNext,
-        res,
-        handler,
-        errorHandler,
-        onFailureRespond,
-        errorMethodHandler,
-        vxmsShared,
-        failure,
-        retry,
-        timeout,
-        circuitBreakerTimeout,
-        delay);
-  }
-
-  private void typedExecute(ThrowableSupplier<Serializable> supplier, int retry,
-      Future<ExecutionResult<Serializable>> handler) {
-    ResponseExecution
-        .executeRetryAndCatchAsync(methodId, supplier, handler, errorHandler, onFailureRespond,
-            errorMethodHandler, vxmsShared, failure, retry, timeout, circuitBreakerTimeout, delay);
-  }
-
-  private Handler<AsyncResult<ExecutionResult<Serializable>>> getTypedResultHandler(int retry) {
-    return value -> {
-      if (!value.failed()) {
-        respond(value.result().getResult());
-      } else {
-        checkAndCloseResponse(retry);
-      }
-    };
-  }
-
-
 }

@@ -1,0 +1,23 @@
+metadata:
+  annotations:
+    configmap.fabric8.io/update-on-change: springconfig
+spec:
+  replicas: 1
+  template:
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: springconfig
+            items:
+              - key: application.properties
+                path: application.properties
+      containers:
+        - name: vertx
+          ports:
+          - containerPort: 7070
+          env:
+          - name: JAVA_ARGS
+            value: '-Dspring.profiles.active=openshift'
+          - name: MYENV
+            value: "openshift"

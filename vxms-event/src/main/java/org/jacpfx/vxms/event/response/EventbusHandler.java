@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import org.jacpfx.vxms.event.eventbus.basic.EventbusBridgeRequest;
 
 /**
  * Created by Andy Moncsek on 07.01.16. The EventbusHandler gives access to the {@link Message} ,
- * the {@link EventbusRequest} , the {@link EventbusResponse} and the {@link
- * EventbusBridgeRequest}.
+ * the {@link EventbusRequest} , the {@link EventbusResponse} and the {@link EventbusBridgeRequest}.
  */
 public class EventbusHandler {
 
@@ -36,23 +35,23 @@ public class EventbusHandler {
 
   /**
    * The constructor initialize the Eventbus Handler
-   *
-   * @param methodId the method identifier
-   * @param message the message to respond to
+   *  @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
+   * @param message the message to respond to
    */
-  public EventbusHandler(String methodId, Message<Object> message, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public EventbusHandler(
+      String methodId,
+      VxmsShared vxmsShared, Throwable failure, Consumer<Throwable> errorMethodHandler,
+      Message<Object> message) {
     this.methodId = methodId;
     this.message = message;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
     this.errorMethodHandler = errorMethodHandler;
   }
-
 
   /**
    * Returns the message to respond to
@@ -78,7 +77,7 @@ public class EventbusHandler {
    * @return {@link EventbusResponse}
    */
   public EventbusResponse response() {
-    return new EventbusResponse(methodId, message, vxmsShared, failure, errorMethodHandler);
+    return new EventbusResponse(methodId, vxmsShared, failure, errorMethodHandler, message);
   }
 
   /**
@@ -88,7 +87,6 @@ public class EventbusHandler {
    * @return {@link EventbusBridgeRequest}
    */
   public EventbusBridgeRequest eventBusRequest() {
-    return new EventbusBridgeRequest(methodId, message, vxmsShared, failure, errorMethodHandler);
+    return new EventbusBridgeRequest(methodId, vxmsShared, failure, errorMethodHandler, message);
   }
-
 }

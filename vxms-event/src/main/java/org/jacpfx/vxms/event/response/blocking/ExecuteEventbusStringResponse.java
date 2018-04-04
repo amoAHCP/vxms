@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,17 @@ package org.jacpfx.vxms.event.response.blocking;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCall;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API for byte responses, defines access to failure handling, timeouts,...
+ * Created by Andy Moncsek on 12.01.16. Fluent API for byte responses, defines access to failure
+ * handling, timeouts,...
  */
 public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
 
@@ -35,29 +37,32 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to responde to
+   * @param chain the execution chain
    * @param stringSupplier the supplier, producing the byte response
    * @param excecuteAsyncEventBusAndReply the response of an event-bus call which is passed to the
-   * fluent API
+   *     fluent API
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response delivery serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusStringResponse(String methodId,
+  public ExecuteEventbusStringResponse(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<String> stringSupplier,
-      ExecuteEventbusStringCallBlocking excecuteAsyncEventBusAndReply,
+      ExecuteEventbusStringCall excecuteAsyncEventBusAndReply,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, String> onFailureRespond,
       DeliveryOptions deliveryOptions,
@@ -65,19 +70,55 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId, vxmsShared, failure,
+    super(
+        methodId,
+        vxmsShared,
+        failure,
         errorMethodHandler,
         message,
-        stringSupplier,
+        chain, stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
         onFailureRespond,
         deliveryOptions,
         retryCount,
         timeout,
-        delay, circuitBreakerTimeout);
+        delay,
+        circuitBreakerTimeout);
   }
 
+  /**
+   *
+   * The constructor to pass minimal needed members
+   *
+   * @param methodId the method identifier
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   *     objects per instance
+   * @param failure the failure thrown while task execution
+   * @param errorMethodHandler the error handler
+   * @param message the message to responde to
+   * @param chain the execution chain
+   * @param stringSupplier the supplier, producing the byte response
+   */
+  public ExecuteEventbusStringResponse(String methodId, VxmsShared vxmsShared, Throwable failure,
+      Consumer<Throwable> errorMethodHandler, Message<Object> message,List<BlockingExecutionStep> chain,
+      ThrowableSupplier<String> stringSupplier) {
+    super(
+        methodId,
+        vxmsShared,
+        failure,
+        errorMethodHandler,
+        message,
+        chain, stringSupplier,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0L,
+        0L,
+        0L);
+  }
 
   /**
    * defines an action for errors in byte responses, you can handle the error and return an
@@ -88,12 +129,13 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    */
   public ExecuteEventbusString onFailureRespond(
       ThrowableFunction<Throwable, String> onFailureRespond) {
-    return new ExecuteEventbusString(methodId,
+    return new ExecuteEventbusString(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
-        stringSupplier,
+        chain, stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
         onFailureRespond,
@@ -112,11 +154,13 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    * @return the response chain {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse onError(Consumer<Throwable> errorHandler) {
-    return new ExecuteEventbusStringResponse(methodId,
+    return new ExecuteEventbusStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -135,11 +179,13 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    * @return the createResponse chain {@link ExecuteEventbusStringCircuitBreaker}
    */
   public ExecuteEventbusStringCircuitBreaker retry(int retryCount) {
-    return new ExecuteEventbusStringCircuitBreaker(methodId,
+    return new ExecuteEventbusStringCircuitBreaker(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -158,11 +204,13 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    * @return the createResponse chain {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse timeout(long timeout) {
-    return new ExecuteEventbusStringResponse(methodId,
+    return new ExecuteEventbusStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -181,11 +229,13 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
    * @return the createResponse chain {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse delay(long delay) {
-    return new ExecuteEventbusStringResponse(methodId,
+    return new ExecuteEventbusStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -196,6 +246,4 @@ public class ExecuteEventbusStringResponse extends ExecuteEventbusString {
         delay,
         circuitBreakerTimeout);
   }
-
-
 }

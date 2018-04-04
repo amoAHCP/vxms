@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import org.jacpfx.vxms.common.ExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.encoder.Encoder;
 import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventChaineResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicByteResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicObjectResponse;
-import org.jacpfx.vxms.event.response.basic.ExecuteEventbusBasicStringResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventChainResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusByteResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusObjectResponse;
+import org.jacpfx.vxms.event.response.basic.ExecuteEventbusStringResponse;
 
 /**
- * Created by Andy Moncsek on 12.01.16.
- * Fluent API to define a Task and to reply the request with the output of your task.
+ * Created by Andy Moncsek on 12.01.16. Fluent API to define a Task and to reply the request with
+ * the output of your task.
  */
 public class EventbusResponse {
 
@@ -46,14 +46,18 @@ public class EventbusResponse {
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
-   * @param message the event-bus message to respond to
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
+   * @param message the event-bus message to respond to
    */
-  public EventbusResponse(String methodId, Message<Object> message, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public EventbusResponse(
+      String methodId,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler,
+      Message<Object> message) {
     this.methodId = methodId;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
@@ -70,57 +74,56 @@ public class EventbusResponse {
     return new EventbusResponseBlocking(methodId, message, vxmsShared, failure, errorMethodHandler);
   }
 
-
   /**
    * starts a supply chain to create a response
+   *
    * @param chainconsumer the initial supplier
    * @param <T> the type of the return value
-   * @return {@link ExecuteEventChaineResponse}
+   * @return {@link ExecuteEventChainResponse}
    */
-  public <T> ExecuteEventChaineResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
+
+  @SuppressWarnings("unchecked")
+  public <T> ExecuteEventChainResponse<T> supply(ThrowableFutureConsumer<T> chainconsumer) {
     final List<ExecutionStep> chain = new ArrayList<>();
     chain.add(new ExecutionStep(chainconsumer));
-    return new ExecuteEventChaineResponse<>(
+    return new ExecuteEventChainResponse<>(
         methodId, vxmsShared, failure, errorMethodHandler, message, chain);
   }
 
   /**
    * Returns a byte array to the target type
    *
-   * @param byteConsumer consumes a io.vertx.core.Future to compleate with a byte response
-   * @return {@link ExecuteEventbusBasicByteResponse}
+   * @param byteConsumer consumes a io.vertx.core.Future to complete with a byte response
+   * @return {@link ExecuteEventbusByteResponse}
    */
-  public ExecuteEventbusBasicByteResponse byteResponse(
-      ThrowableFutureConsumer<byte[]> byteConsumer) {
-    return new ExecuteEventbusBasicByteResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, byteConsumer);
+  public ExecuteEventbusByteResponse byteResponse(ThrowableFutureConsumer<byte[]> byteConsumer) {
+    return new ExecuteEventbusByteResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, null, byteConsumer);
   }
 
   /**
    * Returns a String to the target type
    *
-   * @param stringConsumer consumes a io.vertx.core.Future to compleate with a String response
-   * @return {@link ExecuteEventbusBasicStringResponse}
+   * @param stringConsumer consumes a io.vertx.core.Future to complete with a String response
+   * @return {@link ExecuteEventbusStringResponse}
    */
-  public ExecuteEventbusBasicStringResponse stringResponse(
+  public ExecuteEventbusStringResponse stringResponse(
       ThrowableFutureConsumer<String> stringConsumer) {
-    return new ExecuteEventbusBasicStringResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message,null, stringConsumer);
+    return new ExecuteEventbusStringResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, null, stringConsumer);
   }
 
   /**
    * Returns a Serializable to the target type
    *
-   * @param objectConsumer consumes a io.vertx.core.Future to compleate with a Serialized Object
-   * response
+   * @param objectConsumer consumes a io.vertx.core.Future to complete with a Serialized Object
+   *     response
    * @param encoder the encoder to serialize the response object
-   * @return {@link ExecuteEventbusBasicObjectResponse}
+   * @return {@link ExecuteEventbusObjectResponse}
    */
-  public ExecuteEventbusBasicObjectResponse objectResponse(
+  public ExecuteEventbusObjectResponse objectResponse(
       ThrowableFutureConsumer<Serializable> objectConsumer, Encoder encoder) {
-    return new ExecuteEventbusBasicObjectResponse(methodId, vxmsShared, failure, errorMethodHandler,
-        message, objectConsumer,encoder);
+    return new ExecuteEventbusObjectResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, message, null, objectConsumer, encoder);
   }
-
-
 }

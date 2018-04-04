@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,8 @@ import java.lang.reflect.Method;
 import java.util.function.Supplier;
 import org.jacpfx.vxms.common.util.CommonReflectionUtil;
 
-/**
- * Created by Andy Moncsek on 25.11.15.
- * Utility class for handling invocation of vxms  methods
- */
+/** Created by Andy Moncsek on 25.11.15. Utility class for handling invocation of vxms methods */
 public class ReflectionUtil {
-
 
   /**
    * Invoke a vxms event-bus method parameters
@@ -60,10 +56,8 @@ public class ReflectionUtil {
    * @param invokeTo the target
    * @throws Throwable the exception
    */
-  public static void genericMethodInvocation(Method method, Supplier<Object[]> parameters,
-      Object invokeTo) throws Throwable {
+  public static void genericMethodInvocation(
+      Method method, Supplier<Object[]> parameters, Object invokeTo) throws Throwable {
     CommonReflectionUtil.genericMethodInvocation(method, parameters, invokeTo);
   }
-
-
 }

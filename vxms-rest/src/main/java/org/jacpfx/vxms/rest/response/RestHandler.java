@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,19 +41,22 @@ public class RestHandler {
    * @param methodId the method identifier
    * @param context the vertx routing context
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution or messaging
    * @param errorMethodHandler the error-method handler
    */
-  public RestHandler(String methodId, RoutingContext context, VxmsShared vxmsShared,
-      Throwable failure, Consumer<Throwable> errorMethodHandler) {
+  public RestHandler(
+      String methodId,
+      RoutingContext context,
+      VxmsShared vxmsShared,
+      Throwable failure,
+      Consumer<Throwable> errorMethodHandler) {
     this.methodId = methodId;
     this.context = context;
     this.vxmsShared = vxmsShared;
     this.failure = failure;
     this.errorMethodHandler = errorMethodHandler;
   }
-
 
   /**
    * Returns the Vert.x http Routing context
@@ -79,8 +82,8 @@ public class RestHandler {
    * @return {@link RESTResponse}
    */
   public RESTResponse response() {
-    return new RESTResponse(methodId, vxmsShared, failure, errorMethodHandler, context,
-        new HashMap<>());
+    return new RESTResponse(
+        methodId, vxmsShared, failure, errorMethodHandler, context, new HashMap<>());
   }
 
   /**
@@ -92,5 +95,4 @@ public class RestHandler {
   public EventbusRequest eventBusRequest() {
     return new EventbusRequest(methodId, vxmsShared, failure, errorMethodHandler, context);
   }
-
 }

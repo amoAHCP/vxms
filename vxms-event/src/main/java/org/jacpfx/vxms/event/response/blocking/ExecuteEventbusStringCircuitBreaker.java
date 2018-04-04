@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.jacpfx.vxms.event.response.blocking;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import java.util.List;
 import java.util.function.Consumer;
+import org.jacpfx.vxms.common.BlockingExecutionStep;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
-import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCallBlocking;
+import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCall;
 
 /**
  * Created by Andy Moncsek on 12.01.16. This class defines the fluid API part to define the amount
@@ -30,35 +32,37 @@ import org.jacpfx.vxms.event.interfaces.blocking.ExecuteEventbusStringCallBlocki
  */
 public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringResponse {
 
-
   /**
    * The constructor to pass all needed members
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param failure the failure thrown while task execution
    * @param errorMethodHandler the error handler
    * @param message the message to respond to
+   * @param chain the execution chain
    * @param stringSupplier the supplier, producing the byte response
    * @param excecuteEventBusAndReply the response of an event-bus call which is passed to the fluent
-   * API
+   *     API
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param deliveryOptions the response deliver serverOptions
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the amount of time before the execution will be aborted
    * @param delay the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  public ExecuteEventbusStringCircuitBreaker(String methodId,
+  public ExecuteEventbusStringCircuitBreaker(
+      String methodId,
       VxmsShared vxmsShared,
       Throwable failure,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> message,
+      List<BlockingExecutionStep> chain,
       ThrowableSupplier<String> stringSupplier,
-      ExecuteEventbusStringCallBlocking excecuteEventBusAndReply,
+      ExecuteEventbusStringCall excecuteEventBusAndReply,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, String> onFailureRespond,
       DeliveryOptions deliveryOptions,
@@ -66,11 +70,13 @@ public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringRe
       long timeout,
       long delay,
       long circuitBreakerTimeout) {
-    super(methodId,
+    super(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteEventBusAndReply,
         errorHandler,
@@ -82,22 +88,23 @@ public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringRe
         circuitBreakerTimeout);
   }
 
-
   /**
    * Define a timeout to release the stateful circuit breaker. Depending on your configuration the
    * CircuitBreaker locks either cluster wide, jvm wide or only for the instance
    *
    * @param circuitBreakerTimeout the amount of time in ms before close the CircuitBreaker to allow
-   * "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
-   * faster)
+   *     "normal" execution path again, a value of 0l will use a stateless retry mechanism (performs
+   *     faster)
    * @return the response chain {@link ExecuteEventbusStringResponse}
    */
   public ExecuteEventbusStringResponse closeCircuitBreaker(long circuitBreakerTimeout) {
-    return new ExecuteEventbusStringResponse(methodId,
+    return new ExecuteEventbusStringResponse(
+        methodId,
         vxmsShared,
         failure,
         errorMethodHandler,
         message,
+        chain,
         stringSupplier,
         excecuteAsyncEventBusAndReply,
         errorHandler,
@@ -108,6 +115,4 @@ public class ExecuteEventbusStringCircuitBreaker extends ExecuteEventbusStringRe
         delay,
         circuitBreakerTimeout);
   }
-
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,19 +36,20 @@ public interface ExecuteEventbusObjectCall {
    *
    * @param methodId the method identifier
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param errorMethodHandler the error-method handler
    * @param requestMessage the message to responde to
    * @param encoder the encoder to serialize the response object
    * @param errorHandler the error handler
    * @param onFailureRespond the consumer that takes a Future with the alternate response value in
-   * case of failure
+   *     case of failure
    * @param responseDeliveryOptions the delivery serverOptions for the response
    * @param retryCount the amount of retries before failure execution is triggered
    * @param timeout the delay time in ms between an execution error and the retry
    * @param circuitBreakerTimeout the amount of time before the circuit breaker closed again
    */
-  void execute(String methodId,
+  void execute(
+      String methodId,
       VxmsShared vxmsShared,
       Consumer<Throwable> errorMethodHandler,
       Message<Object> requestMessage,
@@ -56,5 +57,7 @@ public interface ExecuteEventbusObjectCall {
       Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, Serializable> onFailureRespond,
       DeliveryOptions responseDeliveryOptions,
-      int retryCount, long timeout, long circuitBreakerTimeout);
+      int retryCount,
+      long timeout,
+      long circuitBreakerTimeout);
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright [2017] [Andy Moncsek]
+  ~ Copyright [2018] [Andy Moncsek]
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.org.jacpfx</groupId>
+    <groupId>org.jacpfx</groupId>
     <artifactId>vxms</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
   <modules>
     <module>vxms-testing</module>
   </modules>
@@ -40,7 +40,7 @@
         <!--Vertx module name-->
         <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
         <!--Dependency versions-->
-        <vertx.version>3.4.2</vertx.version>
+        <vertx.version>3.5.0</vertx.version>
         <junit.version>4.11</junit.version>
         <!--Plugin versions-->
         <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
@@ -81,6 +81,7 @@
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
+                <module>vxms-k8sdiscovery</module>
                 <module>vxms-testing</module>
             </modules>
         </profile>
@@ -90,6 +91,7 @@
                 <module>vxms-core</module>
                 <module>vxms-event</module>
                 <module>vxms-rest</module>
+                <module>vxms-k8sdiscovery</module>
                 <module>vxms-testing</module>
             </modules>
         </profile>

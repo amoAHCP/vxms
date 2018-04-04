@@ -20,6 +20,7 @@ Dockerfile
 vxms-demos/vxms-stream-demo
 vxms-demos/vxms-test
 vxms-demos/vxms-test/*
+
 vxms-demos/gatling-sample-project/*
 
 out

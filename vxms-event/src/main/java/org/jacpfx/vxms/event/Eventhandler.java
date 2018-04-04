@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@
 package org.jacpfx.vxms.event;
 
 import io.vertx.core.AbstractVerticle;
-import org.jacpfx.vxms.spi.EventhandlerSPI;
 import org.jacpfx.vxms.common.VxmsShared;
+import org.jacpfx.vxms.spi.EventhandlerSPI;
 
-/**
- * Created by amo on 05.08.16.
- */
+/** Created by amo on 05.08.16. */
 public class Eventhandler implements EventhandlerSPI {
 
   @Override
