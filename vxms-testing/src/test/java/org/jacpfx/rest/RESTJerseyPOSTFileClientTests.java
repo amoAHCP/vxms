@@ -19,8 +19,6 @@ package org.jacpfx.rest;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.FileUpload;
@@ -34,16 +32,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
@@ -51,14 +51,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-/** Created by Andy Moncsek on 23.04.15. */
+/**
+ * Created by Andy Moncsek on 23.04.15.
+ */
 public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
-  private HttpClient client;
 
   protected int getNumNodes() {
     return 1;
@@ -105,38 +106,45 @@ public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
               latch2.countDown();
             });
 
-    client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
   }
 
   @Test
   public void stringPOSTResponseWithParameter()
       throws InterruptedException, ExecutionException, IOException {
-    final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
     File file = new File(getClass().getClassLoader().getResource("payload.xml").getFile());
-    final FileDataBodyPart filePart = new FileDataBodyPart("file", file);
-    FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-    final FormDataMultiPart multipart =
-        (FormDataMultiPart)
-            formDataMultiPart.field("foo", "bar").field("hello", "world").bodyPart(filePart);
+    HttpPost post = new HttpPost(
+        "http://" + HOST + ":" + PORT + SERVICE_REST_GET + "/simpleFilePOSTupload");
+    HttpClient client = HttpClientBuilder.create().build();
 
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleFilePOSTupload");
-    final Response response =
-        target.request().post(Entity.entity(multipart, multipart.getMediaType()));
+    FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+    StringBody stringBody1 = new StringBody("bar", ContentType.MULTIPART_FORM_DATA);
+    StringBody stringBody2 = new StringBody("world", ContentType.MULTIPART_FORM_DATA);
+//
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+    builder.addPart("file", fileBody);
+    builder.addPart("foo", stringBody1);
+    builder.addPart("hello", stringBody2);
+    HttpEntity entity = builder.build();
+//
+    post.setEntity(entity);
+    HttpResponse response = client.execute(post);
 
     // Use createResponse object to verify upload success
-    final String entity = response.readEntity(String.class);
-    System.out.println(entity);
-    assertTrue(entity.equals("barworlddfgdfg"));
-    formDataMultiPart.close();
-    multipart.close();
+    final String entity1 = convertStreamToString(response.getEntity().getContent());
+    System.out.println("-->" + entity1);
+    assertTrue(entity1.equals("barworlddfgdfg"));
+
     testComplete();
   }
 
-  public HttpClient getClient() {
-    return client;
+  static String convertStreamToString(java.io.InputStream is) {
+    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
   }
+
+
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
   public class WsServiceOne extends VxmsEndpoint {
