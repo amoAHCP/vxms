@@ -349,23 +349,21 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointSeven_error?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Payload<String> pp = null;
-                      try {
-                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                      } catch (IOException e) {
-                        e.printStackTrace();
-                      } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                      }
-                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Payload<String> pp = null;
+                    try {
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                      e.printStackTrace();
+                    }
+                    assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                  });
+              testComplete();
             });
     request.end();
     await();

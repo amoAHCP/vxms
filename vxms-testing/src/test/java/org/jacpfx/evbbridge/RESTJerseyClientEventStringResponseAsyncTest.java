@@ -21,6 +21,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
@@ -120,165 +121,130 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
   @Test
   public void simpleResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://localhost:" + PORT2).path("/wsService/simpleResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "hello");
-                    latch.countDown();
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleResponse",
+            resp -> {
 
-    latch.await();
-    testComplete();
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
+
+                    assertEquals(body.toString(), "hello");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
   }
 
   @Test
   public void complexResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "hello");
-                    latch.countDown();
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/complexResponse",
+            resp -> {
 
-    latch.await();
-    testComplete();
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
+
+                    assertEquals(body.toString(), "hello");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
   }
 
   @Test
   public void complexErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexErrorResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test exception");
-                    latch.countDown();
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/complexErrorResponse",
+            resp -> {
 
-    latch.await();
-    testComplete();
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
+
+                    assertEquals(body.toString(), "test exception");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
   }
 
   @Test
   public void onErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/onFailurePass");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    vertx.runOnContext(
-                        c -> {
-                          assertEquals(response, "failed");
-                        });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/onFailurePass",
+            resp -> {
 
-                    latch.countDown();
-                  }
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+                    assertEquals(body.toString(), "failed");
 
-    latch.await();
-    testComplete();
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
   }
 
-  @Test
-  @Ignore
-  public void onErrorResponseErrorTest() throws InterruptedException {
-    System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/onFailurePassError");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    vertx.runOnContext(
-                        c -> {
-                          assertEquals(response, "failed");
-                        });
-
-                    latch.countDown();
-                  }
-
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
-
-    latch.await();
-    testComplete();
-  }
 
   public HttpClient getClient() {
     return client;

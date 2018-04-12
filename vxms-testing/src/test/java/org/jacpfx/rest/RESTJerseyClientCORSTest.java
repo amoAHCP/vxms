@@ -20,6 +20,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
@@ -138,138 +139,116 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   @Test
   public void corsFail() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseSyncAsync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .header("Origin", "http://org.jacpfx.org")
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println(
-                        "should not be called::::"
-                            + System.getProperty("sun.net.http.allowRestrictedHeaders")
-                            + response);
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println(throwable.getMessage());
-                    Assert.assertEquals(
-                        "javax.ws.rs.ForbiddenException: HTTP 403 CORS Rejected - Invalid origin",
-                        throwable.getMessage());
-                    latch.countDown();
-                  }
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncAsync",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-    latch.await();
-    testComplete();
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
+                    assertEquals("CORS Rejected - Invalid origin", resp.statusMessage());
+                    testComplete();
+                  });
+
+            }).putHeader("Origin", "http://org.jacpfx.org");
+    request.end();
+    await();
+
   }
 
   @Test
   public void corsOK() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/stringGETResponseSyncAsync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .header("Origin", "http://example.com")
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test-123");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncAsync",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
+                    assertEquals("test-123", body.toString());
+                    testComplete();
+                  });
 
-    latch.await();
-    testComplete();
+            }).putHeader("Origin", "http://example.com");
+    request.end();
+    await();
+
+
   }
 
   @Test
   public void WsServiceThree() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT3).path("/wsService/stringGETResponseSyncAsync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .header("Origin", "http://example.com")
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT3);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test-123");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncAsync",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
+                    assertEquals("test-123", body.toString());
+                    testComplete();
+                  });
 
-    latch.await();
-    testComplete();
+            }).putHeader("Origin", "http://example.com");
+    request.end();
+    await();
+
+
   }
 
   @Test
   public void WsServiceThree_1() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT3)
-            .path("/wsService/stringGETResponseSyncAsync2");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .header("Origin", "http://example1.com")
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT3);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("MESSAGE: " + response);
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncAsync2",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println(throwable.getMessage());
-                    Assert.assertEquals(
-                        "javax.ws.rs.ForbiddenException: HTTP 403 CORS Rejected - Invalid origin",
-                        throwable.getMessage());
-                    latch.countDown();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
+                    assertEquals("CORS Rejected - Invalid origin", resp.statusMessage());
+                    testComplete();
+                  });
 
-    latch.await();
-    testComplete();
+            }).putHeader("Origin", "http://org.jacpfx.org");
+    request.end();
+    await();
+
   }
 
   public HttpClient getClient() {

@@ -20,6 +20,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Session;
@@ -101,32 +102,31 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
   @Test
   public void sessionTest() throws InterruptedException {
     // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path(SERVICE_REST_GET + "/session");
-    Future<String> getCallback =
-        target
-            .request()
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    // Assert.assertEquals(createResponse, "xyz");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            SERVICE_REST_GET + "/session",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertNotNull(body.toString());
+                 //   assertEquals(body.toString(), "<h1>fgdfgdf</h1>");
+                    testComplete();
+                  });
 
-    latch.await();
-    testComplete();
+            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+    request.end();
+    await();
+
+
   }
 
   public HttpClient getClient() {

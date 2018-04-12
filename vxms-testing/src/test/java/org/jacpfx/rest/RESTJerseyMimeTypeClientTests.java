@@ -122,8 +122,9 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "123");
+                    testComplete();
                   });
-              testComplete();
+
             }).putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
@@ -201,8 +202,9 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "hello");
+                    testComplete();
                   });
-              testComplete();
+
             }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
     request.write("hello");
     request.end();
@@ -228,8 +230,8 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "<html><body><h1>Resource not found</h1></body></html>");
+                    testComplete();
                   });
-              testComplete();
             }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
     request.write("hello");
     request.end();
@@ -254,8 +256,8 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "hello");
+                    testComplete();
                   });
-              testComplete();
             }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", MediaType.APPLICATION_XML);
     request.write("hello");
     request.end();

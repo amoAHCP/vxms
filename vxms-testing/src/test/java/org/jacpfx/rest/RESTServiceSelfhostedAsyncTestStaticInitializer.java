@@ -108,15 +108,13 @@ public class RESTServiceSelfhostedAsyncTestStaticInitializer extends VertxTestBa
     HttpClientRequest request =
         client.get(
             "/wsService/asyncStringResponse",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "test");
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Assert.assertEquals(body.toString(), "test");
+                  });
+              testComplete();
             });
     request.end();
     await();
@@ -132,15 +130,13 @@ public class RESTServiceSelfhostedAsyncTestStaticInitializer extends VertxTestBa
     HttpClientRequest request =
         client.get(
             "/wsService/asyncStringResponseParameter/123",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "123");
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Assert.assertEquals(body.toString(), "123");
+                  });
+              testComplete();
             });
     request.end();
     await();

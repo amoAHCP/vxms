@@ -21,12 +21,15 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,7 +38,9 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import org.jacpfx.entity.Payload;
 import org.jacpfx.vxms.common.ServiceEndpoint;
+import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
@@ -130,158 +135,107 @@ public class RESTJerseyClientEventStringCircuitBreakerTest extends VertxTestBase
     client = getVertx().createHttpClient(new HttpClientOptions());
     awaitLatch(latch2);
   }
-
   @Test
   public void simpleSyncNoConnectionErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleSyncNoConnectionErrorResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "No handlers for address hello1");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleSyncNoConnectionErrorResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+                    assertEquals(body.toString(), "No handlers for address hello1");
+                    testComplete();
+                  });
 
-    latch.await();
-    testComplete();
+            });
+    request.end();
+    await();
+
+
   }
+
 
   @Test
   public void simpleSyncNoConnectionErrorResponseStateful() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleSyncNoConnectionErrorResponseStateful");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals("No handlers for address hello1", value);
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
 
-                          vertx.setTimer(
-                              1000,
-                              val -> {
-                                WebTarget target =
-                                    client
-                                        .target("http://" + HOST + ":" + PORT2)
-                                        .path(
-                                            "/wsService/simpleSyncNoConnectionErrorResponseStateful");
-                                Future<String> getCallback =
-                                    target
-                                        .request(MediaType.APPLICATION_JSON_TYPE)
-                                        .async()
-                                        .get(
-                                            new InvocationCallback<String>() {
+                  assertEquals(body.toString(), "No handlers for address hello1");
 
-                                              @Override
-                                              public void completed(String response) {
-                                                System.out.println(
-                                                    "Response entity '" + response + "' received.");
-                                                String value = response;
-                                                vertx.runOnContext(
-                                                    h -> {
-                                                      assertEquals("circuit open", value);
+                  HttpClientRequest request2 =
+                      client.get(
+                          "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+                          resp2 -> resp2.bodyHandler(
+                              body2 -> {
+                                System.out.println("Got a createResponse: " + body2.toString());
 
-                                                      vertx.setTimer(
-                                                          2000,
-                                                          val -> {
-                                                            WebTarget target =
-                                                                client
-                                                                    .target(
-                                                                        "http://" + HOST + ":"
-                                                                            + PORT2)
-                                                                    .path(
-                                                                        "/wsService/simpleSyncNoConnectionErrorResponseStateful");
-                                                            Future<String> getCallback =
-                                                                target
-                                                                    .request(
-                                                                        MediaType
-                                                                            .APPLICATION_JSON_TYPE)
-                                                                    .async()
-                                                                    .get(
-                                                                        new InvocationCallback<
-                                                                            String>() {
+                                assertEquals(body2.toString(), "circuit open");
+                                // wait 1s, but circuit is still open
+                                vertx.setTimer(
+                                    1205,
+                                    handler -> {
+                                      HttpClientRequest request3 =
+                                          client.get(
+                                              "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+                                              resp3 -> resp3.bodyHandler(
+                                                  body3 -> {
+                                                    System.out.println(
+                                                        "Got a createResponse: " + body3
+                                                            .toString());
 
-                                                                          @Override
-                                                                          public void completed(
-                                                                              String response) {
-                                                                            System.out.println(
-                                                                                "Response entity '"
-                                                                                    + response
-                                                                                    + "' received.");
-                                                                            String value = response;
-                                                                            vertx.runOnContext(
-                                                                                h -> {
-                                                                                  assertEquals(
-                                                                                      "No handlers for address hello1",
-                                                                                      value);
-                                                                                });
-                                                                            latch.countDown();
-                                                                          }
+                                                    assertEquals(body3.toString(), "circuit open");
+                                                    // wait another 1s, now circuit
+                                                    // should be closed
+                                                    vertx.setTimer(
+                                                        2005,
+                                                        handler2 -> {
+                                                          HttpClientRequest request4 =
+                                                              client.get(
+                                                                  "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+                                                                  resp4 -> resp4.bodyHandler(
+                                                                      body4 -> {
+                                                                        System.out.println(
+                                                                            "Got a createResponse: "
+                                                                                + body4.toString());
 
-                                                                          @Override
-                                                                          public void failed(
-                                                                              Throwable throwable) {
-                                                                            throwable
-                                                                                .printStackTrace();
-                                                                          }
-                                                                        });
-                                                          });
-                                                    });
-                                              }
+                                                                        assertEquals(
+                                                                            body4.toString(),
+                                                                            "No handlers for address hello1");
+                                                                        testComplete();
+                                                                      }));
+                                                          request4.end();
 
-                                              @Override
-                                              public void failed(Throwable throwable) {
-                                                throwable.printStackTrace();
-                                              }
-                                            });
-                              });
-                        });
-                  }
+                                                        });
+                                                  }));
+                                      request3.end();
+                                    });
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+                              }));
+                  request2.end();
+                }));
 
-    latch.await();
-    testComplete();
+    request.end();
+
+    await(80000, TimeUnit.MILLISECONDS);
   }
+
 
   public HttpClient getClient() {
     return client;
