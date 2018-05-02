@@ -17,9 +17,7 @@
 package org.jacpfx.kuberenetes;
 
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import org.jacpfx.vxms.k8s.api.CustomClientConfig;
 
 public class TestingClientConfig implements CustomClientConfig {

@@ -34,26 +34,13 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <kubernetes-client.version>2.6.1</kubernetes-client.version>
-    <fabric8-annotations.version>2.3.4</fabric8-annotations.version>
+    <kubernetes-client.version>3.1.10</kubernetes-client.version>
+    <fabric8-annotations.version>3.0.11</fabric8-annotations.version>
   </properties>
 
   <dependencies>
 
-    <!-- Testing Dependencies -->
-    <dependency>
-      <groupId>io.fabric8</groupId>
-      <artifactId>mockwebserver</artifactId>
-      <version>0.0.17</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/io.fabric8/kubernetes-server-mock -->
-    <dependency>
-      <groupId>io.fabric8</groupId>
-      <artifactId>kubernetes-server-mock</artifactId>
-      <version>3.1.1</version>
-      <scope>test</scope>
-    </dependency>
+
 
 
     <dependency>

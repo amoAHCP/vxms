@@ -17,7 +17,6 @@
 package org.jacpfx.kuberenetes;
 
 
-
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.annotations.WithLabel;
 import io.fabric8.annotations.WithLabels;
@@ -36,16 +35,13 @@ import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.test.core.VertxTestBase;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.k8s.annotation.K8SDiscovery;
-import org.jacpfx.vxms.k8s.client.VxmsDiscoveryK8SImpl;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;

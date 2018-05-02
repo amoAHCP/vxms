@@ -451,7 +451,7 @@ public class ResponseExecution {
         }
       }
     }
-    if (!_blockingHandler.isComplete()) {
+    if (!_blockingHandler.isComplete() && (result!=null||errorHandler==null)) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
     }
   }

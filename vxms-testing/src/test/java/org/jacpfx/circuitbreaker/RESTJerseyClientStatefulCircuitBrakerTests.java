@@ -21,27 +21,23 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -109,501 +105,251 @@ public class RESTJerseyClientStatefulCircuitBrakerTests extends VertxTestBase {
 
   @Test
   public void stringGETResponseCircuitBaseTest() throws InterruptedException {
-    Client client = ClientBuilder.newClient();
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-    //////// Request 1 -- creates crash
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/stringGETResponseCircuitBaseTest/crash");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseCircuitBaseTest/crash",
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    vertx.runOnContext(
-                        h -> {
-                          System.out.println("--------");
-                          assertEquals("failure", response);
+                  assertEquals(body.toString(), "failure");
+                  HttpClientRequest request2 =
+                      client.get(
+                          "/wsService/stringGETResponseCircuitBaseTest/value",
+                          resp2 -> resp2.bodyHandler(
+                              body2 -> {
+                                System.out.println("Got a createResponse: " + body2.toString());
+                                Assert.assertEquals(body2.toString(), "failure");
+                                // wait 1s, but circuit is still open
+                                vertx.setTimer(
+                                    1205,
+                                    handler -> {
+                                      HttpClientRequest request3 =
+                                          client.get(
+                                              "/wsService/stringGETResponseCircuitBaseTest/value",
+                                              resp3 -> resp3.bodyHandler(
+                                                  body3 -> {
+                                                    System.out.println(
+                                                        "Got a createResponse: " + body3
+                                                            .toString());
 
-                          //////// Request 1 -- is valid but crashes due to open circuit
-                          WebTarget target2 =
-                              client
-                                  .target("http://" + HOST + ":" + PORT)
-                                  .path("/wsService/stringGETResponseCircuitBaseTest/value");
-                          target2
-                              .request(MediaType.APPLICATION_JSON_TYPE)
-                              .async()
-                              .get(
-                                  new InvocationCallback<String>() {
+                                                    Assert.assertEquals(body3.toString(),
+                                                        "failure");
+                                                    // wait another 1s, now circuit
+                                                    // should be closed
+                                                    vertx.setTimer(
+                                                        2005,
+                                                        handler2 -> {
+                                                          HttpClientRequest request4 =
+                                                              client.get(
+                                                                  "/wsService/stringGETResponseCircuitBaseTest/value",
+                                                                  resp4 -> resp4.bodyHandler(
+                                                                      body4 -> {
+                                                                        System.out.println(
+                                                                            "Got a createResponse: "
+                                                                                + body4.toString());
 
-                                    @Override
-                                    public void completed(String response) {
-                                      System.out.println(
-                                          "Response entity '" + response + "' received.");
-                                      vertx.runOnContext(
-                                          h -> {
-                                            System.out.println("--------");
-                                            assertEquals("failure", response);
+                                                                        Assert.assertEquals(
+                                                                            body4.toString(),
+                                                                            "value");
 
-                                            // wait 1s, but circuit is still open
-                                            vertx.setTimer(
-                                                1205,
-                                                handler -> {
-                                                  target2
-                                                      .request(MediaType.APPLICATION_JSON_TYPE)
-                                                      .async()
-                                                      .get(
-                                                          new InvocationCallback<String>() {
+                                                                        // should be closed
+                                                                        testComplete();
+                                                                      }));
+                                                          request4.end();
+                                                        });
+                                                  }));
+                                      request3.end();
+                                    });
+                              }));
+                  request2.end();
+                }));
+    request.end();
 
-                                                            @Override
-                                                            public void completed(String response) {
-                                                              System.out.println(
-                                                                  "Response entity '"
-                                                                      + response
-                                                                      + "' received.");
-                                                              vertx.runOnContext(
-                                                                  h -> {
-                                                                    System.out.println("--------");
-                                                                    assertEquals(
-                                                                        "failure", response);
+    await(80000, TimeUnit.MILLISECONDS);
 
-                                                                    // wait another 1s, now circuit
-                                                                    // should be closed
-                                                                    vertx.setTimer(
-                                                                        1005,
-                                                                        handler -> {
-                                                                          target2
-                                                                              .request(
-                                                                                  MediaType
-                                                                                      .APPLICATION_JSON_TYPE)
-                                                                              .async()
-                                                                              .get(
-                                                                                  new InvocationCallback<
-                                                                                      String>() {
-
-                                                                                    @Override
-                                                                                    public void
-                                                                                        completed(
-                                                                                            String
-                                                                                                response) {
-                                                                                      System.out
-                                                                                          .println(
-                                                                                              "Response entity '"
-                                                                                                  + response
-                                                                                                  + "' received.");
-                                                                                      vertx
-                                                                                          .runOnContext(
-                                                                                              h -> {
-                                                                                                System
-                                                                                                    .out
-                                                                                                    .println(
-                                                                                                        "--------");
-                                                                                                assertEquals(
-                                                                                                    "value",
-                                                                                                    response);
-
-                                                                                                testComplete();
-                                                                                              });
-                                                                                    }
-
-                                                                                    @Override
-                                                                                    public void
-                                                                                        failed(
-                                                                                            Throwable
-                                                                                                throwable) {}
-                                                                                  });
-                                                                        });
-                                                                  });
-                                                            }
-
-                                                            @Override
-                                                            public void failed(
-                                                                Throwable throwable) {}
-                                                          });
-                                                });
-                                          });
-                                    }
-
-                                    @Override
-                                    public void failed(Throwable throwable) {}
-                                  });
-                        });
-                    // Assert.assertEquals(response, "test-123");
-
-                  }
-
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
-
-    await(6000, TimeUnit.MILLISECONDS);
   }
 
   @Test
   public void objectGETResponseCircuitBaseTest() throws InterruptedException {
-    Client client = ClientBuilder.newClient();
 
-    //////// Request 1 -- creates crash
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/objectGETResponseCircuitBaseTest/crash");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    vertx.runOnContext(
-                        h -> {
-                          System.out.println("--------");
-                          Payload<String> pp = new Gson().fromJson(response, Payload.class);
-                          assertEquals(new Payload<String>("failure").getValue(), pp.getValue());
+    HttpClientRequest request =
+        client.get(
+            "/wsService/objectGETResponseCircuitBaseTest/crash",
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
 
-                          //////// Request 1 -- is valid but crashes due to open circuit
-                          WebTarget target2 =
-                              client
-                                  .target("http://" + HOST + ":" + PORT)
-                                  .path("/wsService/objectGETResponseCircuitBaseTest/value");
-                          target2
-                              .request(MediaType.APPLICATION_JSON_TYPE)
-                              .async()
-                              .get(
-                                  new InvocationCallback<String>() {
+                  Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
+                  assertEquals(new Payload<String>("failure").getValue(), pp.getValue());
+                  HttpClientRequest request2 =
+                      client.get(
+                          "/wsService/objectGETResponseCircuitBaseTest/value",
+                          resp2 -> resp2.bodyHandler(
+                              body2 -> {
+                                System.out.println("Got a createResponse: " + body2.toString());
+                                Payload<String> pp2 = new Gson().fromJson(body2.toString(), Payload.class);
+                                assertEquals(new Payload<String>("failure").getValue(), pp2.getValue());
+                                // wait 1s, but circuit is still open
+                                vertx.setTimer(
+                                    1205,
+                                    handler -> {
+                                      HttpClientRequest request3 =
+                                          client.get(
+                                              "/wsService/objectGETResponseCircuitBaseTest/value",
+                                              resp3 -> resp3.bodyHandler(
+                                                  body3 -> {
+                                                    System.out.println(
+                                                        "Got a createResponse: " + body3
+                                                            .toString());
 
-                                    @Override
-                                    public void completed(String response) {
-                                      System.out.println(
-                                          "Response entity '" + response + "' received.");
-                                      vertx.runOnContext(
-                                          h -> {
-                                            System.out.println("--------");
-                                            Payload<String> pp =
-                                                new Gson().fromJson(response, Payload.class);
-                                            assertEquals(
-                                                new Payload<String>("failure").getValue(),
-                                                pp.getValue());
+                                                    Payload<String> pp3 = new Gson().fromJson(body3.toString(), Payload.class);
+                                                    assertEquals(new Payload<String>("failure").getValue(), pp3.getValue());
+                                                    // wait another 1s, now circuit
+                                                    // should be closed
+                                                    vertx.setTimer(
+                                                        2005,
+                                                        handler2 -> {
+                                                          HttpClientRequest request4 =
+                                                              client.get(
+                                                                  "/wsService/objectGETResponseCircuitBaseTest/value",
+                                                                  resp4 -> resp4.bodyHandler(
+                                                                      body4 -> {
+                                                                        System.out.println(
+                                                                            "Got a createResponse: "
+                                                                                + body4.toString());
+                                                                        Payload<String> pp4 = new Gson().fromJson(body4.toString(), Payload.class);
+                                                                        assertEquals(new Payload<String>("value").getValue(), pp4.getValue());
 
-                                            // wait 1s, but circuit is still open
-                                            vertx.setTimer(
-                                                1205,
-                                                handler -> {
-                                                  target2
-                                                      .request(MediaType.APPLICATION_JSON_TYPE)
-                                                      .async()
-                                                      .get(
-                                                          new InvocationCallback<String>() {
 
-                                                            @Override
-                                                            public void completed(String response) {
-                                                              System.out.println(
-                                                                  "Response entity '"
-                                                                      + response
-                                                                      + "' received.");
-                                                              vertx.runOnContext(
-                                                                  h -> {
-                                                                    System.out.println("--------");
-                                                                    Payload<String> pp =
-                                                                        new Gson()
-                                                                            .fromJson(
-                                                                                response,
-                                                                                Payload.class);
-                                                                    assertEquals(
-                                                                        new Payload<String>(
-                                                                                "failure")
-                                                                            .getValue(),
-                                                                        pp.getValue());
+                                                                        // should be closed
+                                                                        testComplete();
+                                                                      }));
+                                                          request4.end();
+                                                        });
+                                                  }));
+                                      request3.end();
+                                    });
+                              }));
+                  request2.end();
+                }));
+    request.end();
 
-                                                                    // wait another 1s, now circuit
-                                                                    // should be closed
-                                                                    vertx.setTimer(
-                                                                        1005,
-                                                                        handler -> {
-                                                                          target2
-                                                                              .request(
-                                                                                  MediaType
-                                                                                      .APPLICATION_JSON_TYPE)
-                                                                              .async()
-                                                                              .get(
-                                                                                  new InvocationCallback<
-                                                                                      String>() {
+    await(80000, TimeUnit.MILLISECONDS);
 
-                                                                                    @Override
-                                                                                    public void
-                                                                                        completed(
-                                                                                            String
-                                                                                                response) {
-                                                                                      System.out
-                                                                                          .println(
-                                                                                              "Response entity '"
-                                                                                                  + response
-                                                                                                  + "' received.");
-                                                                                      vertx
-                                                                                          .runOnContext(
-                                                                                              h -> {
-                                                                                                System
-                                                                                                    .out
-                                                                                                    .println(
-                                                                                                        "--------");
-                                                                                                Payload<
-                                                                                                        String>
-                                                                                                    pp =
-                                                                                                        new Gson()
-                                                                                                            .fromJson(
-                                                                                                                response,
-                                                                                                                Payload
-                                                                                                                    .class);
-                                                                                                assertEquals(
-                                                                                                    new Payload<
-                                                                                                            String>(
-                                                                                                            "value")
-                                                                                                        .getValue(),
-                                                                                                    pp
-                                                                                                        .getValue());
-                                                                                                testComplete();
-                                                                                              });
-                                                                                    }
 
-                                                                                    @Override
-                                                                                    public void
-                                                                                        failed(
-                                                                                            Throwable
-                                                                                                throwable) {}
-                                                                                  });
-                                                                        });
-                                                                  });
-                                                            }
-
-                                                            @Override
-                                                            public void failed(
-                                                                Throwable throwable) {}
-                                                          });
-                                                });
-                                          });
-                                    }
-
-                                    @Override
-                                    public void failed(Throwable throwable) {}
-                                  });
-                        });
-                    // Assert.assertEquals(response, "test-123");
-
-                  }
-
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
-
-    await(6000, TimeUnit.MILLISECONDS);
   }
 
   @Test
   public void byteGETResponseCircuitBaseTest() throws InterruptedException {
-    Client client = ClientBuilder.newClient();
 
-    //////// Request 1 -- creates crash
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/byteGETResponseCircuitBaseTest/crash");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(byte[] response) {
-                    System.out.println("Response entity byte '" + response + "' received.");
-                    vertx.runOnContext(
-                        h -> {
-                          System.out.println("--------");
-                          Payload<String> pp = null;
-                          try {
-                            pp = (Payload<String>) Serializer.deserialize(response);
-                          } catch (IOException e) {
-                            e.printStackTrace();
-                          } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                          }
-                          assertEquals(new Payload<String>("failure").getValue(), pp.getValue());
+    HttpClientRequest request =
+        client.get(
+            "/wsService/byteGETResponseCircuitBaseTest/crash",
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
 
-                          //////// Request 1 -- is valid but crashes due to open circuit
-                          WebTarget target2 =
-                              client
-                                  .target("http://" + HOST + ":" + PORT)
-                                  .path("/wsService/byteGETResponseCircuitBaseTest/value");
-                          target2
-                              .request(MediaType.APPLICATION_JSON_TYPE)
-                              .async()
-                              .get(
-                                  new InvocationCallback<byte[]>() {
-
-                                    @Override
-                                    public void completed(byte[] response) {
-                                      System.out.println(
-                                          "Response entity '" + response + "' received.");
-                                      vertx.runOnContext(
-                                          h -> {
-                                            System.out.println("--------");
-                                            Payload<String> pp = null;
-                                            try {
-                                              pp =
-                                                  (Payload<String>)
-                                                      Serializer.deserialize(response);
-                                            } catch (IOException e) {
-                                              e.printStackTrace();
-                                            } catch (ClassNotFoundException e) {
-                                              e.printStackTrace();
-                                            }
-                                            assertEquals(
-                                                new Payload<String>("failure").getValue(),
-                                                pp.getValue());
-
-                                            // wait 1s, but circuit is still open
-                                            vertx.setTimer(
-                                                1205,
-                                                handler -> {
-                                                  target2
-                                                      .request(MediaType.APPLICATION_JSON_TYPE)
-                                                      .async()
-                                                      .get(
-                                                          new InvocationCallback<byte[]>() {
-
-                                                            @Override
-                                                            public void completed(byte[] response) {
-                                                              System.out.println(
-                                                                  "Response entity '"
-                                                                      + response
-                                                                      + "' received.");
-                                                              vertx.runOnContext(
-                                                                  h -> {
-                                                                    System.out.println("--------");
-                                                                    Payload<String> pp = null;
-                                                                    try {
-                                                                      pp =
-                                                                          (Payload<String>)
-                                                                              Serializer
-                                                                                  .deserialize(
-                                                                                      response);
-                                                                    } catch (IOException e) {
-                                                                      e.printStackTrace();
-                                                                    } catch (
-                                                                        ClassNotFoundException e) {
-                                                                      e.printStackTrace();
-                                                                    }
-                                                                    assertEquals(
-                                                                        new Payload<String>(
-                                                                                "failure")
-                                                                            .getValue(),
-                                                                        pp.getValue());
-
-                                                                    // wait another 1s, now circuit
-                                                                    // should be closed
-                                                                    vertx.setTimer(
-                                                                        1005,
-                                                                        handler -> {
-                                                                          target2
-                                                                              .request(
-                                                                                  MediaType
-                                                                                      .APPLICATION_JSON_TYPE)
-                                                                              .async()
-                                                                              .get(
-                                                                                  new InvocationCallback<
-                                                                                      byte[]>() {
-
-                                                                                    @Override
-                                                                                    public void
-                                                                                        completed(
-                                                                                            byte[]
-                                                                                                response) {
-                                                                                      System.out
-                                                                                          .println(
-                                                                                              "Response entity '"
-                                                                                                  + response
-                                                                                                  + "' received.");
-                                                                                      vertx
-                                                                                          .runOnContext(
-                                                                                              h -> {
-                                                                                                System
-                                                                                                    .out
-                                                                                                    .println(
-                                                                                                        "--------");
-                                                                                                Payload<
-                                                                                                        String>
-                                                                                                    pp =
-                                                                                                        null;
-                                                                                                try {
-                                                                                                  pp =
-                                                                                                      (Payload<
-                                                                                                              String>)
-                                                                                                          Serializer
-                                                                                                              .deserialize(
-                                                                                                                  response);
-                                                                                                } catch (
-                                                                                                    IOException
-                                                                                                        e) {
-                                                                                                  e
-                                                                                                      .printStackTrace();
-                                                                                                } catch (
-                                                                                                    ClassNotFoundException
-                                                                                                        e) {
-                                                                                                  e
-                                                                                                      .printStackTrace();
-                                                                                                }
-                                                                                                assertEquals(
-                                                                                                    new Payload<
-                                                                                                            String>(
-                                                                                                            "value")
-                                                                                                        .getValue(),
-                                                                                                    pp
-                                                                                                        .getValue());
-                                                                                                testComplete();
-                                                                                              });
-                                                                                    }
-
-                                                                                    @Override
-                                                                                    public void
-                                                                                        failed(
-                                                                                            Throwable
-                                                                                                throwable) {}
-                                                                                  });
-                                                                        });
-                                                                  });
-                                                            }
-
-                                                            @Override
-                                                            public void failed(
-                                                                Throwable throwable) {}
-                                                          });
-                                                });
-                                          });
-                                    }
-
-                                    @Override
-                                    public void failed(Throwable throwable) {}
-                                  });
-                        });
-                    // Assert.assertEquals(response, "test-123");
-
+                  Payload<String> pp = null;
+                  try {
+                    pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                  } catch (IOException e) {
+                    e.printStackTrace();
+                  } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
                   }
+                  assertEquals(new Payload<String>("failure").getValue(), pp.getValue());
+                  HttpClientRequest request2 =
+                      client.get(
+                          "/wsService/byteGETResponseCircuitBaseTest/value",
+                          resp2 -> resp2.bodyHandler(
+                              body2 -> {
+                                System.out.println("Got a createResponse: " + body2.toString());
+                                Payload<String> pp2 = null;
+                                try {
+                                  pp2 = (Payload<String>) Serializer.deserialize(body2.getBytes());
+                                } catch (IOException e) {
+                                  e.printStackTrace();
+                                } catch (ClassNotFoundException e) {
+                                  e.printStackTrace();
+                                }
+                                assertEquals(new Payload<String>("failure").getValue(), pp2.getValue());
+                                // wait 1s, but circuit is still open
+                                vertx.setTimer(
+                                    1205,
+                                    handler -> {
+                                      HttpClientRequest request3 =
+                                          client.get(
+                                              "/wsService/byteGETResponseCircuitBaseTest/value",
+                                              resp3 -> resp3.bodyHandler(
+                                                  body3 -> {
+                                                    System.out.println(
+                                                        "Got a createResponse: " + body3
+                                                            .toString());
 
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
+                                                    Payload<String> pp3 = null;
+                                                    try {
+                                                      pp3 = (Payload<String>) Serializer.deserialize(body.getBytes());
+                                                    } catch (IOException e) {
+                                                      e.printStackTrace();
+                                                    } catch (ClassNotFoundException e) {
+                                                      e.printStackTrace();
+                                                    }
+                                                    assertEquals(new Payload<String>("failure").getValue(), pp3.getValue());
+                                                    // wait another 1s, now circuit
+                                                    // should be closed
+                                                    vertx.setTimer(
+                                                        2005,
+                                                        handler2 -> {
+                                                          HttpClientRequest request4 =
+                                                              client.get(
+                                                                  "/wsService/byteGETResponseCircuitBaseTest/value",
+                                                                  resp4 -> resp4.bodyHandler(
+                                                                      body4 -> {
+                                                                        System.out.println(
+                                                                            "Got a createResponse: "
+                                                                                + body4.toString());
+                                                                        Payload<String> pp4 = null;
+                                                                        try {
+                                                                          pp4 = (Payload<String>) Serializer.deserialize(body4.getBytes());
+                                                                        } catch (IOException e) {
+                                                                          e.printStackTrace();
+                                                                        } catch (ClassNotFoundException e) {
+                                                                          e.printStackTrace();
+                                                                        }
+                                                                        assertEquals(new Payload<String>("value").getValue(), pp4.getValue());
 
-    await(6000, TimeUnit.MILLISECONDS);
+                                                                        // should be closed
+                                                                        testComplete();
+                                                                      }));
+                                                          request4.end();
+                                                        });
+                                                  }));
+                                      request3.end();
+                                    });
+                              }));
+                  request2.end();
+                }));
+    request.end();
+
+    await(80000, TimeUnit.MILLISECONDS);
+
+
   }
 
   public HttpClient getClient() {
@@ -651,7 +397,6 @@ public class RESTJerseyClientStatefulCircuitBrakerTests extends VertxTestBase {
                 future.complete(new Payload<>(val));
               },
               new ExampleStringEncoder())
-          .onError(e -> System.out.println(e.getMessage()))
           .onError(e -> System.out.println(e.getMessage()))
           .retry(3)
           .closeCircuitBreaker(2000)

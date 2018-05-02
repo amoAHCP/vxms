@@ -21,25 +21,19 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -137,221 +131,188 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
   @Test
   public void complexSyncResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexSyncResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "hello1");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/complexSyncResponse",
+            resp -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
 
-    latch.await();
-    testComplete();
+                   assertEquals(body.toString(), "hello1");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
   }
 
   @Test
   public void complexSyncErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexSyncErrorResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test exception");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "test exception");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/complexSyncErrorResponse",
+            resp -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
 
-    latch.await();
-    testComplete();
+                    assertEquals(body.toString(), "test exception");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
   }
 
   @Test
   public void simpleSyncNoConnectionErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleSyncNoConnectionErrorResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "No handlers for address hello1");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleSyncNoConnectionErrorResponse",
+            resp -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
 
-    latch.await();
-    testComplete();
+                    assertEquals(body.toString(), "No handlers for address hello1");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
   }
 
   @Test
   @Ignore
   public void simpleSyncNoConnectionErrorTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleSyncNoConnectionError");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "no connection");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleSyncNoConnectionError",
+            resp -> {
 
-    latch.await();
-    testComplete();
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
+
+                    assertEquals(body.toString(), "no connection");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
   }
 
   @Test
   public void simpleSyncNoConnectionRetryErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://localhost:" + PORT2)
-            .path("/wsService/simpleSyncNoConnectionRetryErrorResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "hello1");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleSyncNoConnectionRetryErrorResponse",
+            resp -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
 
-    latch.await();
-    testComplete();
+                    assertEquals(body.toString(), "hello1");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
   }
 
   @Test
   public void simpleSyncNoConnectionExceptionRetryErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleSyncNoConnectionExceptionRetryErrorResponse");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    String value = response;
-                    vertx.runOnContext(
-                        h -> {
-                          assertEquals(value, "hello1");
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleSyncNoConnectionExceptionRetryErrorResponse",
+            resp -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse"
+                            + body.toString());
 
-    latch.await();
-    testComplete();
+                    assertEquals(body.toString(), "hello1");
+
+                  });
+
+              testComplete();
+            });
+    request.end();
+    await();
+
+
+
   }
 
   public HttpClient getClient() {

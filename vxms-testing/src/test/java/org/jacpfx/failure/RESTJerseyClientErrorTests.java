@@ -20,24 +20,19 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.annotation.OnRestError;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -101,114 +96,96 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
 
   @Test
   public void stringGETResponseSyncAsync() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseSyncAsync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test-123");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncAsync",
+            resp -> resp.bodyHandler(
+                body -> {
+                  String val = body.getString(0, body.length());
+                  assertEquals("test-123", val);
+                  testComplete();
+                }));
+    request.end();
 
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
+    await(10000, TimeUnit.MILLISECONDS);
 
-    latch.await();
-    testComplete();
   }
 
   @Test
   public void stringGETResponseAsyncSync() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseAsyncSync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test-123");
-                    latch.countDown();
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseAsyncSync",
+            resp -> resp.bodyHandler(
+                body -> {
+                  String val = body.getString(0, body.length());
+                  assertEquals("test-123", val);
+                  testComplete();
+                }));
+    request.end();
 
-    latch.await();
-    testComplete();
+    await(10000, TimeUnit.MILLISECONDS);
+
+
   }
 
   @Test
   public void stringGETResponseAsyncAsync() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseAsyncAsync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response-- entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test-123");
-                    latch.countDown();
-                  }
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseAsyncAsync",
+            resp -> resp.bodyHandler(
+                body -> {
+                  String val = body.getString(0, body.length());
+                  assertEquals("test-123", val);
+                  testComplete();
+                }));
+    request.end();
 
-    latch.await();
-    testComplete();
+    await(10000, TimeUnit.MILLISECONDS);
+
+
   }
 
   @Test
   public void stringGETResponseSyncSync() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/stringGETResponseSyncSync");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "test-123");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETResponseSyncSync",
+            resp -> resp.bodyHandler(
+                body -> {
+                  String val = body.getString(0, body.length());
+                  assertEquals("test-123", val);
+                  testComplete();
+                }));
+    request.end();
 
-                  @Override
-                  public void failed(Throwable throwable) {}
-                });
+    await(10000, TimeUnit.MILLISECONDS);
 
-    latch.await();
-    testComplete();
+
+
   }
 
   public HttpClient getClient() {
