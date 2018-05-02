@@ -16,7 +16,6 @@
 
 package org.jacpfx.failure;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -135,6 +134,7 @@ public class RESTServiceOnFailureTest extends VertxTestBase {
             "/wsService/simpleOnFailureResponse",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
+                System.out.println(resp.statusMessage());
                 resp.bodyHandler(
                     body -> {
                       String val = body.getString(0, body.length());
@@ -169,7 +169,7 @@ public class RESTServiceOnFailureTest extends VertxTestBase {
           .onFailureRespond(
               (t) -> {
                // System.out.print("the stack trace --> ");
-                //t.printStackTrace();
+                t.printStackTrace();
                 return null;
               })
           .execute();

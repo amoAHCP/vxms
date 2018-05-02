@@ -17,7 +17,6 @@
 package org.jacpfx.kuberenetes;
 
 
-
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.annotations.WithLabel;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -44,7 +43,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.k8s.annotation.K8SDiscovery;
-import org.jacpfx.vxms.k8s.client.VxmsDiscoveryK8SImpl;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;

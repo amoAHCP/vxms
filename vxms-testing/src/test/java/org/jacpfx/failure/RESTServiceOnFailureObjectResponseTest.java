@@ -30,15 +30,9 @@ import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
@@ -143,44 +137,39 @@ public class RESTServiceOnFailureObjectResponseTest extends VertxTestBase {
   public void simpleOnFailureResponse() throws InterruptedException {
 
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleOnFailureResponse");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
 
-                  @Override
-                  public void completed(byte[] response) {
-                    System.out.println("Response entity '" + response + "' received.");
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                    vertx.runOnContext(
-                        h -> {
-                          Payload<String> pp = null;
-                          try {
-                            pp = (Payload<String>) Serializer.deserialize(response);
-                          } catch (IOException e) {
-                            e.printStackTrace();
-                          } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                          }
-                          assertEquals("on failure", pp.getValue());
-                        });
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleOnFailureResponse",
+            new Handler<HttpClientResponse>() {
+              public void handle(HttpClientResponse resp) {
+                resp.bodyHandler(
+                    body -> {
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+                      System.out.println("--------catchedAsyncByteErrorDelay: " + pp.getValue());
+                      assertEquals("on failure", pp.getValue());
+                      testComplete();
+                    });
+              }
+            });
+    request.end();
 
-    latch.await();
-    testComplete();
+    await(10000, TimeUnit.MILLISECONDS);
+
+
   }
 
   @Test
