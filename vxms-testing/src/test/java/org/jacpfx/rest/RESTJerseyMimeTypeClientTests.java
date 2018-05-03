@@ -20,26 +20,20 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -102,169 +96,165 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
   }
 
   @Test
-  public void stringGETResponse() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/stringGETConsumesResponse/123");
-    Future<String> getCallback =
-        target
-            .request()
-            .header("Content-Type", "application/json;charset=UTF-8")
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+  public void stringGETResponse_1() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "123");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETConsumesResponse/123",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println("getCallback");
-                    throwable.printStackTrace();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "123");
+                    testComplete();
+                  });
 
-    latch.await();
-    CountDownLatch latch2 = new CountDownLatch(1);
-    Future<String> getCallback2 =
-        target
-            .request(MediaType.APPLICATION_ATOM_XML)
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+    request.end();
+    await();
+  }
+  @Test
+  public void stringGETResponse_2() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "123");
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETConsumesResponse/123",
+            resp -> {
+              resp.exceptionHandler(error -> {
+                System.out.println("Got a createResponse ERROR: " + error.toString());
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println("getCallback2");
-                    throwable.printStackTrace();
-                    latch2.countDown();
-                  }
-                });
-    latch2.await();
-    CountDownLatch latch3 = new CountDownLatch(1);
+              });
+              resp.bodyHandler(
+                  body -> {
 
-    Future<String> getCallback3 =
-        target
-            .request()
-            .header("Content-Type", "application/xml;charset=UTF-8")
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "<html><body><h1>Resource not found</h1></body></html>");
+                    testComplete();
+                  });
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println(
-                        "Response entity '" + response + "' received in getCallback3.");
-                    Assert.assertEquals(response, "123");
-                    latch3.countDown();
-                  }
+            }).putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
+    request.end();
+    await();
+  }
+  @Test
+  public void stringGETResponse_3() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println("getCallback");
-                    throwable.printStackTrace();
-                  }
-                });
+    HttpClientRequest request =
+        client.get(
+            "/wsService/stringGETConsumesResponse/123",
+            resp -> {
+              resp.exceptionHandler(error -> {
+                System.out.println("Got a createResponse ERROR: " + error.toString());
 
-    latch3.await();
-    testComplete();
+              });
+              resp.bodyHandler(
+                  body -> {
+
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "123");
+                    testComplete();
+                  });
+
+            }).putHeader("Content-Type", "application/xml;charset=UTF-8");
+    request.end();
+    await();
   }
 
   @Test
-  public void stringPOSTResponse() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/stringPOSTConsumesResponse/123");
-    Future<String> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .post(
-                Entity.entity("hello", MediaType.APPLICATION_JSON_TYPE),
-                new InvocationCallback<String>() {
+  public void stringPOSTResponse_1() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "hello");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.post(
+            "/wsService/stringPOSTConsumesResponse/123",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println("getCallback");
-                    throwable.printStackTrace();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "hello");
+                    testComplete();
+                  });
 
-    latch.await();
-    CountDownLatch latch2 = new CountDownLatch(1);
-    Future<String> getCallback2 =
-        target
-            .request(MediaType.APPLICATION_ATOM_XML)
-            .async()
-            .post(
-                Entity.entity("hello", MediaType.APPLICATION_ATOM_XML),
-                new InvocationCallback<String>() {
-
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "hello");
-                  }
-
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println("getCallback2");
-                    throwable.printStackTrace();
-                    latch2.countDown();
-                  }
-                });
-    latch2.await();
-    CountDownLatch latch3 = new CountDownLatch(1);
-
-    Future<String> getCallback3 =
-        target
-            .request(MediaType.APPLICATION_XML)
-            .async()
-            .post(
-                Entity.entity("hello", MediaType.APPLICATION_XML),
-                new InvocationCallback<String>() {
-
-                  @Override
-                  public void completed(String response) {
-                    System.out.println(
-                        "Response entity '" + response + "' received in getCallback3.");
-                    Assert.assertEquals(response, "hello");
-                    latch3.countDown();
-                  }
-
-                  @Override
-                  public void failed(Throwable throwable) {
-                    System.out.println("getCallback");
-                    throwable.printStackTrace();
-                  }
-                });
-
-    latch3.await();
-    testComplete();
+            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
+    request.write("hello");
+    request.end();
+    await();
   }
+
+
+  @Test
+  public void stringPOSTResponse_2() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.post(
+            "/wsService/stringPOSTConsumesResponse/123",
+            resp -> {
+              resp.exceptionHandler(error -> {
+
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "<html><body><h1>Resource not found</h1></body></html>");
+                    testComplete();
+                  });
+            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
+    request.write("hello");
+    request.end();
+    await();
+  }
+
+  @Test
+  public void stringPOSTResponse_3() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.post(
+            "/wsService/stringPOSTConsumesResponse/123",
+            resp -> {
+              resp.exceptionHandler(error -> {
+
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "hello");
+                    testComplete();
+                  });
+            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", MediaType.APPLICATION_XML);
+    request.write("hello");
+    request.end();
+    await();
+  }
+
 
   public HttpClient getClient() {
     return client;

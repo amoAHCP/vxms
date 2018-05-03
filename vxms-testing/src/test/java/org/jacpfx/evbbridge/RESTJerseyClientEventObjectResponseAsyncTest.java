@@ -21,22 +21,17 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
@@ -140,201 +135,165 @@ public class RESTJerseyClientEventObjectResponseAsyncTest extends VertxTestBase 
   @Test
   public void complexByteResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexByteResponse");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
 
-                  @Override
-                  public void completed(byte[] response) {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/complexByteResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
                     Payload<String> pp = null;
                     try {
-                      pp = (Payload<String>) Serializer.deserialize(response);
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
                     } catch (IOException e) {
                       e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
                     Assert.assertEquals(pp.getValue(), new Payload<>("hello").getValue());
-                    // Assert.assertEquals(response, "hello1");
-                    latch.countDown();
-                  }
+                    testComplete();
+                  });
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+            });
+    request.end();
+    await();
 
-    latch.await();
-    testComplete();
   }
 
   @Test
   public void complexByteErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT2).path("/wsService/complexByteErrorResponse");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
 
-                  @Override
-                  public void completed(byte[] response) {
-                    System.out.println("Response entity '" + response + "' received.");
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/complexByteErrorResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
                     Payload<String> pp = null;
                     try {
-                      pp = (Payload<String>) Serializer.deserialize(response);
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
                     } catch (IOException e) {
                       e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
                     Assert.assertEquals(pp.getValue(), new Payload<>("test exception").getValue());
-                    latch.countDown();
-                  }
+                    testComplete();
+                  });
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+            });
+    request.end();
+    await();
 
-    latch.await();
-    testComplete();
   }
 
   @Test
   public void simpleByteNoConnectionErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleByteNoConnectionErrorResponse");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
 
-                  @Override
-                  public void completed(byte[] response) {
-                    System.out.println("Response entity '" + response + "' received.");
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleByteNoConnectionErrorResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
                     Payload<String> pp = null;
                     try {
-                      pp = (Payload<String>) Serializer.deserialize(response);
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
                     } catch (IOException e) {
                       e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
                     Assert.assertEquals(pp.getValue(), new Payload<>("no connection").getValue());
-                    latch.countDown();
-                  }
+                    testComplete();
+                  });
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+            });
+    request.end();
+    await();
 
-    latch.await();
-    testComplete();
+
   }
 
   @Test
   public void simpleByteNoConnectionRetryErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleByteNoConnectionRetryErrorResponse");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(byte[] response) {
-                    System.out.println("Response entity '" + response + "' received.");
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleByteNoConnectionRetryErrorResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
                     Payload<String> pp = null;
                     try {
-                      pp = (Payload<String>) Serializer.deserialize(response);
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
                     } catch (IOException e) {
                       e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
                     Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
-                    latch.countDown();
-                  }
+                    testComplete();
+                  });
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+            });
+    request.end();
+    await();
 
-    latch.await();
-    testComplete();
   }
 
   @Test
   public void simpleByteNoConnectionExceptionRetryErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT2)
-            .path("/wsService/simpleByteNoConnectionExceptionRetryErrorResponse");
-    Future<byte[]> getCallback =
-        target
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .async()
-            .get(
-                new InvocationCallback<byte[]>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT2);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(byte[] response) {
-                    System.out.println("Response entity '" + response + "' received.");
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleByteNoConnectionExceptionRetryErrorResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
                     Payload<String> pp = null;
                     try {
-                      pp = (Payload<String>) Serializer.deserialize(response);
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
                     } catch (IOException e) {
                       e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
                     Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
-                    latch.countDown();
-                  }
+                    testComplete();
+                  });
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
-    latch.await();
-    testComplete();
+            });
+    request.end();
+    await();
+
   }
 
   public HttpClient getClient() {

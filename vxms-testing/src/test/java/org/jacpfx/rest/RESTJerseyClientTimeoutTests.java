@@ -22,6 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
@@ -30,11 +31,6 @@ import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
@@ -118,123 +114,118 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
   }
 
   @Test
-  public void simpleTimeoutTest() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(2);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client.target("http://" + HOST + ":" + PORT).path("/wsService/simpleTimeoutTest");
-    target
-        .request(MediaType.APPLICATION_JSON_TYPE)
-        .async()
-        .get(
-            new InvocationCallback<String>() {
+  public void simpleTimeoutTest_1() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
-                latch.countDown();
-              }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleTimeoutTest",
+            resp -> {
+              resp.exceptionHandler(error -> {
+                System.out.println("Got a createResponse ERROR: " + error.toString());
 
-              @Override
-              public void failed(Throwable throwable) {}
+              });
+              resp.bodyHandler(
+                  body -> {
+
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "operation _timeout");
+                    testComplete();
+                  });
+
             });
-
-    target
-        .request(MediaType.APPLICATION_JSON_TYPE)
-        .async()
-        .get(
-            new InvocationCallback<String>() {
-
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "operation _timeout"));
-                latch.countDown();
-              }
-
-              @Override
-              public void failed(Throwable throwable) {}
-            });
-
-    latch.await();
-    testComplete();
+    request.end();
+    await();
   }
 
   @Test
-  public void simpleTimeoutNonBlockingTest() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(2);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/simpleTimeoutNonBlockingTest");
-    target
-        .request(MediaType.APPLICATION_JSON_TYPE)
-        .async()
-        .get(
-            new InvocationCallback<String>() {
+  public void simpleTimeoutTest_2() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "failure"));
-                latch.countDown();
-              }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleTimeoutTest",
+            resp -> {
+              resp.exceptionHandler(error -> {
+                System.out.println("Got a createResponse ERROR: " + error.toString());
 
-              @Override
-              public void failed(Throwable throwable) {}
+              });
+              resp.bodyHandler(
+                  body -> {
+
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "operation _timeout");
+                    testComplete();
+                  });
+
             });
-
-    target
-        .request(MediaType.APPLICATION_JSON_TYPE)
-        .async()
-        .get(
-            new InvocationCallback<String>() {
-
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "failure"));
-                latch.countDown();
-              }
-
-              @Override
-              public void failed(Throwable throwable) {}
-            });
-
-    latch.await();
-    testComplete();
+    request.end();
+    await();
   }
 
   @Test
-  public void eventbusTimeoutNonBlockingTest() throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target =
-        client
-            .target("http://" + HOST + ":" + PORT)
-            .path("/wsService/eventbusTimeoutNonBlockingTest");
-    target
-        .request(MediaType.APPLICATION_JSON_TYPE)
-        .async()
-        .get(
-            new InvocationCallback<String>() {
+  public void simpleTimeoutNonBlockingTest_1() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-              @Override
-              public void completed(String response) {
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext((e) -> assertEquals(response, "timeout"));
-                latch.countDown();
-              }
+    HttpClientRequest request =
+        client.get(
+            "/wsService/simpleTimeoutNonBlockingTest",
+            resp -> {
+              resp.exceptionHandler(error -> {
+                System.out.println("Got a createResponse ERROR: " + error.toString());
 
-              @Override
-              public void failed(Throwable throwable) {}
+              });
+              resp.bodyHandler(
+                  body -> {
+
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "failure");
+                    testComplete();
+                  });
+
             });
-
-    latch.await();
-    testComplete();
+    request.end();
+    await();
   }
+
+  @Test
+  public void eventbusTimeoutNonBlockingTest_1() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/eventbusTimeoutNonBlockingTest",
+            resp -> {
+              resp.exceptionHandler(error -> {
+                System.out.println("Got a createResponse ERROR: " + error.toString());
+
+              });
+              resp.bodyHandler(
+                  body -> {
+
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "timeout");
+                    testComplete();
+                  });
+
+            });
+    request.end();
+    await();
+  }
+
+
 
   public HttpClient getClient() {
     return client;
@@ -269,24 +260,20 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
       reply
           .response()
           .stringResponse(
-              (future) -> {
-                getVertx()
-                    .createHttpClient(new HttpClientOptions())
-                    .getNow(
-                        PORT,
-                        HOST,
-                        SERVICE_REST_GET + "/long",
-                        response -> {
-                          if (!future.isComplete()) {
-                            future.complete("reply");
-                          }
-                        });
-              })
+              (future) -> getVertx()
+                  .createHttpClient(new HttpClientOptions())
+                  .getNow(
+                      PORT,
+                      HOST,
+                      SERVICE_REST_GET + "/long",
+                      response -> {
+                        if (!future.isComplete()) {
+                          future.complete("reply");
+                        }
+                      }))
           .timeout(1000)
           .onError(
-              e -> {
-                System.out.println("TIMEOUT");
-              })
+              e -> System.out.println("TIMEOUT"))
           .retry(3)
           .onFailureRespond(
               (error, response) -> {

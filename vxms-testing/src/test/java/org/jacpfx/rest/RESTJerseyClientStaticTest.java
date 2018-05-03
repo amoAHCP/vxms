@@ -20,20 +20,15 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
 import org.jacpfx.entity.StaticContentRouterConfig;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -98,31 +93,29 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
   @Test
   public void staticTest() throws InterruptedException {
     // System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-    CountDownLatch latch = new CountDownLatch(1);
-    Client client = ClientBuilder.newClient();
-    WebTarget target = client.target("http://" + HOST + ":" + PORT).path("/static/index.html");
-    Future<String> getCallback =
-        target
-            .request()
-            .async()
-            .get(
-                new InvocationCallback<String>() {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
 
-                  @Override
-                  public void completed(String response) {
-                    System.out.println("Response entity '" + response + "' received.");
-                    Assert.assertEquals(response, "<h1>fgdfgdf</h1>");
-                    latch.countDown();
-                  }
+    HttpClientRequest request =
+        client.get(
+            "/static/index.html",
+            resp -> {
+              resp.exceptionHandler(error -> {
 
-                  @Override
-                  public void failed(Throwable throwable) {
-                    throwable.printStackTrace();
-                  }
-                });
+              });
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "<h1>fgdfgdf</h1>");
+                    testComplete();
+                  });
 
-    latch.await();
-    testComplete();
+            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+    request.end();
+    await();
+
   }
 
   public HttpClient getClient() {

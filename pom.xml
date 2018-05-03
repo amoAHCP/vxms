@@ -15,219 +15,265 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jacpfx</groupId>
-    <artifactId>vxms</artifactId>
-    <packaging>pom</packaging>
-    <version>1.2-SNAPSHOT</version>
+  <groupId>org.jacpfx</groupId>
+  <artifactId>vxms</artifactId>
+  <packaging>pom</packaging>
+  <version>1.2-SNAPSHOT</version>
   <modules>
     <module>vxms-testing</module>
   </modules>
   <name>vxms</name>
-    <url>http://maven.apache.org</url>
+  <url>http://maven.apache.org</url>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--Vertx module name-->
-        <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
-        <!--Dependency versions-->
-        <vertx.version>3.5.0</vertx.version>
-        <junit.version>4.11</junit.version>
-        <!--Plugin versions-->
-        <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
-        <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
-        <maven-compiler-plugin.source>1.8</maven-compiler-plugin.source>
-        <maven-compiler-plugin.target>1.8</maven-compiler-plugin.target>
-        <maven-javadoc-plugin.version>3.0.0-M1</maven-javadoc-plugin.version>
-        <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-    </properties>
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>amo</id>
-            <name>Andy Moncsek</name>
-            <email>amo.ahcp@gmail.com</email>
-        </developer>
-    </developers>
-    <scm>
-        <connection>scm:git:git@github.com:amoAHCP/vxms.git</connection>
-        <developerConnection>scm:git:git@github.com:amoAHCP/vxms.git</developerConnection>
-        <url>git@github.com:amoAHCP/vxms.git</url>
-        <tag>vxms-parent</tag>
-    </scm>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!--Vertx module name-->
+    <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
+    <!--Dependency versions-->
+    <vertx.version>3.5.1</vertx.version>
+    <junit.version>4.11</junit.version>
+    <!--Plugin versions-->
+    <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+    <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
+    <maven-compiler-plugin.source>9</maven-compiler-plugin.source>
+    <maven-compiler-plugin.target>9</maven-compiler-plugin.target>
+    <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
+    <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
+  </properties>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>amo</id>
+      <name>Andy Moncsek</name>
+      <email>amo.ahcp@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git@github.com:amoAHCP/vxms.git</connection>
+    <developerConnection>scm:git:git@github.com:amoAHCP/vxms.git</developerConnection>
+    <url>git@github.com:amoAHCP/vxms.git</url>
+    <tag>vxms-parent</tag>
+  </scm>
 
-    <profiles>
-        <profile>
-            <id>all</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>vxms-core</module>
-                <module>vxms-event</module>
-                <module>vxms-rest</module>
-                <module>vxms-k8sdiscovery</module>
-                <module>vxms-testing</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>release</id>
-            <modules>
-                <module>vxms-core</module>
-                <module>vxms-event</module>
-                <module>vxms-rest</module>
-                <module>vxms-k8sdiscovery</module>
-                <module>vxms-testing</module>
-            </modules>
-        </profile>
+  <profiles>
+    <profile>
+      <id>all</id>
+    <!--  <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>-->
+      <modules>
+        <module>vxms-core</module>
+        <module>vxms-event</module>
+        <module>vxms-rest</module>
+        <module>vxms-k8sdiscovery</module>
+        <module>vxms-testing</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>release</id>
+      <modules>
+        <module>vxms-core</module>
+        <module>vxms-event</module>
+        <module>vxms-rest</module>
+        <module>vxms-k8sdiscovery</module>
+        <module>vxms-testing</module>
+      </modules>
+    </profile>
 
-    </profiles>
-
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-    </repositories>
-
-    <dependencies>
-        <!-- If you're using the Vert.x Java API you need this dependency -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <!-- We depend on the Vert.x test jar so we can extend VertxTestBase for asynchronous tests -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <!--Vertx provided dependencies-->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-hazelcast</artifactId>
-            <version>${vertx.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.11</version>
-          <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-
+    <profile>
+      <id>java-9</id>
+      <activation>
+        <jdk>9</jdk>
+      </activation>
+      <modules>
+        <module>vxms-core</module>
+        <module>vxms-event</module>
+        <module>vxms-rest</module>
+        <module>vxms-k8sdiscovery</module>
+        <module>vxms-testing</module>
+      </modules>
+      <build>
         <plugins>
-
-            <!-- Other plugins required by the build -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
-                <configuration>
-                    <source>${maven-compiler-plugin.source}</source>
-                    <target>${maven-compiler-plugin.target}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <!-- create source jar -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>${artifactId}-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <failOnError>false</failOnError>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven.compiler.plugin.version}</version>
+            <configuration>
+              <source>${maven-compiler-plugin.source}</source>
+              <target>${maven-compiler-plugin.target}</target>
+            </configuration>
+          </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven.compiler.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven.surefire.report.plugin.version}</version>
-                    <configuration>
-                        <argLine>-Xmx512m -XX:MaxPermSize=256m -Dsun.net.http.allowRestrictedHeaders=true</argLine>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${maven-javadoc-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.6</version>
-                    <configuration>
-                        <skip>true</skip>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+      </build>
+    </profile>
+    <profile>
+      <id>java-8</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <modules>
+        <module>vxms-core</module>
+        <module>vxms-event</module>
+        <module>vxms-rest</module>
+        <module>vxms-k8sdiscovery</module>
+        <module>vxms-testing</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven.compiler.plugin.version}</version>
+            <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <repositories>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- If you're using the Vert.x Java API you need this dependency -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <!-- We depend on the Vert.x test jar so we can extend VertxTestBase for asynchronous tests -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <version>${vertx.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <!--Vertx provided dependencies-->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
+      <version>${vertx.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <!-- Other plugins required by the build -->
+
+      <plugin>
+        <!-- create source jar -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>${artifactId}-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <failOnError>false</failOnError>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.report.plugin.version}</version>
+          <configuration>
+            <argLine>-Xmx512m -XX:MaxPermSize=256m -Dsun.net.http.allowRestrictedHeaders=true
+            </argLine>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.6</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
