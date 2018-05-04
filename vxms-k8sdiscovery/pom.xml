@@ -55,13 +55,13 @@
       <version>${kubernetes-client.version}</version>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/io.fabric8/openshift-client -->
+    <!-- https://mvnrepository.com/artifact/io.fabric8/openshift-client
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>openshift-client</artifactId>
       <version>${kubernetes-client.version}</version>
     </dependency>
-
+-->
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>fabric8-annotations</artifactId>
