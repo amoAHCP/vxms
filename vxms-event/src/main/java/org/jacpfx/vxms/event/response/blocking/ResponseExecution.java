@@ -32,7 +32,9 @@ import org.jacpfx.vxms.common.concurrent.LocalData;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
-/** Created by Andy Moncsek on 19.01.16. Performs blocking Executions and prepares response */
+/**
+ * Created by Andy Moncsek on 19.01.16. Performs blocking Executions and prepares response
+ */
 public class ResponseExecution {
 
   private static final int DEFAULT_VALUE = 0;
@@ -46,13 +48,13 @@ public class ResponseExecution {
    *
    * @param methodId the method name/id to be executed
    * @param supplier the user defined supply method to be executed (mapToStringResponse,
-   *     mapToByteResponse, mapToObjectResponse)
+   * mapToByteResponse, mapToObjectResponse)
    * @param blockingHandler the result handler, that takes the result
    * @param errorHandler the intermediate error method, executed on each error
    * @param onFailureRespond the method to be executed on failure
    * @param errorMethodHandler the fallback method
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   *     objects per instance
+   * objects per instance
    * @param failure last thrown Exception
    * @param retry the amount of retries
    * @param timeout the max timeout time for the method execution
@@ -223,7 +225,8 @@ public class ResponseExecution {
           }
         },
         false,
-        res -> {});
+        res -> {
+        });
   }
 
   private static <T> void executeInitialState(
@@ -279,7 +282,8 @@ public class ResponseExecution {
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       Throwable cause) {
-    final T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, cause);
+    final T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler,
+        _blockingHandler, cause);
     if (!_blockingHandler.isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
     }
@@ -352,13 +356,15 @@ public class ResponseExecution {
           final Vertx vertx = vxmsShared.getVertx();
           vertx.executeBlocking(
               bhandler -> {
-                T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, e);
+                T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler,
+                    _blockingHandler, e);
                 if (!_blockingHandler.isComplete()) {
                   _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
                 }
               },
               false,
-              res -> {});
+              res -> {
+              });
         });
   }
 
@@ -367,7 +373,8 @@ public class ResponseExecution {
     final long initialRetryCounterValue = (long) (_retry + 1);
     final Vertx vertx = vxmsShared.getVertx();
     vertx.setTimer(
-        _circuitBreakerTimeout, timer -> counter.addAndGet(initialRetryCounterValue, val -> {}));
+        _circuitBreakerTimeout, timer -> counter.addAndGet(initialRetryCounterValue, val -> {
+        }));
   }
 
   private static <T> void executeDefaultState(
@@ -401,7 +408,8 @@ public class ResponseExecution {
           }
         },
         false,
-        (val) -> {});
+        (val) -> {
+        });
 
     try {
       result = timeoutFuture.get(_timeout, TimeUnit.MILLISECONDS);
@@ -439,7 +447,8 @@ public class ResponseExecution {
         _retry--;
         if (_retry < DEFAULT_VALUE) {
           try {
-            result = handleError(errorHandler, onFailureRespond, errorMethodHandler, e);
+            result = handleError(errorHandler, onFailureRespond, errorMethodHandler,
+                _blockingHandler, e);
             errorHandling = true;
           } catch (Exception ee) {
             _blockingHandler.fail(ee);
@@ -451,8 +460,10 @@ public class ResponseExecution {
         }
       }
     }
-    if (!_blockingHandler.isComplete() && (result!=null||errorHandler==null)) {
+    if (!_blockingHandler.isComplete() && result != null) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
+    } else if (!_blockingHandler.isComplete()) {
+      _blockingHandler.complete(new ExecutionResult<>(result, false, errorHandling, null));
     }
   }
 
@@ -470,6 +481,7 @@ public class ResponseExecution {
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
+      Future<ExecutionResult<T>> _blockingHandler,
       Throwable e) {
     T result = null;
     try {
@@ -481,8 +493,8 @@ public class ResponseExecution {
       }
       if (errorHandler == null && onFailureRespond == null) {
         errorMethodHandler.accept(
-            e); // TODO switch to function to return true if an error method was executed, no if no
-                // error method is available
+            e);
+        _blockingHandler.complete();
         return null;
       }
     } catch (Throwable throwable) {
