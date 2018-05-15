@@ -100,33 +100,7 @@
     <profile>
       <id>java-9</id>
       <activation>
-        <jdk>9</jdk>
-      </activation>
-      <modules>
-        <module>vxms-core</module>
-        <module>vxms-event</module>
-        <module>vxms-rest</module>
-        <module>vxms-k8sdiscovery</module>
-        <module>vxms-testing</module>
-      </modules>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>${maven.compiler.plugin.version}</version>
-            <configuration>
-              <source>${maven-compiler-plugin.source}</source>
-              <target>${maven-compiler-plugin.target}</target>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>java-10</id>
-      <activation>
-        <jdk>10</jdk>
+        <jdk>[9,)</jdk>
       </activation>
       <modules>
         <module>vxms-core</module>

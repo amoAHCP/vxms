@@ -15,7 +15,7 @@
  */
 
 
-module vxms.core.demo {
+open module vxms.core.demo {
   requires vxms.core;
   requires vertx.core;
   requires vertx.web;
@@ -24,6 +24,6 @@ module vxms.core.demo {
   requires java.logging;
   requires java.management;
 
-
+  exports org.jacpfx.vxms.verticle to vxms.core,vertx.core;
 
 }

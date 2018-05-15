@@ -15,18 +15,17 @@
  */
 
 
-module vxms.rest.demo {
+module vxms.k8s.write.demo {
   requires vxms.core;
   requires vertx.core;
   requires vxms.rest;
   requires vertx.web;
+  requires vertx.mongo.client;
   requires java.logging;
   requires java.management;
   requires java.ws.rs;
   requires io.netty.codec.http;
 
   uses org.jacpfx.vxms.spi.RESThandlerSPI;
-  opens org.jacpfx.vxms.verticle;
-  exports org.jacpfx.vxms.verticle to vxms.core, vertx.core;
 
 }
