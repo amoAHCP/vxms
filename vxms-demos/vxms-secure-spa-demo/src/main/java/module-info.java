@@ -15,18 +15,22 @@
  */
 
 
-module vxms.rest.demo {
+module vxms.spa.demo {
   requires vxms.core;
   requires vertx.core;
+  requires vertx.auth.oauth2;
+  requires vertx.auth.common;
+  requires spring.context;
   requires vxms.rest;
   requires vertx.web;
   requires java.logging;
   requires java.management;
   requires java.ws.rs;
+  requires javax.inject;
+  requires java.xml.ws.annotation;
   requires io.netty.codec.http;
+  requires jacpfx.vertx.spring;
 
   uses org.jacpfx.vxms.spi.RESThandlerSPI;
-  opens org.jacpfx.vxms.verticle;
-  exports org.jacpfx.vxms.verticle to vxms.core, vertx.core;
 
 }

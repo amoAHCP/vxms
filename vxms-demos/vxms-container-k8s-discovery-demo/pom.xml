@@ -98,6 +98,7 @@
   <build>
 
     <plugins>
+
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-maven-plugin</artifactId>
@@ -107,10 +108,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven.compiler.plugin.version}</version>
+        <version>3.7.0</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>9</source>
+          <target>9</target>
+          <compilerArgs>
+            <arg>--add-exports</arg>
+            <arg>java.base/sun.security.tools.keytool=vxms.spa.demo</arg>
+            <arg>--add-exports</arg>
+            <arg>java.base/sun.security.x509=vxms.spa.demo</arg>
+
+
+          </compilerArgs>
         </configuration>
       </plugin>
 
