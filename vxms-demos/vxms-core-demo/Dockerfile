@@ -15,7 +15,7 @@ RUN jlink --module-path vxms-core-demo-1.2-SNAPSHOT.jar:mod:$JAVA_HOME/jmods \
         --no-man-pages
 
 # Second stage: Copies the custom JRE into our image and runs it
-FROM debian:jessie
+FROM debian:sid-slim
 
 
 WORKDIR /app
