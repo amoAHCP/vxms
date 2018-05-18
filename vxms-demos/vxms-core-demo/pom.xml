@@ -30,6 +30,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vxms.version>1.2-SNAPSHOT</vxms.version>
         <main.verticle>org.jacpfx.vxms.verticle.SimpleREST</main.verticle>
+        <netty.version>4.1.19.Final</netty.version>
     </properties>
 
     <repositories>
@@ -46,9 +47,339 @@
             <version>${vxms.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-unix-common</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-kqueue</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
     </dependencies>
+    <profiles><profile>
+        <id>java-9</id>
+        <activation>
+            <jdk>[9,)</jdk>
+        </activation>
+
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.7.0</version>
+                    <configuration>
+                        <source>9</source>
+                        <target>9</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+        <profile>
+            <id>java-8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.7.0</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/module-info.java</exclude>
+                            </excludes>
+                            <source>1.8</source>
+                            <target>1.8</target>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <version>1.0.0.Beta1</version>
+                <executions>
+                    <execution>
+                        <id>add-module-info-to-dependencies</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                            <modules>
+                                <module>
+                                    <artifact>
+                                        <groupId>com.fasterxml.jackson.core</groupId>
+                                        <artifactId>jackson-core</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>com.fasterxml.jackson.core</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>com.fasterxml.jackson.core</groupId>
+                                        <artifactId>jackson-annotations</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>com.fasterxml.jackson.annotations</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>com.fasterxml.jackson.core</groupId>
+                                        <artifactId>jackson-databind</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>com.fasterxml.jackson.databind</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-common</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.common</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-buffer</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.buffer</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-codec</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.codec</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-resolver</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.resolver</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-transport</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.transport</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-codec-dns</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.codec.dns</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-codec-http2</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.codec.http2</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-resolver-dns</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.resolver.dns</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-transport-native-unix-common</artifactId>
+                                        <version>${netty.version}</version>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.channel.unix</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-transport-native-epoll</artifactId>
+                                    </artifact>
+                                    <!-- TODO <moduleInfo>, needs handling of native unix-common dependency -->
+                                    <moduleInfoSource>
+                                        module io.netty.channel.epoll {
+                                        requires io.netty.buffer;
+                                        requires io.netty.channel.unix;
+                                        requires io.netty.common;
+                                        requires io.netty.transport;
+                                        exports io.netty.channel.epoll;
+                                        }
+                                    </moduleInfoSource>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-transport-native-kqueue</artifactId>
+                                    </artifact>
+                                    <!-- TODO <moduleInfo>, needs handling of native unix-common dependency -->
+                                    <moduleInfoSource>
+                                        module io.netty.channel.kqueue {
+                                        exports io.netty.channel.kqueue;
+                                        }
+                                    </moduleInfoSource>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-handler</artifactId>
+                                    </artifact>
+                                    <moduleInfoSource>
+                                        module io.netty.handler {
+                                        exports io.netty.handler.flow;
+                                        exports io.netty.handler.flush;
+                                        exports io.netty.handler.ipfilter;
+                                        exports io.netty.handler.logging;
+                                        exports io.netty.handler.ssl;
+                                        exports io.netty.handler.ssl.ocsp;
+                                        exports io.netty.handler.ssl.util;
+                                        exports io.netty.handler.stream;
+                                        exports io.netty.handler.timeout;
+                                        exports io.netty.handler.traffic;
+                                        }
+                                    </moduleInfoSource>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-codec-socks</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.codec.socks</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-handler-proxy</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.handler.proxy</name>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>io.netty</groupId>
+                                        <artifactId>netty-codec-http</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.netty.codec.http</name>
+                                    </moduleInfo>
+                                </module>
+                               <module>
+                                    <artifact>
+                                        <groupId>io.vertx</groupId>
+                                        <artifactId>vertx-auth-common</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.vertx.auth.common</name>
+                                        <requires>
+                                            static log4j.api;
+                                            static log4j;
+                                            static slf4j.api;
+                                            *;
+                                        </requires>
+                                        <exports>
+                                            !*impl*;
+                                            *;
+                                        </exports>
+                                    </moduleInfo>
+                                </module>
+
+                                <!--     <module>
+                                         <artifact>
+                                             <groupId>io.vertx</groupId>
+                                             <artifactId>vertx-bridge-common</artifactId>
+                                         </artifact>
+                                         <moduleInfo>
+                                             <name>io.vertx.bridge.common</name>
+                                         </moduleInfo>
+                                     </module>-->
+                                <module>
+                                    <artifact>
+                                        <groupId>io.vertx</groupId>
+                                        <artifactId>vertx-core</artifactId>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>io.vertx.core</name>
+                                        <requires>
+                                            static log4j.api;
+                                            static log4j;
+                                            static slf4j.api;
+                                            *;
+                                        </requires>
+                                        <exports>
+                                            !*impl*;
+                                            *;
+                                        </exports>
+                                        <uses>
+                                            io.vertx.core.spi.VertxFactory;
+                                            io.vertx.core.spi.VerticleFactory;
+                                            io.vertx.core.spi.FutureFactory;
+                                            io.vertx.core.spi.BufferFactory;
+                                        </uses>
+                                    </moduleInfo>
+                                </module>
+                            </modules>
+                            <module>
+                                <mainClass>org.jacpfx.vxms.verticle.SimpleREST</mainClass>
+                                <moduleInfo>
+                                    <name>vxms.core.demo</name>
+                                    <exports>
+                                        org.jacpfx.vxms.verticle to vxms.core;
+                                    </exports>
+                                </moduleInfo>
+                            </module>
+                        </configuration>
+                        <goals>
+                            <goal>add-module-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

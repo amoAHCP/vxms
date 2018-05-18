@@ -15,14 +15,14 @@ RUN jlink --module-path vxms-core-demo-1.2-SNAPSHOT.jar:mod:$JAVA_HOME/jmods \
         --no-man-pages
 
 # Second stage: Copies the custom JRE into our image and runs it
-FROM openjdk:9-jdk-sid
+FROM debian:sid-slim
 
 
 WORKDIR /app
 
-#COPY --from=builder /app/dist/ ./
+COPY --from=builder /app/dist/ ./
 COPY target/vxms-core-demo-1.2-SNAPSHOT.jar .
-COPY target/modules/ .
+COPY target/mod/ .
 
 ENV JAVA_HOME=/app
 ENV PATH="$PATH:$JAVA_HOME/bin"
@@ -30,5 +30,5 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 EXPOSE 9090
 
 #CMD ls -la
-CMD java --module-path vxms-core-demo-1.2-SNAPSHOT.jar:.:$JAVA_HOME/jmods --add-modules com.fasterxml.jackson.core com.fasterxml.jackson.annotations --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
+CMD bin/java --module-path vxms-core-demo-1.2-SNAPSHOT.jar:. --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
 

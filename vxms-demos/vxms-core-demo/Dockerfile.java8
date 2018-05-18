@@ -15,20 +15,13 @@ RUN jlink --module-path vxms-core-demo-1.2-SNAPSHOT.jar:mod:$JAVA_HOME/jmods \
         --no-man-pages
 
 # Second stage: Copies the custom JRE into our image and runs it
-FROM openjdk:9-jdk-sid
+FROM maven:3.3-jdk-8
+COPY . /usr/src/app
+
+ENV httpPort 9090
+EXPOSE $httpPort
+# CMD ["java", "-jar", "/usr/src/app/target/vxms-frontend-1.0-SNAPSHOT-fat.jar","-instances","8","-d64","-server","-XX:+AggressiveOpts"]
+CMD ["java", "-jar", "/usr/src/app/target/vxms-core-demo-fat.jar"]
 
 
-WORKDIR /app
-
-#COPY --from=builder /app/dist/ ./
-COPY target/vxms-core-demo-1.2-SNAPSHOT.jar .
-COPY target/modules/ .
-
-ENV JAVA_HOME=/app
-ENV PATH="$PATH:$JAVA_HOME/bin"
-
-EXPOSE 9090
-
-#CMD ls -la
-CMD java --module-path vxms-core-demo-1.2-SNAPSHOT.jar:.:$JAVA_HOME/jmods --add-modules com.fasterxml.jackson.core com.fasterxml.jackson.annotations --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
 
