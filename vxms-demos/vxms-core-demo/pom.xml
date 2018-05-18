@@ -309,6 +309,11 @@
                                         <name>io.netty.codec.http</name>
                                     </moduleInfo>
                                 </module>
+                                <!-- ADDING THIS MODULE LEADS TO FOLLOWING ERROR;
+ERROR] Failed to execute goal org.moditect:moditect-maven-plugin:1.0.0.Beta1:add-module-info (add-module-info-to-dependencies) on project vxms-core-demo: Execution add-module-info-to-dependencies of goal org.moditect:moditect-maven-plugin:1.0.0.Beta1:add-module-info failed: Unable to derive module descriptor for .m2/repository/org/codehaus/groovy/groovy-all/2.4.7/groovy-all-2.4.7.jar: Provider class moduleName=groovy-all not in module -> [Help 1]
+
+                                same for vertx.web
+                                -->
                                <module>
                                     <artifact>
                                         <groupId>io.vertx</groupId>
