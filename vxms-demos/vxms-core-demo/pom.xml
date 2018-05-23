@@ -14,97 +14,441 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jacpfx</groupId>
-    <artifactId>vxms-core-demo</artifactId>
-    <version>1.2-SNAPSHOT</version>
-    <packaging>jar</packaging>
+  <groupId>org.jacpfx</groupId>
+  <artifactId>vxms-core-demo</artifactId>
+  <version>1.2-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
-    <name>vxms-core-demo</name>
-    <url>http://maven.apache.org</url>
+  <name>vxms-core-demo</name>
+  <url>http://maven.apache.org</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vxms.version>1.2-SNAPSHOT</vxms.version>
-        <main.verticle>org.jacpfx.vxms.verticle.SimpleREST</main.verticle>
-    </properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <vxms.version>1.2-SNAPSHOT</vxms.version>
+    <main.verticle>org.jacpfx.vxms.verticle.SimpleREST</main.verticle>
+    <netty.version>4.1.19.Final</netty.version>
+  </properties>
 
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-    </repositories>
+  <repositories>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.jacpfx</groupId>
-            <artifactId>vxms-core</artifactId>
-            <version>${vxms.version}</version>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.jacpfx</groupId>
+      <artifactId>vxms-core</artifactId>
+      <version>${vxms.version}</version>
+    </dependency>
 
-    </dependencies>
-    <build>
+  </dependencies>
+  <profiles>
+    <profile>
+      <id>java-9</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+
+      <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/mod</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.7.0</version>
+            <configuration>
+              <source>9</source>
+              <target>9</target>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.moditect</groupId>
+            <artifactId>moditect-maven-plugin</artifactId>
+            <version>1.0.0.Beta1</version>
+            <executions>
+              <execution>
+                <id>add-module-info-to-dependencies</id>
+                <phase>package</phase>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                  <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                  <modules>
+                    <module>
+                      <artifact>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>com.fasterxml.jackson.core</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>com.fasterxml.jackson.annotations</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>com.fasterxml.jackson.databind</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-common</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.common</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-buffer</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.buffer</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-resolver</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.resolver</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.transport</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-dns</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.dns</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-http2</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.http2</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-resolver-dns</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.resolver.dns</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport-native-unix-common</artifactId>
+                        <version>${netty.version}</version>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.channel.unix</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport-native-epoll</artifactId>
+                        <version>${netty.version}</version>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        module io.netty.channel.epoll {
+                        requires io.netty.buffer;
+                        requires io.netty.channel.unix;
+                        requires io.netty.common;
+                        requires io.netty.transport;
+                        exports io.netty.channel.epoll;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport-native-kqueue</artifactId>
+                        <version>${netty.version}</version>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        module io.netty.channel.kqueue {
+                        exports io.netty.channel.kqueue;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-handler</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module io.netty.handler {
+                        exports io.netty.handler.flow;
+                        exports io.netty.handler.flush;
+                        exports io.netty.handler.ipfilter;
+                        exports io.netty.handler.logging;
+                        exports io.netty.handler.ssl;
+                        exports io.netty.handler.ssl.ocsp;
+                        exports io.netty.handler.ssl.util;
+                        exports io.netty.handler.stream;
+                        exports io.netty.handler.timeout;
+                        exports io.netty.handler.traffic;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-socks</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.socks</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-handler-proxy</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.handler.proxy</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-http</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.http</name>
+                      </moduleInfo>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-core</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>vertx.core</name>
+                        <requires>
+                          static log4j.api;
+                          static log4j;
+                          static slf4j.api;
+                          *;
+                        </requires>
+                        <exports>
+                          *;
+                        </exports>
+                        <uses>
+                          io.vertx.core.spi.VertxFactory;
+                          io.vertx.core.spi.VerticleFactory;
+                          io.vertx.core.spi.FutureFactory;
+                          io.vertx.core.spi.BufferFactory;
+                        </uses>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-auth-common</artifactId>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        open module io.vertx.auth.common {
+                        requires vertx.core;
+
+
+                        exports io.vertx.ext.auth;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-bridge-common</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module vertx.bridge.common {
+                        requires vertx.core;
+
+
+                        exports io.vertx.ext.bridge;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-web</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module vertx.web {
+                        requires vertx.core;
+                        requires io.netty.codec.http;
+
+
+                        exports io.vertx.ext.web;
+                        exports io.vertx.ext.web.handler;
+                        exports io.vertx.ext.web.impl;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                  </modules>
+                  <module>
+                    <mainClass>${main.verticle}</mainClass>
+                    <moduleInfoSource>
+                      open module vxms.core.demo {
+                      requires vxms.core;
+                      requires vertx.core;
+                      requires vertx.web;
+                      requires io.netty.codec;
+                      requires io.netty.codec.http;
+                      requires java.logging;
+                      requires java.management;
+
+                      exports org.jacpfx.vxms.verticle to vxms.core,vertx.core;
+
+                      }
+                    </moduleInfoSource>
+                  </module>
+
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>${main.verticle}</Main-Verticle>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                            <artifactSet/>
-                            <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                <goals>
+                  <goal>add-module-info</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
-    </build>
+      </build>
+    </profile>
+    <profile>
+      <id>java-8</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.7.0</version>
+            <configuration>
+              <excludes>
+                <exclude>**/module-info.java</exclude>
+              </excludes>
+              <source>1.8</source>
+              <target>1.8</target>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>2.3</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <transformers>
+                    <transformer
+                      implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <manifestEntries>
+                        <Main-Class>io.vertx.core.Launcher</Main-Class>
+                        <Main-Verticle>${main.verticle}</Main-Verticle>
+                      </manifestEntries>
+                    </transformer>
+                  </transformers>
+                  <artifactSet/>
+                  <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/mod</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>9</source>
+          <target>9</target>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
 </project>
