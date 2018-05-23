@@ -4,7 +4,9 @@ MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 RUN git clone https://github.com/amoAHCP/vxms.git && \
-    cd vxms/vxms-demos/vxms-core-demo && \
+    cd vxms && \
+    git checkout java9 && \
+    cd vxms-demos/vxms-core-demo && \
     mvn clean install
 
 
@@ -23,9 +25,7 @@ RUN set -ex && \
     rm /opt/jdk/lib/src.zip
 WORKDIR /app
 COPY --from=mavenbuilder /app/vxms/vxms-demos/vxms-core-demo/ ./
-#COPY --from=mavenbuilder /app/vxms/vxms-demos/vxms-core-demo/target/mod/vxms-core-1.2-SNAPSHOT.jar ./target/modules
-
-RUN ls -la target
+COPY --from=mavenbuilder /app/vxms/vxms-demos/vxms-core-demo/target/mod/vxms-core-1.2-SNAPSHOT.jar ./target/modules
 RUN jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules:$JAVA_HOME/jmods \
           --add-modules vxms.core.demo \
           --limit-modules vxms.core.demo \
@@ -41,15 +41,11 @@ RUN jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules:$J
 # Third stage: Copies the custom JRE into our image and runs it
 FROM alpine:3.7
 MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
-
 WORKDIR /app
-
 COPY --from=builder /app/dist/ ./
-
-
 EXPOSE 9090
-#ENV JVM_OPTS="-XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1"
-ENV JVM_OPTS="-Xms24M"
+ENV JVM_OPTS="-XX:MaxRAMFraction=1"
+#ENV JVM_OPTS="-Xms16M"
 ENTRYPOINT ["bin/run"]
 
 

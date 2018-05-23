@@ -11,10 +11,17 @@ In this case we simply use the main method declared in the class, instead of usi
   
 ``` 
 
+## create a modular runtime image
+The Dockerfile in this project is an example, how to build a modular runtime image to run a vxms (Vert.x based) application. To build the application modules, the moditec maven plugin is used(https://github.com/moditect/moditect). Basically the process consists of 3 Steps:
+- Step 1: clone the project, switch to Java9 branch and build the project against Java9
+- Step 2: the created modules are copied to the next step, the alpine JDK11 will be downloaded an a modular runtime image will be created
+- Step 3: the modular image (containing the REST service) will be copied to an alpine image
 
-java --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules/ --add-modules io.netty.channel.unix,io.netty.channel.kqueue,io.netty.channel.epoll,io.netty.relver.dns,io.netty.codec.dns,io.netty.transport,io.netty.resolver --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
-
-
-
-
-/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home/bin/jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules:$JAVA_HOME/jmods --add-modules vxms.core.demo --launcher run=vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST --output java9-vertx --compress 2 --strip-debug --no-header-files --no-man-pages
+### how to build
+```shell
+docker build -t core-demo .
+```
+### how to run
+```shell
+docker run -m32M -p 9090:9090 --name core-demo core-demo:latest
+```
