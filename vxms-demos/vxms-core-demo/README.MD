@@ -8,8 +8,13 @@ In this case we simply use the main method declared in the class, instead of usi
 
 ```shell
    java --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/mod --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
-   jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/mod:$JAVA_HOME/jmods --add-modules vxms.core.demo --launcher run=vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST --output dist --compress 2 --strip-debug --no-header-files --no-man-pages
-
-$JAVA_HOME/bin/jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/mod:$JAVA_HOME/jmods/ --add-modules java.base,java.logging,java.xml,jdk.unsupported,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument  --compress 2 --no-header-files --output jdk-9-minimal
-
+  
 ``` 
+
+
+java --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules/ --add-modules io.netty.channel.unix,io.netty.channel.kqueue,io.netty.channel.epoll,io.netty.relver.dns,io.netty.codec.dns,io.netty.transport,io.netty.resolver --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
+
+
+
+
+/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home/bin/jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules:$JAVA_HOME/jmods --add-modules vxms.core.demo --launcher run=vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST --output java9-vertx --compress 2 --strip-debug --no-header-files --no-man-pages

@@ -1,34 +1,56 @@
-FROM openjdk:9-jdk-sid AS builder
+# First stage: Copy the project and run mvn clean install in Docker to build the project against Java 9
+FROM maven:3.5.3-jdk-9 AS mavenbuilder
+MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+RUN git clone https://github.com/amoAHCP/vxms.git && \
+    cd vxms/vxms-demos/vxms-core-demo && \
+    mvn clean install
 
+
+# Second stage: Copies the builded application and creates a custom JRE
+FROM alpine:3.7 AS builder
+MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
+ENV JAVA_HOME=/opt/jdk \
+    PATH=${PATH}:/opt/jdk/bin \
+    LANG=C.UTF-8
+RUN set -ex && \
+    apk add --no-cache bash && \
+    wget https://download.java.net/java/early_access/alpine/11/binaries/openjdk-11-ea+11_linux-x64-musl_bin.tar.gz -O jdk.tar.gz && \
+    mkdir -p /opt/jdk && \
+    tar zxvf jdk.tar.gz -C /opt/jdk --strip-components=1 && \
+    rm jdk.tar.gz && \
+    rm /opt/jdk/lib/src.zip
+WORKDIR /app
+COPY --from=mavenbuilder /app/vxms/vxms-demos/vxms-core-demo/ ./
+#COPY --from=mavenbuilder /app/vxms/vxms-demos/vxms-core-demo/target/mod/vxms-core-1.2-SNAPSHOT.jar ./target/modules
+
+RUN ls -la target
+RUN jlink --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/modules:$JAVA_HOME/jmods \
+          --add-modules vxms.core.demo \
+          --limit-modules vxms.core.demo \
+          --launcher run=vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST \
+          --output dist \
+          --compress 2 \
+          --strip-debug \
+          --no-header-files \
+          --no-man-pages \
+          --vm server
+
+
+# Third stage: Copies the custom JRE into our image and runs it
+FROM alpine:3.7
+MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
 
 WORKDIR /app
 
-COPY target/vxms-core-demo-1.2-SNAPSHOT.jar .
-COPY target/mod/ .
+COPY --from=builder /app/dist/ ./
 
-
-RUN jlink --module-path vxms-core-demo-1.2-SNAPSHOT.jar:mod:$JAVA_HOME/jmods \
-        --add-modules java.base,java.logging,java.xml,jdk.unsupported,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument  \
-        --output dist \
-        --compress 2 \
-        --no-header-files \
-        --no-man-pages
-
-# Second stage: Copies the custom JRE into our image and runs it
-FROM openjdk:9-jdk-sid
-
-
-WORKDIR /app
-
-#COPY --from=builder /app/dist/ ./
-COPY target/vxms-core-demo-1.2-SNAPSHOT.jar .
-COPY target/modules/ .
-
-ENV JAVA_HOME=/app
-ENV PATH="$PATH:$JAVA_HOME/bin"
 
 EXPOSE 9090
+#ENV JVM_OPTS="-XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1"
+ENV JVM_OPTS="-Xms24M"
+ENTRYPOINT ["bin/run"]
 
-#CMD ls -la
-CMD java --module-path vxms-core-demo-1.2-SNAPSHOT.jar:.:$JAVA_HOME/jmods --add-modules com.fasterxml.jackson.core com.fasterxml.jackson.annotations --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
+
 
