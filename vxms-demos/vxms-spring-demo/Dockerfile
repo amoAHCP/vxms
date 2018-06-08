@@ -1,4 +1,16 @@
-# First stage: Copies the builded application and creates a custom JRE
+# First stage: Copy the project and run mvn clean install in Docker to build the project against Java 9
+FROM maven:3.5.3-jdk-9 AS mavenbuilder
+MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+RUN git clone https://github.com/amoAHCP/vxms.git && \
+    cd vxms && \
+    git checkout java9 && \
+    cd vxms-demos/vxms-spring-demo && \
+    mvn clean install
+
+
+# Second stage: Copies the builded application and creates a custom JRE
 FROM alpine:3.7 AS builder
 MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
 ENV JAVA_HOME=/opt/jdk \
@@ -25,7 +37,7 @@ RUN jlink --module-path target/vxms-spring-demo-1.2-SNAPSHOT.jar:target/modules:
           --vm server
 
 
-# Second stage: Copies the custom JRE into our image and runs it
+# Third stage: Copies the custom JRE into our image and runs it
 FROM alpine:3.7
 MAINTAINER Andy Moncsek <amo.ahcp@gmail.com>
 WORKDIR /app
