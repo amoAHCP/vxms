@@ -16,8 +16,9 @@ target
 file-uploads
 .vertx
 docker-compose.yml
-Dockerfile
+
 vxms-demos/vxms-stream-demo
+vxms-demos/vxms-core-demo/Backup
 vxms-demos/vxms-test
 vxms-demos/vxms-test/*
 
