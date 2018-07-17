@@ -26,7 +26,7 @@ import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.impl.AsynchronousCounter;
-import io.vertx.core.shareddata.impl.AsynchronousLock;
+import io.vertx.core.shareddata.impl.LocalAsyncLocks;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentMap;
 public class LocalData {
 
   private final ConcurrentMap<String, Counter> localCounters = new ConcurrentHashMap();
-  private final ConcurrentMap<String, AsynchronousLock> localLocks = new ConcurrentHashMap();
+  private final ConcurrentMap<String, LocalAsyncLocks> localLocks = new ConcurrentHashMap();
   private final Vertx vertx;
 
   public LocalData(Vertx vertx) {
@@ -76,9 +76,9 @@ public class LocalData {
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(resultHandler, "resultHandler");
     Arguments.require(timeout >= 0L, "timeout must be >= 0");
-    AsynchronousLock lock = this.localLocks
-        .computeIfAbsent(name, (n) -> new AsynchronousLock(this.vertx));
-    lock.acquire(timeout, resultHandler);
+    LocalAsyncLocks lock = this.localLocks
+        .computeIfAbsent(name, (n) -> new LocalAsyncLocks());
+    lock.acquire(this.vertx.getOrCreateContext(),name,timeout, resultHandler);
 
   }
 

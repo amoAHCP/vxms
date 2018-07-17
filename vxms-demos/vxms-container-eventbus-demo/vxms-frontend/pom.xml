@@ -33,6 +33,10 @@
   <name>vxms-frontend</name>
   <url>http://maven.apache.org</url>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
+  </properties>
 
   <dependencies>
     <dependency>

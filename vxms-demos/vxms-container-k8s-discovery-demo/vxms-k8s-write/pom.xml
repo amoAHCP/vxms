@@ -30,7 +30,9 @@
 
   <name>vxms-k8s-write</name>
   <url>http://maven.apache.org</url>
-
+<properties>
+  <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
+</properties>
 
   <dependencies>
 

@@ -36,6 +36,7 @@
   <properties>
     <vertx.health.path>/health</vertx.health.path>
     <vertx.health.port>8181</vertx.health.port>
+    <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
   </properties>
 
   <dependencies>
