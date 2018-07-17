@@ -32,8 +32,8 @@ open module vxms.spring.demo {
 
 
   uses org.jacpfx.vxms.spi.RESThandlerSPI;
+  exports org.jacpfx.vxms.spring;
 
 
-  exports org.jacpfx.vxms.spring to vxms.core, vertx.core, jacpfx.vertx.spring;
 
 }

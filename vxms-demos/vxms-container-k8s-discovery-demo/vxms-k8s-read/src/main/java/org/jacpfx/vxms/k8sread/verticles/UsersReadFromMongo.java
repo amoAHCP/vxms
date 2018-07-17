@@ -35,7 +35,7 @@ import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/** Created by Andy Moncsek on 17.02.16. */
+
 @SpringVerticle(springConfig = ReadApplication.class)
 @ServiceEndpoint(name = "read-verticle", contextRoot = "/read", port = 7070)
 public class UsersReadFromMongo extends VxmsEndpoint {

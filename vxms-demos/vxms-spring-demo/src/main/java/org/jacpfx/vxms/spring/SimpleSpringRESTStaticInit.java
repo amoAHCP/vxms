@@ -46,7 +46,7 @@ public class SimpleSpringRESTStaticInit extends AbstractVerticle {
     }
 
     @Inject
-    HelloWorldBean bean;
+    public HelloWorldBean bean;
 
     @Path("/helloGET")
     @GET
@@ -78,7 +78,7 @@ public class SimpleSpringRESTStaticInit extends AbstractVerticle {
     }
 
     public static void main(String[] args) {
-        DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("host", "localhost"));
+        DeploymentOptions options = new DeploymentOptions();
         Vertx.vertx().deployVerticle(SimpleSpringRESTStaticInit.class.getName(), options);
     }
 }

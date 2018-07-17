@@ -30,8 +30,10 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vxms.version>1.2-SNAPSHOT</vxms.version>
-    <vertx-spring-ext.version>2.3</vertx-spring-ext.version>
-    <main.verticle>java-spring:org.jacpfx.vxms.spring.SimpleSpringREST</main.verticle>
+    <vertx-spring-ext.version>2.4-SNAPSHOT</vertx-spring-ext.version>
+    <main.verticle>org.jacpfx.vxms.spring.SimpleSpringREST</main.verticle>
+    <netty.version>4.1.19.Final</netty.version>
+    <aspectj.version>1.8.10</aspectj.version>
   </properties>
 
   <repositories>
@@ -48,7 +50,26 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.ws</groupId>
+      <artifactId>jaxws-api</artifactId>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <version>1.1.1</version>
+    </dependency>
     <dependency>
       <groupId>org.jacpfx</groupId>
       <artifactId>vxms-core</artifactId>
@@ -65,11 +86,615 @@
       <version>${vertx-spring-ext.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>${aspectj.version}</version>
+    </dependency>
+    <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
       <version>1</version>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>java-9</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.7.0</version>
+            <configuration>
+              <source>9</source>
+              <target>9</target>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.moditect</groupId>
+            <artifactId>moditect-maven-plugin</artifactId>
+            <version>1.0.0.Beta1</version>
+            <executions>
+              <execution>
+                <id>add-module-info-to-dependencies</id>
+                <phase>package</phase>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                  <modules>
+                    <module>
+                      <artifact>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module aspectjweaver {
+                        exports org.aspectj.lang.annotation;
+                        exports aj.org.objectweb.asm;
+                        exports org.aspectj.lang.reflect;
+                        exports org.aspectj.weaver.tools;
+                        exports org.aspectj.lang;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>org.jacpfx.vertx.spring</groupId>
+                        <artifactId>vertx-spring-ext</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module jacpfx.vertx.spring {
+                        requires vertx.core;
+                        requires io.netty.codec;
+                        requires io.netty.codec.http;
+                        requires java.logging;
+                        requires java.management;
+                        requires spring.core;
+                        requires spring.context;
+                        requires spring.beans;
+                        requires aspectjweaver;
+
+                        exports org.jacpfx.vertx.spring;
+                        opens org.jacpfx.vertx.spring to spring.core;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.jacpfx</groupId>
+                        <artifactId>vxms-core</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module vxms.core {
+                        requires vertx.core;
+                        requires vertx.web;
+                        requires java.logging;
+                        requires java.management;
+
+                        exports org.jacpfx.vxms.spi;
+                        exports org.jacpfx.vxms.common.encoder;
+                        exports org.jacpfx.vxms.common.decoder;
+                        exports org.jacpfx.vxms.common.concurrent to vxms.rest,vxms.event,
+                        vxms.k8sdiscovery;
+                        exports org.jacpfx.vxms.common.util to vxms.rest,vxms.event,
+                        vxms.k8sdiscovery;
+                        exports org.jacpfx.vxms.common;
+                        exports org.jacpfx.vxms.common.configuration;
+                        exports org.jacpfx.vxms.services;
+                        exports org.jacpfx.vxms.common.throwable;
+
+                        uses org.jacpfx.vxms.spi.EventhandlerSPI;
+                        uses org.jacpfx.vxms.spi.RESThandlerSPI;
+                        uses org.jacpfx.vxms.spi.ServiceDiscoverySPI;
+                        uses org.jacpfx.vxms.spi.WebSockethandlerSPI;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.jacpfx</groupId>
+                        <artifactId>vxms-rest</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module vxms.rest {
+                        requires vxms.core;
+                        requires vertx.core;
+                        requires vertx.web;
+                        requires io.netty.codec;
+                        requires io.netty.codec.http;
+                        requires java.logging;
+                        requires java.management;
+                        requires java.ws.rs;
+
+                        exports org.jacpfx.vxms.rest.annotation;
+                        exports org.jacpfx.vxms.rest.response;
+                        exports org.jacpfx.vxms.rest.response.basic;
+                        exports org.jacpfx.vxms.rest.response.blocking;
+
+                        provides org.jacpfx.vxms.spi.RESThandlerSPI with
+                        org.jacpfx.vxms.rest.RESThandler;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+
+
+                    <module>
+                      <artifact>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>java.activation</name>
+                      </moduleInfo>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module java.xml.bind {
+                        requires transitive java.activation;
+                        requires transitive java.xml;
+                        requires java.logging;
+                        requires java.desktop;
+
+                        exports javax.xml.bind;
+                        exports javax.xml.bind.annotation;
+                        exports javax.xml.bind.annotation.adapters;
+                        exports javax.xml.bind.attachment;
+                        exports javax.xml.bind.helpers;
+                        exports javax.xml.bind.util;
+
+                        uses javax.xml.bind.JAXBContextFactory;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>javax.annotation-api</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>java.xml.ws.annotation</name>
+                      </moduleInfo>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>javax.ws.rs</groupId>
+                        <artifactId>javax.ws.rs-api</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>java.ws.rs</name>
+                      </moduleInfo>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>javax.inject</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>com.fasterxml.jackson.core</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>com.fasterxml.jackson.annotations</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>com.fasterxml.jackson.databind</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-common</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.common</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-buffer</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.buffer</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-resolver</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.resolver</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.transport</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-dns</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.dns</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-http2</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.http2</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-resolver-dns</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.resolver.dns</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport-native-unix-common</artifactId>
+                        <version>${netty.version}</version>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.channel.unix</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport-native-epoll</artifactId>
+                        <version>${netty.version}</version>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        module io.netty.channel.epoll {
+                        requires io.netty.buffer;
+                        requires io.netty.channel.unix;
+                        requires io.netty.common;
+                        requires io.netty.transport;
+                        exports io.netty.channel.epoll;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-transport-native-kqueue</artifactId>
+                        <version>${netty.version}</version>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        module io.netty.channel.kqueue {
+                        exports io.netty.channel.kqueue;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-handler</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        module io.netty.handler {
+                        exports io.netty.handler.flow;
+                        exports io.netty.handler.flush;
+                        exports io.netty.handler.ipfilter;
+                        exports io.netty.handler.logging;
+                        exports io.netty.handler.ssl;
+                        exports io.netty.handler.ssl.ocsp;
+                        exports io.netty.handler.ssl.util;
+                        exports io.netty.handler.stream;
+                        exports io.netty.handler.timeout;
+                        exports io.netty.handler.traffic;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-socks</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.socks</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-handler-proxy</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.handler.proxy</name>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-codec-http</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>io.netty.codec.http</name>
+                      </moduleInfo>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-core</artifactId>
+                      </artifact>
+                      <moduleInfo>
+                        <name>vertx.core</name>
+                        <requires>
+                          static log4j.api;
+                          static log4j;
+                          static slf4j.api;
+                          *;
+                        </requires>
+                        <exports>
+                          *;
+                        </exports>
+                        <uses>
+                          io.vertx.core.spi.VertxFactory;
+                          io.vertx.core.spi.VerticleFactory;
+                          io.vertx.core.spi.FutureFactory;
+                          io.vertx.core.spi.BufferFactory;
+                        </uses>
+                      </moduleInfo>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-auth-common</artifactId>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        open module io.vertx.auth.common {
+                        requires vertx.core;
+
+
+                        exports io.vertx.ext.auth;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-bridge-common</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module vertx.bridge.common {
+                        requires vertx.core;
+
+
+                        exports io.vertx.ext.bridge;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>io.vertx</groupId>
+                        <artifactId>vertx-web</artifactId>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module vertx.web {
+                        requires vertx.core;
+                        requires io.netty.codec.http;
+
+
+                        exports io.vertx.ext.web;
+                        exports io.vertx.ext.web.handler;
+                        exports io.vertx.ext.web.impl;
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-jcl</artifactId>
+                        <version>5.0.6.RELEASE</version>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        open module spring.jcl {
+                        requires java.logging;
+                        exports org.apache.commons.logging;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-core</artifactId>
+                        <version>5.0.6.RELEASE</version>
+                      </artifact>
+
+                      <moduleInfoSource>
+                        open module spring.core {
+                        requires java.desktop;
+                        requires spring.jcl;
+                        exports org.springframework.core.io.support;
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-beans</artifactId>
+                        <version>5.0.6.RELEASE</version>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module spring.beans {
+                        requires spring.core;
+                        requires spring.jcl;
+                        requires java.desktop;
+
+                        exports org.springframework.beans;
+
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+
+                    <module>
+                      <artifact>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-expression</artifactId>
+                        <version>5.0.6.RELEASE</version>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module spring.expression {
+                        requires spring.core;
+                        requires spring.jcl;
+                        exports org.springframework.expression;
+
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-aop</artifactId>
+                        <version>5.0.6.RELEASE</version>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module spring.aop {
+                        requires spring.core;
+                        requires spring.beans;
+                        requires spring.jcl;
+                        requires aspectjweaver;
+                        exports org.springframework.aop;
+
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                    <module>
+                      <artifact>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-context</artifactId>
+                        <version>5.0.6.RELEASE</version>
+                      </artifact>
+                      <moduleInfoSource>
+                        open module spring.context {
+                        requires spring.core;
+                        requires spring.beans;
+                        requires spring.jcl;
+                        requires spring.expression;
+                        requires spring.aop;
+                        requires java.desktop;
+                        requires java.naming;
+                        requires java.xml.ws.annotation;
+
+
+                        exports org.springframework.context;
+
+
+                        }
+                      </moduleInfoSource>
+                    </module>
+                  </modules>
+                  <module>
+                    <mainClass>org.jacpfx.vxms.spring.SimpleSpringRESTStaticInit</mainClass>
+                    <moduleInfoSource>
+                      open module vxms.spring.demo {
+                      requires vxms.core;
+                      requires vertx.core;
+                      requires spring.context;
+                      requires spring.core;
+                      requires spring.beans;
+                      requires jacpfx.vertx.spring;
+                      requires vxms.rest;
+                      requires vertx.web;
+                      requires java.logging;
+                      requires java.management;
+                      requires java.ws.rs;
+                      requires javax.inject;
+                      requires java.xml.ws.annotation;
+                      requires io.netty.codec.http;
+
+
+                      uses org.jacpfx.vxms.spi.RESThandlerSPI;
+                      exports org.jacpfx.vxms.spring;
+                      exports org.jacpfx.vxms.spring.beans;
+                      exports org.jacpfx.vxms.spring.configuration;
+
+
+                      }
+                    </moduleInfoSource>
+                  </module>
+
+                </configuration>
+                <goals>
+                  <goal>add-module-info</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   <build>
     <plugins>
       <plugin>
@@ -102,38 +727,7 @@
           <target>9</target>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>io.vertx.core.Launcher</Main-Class>
-                    <Main-Verticle>${main.verticle}</Main-Verticle>
-                  </manifestEntries>
-                </transformer>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                  <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
-                </transformer>
-              </transformers>
-              <artifactSet/>
-              <outputFile>
-                ${project.build.directory}/${project.artifactId}-${project.version}-fat.jar
-              </outputFile>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
     </plugins>
   </build>
 

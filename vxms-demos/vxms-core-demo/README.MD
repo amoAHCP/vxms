@@ -8,6 +8,8 @@ In this case we simply use the main method declared in the class, instead of usi
 
 ```shell
    java --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/mod --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
+   time java -XX:+UseAppCDS -Xshare:dump -XX:SharedArchiveFile=app-cds.jsa -XX:DumpLoadedClassList=classes.lst --class-path --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/mod --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST
+   time java -XX:+UnlockCommercialFeatures -XX:+UseAppCDS -Xshare:on -XX:SharedArchiveFile=app-cds.jsa  --module-path target/vxms-core-demo-1.2-SNAPSHOT.jar:target/mod --module vxms.core.demo/org.jacpfx.vxms.verticle.SimpleREST -Xlog:class+load
   
 ``` 
 

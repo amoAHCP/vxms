@@ -16,13 +16,20 @@
 
 package org.jacpfx.vxms.spring.configuration;
 
+import org.jacpfx.vxms.spring.beans.HelloWorldBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by Andy Moncsek on 28.01.16.
  */
 @Configuration
-@ComponentScan(basePackages = "org.jacpfx.vxms.spring")
+//@ComponentScan(basePackages = "org.jacpfx.vxms.spring.beans")
 public class SpringConfig {
+  @Bean
+  public HelloWorldBean getHelloWorldBean() {
+    return new HelloWorldBean();
+  }
 }

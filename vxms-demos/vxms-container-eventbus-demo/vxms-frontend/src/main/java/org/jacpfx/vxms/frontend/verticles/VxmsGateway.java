@@ -51,7 +51,7 @@ public class VxmsGateway extends VxmsEndpoint {
   @Override
   public void postConstruct(final Future<Void> startFuture) {
     // for demo purposes
-    InitMongoDB.initMongoData(vertx, config());
+  //  InitMongoDB.initMongoData(vertx, config());
     startFuture.complete();
 
   }
