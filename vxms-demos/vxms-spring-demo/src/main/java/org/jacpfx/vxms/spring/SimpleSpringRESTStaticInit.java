@@ -45,11 +45,7 @@ public class SimpleSpringRESTStaticInit extends AbstractVerticle {
         VxmsEndpoint.start(startFuture,this);
     }
 
-    public void postConstruct(final Future<Void> startFuture) {
-        startFuture.complete();
-        System.out.println("STOP");
-        System.exit(0);
-    }
+
 
     @Inject
     public HelloWorldBean bean;
@@ -84,8 +80,13 @@ public class SimpleSpringRESTStaticInit extends AbstractVerticle {
     }
 
     public static void main(String[] args) {
-        System.out.println("STATIC");
+
         DeploymentOptions options = new DeploymentOptions();
-        Vertx.vertx().deployVerticle(SimpleSpringRESTStaticInit.class.getName(), options);
+        Vertx.vertx().deployVerticle(SimpleSpringRESTStaticInit.class.getName(), options, handler -> {
+            if(handler.succeeded()) {
+                System.out.println("STATIC ready");
+                System.exit(0);
+            }
+        });
     }
 }
