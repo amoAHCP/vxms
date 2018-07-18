@@ -72,6 +72,7 @@ public class SimpleSpringREST extends VxmsEndpoint {
     }
 
     public static void main(String[] args) {
+        System.out.println("Default");
         DeploymentOptions options = new DeploymentOptions().setInstances(1).setConfig(new JsonObject().put("host", "localhost"));
         Vertx.vertx().deployVerticle("java-spring:" + SimpleSpringREST.class.getName(), options);
     }

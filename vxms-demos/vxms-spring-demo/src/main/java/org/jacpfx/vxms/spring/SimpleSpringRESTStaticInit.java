@@ -84,6 +84,7 @@ public class SimpleSpringRESTStaticInit extends AbstractVerticle {
     }
 
     public static void main(String[] args) {
+        System.out.println("STATIC");
         DeploymentOptions options = new DeploymentOptions();
         Vertx.vertx().deployVerticle(SimpleSpringRESTStaticInit.class.getName(), options);
     }
