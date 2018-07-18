@@ -45,6 +45,12 @@ public class SimpleSpringRESTStaticInit extends AbstractVerticle {
         VxmsEndpoint.start(startFuture,this);
     }
 
+    public void postConstruct(final Future<Void> startFuture) {
+        startFuture.complete();
+        System.out.println("STOP");
+        System.exit(0);
+    }
+
     @Inject
     public HelloWorldBean bean;
 
