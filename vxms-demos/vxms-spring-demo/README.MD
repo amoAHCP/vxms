@@ -27,3 +27,15 @@ docker build -t spring-demo .
 docker run -m32M -p 9090:9090 --name spring-demo spring-demo:latest
 ```
 
+
+
+Benchmark plain:
+
+
+STATIC ready
+
+real    0m3.844s
+user    0m0.085s
+sys     0m0.019s
+
+
