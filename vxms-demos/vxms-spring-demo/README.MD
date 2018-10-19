@@ -8,7 +8,7 @@ Start the Endpoint either by using the main method or build the project und star
 In this case we simply use the main method declared in the class, instead of using the Vert.x Factory mechanism used by maven shade.
 
 ```shell
-   java --module-path target/vxms-spring-demo-1.2-SNAPSHOT.jar:target/modules:$JAVA_HOME/jmods/ --module vxms.spring.demo/org.jacpfx.vxms.spring.SimpleSpringREST
+   java --add-opens java.base/java.lang=spring.core --module-path target/vxms-spring-demo-1.2-SNAPSHOT.jar:target/modules:$JAVA_HOME/jmods/ --module vxms.spring.demo/org.jacpfx.vxms.spring.SimpleSpringRESTStaticInit
   
 ``` 
 
@@ -26,4 +26,16 @@ docker build -t spring-demo .
 ```shell
 docker run -m32M -p 9090:9090 --name spring-demo spring-demo:latest
 ```
+
+
+
+Benchmark plain:
+
+
+STATIC ready
+
+real    0m3.844s
+user    0m0.085s
+sys     0m0.019s
+
 

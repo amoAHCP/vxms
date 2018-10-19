@@ -41,7 +41,7 @@
     <!--Vertx module name-->
     <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
     <!--Dependency versions-->
-    <vertx.version>3.5.3</vertx.version>
+    <vertx.version>3.5.4</vertx.version>
     <junit.version>4.11</junit.version>
     <!--Plugin versions-->
     <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>

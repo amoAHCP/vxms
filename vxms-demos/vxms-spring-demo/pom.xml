@@ -111,8 +111,8 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.7.0</version>
             <configuration>
-              <source>9</source>
-              <target>9</target>
+              <source>11</source>
+              <target>11</target>
             </configuration>
           </plugin>
           <plugin>
@@ -273,9 +273,22 @@
                         <groupId>javax.ws.rs</groupId>
                         <artifactId>javax.ws.rs-api</artifactId>
                       </artifact>
-                      <moduleInfo>
-                        <name>java.ws.rs</name>
-                      </moduleInfo>
+                      <moduleInfoSource>
+                        module java.ws.rs {
+                        requires java.logging;
+
+                        requires transitive java.xml;
+                        requires transitive java.xml.bind;
+
+                        exports javax.ws.rs;
+                        exports javax.ws.rs.client;
+                        exports javax.ws.rs.container;
+                        exports javax.ws.rs.core;
+                        exports javax.ws.rs.ext;
+                        exports javax.ws.rs.sse;
+
+                        }
+                      </moduleInfoSource>
                     </module>
 
                     <module>
@@ -723,8 +736,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.7.0</version>
         <configuration>
-          <source>9</source>
-          <target>9</target>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
 

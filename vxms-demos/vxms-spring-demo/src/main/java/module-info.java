@@ -27,7 +27,6 @@ open module vxms.spring.demo {
   requires java.management;
   requires java.ws.rs;
   requires javax.inject;
-  requires java.xml.ws.annotation;
   requires io.netty.codec.http;
 
 
