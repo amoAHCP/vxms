@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package org.jacpfx.verticle;
+package org.jacpfx.rest;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
+import static org.junit.Assert.assertEquals;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import org.jacpfx.vxms.rest.VxmsRESTRoutes;
 import org.jacpfx.vxms.rest.response.RestHandler;
-import org.jacpfx.vxms.services.VxmsEndpoint;
+import org.junit.Test;
 
-/** Created by amo on 23.11.16. */
-public class Testverticl2 extends AbstractVerticle {
+public class BuilderTest {
 
-  public static void main(String[] args) {
-    DeploymentOptions options =
-        new DeploymentOptions()
-            .setInstances(1)
-            .setConfig(
-                new JsonObject()
-                    .put("host", "localhost")
-                    .put("serverOptions", "org.jacpfx.verticle.MyCustomServerOptions"));
-    Vertx.vertx().deployVerticle(Testverticl2.class.getName(), options);
-  }
+  @Test
+  public void testAmountGet() {
+    VxmsRESTRoutes tmp = VxmsRESTRoutes.init().
+        get("/hello",this::hello).
+        get("/hello2",this::hello2).
+        post("/hello",this::hello).
+        post("/hello2",this::hello2).
+        optional("/hello",this::hello).
+        optional("/hello2",this::hello2).
+        put("/hello",this::hello).
+        put("/hello2",this::hello2).
+        delete("/hello",this::hello).
+        delete("/hello2",this::hello2);
 
-  @Override
-  public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
-    VxmsEndpoint.start(startFuture, this);
-    VxmsRESTRoutes.init().get("/hello",this::hello).get("/hello2",this::hello2);
+    assertEquals(2,tmp.getGetMapping().size());
+    assertEquals(2,tmp.getPostMapping().size());
+    assertEquals(2,tmp.getPutMapping().size());
+    assertEquals(2,tmp.getOptionalMapping().size());
+    assertEquals(2,tmp.getDeleteMapping().size());
   }
 
   @Path("/hello")
@@ -57,4 +58,5 @@ public class Testverticl2 extends AbstractVerticle {
   public void hello2(RestHandler handler) {
     handler.response().stringResponse((future) -> future.complete("hi")).execute();
   }
+
 }
