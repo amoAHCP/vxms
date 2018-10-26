@@ -16,99 +16,46 @@
 
 package org.jacpfx.vxms.rest;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.spi.VxmsRoutes;
 
 public class VxmsRESTRoutes implements VxmsRoutes {
 
-  protected final Map<String, RestHandlerConsumer> getMapping;
-  protected final Map<String, RestHandlerConsumer> postMapping;
-  protected final Map<String, RestHandlerConsumer> optionalMapping;
-  protected final Map<String, RestHandlerConsumer> putMapping;
-  protected final Map<String, RestHandlerConsumer> deleteMapping;
+
+  protected List<MethodDescriptor> descriptors;
 
   public VxmsRESTRoutes(
-      Map<String, RestHandlerConsumer> getMapping,
-      Map<String, RestHandlerConsumer> postMapping,
-      Map<String, RestHandlerConsumer> optionalMapping,
-      Map<String, RestHandlerConsumer> putMapping,
-      Map<String, RestHandlerConsumer> deleteMapping) {
-    this.getMapping = getMapping;
-    this.postMapping = postMapping;
-    this.optionalMapping = optionalMapping;
-    this.putMapping = putMapping;
-    this.deleteMapping = deleteMapping;
+      List<MethodDescriptor> descriptors) {
+    this.descriptors = descriptors;
+
   }
 
   public static VxmsRESTRoutes init() {
-    return new VxmsRESTRoutes( Collections.emptyMap(),
-        Collections.emptyMap(),
-        Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
+    return new VxmsRESTRoutes( Collections.emptyList());
   }
 
-  public VxmsRESTRoutes get(String path, RestHandlerConsumer methodReference) {
-    Map<String, RestHandlerConsumer> tmp = new HashMap<>(getMapping);
-    tmp.put(path, methodReference);
-    return new VxmsRESTRoutes( tmp, postMapping, optionalMapping,
-        putMapping, deleteMapping);
+  public VxmsRESTRoutes route(RouteBuilder builder) {
+    List<MethodDescriptor> tmp = new ArrayList<>(descriptors);
+    tmp.add(builder.getDescriptor());
+    return new VxmsRESTRoutes(tmp);
   }
 
-  public VxmsRESTRoutes post(String path, RestHandlerConsumer methodReference) {
-    Map<String, RestHandlerConsumer> tmp = new HashMap<>(postMapping);
-    tmp.put(path, methodReference);
-    return new VxmsRESTRoutes( getMapping, tmp, optionalMapping,
-        putMapping, deleteMapping);
-  }
-
-  public VxmsRESTRoutes optional(String path, RestHandlerConsumer methodReference) {
-    Map<String, RestHandlerConsumer> tmp = new HashMap<>(optionalMapping);
-    tmp.put(path, methodReference);
-    return new VxmsRESTRoutes( getMapping, postMapping, tmp,
-        putMapping, deleteMapping);
-  }
-
-  public VxmsRESTRoutes put(String path, RestHandlerConsumer methodReference) {
-    Map<String, RestHandlerConsumer> tmp = new HashMap<>(putMapping);
-    tmp.put(path, methodReference);
-    return new VxmsRESTRoutes( getMapping, postMapping, optionalMapping,
-        tmp, deleteMapping);
-  }
-
-  public VxmsRESTRoutes delete(String path, RestHandlerConsumer methodReference) {
-    Map<String, RestHandlerConsumer> tmp = new HashMap<>(deleteMapping);
-    tmp.put(path, methodReference);
-    return new VxmsRESTRoutes( getMapping, postMapping, optionalMapping,
-        putMapping, tmp);
-  }
-
-  public Map<String, RestHandlerConsumer> getGetMapping() {
-    return Collections.unmodifiableMap(getMapping);
-  }
-
-  public Map<String, RestHandlerConsumer> getPostMapping() {
-    return Collections.unmodifiableMap(postMapping);
-  }
-
-  public Map<String, RestHandlerConsumer> getOptionalMapping() {
-    return Collections.unmodifiableMap(optionalMapping);
-  }
-
-  public Map<String, RestHandlerConsumer> getPutMapping() {
-    return Collections.unmodifiableMap(putMapping);
-  }
-
-  public Map<String, RestHandlerConsumer> getDeleteMapping() {
-    return Collections.unmodifiableMap(deleteMapping);
-  }
 
   public interface RestHandlerConsumer extends Consumer<RestHandler> {
 
   }
 
+  public interface RestErrorConsumer extends BiConsumer<RestHandler, Throwable> {
+
+  }
+
+
+  protected List<MethodDescriptor> getDescriptors() {
+    return descriptors;
+  }
 }
