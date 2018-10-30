@@ -94,8 +94,6 @@ public class RESTServiceOnFailureTest extends VertxTestBase {
     awaitLatch(latch2);
   }
 
-
-
   @Test
   public void simpleOnFailureResponseBlocking() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
@@ -168,7 +166,7 @@ public class RESTServiceOnFailureTest extends VertxTestBase {
               })
           .onFailureRespond(
               (t) -> {
-               // System.out.print("the stack trace --> ");
+                // System.out.print("the stack trace --> ");
                 t.printStackTrace();
                 return null;
               })
@@ -185,13 +183,12 @@ public class RESTServiceOnFailureTest extends VertxTestBase {
                 throw new NullPointerException("test");
               })
           .onFailureRespond(
-              (t,f) -> {
+              (t, f) -> {
                 // System.out.print("the stack trace --> ");
-                //t.printStackTrace();
+                // t.printStackTrace();
                 f.complete(null);
               })
           .execute();
     }
-
   }
 }

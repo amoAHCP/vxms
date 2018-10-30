@@ -38,7 +38,6 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -110,12 +109,13 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointOne",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "test");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "test");
+                      testComplete();
+                    }));
     request.end();
     await();
   }
@@ -130,12 +130,13 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointTwo/123",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "123");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "123");
+                      testComplete();
+                    }));
     request.end();
     await();
   }
@@ -172,12 +173,13 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFourErrorRetryTest?val=123&tmp=456",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  assertEquals(body.toString(), "123456");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "123456");
+                      testComplete();
+                    }));
     request.end();
     await();
   }
@@ -192,14 +194,15 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFourErrorReturnRetryTest?productType=123&product=456",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println(
-                      "Got a createResponse endpointFourErrorReturnRetryTest: "
-                          + body.toString());
-                  assertEquals(body.toString(), "456123");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println(
+                          "Got a createResponse endpointFourErrorReturnRetryTest: "
+                              + body.toString());
+                      assertEquals(body.toString(), "456123");
+                      testComplete();
+                    }));
     request.end();
     await();
   }
@@ -407,7 +410,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
         client.get(
             "/wsService/endpointNine_exception?val=123&tmp=456",
             resp -> {
-
               vertx.runOnContext(
                   h -> {
                     assertEquals(500, resp.statusCode());

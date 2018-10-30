@@ -16,14 +16,12 @@
 
 package org.jacpfx.vxms.rest;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 import io.vertx.core.http.HttpMethod;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import org.jacpfx.vxms.rest.RouteBuilder;
-import org.jacpfx.vxms.rest.VxmsRESTRoutes;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.junit.Test;
 
@@ -31,25 +29,54 @@ public class BuilderTest {
 
   @Test
   public void testAmountGet() {
-    VxmsRESTRoutes tmp = VxmsRESTRoutes.init().
-        route(RouteBuilder.get("/hello",this::hello)).
-        route(RouteBuilder.get("/hello2",this::hello2)).
-        route(RouteBuilder.post("/hello",this::hello)).
-        route(RouteBuilder.post("/hello2",this::hello2)).
-        route(RouteBuilder.options("/hello",this::hello)).
-        route(RouteBuilder.options("/hello2",this::hello2)).
-        route(RouteBuilder.put("/hello",this::hello)).
-        route(RouteBuilder.put("/hello2",this::hello2)).
-        route(RouteBuilder.delete("/hello",this::hello2)).
-        route(RouteBuilder.delete("/hello2",this::hello2));
+    VxmsRESTRoutes tmp =
+        VxmsRESTRoutes.init()
+            .route(RouteBuilder.get("/hello", this::hello))
+            .route(RouteBuilder.get("/hello2", this::hello2))
+            .route(RouteBuilder.post("/hello", this::hello))
+            .route(RouteBuilder.post("/hello2", this::hello2))
+            .route(RouteBuilder.options("/hello", this::hello))
+            .route(RouteBuilder.options("/hello2", this::hello2))
+            .route(RouteBuilder.put("/hello", this::hello))
+            .route(RouteBuilder.put("/hello2", this::hello2))
+            .route(RouteBuilder.delete("/hello", this::hello2))
+            .route(RouteBuilder.delete("/hello2", this::hello2));
 
-
-    assertEquals(2,tmp.getDescriptors().stream().filter(method -> method.getHttpMethod().equals(HttpMethod.GET)).collect(Collectors.toList()).size());
-    assertEquals(2,tmp.getDescriptors().stream().filter(method -> method.getHttpMethod().equals(HttpMethod.POST)).collect(Collectors.toList()).size());
-    assertEquals(2,tmp.getDescriptors().stream().filter(method -> method.getHttpMethod().equals(HttpMethod.OPTIONS)).collect(Collectors.toList()).size());
-    assertEquals(2,tmp.getDescriptors().stream().filter(method -> method.getHttpMethod().equals(HttpMethod.PUT)).collect(Collectors.toList()).size());
-    assertEquals(2,tmp.getDescriptors().stream().filter(method -> method.getHttpMethod().equals(HttpMethod.DELETE)).collect(Collectors.toList()).size());
-
+    assertEquals(
+        2,
+        tmp.getDescriptors()
+            .stream()
+            .filter(method -> method.getHttpMethod().equals(HttpMethod.GET))
+            .collect(Collectors.toList())
+            .size());
+    assertEquals(
+        2,
+        tmp.getDescriptors()
+            .stream()
+            .filter(method -> method.getHttpMethod().equals(HttpMethod.POST))
+            .collect(Collectors.toList())
+            .size());
+    assertEquals(
+        2,
+        tmp.getDescriptors()
+            .stream()
+            .filter(method -> method.getHttpMethod().equals(HttpMethod.OPTIONS))
+            .collect(Collectors.toList())
+            .size());
+    assertEquals(
+        2,
+        tmp.getDescriptors()
+            .stream()
+            .filter(method -> method.getHttpMethod().equals(HttpMethod.PUT))
+            .collect(Collectors.toList())
+            .size());
+    assertEquals(
+        2,
+        tmp.getDescriptors()
+            .stream()
+            .filter(method -> method.getHttpMethod().equals(HttpMethod.DELETE))
+            .collect(Collectors.toList())
+            .size());
   }
 
   @Path("/hello")
@@ -63,5 +90,4 @@ public class BuilderTest {
   public void hello2(RestHandler handler) {
     handler.response().stringResponse((future) -> future.complete("hi")).execute();
   }
-
 }

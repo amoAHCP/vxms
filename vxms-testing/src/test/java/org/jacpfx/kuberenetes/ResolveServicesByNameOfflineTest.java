@@ -16,7 +16,6 @@
 
 package org.jacpfx.kuberenetes;
 
-
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -44,40 +43,40 @@ public class ResolveServicesByNameOfflineTest extends VertxTestBase {
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final String HOST = "127.0.0.1";
-  private HttpClient httpClient;
   public KubernetesMockServer server;
   public Config config;
- // public DefaultKubernetesClient client;
+  private HttpClient httpClient;
+  // public DefaultKubernetesClient client;
 
   public void initKubernetes() {
-   // KubernetesMockServer plainServer = new KubernetesMockServer(false);
-    //plainServer.init();
+    // KubernetesMockServer plainServer = new KubernetesMockServer(false);
+    // plainServer.init();
     String host = "1.1.1.1";
     Integer port = 8080;
     ClassLoader classLoader = getClass().getClassLoader();
     File ca = new File(classLoader.getResource("ca.crt").getFile());
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
-    System.out.println("port: "+port+"  host:"+host);
-    config = new ConfigBuilder()
-        .withMasterUrl(host + ":" +port)
-        .withNamespace(null)
-        .withCaCertFile(ca.getAbsolutePath())
-        .withClientCertFile(clientcert.getAbsolutePath())
-        .withClientKeyFile(clientkey.getAbsolutePath())
-        .build();
+    System.out.println("port: " + port + "  host:" + host);
+    config =
+        new ConfigBuilder()
+            .withMasterUrl(host + ":" + port)
+            .withNamespace(null)
+            .withCaCertFile(ca.getAbsolutePath())
+            .withClientCertFile(clientcert.getAbsolutePath())
+            .withClientKeyFile(clientkey.getAbsolutePath())
+            .build();
   }
-
 
   @Before
   public void startVerticles() throws InterruptedException {
     initKubernetes();
-   // initService();
+    // initService();
     CountDownLatch latch2 = new CountDownLatch(1);
     JsonObject conf = new JsonObject();
-    conf.put("kube.offline",true);
-    conf.put("myTestService","http://192.168.1.1:8080");
-    conf.put("myTestService2","http://192.168.1.2:9080");
+    conf.put("kube.offline", true);
+    conf.put("myTestService", "http://192.168.1.1:8080");
+    conf.put("myTestService2", "http://192.168.1.2:9080");
     DeploymentOptions options = new DeploymentOptions().setConfig(conf).setInstances(1);
 
     vertx.deployVerticle(
@@ -99,7 +98,6 @@ public class ResolveServicesByNameOfflineTest extends VertxTestBase {
     awaitLatch(latch2);
   }
 
-
   @Test
   public void testServiceByName() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
@@ -112,24 +110,21 @@ public class ResolveServicesByNameOfflineTest extends VertxTestBase {
         client.get(
             "/wsService/myTestService",
             resp -> {
-              resp.bodyHandler(body -> {
-                String response = body.toString();
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext(
-                    context -> {
-                      failed.set(!response.equalsIgnoreCase("http://192.168.1.1:8080/http://192.168.1.2:9080"));
+              resp.bodyHandler(
+                  body -> {
+                    String response = body.toString();
+                    System.out.println("Response entity '" + response + "' received.");
+                    vertx.runOnContext(
+                        context -> {
+                          failed.set(
+                              !response.equalsIgnoreCase(
+                                  "http://192.168.1.1:8080/http://192.168.1.2:9080"));
 
-                      latch.countDown();
-
-                    });
-
-              });
-
-
+                          latch.countDown();
+                        });
+                  });
             });
     request.end();
-
-
 
     latch.await();
     assertTrue(!failed.get());
@@ -140,17 +135,18 @@ public class ResolveServicesByNameOfflineTest extends VertxTestBase {
   @K8SDiscovery
   public class WsServiceOne extends VxmsEndpoint {
 
+    public Config config;
     @ServiceName("myTestService")
     private String service1;
-
     @ServiceName("myTestService2")
     private String service2;
-    public Config config;
 
-    public WsServiceOne(Config config) {this.config =config;}
+    public WsServiceOne(Config config) {
+      this.config = config;
+    }
 
     public void postConstruct(final io.vertx.core.Future<Void> startFuture) {
-      new VxmsDiscoveryK8SImpl().initDiscovery(this,config);
+      new VxmsDiscoveryK8SImpl().initDiscovery(this, config);
       startFuture.complete();
     }
 
@@ -158,7 +154,10 @@ public class ResolveServicesByNameOfflineTest extends VertxTestBase {
     @GET
     public void rsstringGETResponse(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().stringResponse((future) -> future.complete(service1+"/"+service2)).execute();
+      reply
+          .response()
+          .stringResponse((future) -> future.complete(service1 + "/" + service2))
+          .execute();
     }
   }
 }

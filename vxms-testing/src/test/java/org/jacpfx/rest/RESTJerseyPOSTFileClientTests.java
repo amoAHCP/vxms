@@ -51,15 +51,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
+
+  static String convertStreamToString(java.io.InputStream is) {
+    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
+  }
 
   protected int getNumNodes() {
     return 1;
@@ -113,21 +116,21 @@ public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
   public void stringPOSTResponseWithParameter()
       throws InterruptedException, ExecutionException, IOException {
     File file = new File(getClass().getClassLoader().getResource("payload.xml").getFile());
-    HttpPost post = new HttpPost(
-        "http://" + HOST + ":" + PORT + SERVICE_REST_GET + "/simpleFilePOSTupload");
+    HttpPost post =
+        new HttpPost("http://" + HOST + ":" + PORT + SERVICE_REST_GET + "/simpleFilePOSTupload");
     HttpClient client = HttpClientBuilder.create().build();
 
     FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
     StringBody stringBody1 = new StringBody("bar", ContentType.MULTIPART_FORM_DATA);
     StringBody stringBody2 = new StringBody("world", ContentType.MULTIPART_FORM_DATA);
-//
+    //
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
     builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
     builder.addPart("file", fileBody);
     builder.addPart("foo", stringBody1);
     builder.addPart("hello", stringBody2);
     HttpEntity entity = builder.build();
-//
+    //
     post.setEntity(entity);
     HttpResponse response = client.execute(post);
 
@@ -138,13 +141,6 @@ public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
 
     testComplete();
   }
-
-  static String convertStreamToString(java.io.InputStream is) {
-    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-    return s.hasNext() ? s.next() : "";
-  }
-
-
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
   public class WsServiceOne extends VxmsEndpoint {

@@ -103,23 +103,24 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETConsumesResponse/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETConsumesResponse/123",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "123");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "123");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
   }
+
   @Test
   public void stringGETResponse_2() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
@@ -128,25 +129,28 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETConsumesResponse/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
-                System.out.println("Got a createResponse ERROR: " + error.toString());
-
-              });
-              resp.bodyHandler(
-                  body -> {
-
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "<html><body><h1>Resource not found</h1></body></html>");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
+        client
+            .get(
+                "/wsService/stringGETConsumesResponse/123",
+                resp -> {
+                  resp.exceptionHandler(
+                      error -> {
+                        System.out.println("Got a createResponse ERROR: " + error.toString());
+                      });
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(
+                            body.toString(),
+                            "<html><body><h1>Resource not found</h1></body></html>");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
     request.end();
     await();
   }
+
   @Test
   public void stringGETResponse_3() throws InterruptedException {
     HttpClientOptions options = new HttpClientOptions();
@@ -155,22 +159,22 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETConsumesResponse/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
-                System.out.println("Got a createResponse ERROR: " + error.toString());
-
-              });
-              resp.bodyHandler(
-                  body -> {
-
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "123");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/xml;charset=UTF-8");
+        client
+            .get(
+                "/wsService/stringGETConsumesResponse/123",
+                resp -> {
+                  resp.exceptionHandler(
+                      error -> {
+                        System.out.println("Got a createResponse ERROR: " + error.toString());
+                      });
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "123");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/xml;charset=UTF-8");
     request.end();
     await();
   }
@@ -183,25 +187,25 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.post(
-            "/wsService/stringPOSTConsumesResponse/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .post(
+                "/wsService/stringPOSTConsumesResponse/123",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "hello");
-                    testComplete();
-                  });
-
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello");
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.write("hello");
     request.end();
     await();
   }
-
 
   @Test
   public void stringPOSTResponse_2() throws InterruptedException {
@@ -211,19 +215,23 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.post(
-            "/wsService/stringPOSTConsumesResponse/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .post(
+                "/wsService/stringPOSTConsumesResponse/123",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "<html><body><h1>Resource not found</h1></body></html>");
-                    testComplete();
-                  });
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(
+                            body.toString(),
+                            "<html><body><h1>Resource not found</h1></body></html>");
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", MediaType.APPLICATION_ATOM_XML);
     request.write("hello");
     request.end();
     await();
@@ -237,24 +245,25 @@ public class RESTJerseyMimeTypeClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.post(
-            "/wsService/stringPOSTConsumesResponse/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .post(
+                "/wsService/stringPOSTConsumesResponse/123",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "hello");
-                    testComplete();
-                  });
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", MediaType.APPLICATION_XML);
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello");
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", MediaType.APPLICATION_XML);
     request.write("hello");
     request.end();
     await();
   }
-
 
   public HttpClient getClient() {
     return client;

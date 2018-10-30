@@ -35,7 +35,6 @@ import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -112,7 +111,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "1 final");
+                      assertEquals(body.toString(), "1 final");
                       testComplete();
                     }));
     request.end();
@@ -135,7 +134,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "2 final");
+                      assertEquals(body.toString(), "2 final");
                       testComplete();
                     });
               }
@@ -160,7 +159,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "error test error");
+                      assertEquals(body.toString(), "error test error");
                       testComplete();
                     });
               }
@@ -185,7 +184,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "error test error");
+                      assertEquals(body.toString(), "error test error");
                       testComplete();
                     });
               }
@@ -207,8 +206,8 @@ public class RESTServiceChainStringTest extends VertxTestBase {
             "/wsService/basicTestSupplyWithErrorUnhandled",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                Assert.assertEquals(resp.statusCode(), 500);
-                Assert.assertEquals(resp.statusMessage(), "test error");
+                assertEquals(resp.statusCode(), 500);
+                assertEquals(resp.statusMessage(), "test error");
                 testComplete();
               }
             });
@@ -229,8 +228,8 @@ public class RESTServiceChainStringTest extends VertxTestBase {
             "/wsService/basicTestAndThenWithErrorUnhandled",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                Assert.assertEquals(resp.statusCode(), 500);
-                Assert.assertEquals(resp.statusMessage(), "test error");
+                assertEquals(resp.statusCode(), 500);
+                assertEquals(resp.statusMessage(), "test error");
                 testComplete();
               }
             });
@@ -254,7 +253,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "error 4 test error");
+                      assertEquals(body.toString(), "error 4 test error");
                       testComplete();
                     });
               }
@@ -279,7 +278,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "error 4 test error");
+                      assertEquals(body.toString(), "error 4 test error");
                       testComplete();
                     });
               }
@@ -291,7 +290,6 @@ public class RESTServiceChainStringTest extends VertxTestBase {
   @Test
   public void basicTestSupplyWithErrorAndCircuitBreaker() throws InterruptedException {
 
-
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
@@ -300,67 +298,74 @@ public class RESTServiceChainStringTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/crash",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
 
-                  assertEquals(body.toString(), "failure");
-                  HttpClientRequest request2 =
-                      client.get(
-                          "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
-                          resp2 -> resp2.bodyHandler(
-                              body2 -> {
-                                System.out.println("Got a createResponse: " + body2.toString());
-                                Assert.assertEquals(body2.toString(), "failure");
-                                // wait 1s, but circuit is still open
-                                vertx.setTimer(
-                                    1205,
-                                    handler -> {
-                                      HttpClientRequest request3 =
-                                          client.get(
-                                              "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
-                                              resp3 -> resp3.bodyHandler(
-                                                  body3 -> {
-                                                    System.out.println(
-                                                        "Got a createResponse: " + body3
-                                                            .toString());
+                      assertEquals(body.toString(), "failure");
+                      HttpClientRequest request2 =
+                          client.get(
+                              "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
+                              resp2 ->
+                                  resp2.bodyHandler(
+                                      body2 -> {
+                                        System.out.println(
+                                            "Got a createResponse: " + body2.toString());
+                                        assertEquals(body2.toString(), "failure");
+                                        // wait 1s, but circuit is still open
+                                        vertx.setTimer(
+                                            1205,
+                                            handler -> {
+                                              HttpClientRequest request3 =
+                                                  client.get(
+                                                      "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
+                                                      resp3 ->
+                                                          resp3.bodyHandler(
+                                                              body3 -> {
+                                                                System.out.println(
+                                                                    "Got a createResponse: "
+                                                                        + body3.toString());
 
-                                                    Assert.assertEquals(body3.toString(),
-                                                        "failure");
-                                                    // wait another 1s, now circuit
-                                                    // should be closed
-                                                    vertx.setTimer(
-                                                        2005,
-                                                        handler2 -> {
-                                                          HttpClientRequest request4 =
-                                                              client.get(
-                                                                  "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
-                                                                  resp4 -> resp4.bodyHandler(
-                                                                      body4 -> {
-                                                                        System.out.println(
-                                                                            "Got a createResponse: "
-                                                                                + body4.toString());
+                                                                assertEquals(
+                                                                    body3.toString(), "failure");
+                                                                // wait another 1s, now circuit
+                                                                // should be closed
+                                                                vertx.setTimer(
+                                                                    2005,
+                                                                    handler2 -> {
+                                                                      HttpClientRequest request4 =
+                                                                          client.get(
+                                                                              "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
+                                                                              resp4 ->
+                                                                                  resp4.bodyHandler(
+                                                                                      body4 -> {
+                                                                                        System.out
+                                                                                            .println(
+                                                                                                "Got a createResponse: "
+                                                                                                    + body4
+                                                                                                        .toString());
 
-                                                                        Assert.assertEquals(
-                                                                            body4.toString(),
-                                                                            "value");
+                                                                                        assertEquals(
+                                                                                            body4
+                                                                                                .toString(),
+                                                                                            "value");
 
-                                                                        // should be closed
-                                                                        testComplete();
-                                                                      }));
-                                                          request4.end();
-                                                        });
-                                                  }));
-                                      request3.end();
-                                    });
-                              }));
-                  request2.end();
-                }));
+                                                                                        // should be
+                                                                                        // closed
+                                                                                        testComplete();
+                                                                                      }));
+                                                                      request4.end();
+                                                                    });
+                                                              }));
+                                              request3.end();
+                                            });
+                                      }));
+                      request2.end();
+                    }));
     request.end();
 
     await(80000, TimeUnit.MILLISECONDS);
-
-
   }
 
   @Test
@@ -374,66 +379,74 @@ public class RESTServiceChainStringTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/crash",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
 
-                  assertEquals(body.toString(), "failure");
-                  HttpClientRequest request2 =
-                      client.get(
-                          "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
-                          resp2 -> resp2.bodyHandler(
-                              body2 -> {
-                                System.out.println("Got a createResponse: " + body2.toString());
-                                Assert.assertEquals(body2.toString(), "failure");
-                                // wait 1s, but circuit is still open
-                                vertx.setTimer(
-                                    1205,
-                                    handler -> {
-                                      HttpClientRequest request3 =
-                                          client.get(
-                                              "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
-                                              resp3 -> resp3.bodyHandler(
-                                                  body3 -> {
-                                                    System.out.println(
-                                                        "Got a createResponse: " + body3
-                                                            .toString());
+                      assertEquals(body.toString(), "failure");
+                      HttpClientRequest request2 =
+                          client.get(
+                              "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
+                              resp2 ->
+                                  resp2.bodyHandler(
+                                      body2 -> {
+                                        System.out.println(
+                                            "Got a createResponse: " + body2.toString());
+                                        assertEquals(body2.toString(), "failure");
+                                        // wait 1s, but circuit is still open
+                                        vertx.setTimer(
+                                            1205,
+                                            handler -> {
+                                              HttpClientRequest request3 =
+                                                  client.get(
+                                                      "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
+                                                      resp3 ->
+                                                          resp3.bodyHandler(
+                                                              body3 -> {
+                                                                System.out.println(
+                                                                    "Got a createResponse: "
+                                                                        + body3.toString());
 
-                                                    Assert.assertEquals(body3.toString(),
-                                                        "failure");
-                                                    // wait another 1s, now circuit
-                                                    // should be closed
-                                                    vertx.setTimer(
-                                                        2005,
-                                                        handler2 -> {
-                                                          HttpClientRequest request4 =
-                                                              client.get(
-                                                                  "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
-                                                                  resp4 -> resp4.bodyHandler(
-                                                                      body4 -> {
-                                                                        System.out.println(
-                                                                            "Got a createResponse: "
-                                                                                + body4.toString());
+                                                                assertEquals(
+                                                                    body3.toString(), "failure");
+                                                                // wait another 1s, now circuit
+                                                                // should be closed
+                                                                vertx.setTimer(
+                                                                    2005,
+                                                                    handler2 -> {
+                                                                      HttpClientRequest request4 =
+                                                                          client.get(
+                                                                              "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
+                                                                              resp4 ->
+                                                                                  resp4.bodyHandler(
+                                                                                      body4 -> {
+                                                                                        System.out
+                                                                                            .println(
+                                                                                                "Got a createResponse: "
+                                                                                                    + body4
+                                                                                                        .toString());
 
-                                                                        Assert.assertEquals(
-                                                                            body4.toString(),
-                                                                            "value");
+                                                                                        assertEquals(
+                                                                                            body4
+                                                                                                .toString(),
+                                                                                            "value");
 
-                                                                        // should be closed
-                                                                        testComplete();
-                                                                      }));
-                                                          request4.end();
-                                                        });
-                                                  }));
-                                      request3.end();
-                                    });
-                              }));
-                  request2.end();
-                }));
+                                                                                        // should be
+                                                                                        // closed
+                                                                                        testComplete();
+                                                                                      }));
+                                                                      request4.end();
+                                                                    });
+                                                              }));
+                                              request3.end();
+                                            });
+                                      }));
+                      request2.end();
+                    }));
     request.end();
 
     await(80000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -452,7 +465,7 @@ public class RESTServiceChainStringTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "1test final");
+                      assertEquals(body.toString(), "1test final");
                       testComplete();
                     });
               }

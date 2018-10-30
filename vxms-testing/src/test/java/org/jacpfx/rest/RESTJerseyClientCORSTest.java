@@ -139,23 +139,23 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponseSyncAsync",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponseSyncAsync",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
-                    assertEquals("CORS Rejected - Invalid origin", resp.statusMessage());
-                    testComplete();
-                  });
-
-            }).putHeader("Origin", "http://org.jacpfx.org");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println(
+                            "Status: " + resp.statusCode() + " message:" + resp.statusMessage());
+                        assertEquals("CORS Rejected - Invalid origin", resp.statusMessage());
+                        testComplete();
+                      });
+                })
+            .putHeader("Origin", "http://org.jacpfx.org");
     request.end();
     await();
-
   }
 
   @Test
@@ -167,24 +167,23 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponseSyncAsync",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponseSyncAsync",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
-                    assertEquals("test-123", body.toString());
-                    testComplete();
-                  });
-
-            }).putHeader("Origin", "http://example.com");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println(
+                            "Status: " + resp.statusCode() + " message:" + resp.statusMessage());
+                        assertEquals("test-123", body.toString());
+                        testComplete();
+                      });
+                })
+            .putHeader("Origin", "http://example.com");
     request.end();
     await();
-
-
   }
 
   @Test
@@ -196,24 +195,23 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponseSyncAsync",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponseSyncAsync",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
-                    assertEquals("test-123", body.toString());
-                    testComplete();
-                  });
-
-            }).putHeader("Origin", "http://example.com");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println(
+                            "Status: " + resp.statusCode() + " message:" + resp.statusMessage());
+                        assertEquals("test-123", body.toString());
+                        testComplete();
+                      });
+                })
+            .putHeader("Origin", "http://example.com");
     request.end();
     await();
-
-
   }
 
   @Test
@@ -225,23 +223,23 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponseSyncAsync2",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponseSyncAsync2",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
-                    assertEquals("CORS Rejected - Invalid origin", resp.statusMessage());
-                    testComplete();
-                  });
-
-            }).putHeader("Origin", "http://org.jacpfx.org");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println(
+                            "Status: " + resp.statusCode() + " message:" + resp.statusMessage());
+                        assertEquals("CORS Rejected - Invalid origin", resp.statusMessage());
+                        testComplete();
+                      });
+                })
+            .putHeader("Origin", "http://org.jacpfx.org");
     request.end();
     await();
-
   }
 
   public HttpClient getClient() {
@@ -250,11 +248,10 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
 
   // TODO extend test for POST, OPTIONAL,....
   @ServiceEndpoint(
-    name = SERVICE_REST_GET,
-    contextRoot = SERVICE_REST_GET,
-    port = PORT,
-    routerConf = RestrictedCorsRouterConfig.class
-  )
+      name = SERVICE_REST_GET,
+      contextRoot = SERVICE_REST_GET,
+      port = PORT,
+      routerConf = RestrictedCorsRouterConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
     ///// ------------- sync blocking ----------------
@@ -274,11 +271,10 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   }
 
   @ServiceEndpoint(
-    name = SERVICE_REST_GET,
-    contextRoot = SERVICE_REST_GET,
-    port = PORT2,
-    routerConf = RestrictedCorsRouterConfig2.class
-  )
+      name = SERVICE_REST_GET,
+      contextRoot = SERVICE_REST_GET,
+      port = PORT2,
+      routerConf = RestrictedCorsRouterConfig2.class)
   public class WsServiceTwo extends VxmsEndpoint {
 
     ///// ------------- sync blocking ----------------
@@ -298,11 +294,10 @@ public class RESTJerseyClientCORSTest extends VertxTestBase {
   }
 
   @ServiceEndpoint(
-    name = SERVICE_REST_GET,
-    contextRoot = SERVICE_REST_GET,
-    port = PORT3,
-    routerConf = RestrictedCorsRouterConfig3.class
-  )
+      name = SERVICE_REST_GET,
+      contextRoot = SERVICE_REST_GET,
+      port = PORT3,
+      routerConf = RestrictedCorsRouterConfig3.class)
   public class WsServiceThree extends VxmsEndpoint {
 
     ///// ------------- sync blocking ----------------

@@ -115,7 +115,6 @@ public class PostConstructTest extends VertxTestBase {
   @Test
   public void stringGETResponse() throws InterruptedException {
 
-
     HttpClientOptions options = new HttpClientOptions();
     options.setDefaultPort(PORT);
     options.setDefaultHost(HOST);
@@ -127,11 +126,9 @@ public class PostConstructTest extends VertxTestBase {
             resp -> {
               resp.bodyHandler(
                   body -> {
-
                     assertEquals(body.toString(), POST_VAL);
                     testComplete();
                   });
-
             });
     request.end();
     await();
@@ -151,11 +148,9 @@ public class PostConstructTest extends VertxTestBase {
             resp -> {
               resp.bodyHandler(
                   body -> {
-
                     assertEquals(body.toString(), POST_VAL);
                     testComplete();
                   });
-
             });
     request.end();
     await();

@@ -124,18 +124,16 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         client.get(
             "/wsService/simpleTimeoutTest",
             resp -> {
-              resp.exceptionHandler(error -> {
-                System.out.println("Got a createResponse ERROR: " + error.toString());
-
-              });
+              resp.exceptionHandler(
+                  error -> {
+                    System.out.println("Got a createResponse ERROR: " + error.toString());
+                  });
               resp.bodyHandler(
                   body -> {
-
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "operation _timeout");
                     testComplete();
                   });
-
             });
     request.end();
     await();
@@ -152,18 +150,16 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         client.get(
             "/wsService/simpleTimeoutTest",
             resp -> {
-              resp.exceptionHandler(error -> {
-                System.out.println("Got a createResponse ERROR: " + error.toString());
-
-              });
+              resp.exceptionHandler(
+                  error -> {
+                    System.out.println("Got a createResponse ERROR: " + error.toString());
+                  });
               resp.bodyHandler(
                   body -> {
-
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "operation _timeout");
                     testComplete();
                   });
-
             });
     request.end();
     await();
@@ -180,18 +176,16 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         client.get(
             "/wsService/simpleTimeoutNonBlockingTest",
             resp -> {
-              resp.exceptionHandler(error -> {
-                System.out.println("Got a createResponse ERROR: " + error.toString());
-
-              });
+              resp.exceptionHandler(
+                  error -> {
+                    System.out.println("Got a createResponse ERROR: " + error.toString());
+                  });
               resp.bodyHandler(
                   body -> {
-
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "failure");
                     testComplete();
                   });
-
             });
     request.end();
     await();
@@ -208,24 +202,20 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
         client.get(
             "/wsService/eventbusTimeoutNonBlockingTest",
             resp -> {
-              resp.exceptionHandler(error -> {
-                System.out.println("Got a createResponse ERROR: " + error.toString());
-
-              });
+              resp.exceptionHandler(
+                  error -> {
+                    System.out.println("Got a createResponse ERROR: " + error.toString());
+                  });
               resp.bodyHandler(
                   body -> {
-
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "timeout");
                     testComplete();
                   });
-
             });
     request.end();
     await();
   }
-
-
 
   public HttpClient getClient() {
     return client;
@@ -260,20 +250,20 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
       reply
           .response()
           .stringResponse(
-              (future) -> getVertx()
-                  .createHttpClient(new HttpClientOptions())
-                  .getNow(
-                      PORT,
-                      HOST,
-                      SERVICE_REST_GET + "/long",
-                      response -> {
-                        if (!future.isComplete()) {
-                          future.complete("reply");
-                        }
-                      }))
+              (future) ->
+                  getVertx()
+                      .createHttpClient(new HttpClientOptions())
+                      .getNow(
+                          PORT,
+                          HOST,
+                          SERVICE_REST_GET + "/long",
+                          response -> {
+                            if (!future.isComplete()) {
+                              future.complete("reply");
+                            }
+                          }))
           .timeout(1000)
-          .onError(
-              e -> System.out.println("TIMEOUT"))
+          .onError(e -> System.out.println("TIMEOUT"))
           .retry(3)
           .onFailureRespond(
               (error, response) -> {

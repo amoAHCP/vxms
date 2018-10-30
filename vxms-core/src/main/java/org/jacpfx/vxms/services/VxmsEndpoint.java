@@ -128,7 +128,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
     initEndpointConfiguration(routerConfiguration, vertx, router, secure, host, port);
 
-    initExtensions(server, router, registrationObject, vxmsShared);
+    initExtensions(server, router, registrationObject, vxmsShared, routes);
 
     postEndpointConfiguration(routerConfiguration, router);
 

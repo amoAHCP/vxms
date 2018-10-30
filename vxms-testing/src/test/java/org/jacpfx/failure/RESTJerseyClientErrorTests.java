@@ -104,16 +104,16 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/stringGETResponseSyncAsync",
-            resp -> resp.bodyHandler(
-                body -> {
-                  String val = body.getString(0, body.length());
-                  assertEquals("test-123", val);
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      assertEquals("test-123", val);
+                      testComplete();
+                    }));
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -127,17 +127,16 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/stringGETResponseAsyncSync",
-            resp -> resp.bodyHandler(
-                body -> {
-                  String val = body.getString(0, body.length());
-                  assertEquals("test-123", val);
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      assertEquals("test-123", val);
+                      testComplete();
+                    }));
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);
-
-
   }
 
   @Test
@@ -151,17 +150,16 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/stringGETResponseAsyncAsync",
-            resp -> resp.bodyHandler(
-                body -> {
-                  String val = body.getString(0, body.length());
-                  assertEquals("test-123", val);
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      assertEquals("test-123", val);
+                      testComplete();
+                    }));
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);
-
-
   }
 
   @Test
@@ -174,18 +172,16 @@ public class RESTJerseyClientErrorTests extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/stringGETResponseSyncSync",
-            resp -> resp.bodyHandler(
-                body -> {
-                  String val = body.getString(0, body.length());
-                  assertEquals("test-123", val);
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      String val = body.getString(0, body.length());
+                      assertEquals("test-123", val);
+                      testComplete();
+                    }));
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);
-
-
-
   }
 
   public HttpClient getClient() {

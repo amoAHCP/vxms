@@ -39,7 +39,6 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -243,8 +242,8 @@ public class RESTServiceChainObjectTest extends VertxTestBase {
             "/wsService/basicTestSupplyWithErrorUnhandled",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                Assert.assertEquals(resp.statusCode(), 500);
-                Assert.assertEquals(resp.statusMessage(), "test error");
+                assertEquals(resp.statusCode(), 500);
+                assertEquals(resp.statusMessage(), "test error");
                 testComplete();
               }
             });
@@ -265,8 +264,8 @@ public class RESTServiceChainObjectTest extends VertxTestBase {
             "/wsService/basicTestAndThenWithErrorUnhandled",
             new Handler<HttpClientResponse>() {
               public void handle(HttpClientResponse resp) {
-                Assert.assertEquals(resp.statusCode(), 500);
-                Assert.assertEquals(resp.statusMessage(), "test error");
+                assertEquals(resp.statusCode(), 500);
+                assertEquals(resp.statusMessage(), "test error");
                 testComplete();
               }
             });
@@ -350,95 +349,130 @@ public class RESTServiceChainObjectTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/crash",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
 
-                  Payload<String> pp = null;
-                  try {
-                    pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                  }
-                  assertEquals(pp.getValue(), new Payload<>("failure").getValue());
-                  HttpClientRequest request2 =
-                      client.get(
-                          "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
-                          resp2 -> resp2.bodyHandler(
-                              body2 -> {
-                                System.out.println("Got a createResponse: " + body2.toString());
-                                Payload<String> pp2 = null;
-                                try {
-                                  pp2 = (Payload<String>) Serializer.deserialize(body2.getBytes());
-                                } catch (IOException e) {
-                                  e.printStackTrace();
-                                } catch (ClassNotFoundException e) {
-                                  e.printStackTrace();
-                                }
-                                assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
-                                // wait 1s, but circuit is still open
-                                vertx.setTimer(
-                                    1205,
-                                    handler -> {
-                                      HttpClientRequest request3 =
-                                          client.get(
-                                              "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
-                                              resp3 -> resp3.bodyHandler(
-                                                  body3 -> {
-                                                    System.out.println(
-                                                        "Got a createResponse: " + body3
-                                                            .toString());
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
+                      assertEquals(pp.getValue(), new Payload<>("failure").getValue());
+                      HttpClientRequest request2 =
+                          client.get(
+                              "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
+                              resp2 ->
+                                  resp2.bodyHandler(
+                                      body2 -> {
+                                        System.out.println(
+                                            "Got a createResponse: " + body2.toString());
+                                        Payload<String> pp2 = null;
+                                        try {
+                                          pp2 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(body2.getBytes());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(
+                                            pp2.getValue(), new Payload<>("failure").getValue());
+                                        // wait 1s, but circuit is still open
+                                        vertx.setTimer(
+                                            1205,
+                                            handler -> {
+                                              HttpClientRequest request3 =
+                                                  client.get(
+                                                      "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
+                                                      resp3 ->
+                                                          resp3.bodyHandler(
+                                                              body3 -> {
+                                                                System.out.println(
+                                                                    "Got a createResponse: "
+                                                                        + body3.toString());
 
-                                                    Payload<String> pp3 = null;
-                                                    try {
-                                                      pp3 = (Payload<String>) Serializer.deserialize(body3.getBytes());
-                                                    } catch (IOException e) {
-                                                      e.printStackTrace();
-                                                    } catch (ClassNotFoundException e) {
-                                                      e.printStackTrace();
-                                                    }
-                                                    assertEquals(pp3.getValue(), new Payload<>("failure").getValue());
-                                                    // wait another 1s, now circuit
-                                                    // should be closed
-                                                    vertx.setTimer(
-                                                        2005,
-                                                        handler2 -> {
-                                                          HttpClientRequest request4 =
-                                                              client.get(
-                                                                  "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
-                                                                  resp4 -> resp4.bodyHandler(
-                                                                      body4 -> {
-                                                                        System.out.println(
-                                                                            "Got a createResponse: "
-                                                                                + body4.toString());
-                                                                        Payload<String> pp4 = null;
-                                                                        try {
-                                                                          pp4 = (Payload<String>) Serializer.deserialize(body4.getBytes());
-                                                                        } catch (IOException e) {
-                                                                          e.printStackTrace();
-                                                                        } catch (ClassNotFoundException e) {
-                                                                          e.printStackTrace();
-                                                                        }
-                                                                        assertEquals(pp4.getValue(), new Payload<>("value").getValue());
+                                                                Payload<String> pp3 = null;
+                                                                try {
+                                                                  pp3 =
+                                                                      (Payload<String>)
+                                                                          Serializer.deserialize(
+                                                                              body3.getBytes());
+                                                                } catch (IOException e) {
+                                                                  e.printStackTrace();
+                                                                } catch (ClassNotFoundException e) {
+                                                                  e.printStackTrace();
+                                                                }
+                                                                assertEquals(
+                                                                    pp3.getValue(),
+                                                                    new Payload<>("failure")
+                                                                        .getValue());
+                                                                // wait another 1s, now circuit
+                                                                // should be closed
+                                                                vertx.setTimer(
+                                                                    2005,
+                                                                    handler2 -> {
+                                                                      HttpClientRequest request4 =
+                                                                          client.get(
+                                                                              "/wsService/basicTestSupplyWithErrorAndCircuitBreaker/value",
+                                                                              resp4 ->
+                                                                                  resp4.bodyHandler(
+                                                                                      body4 -> {
+                                                                                        System.out
+                                                                                            .println(
+                                                                                                "Got a createResponse: "
+                                                                                                    + body4
+                                                                                                        .toString());
+                                                                                        Payload<
+                                                                                                String>
+                                                                                            pp4 =
+                                                                                                null;
+                                                                                        try {
+                                                                                          pp4 =
+                                                                                              (Payload<
+                                                                                                      String>)
+                                                                                                  Serializer
+                                                                                                      .deserialize(
+                                                                                                          body4
+                                                                                                              .getBytes());
+                                                                                        } catch (
+                                                                                            IOException
+                                                                                                e) {
+                                                                                          e
+                                                                                              .printStackTrace();
+                                                                                        } catch (
+                                                                                            ClassNotFoundException
+                                                                                                e) {
+                                                                                          e
+                                                                                              .printStackTrace();
+                                                                                        }
+                                                                                        assertEquals(
+                                                                                            pp4
+                                                                                                .getValue(),
+                                                                                            new Payload<>(
+                                                                                                    "value")
+                                                                                                .getValue());
 
-
-                                                                        // should be closed
-                                                                        testComplete();
-                                                                      }));
-                                                          request4.end();
-                                                        });
-                                                  }));
-                                      request3.end();
-                                    });
-                              }));
-                  request2.end();
-                }));
+                                                                                        // should be
+                                                                                        // closed
+                                                                                        testComplete();
+                                                                                      }));
+                                                                      request4.end();
+                                                                    });
+                                                              }));
+                                              request3.end();
+                                            });
+                                      }));
+                      request2.end();
+                    }));
     request.end();
 
     await(80000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -451,95 +485,130 @@ public class RESTServiceChainObjectTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/crash",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
 
-                  Payload<String> pp = null;
-                  try {
-                    pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                  }
-                  assertEquals(pp.getValue(), new Payload<>("failure").getValue());
-                  HttpClientRequest request2 =
-                      client.get(
-                          "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
-                          resp2 -> resp2.bodyHandler(
-                              body2 -> {
-                                System.out.println("Got a createResponse: " + body2.toString());
-                                Payload<String> pp2 = null;
-                                try {
-                                  pp2 = (Payload<String>) Serializer.deserialize(body2.getBytes());
-                                } catch (IOException e) {
-                                  e.printStackTrace();
-                                } catch (ClassNotFoundException e) {
-                                  e.printStackTrace();
-                                }
-                                assertEquals(pp2.getValue(), new Payload<>("failure").getValue());
-                                // wait 1s, but circuit is still open
-                                vertx.setTimer(
-                                    1205,
-                                    handler -> {
-                                      HttpClientRequest request3 =
-                                          client.get(
-                                              "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
-                                              resp3 -> resp3.bodyHandler(
-                                                  body3 -> {
-                                                    System.out.println(
-                                                        "Got a createResponse: " + body3
-                                                            .toString());
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
+                      assertEquals(pp.getValue(), new Payload<>("failure").getValue());
+                      HttpClientRequest request2 =
+                          client.get(
+                              "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
+                              resp2 ->
+                                  resp2.bodyHandler(
+                                      body2 -> {
+                                        System.out.println(
+                                            "Got a createResponse: " + body2.toString());
+                                        Payload<String> pp2 = null;
+                                        try {
+                                          pp2 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(body2.getBytes());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(
+                                            pp2.getValue(), new Payload<>("failure").getValue());
+                                        // wait 1s, but circuit is still open
+                                        vertx.setTimer(
+                                            1205,
+                                            handler -> {
+                                              HttpClientRequest request3 =
+                                                  client.get(
+                                                      "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
+                                                      resp3 ->
+                                                          resp3.bodyHandler(
+                                                              body3 -> {
+                                                                System.out.println(
+                                                                    "Got a createResponse: "
+                                                                        + body3.toString());
 
-                                                    Payload<String> pp3 = null;
-                                                    try {
-                                                      pp3 = (Payload<String>) Serializer.deserialize(body3.getBytes());
-                                                    } catch (IOException e) {
-                                                      e.printStackTrace();
-                                                    } catch (ClassNotFoundException e) {
-                                                      e.printStackTrace();
-                                                    }
-                                                    assertEquals(pp3.getValue(), new Payload<>("failure").getValue());
-                                                    // wait another 1s, now circuit
-                                                    // should be closed
-                                                    vertx.setTimer(
-                                                        2005,
-                                                        handler2 -> {
-                                                          HttpClientRequest request4 =
-                                                              client.get(
-                                                                  "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
-                                                                  resp4 -> resp4.bodyHandler(
-                                                                      body4 -> {
-                                                                        System.out.println(
-                                                                            "Got a createResponse: "
-                                                                                + body4.toString());
-                                                                        Payload<String> pp4 = null;
-                                                                        try {
-                                                                          pp4 = (Payload<String>) Serializer.deserialize(body4.getBytes());
-                                                                        } catch (IOException e) {
-                                                                          e.printStackTrace();
-                                                                        } catch (ClassNotFoundException e) {
-                                                                          e.printStackTrace();
-                                                                        }
-                                                                        assertEquals(pp4.getValue(), new Payload<>("value").getValue());
+                                                                Payload<String> pp3 = null;
+                                                                try {
+                                                                  pp3 =
+                                                                      (Payload<String>)
+                                                                          Serializer.deserialize(
+                                                                              body3.getBytes());
+                                                                } catch (IOException e) {
+                                                                  e.printStackTrace();
+                                                                } catch (ClassNotFoundException e) {
+                                                                  e.printStackTrace();
+                                                                }
+                                                                assertEquals(
+                                                                    pp3.getValue(),
+                                                                    new Payload<>("failure")
+                                                                        .getValue());
+                                                                // wait another 1s, now circuit
+                                                                // should be closed
+                                                                vertx.setTimer(
+                                                                    2005,
+                                                                    handler2 -> {
+                                                                      HttpClientRequest request4 =
+                                                                          client.get(
+                                                                              "/wsService/basicTestAndThenWithErrorAndCircuitBreaker/value",
+                                                                              resp4 ->
+                                                                                  resp4.bodyHandler(
+                                                                                      body4 -> {
+                                                                                        System.out
+                                                                                            .println(
+                                                                                                "Got a createResponse: "
+                                                                                                    + body4
+                                                                                                        .toString());
+                                                                                        Payload<
+                                                                                                String>
+                                                                                            pp4 =
+                                                                                                null;
+                                                                                        try {
+                                                                                          pp4 =
+                                                                                              (Payload<
+                                                                                                      String>)
+                                                                                                  Serializer
+                                                                                                      .deserialize(
+                                                                                                          body4
+                                                                                                              .getBytes());
+                                                                                        } catch (
+                                                                                            IOException
+                                                                                                e) {
+                                                                                          e
+                                                                                              .printStackTrace();
+                                                                                        } catch (
+                                                                                            ClassNotFoundException
+                                                                                                e) {
+                                                                                          e
+                                                                                              .printStackTrace();
+                                                                                        }
+                                                                                        assertEquals(
+                                                                                            pp4
+                                                                                                .getValue(),
+                                                                                            new Payload<>(
+                                                                                                    "value")
+                                                                                                .getValue());
 
-
-                                                                        // should be closed
-                                                                        testComplete();
-                                                                      }));
-                                                          request4.end();
-                                                        });
-                                                  }));
-                                      request3.end();
-                                    });
-                              }));
-                  request2.end();
-                }));
+                                                                                        // should be
+                                                                                        // closed
+                                                                                        testComplete();
+                                                                                      }));
+                                                                      request4.end();
+                                                                    });
+                                                              }));
+                                              request3.end();
+                                            });
+                                      }));
+                      request2.end();
+                    }));
     request.end();
 
     await(80000, TimeUnit.MILLISECONDS);
-
   }
 
   @Test
@@ -558,7 +627,7 @@ public class RESTServiceChainObjectTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "1test final");
+                      assertEquals(body.toString(), "1test final");
                       testComplete();
                     });
               }

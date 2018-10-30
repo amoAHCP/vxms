@@ -168,8 +168,6 @@ public class RESTServiceOnFailureObjectResponseTest extends VertxTestBase {
     request.end();
 
     await(10000, TimeUnit.MILLISECONDS);
-
-
   }
 
   @Test

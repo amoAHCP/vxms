@@ -16,7 +16,6 @@
 
 package org.jacpfx.kuberenetes;
 
-
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.annotations.WithLabel;
 import io.fabric8.annotations.WithLabels;
@@ -46,10 +45,10 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final String HOST = "127.0.0.1";
-  private HttpClient httpClient;
   public KubernetesMockServer server;
   public Config config;
- // public DefaultKubernetesClient client;
+  private HttpClient httpClient;
+  // public DefaultKubernetesClient client;
 
   public void initKubernetes() {
 
@@ -57,30 +56,29 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
     File ca = new File(classLoader.getResource("ca.crt").getFile());
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
-    System.out.println("port: "+0+"  host:"+0);
-    config = new ConfigBuilder()
-        .withMasterUrl(0 + ":" +0)
-        .withNamespace(null)
-        .withCaCertFile(ca.getAbsolutePath())
-        .withClientCertFile(clientcert.getAbsolutePath())
-        .withClientKeyFile(clientkey.getAbsolutePath())
-        .build();
-
+    System.out.println("port: " + 0 + "  host:" + 0);
+    config =
+        new ConfigBuilder()
+            .withMasterUrl(0 + ":" + 0)
+            .withNamespace(null)
+            .withCaCertFile(ca.getAbsolutePath())
+            .withClientCertFile(clientcert.getAbsolutePath())
+            .withClientKeyFile(clientkey.getAbsolutePath())
+            .build();
   }
-
 
   @Before
   public void startVerticles() throws InterruptedException {
     initKubernetes();
     CountDownLatch latch2 = new CountDownLatch(1);
     JsonObject conf = new JsonObject();
-    conf.put("service1.1.name","version").put("service1.1.value","v1");
-    conf.put("service2.1.name","version").put("service2.1.value","v2");
-    conf.put("service1.0.name","name").put("service1.0.value","myTestService");
-    conf.put("service2.0.name","name").put("service2.0.value","myTestService");
-    conf.put("name.myTestService.version.v1","http://192.168.1.1:8080");
-    conf.put("name.myTestService.version.v2","http://192.168.1.2:9080");
-    conf.put("kube.offline",true);
+    conf.put("service1.1.name", "version").put("service1.1.value", "v1");
+    conf.put("service2.1.name", "version").put("service2.1.value", "v2");
+    conf.put("service1.0.name", "name").put("service1.0.value", "myTestService");
+    conf.put("service2.0.name", "name").put("service2.0.value", "myTestService");
+    conf.put("name.myTestService.version.v1", "http://192.168.1.1:8080");
+    conf.put("name.myTestService.version.v2", "http://192.168.1.2:9080");
+    conf.put("kube.offline", true);
     DeploymentOptions options = new DeploymentOptions().setConfig(conf).setInstances(1);
 
     vertx.deployVerticle(
@@ -102,7 +100,6 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
     awaitLatch(latch2);
   }
 
-
   @Test
   public void testServiceByName() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
@@ -115,24 +112,21 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
         client.get(
             "/wsService/myTestService",
             resp -> {
-              resp.bodyHandler(body -> {
-                String response = body.toString();
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext(
-                    context -> {
-                      failed.set(!response.equalsIgnoreCase("http://192.168.1.1:8080/http://192.168.1.2:9080"));
+              resp.bodyHandler(
+                  body -> {
+                    String response = body.toString();
+                    System.out.println("Response entity '" + response + "' received.");
+                    vertx.runOnContext(
+                        context -> {
+                          failed.set(
+                              !response.equalsIgnoreCase(
+                                  "http://192.168.1.1:8080/http://192.168.1.2:9080"));
 
-                      latch.countDown();
-
-                    });
-
-              });
-
-
+                          latch.countDown();
+                        });
+                  });
             });
     request.end();
-
-
 
     latch.await();
     assertTrue(!failed.get());
@@ -143,19 +137,28 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
   @K8SDiscovery
   public class WsServiceOne extends VxmsEndpoint {
 
-    @ServiceName()
-    @WithLabels( value={ @WithLabel(name="${service1.0.name}",value="${service1.0.value}"), @WithLabel(name="${service1.1.name}",value="${service1.1.value}")})
-    private String service1;
-
-    @ServiceName()
-    @WithLabels( value={ @WithLabel(name="${service2.0.name}",value="${service2.0.value}"), @WithLabel(name="${service2.1.name}",value="${service2.1.value}")})
-    private String service2;
     public Config config;
+    @ServiceName()
+    @WithLabels(
+        value = {
+          @WithLabel(name = "${service1.0.name}", value = "${service1.0.value}"),
+          @WithLabel(name = "${service1.1.name}", value = "${service1.1.value}")
+        })
+    private String service1;
+    @ServiceName()
+    @WithLabels(
+        value = {
+          @WithLabel(name = "${service2.0.name}", value = "${service2.0.value}"),
+          @WithLabel(name = "${service2.1.name}", value = "${service2.1.value}")
+        })
+    private String service2;
 
-    public WsServiceOne(Config config) {this.config =config;}
+    public WsServiceOne(Config config) {
+      this.config = config;
+    }
 
     public void postConstruct(final io.vertx.core.Future<Void> startFuture) {
-      new VxmsDiscoveryK8SImpl().initDiscovery(this,config);
+      new VxmsDiscoveryK8SImpl().initDiscovery(this, config);
       startFuture.complete();
     }
 
@@ -163,7 +166,10 @@ public class ResolveServicesByLabelsConfigOKOfflineTest extends VertxTestBase {
     @GET
     public void rsstringGETResponse(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().stringResponse((future) -> future.complete(service1+"/"+service2)).execute();
+      reply
+          .response()
+          .stringResponse((future) -> future.complete(service1 + "/" + service2))
+          .execute();
     }
   }
 }

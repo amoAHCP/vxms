@@ -16,7 +16,6 @@
 
 package org.jacpfx.kuberenetes;
 
-
 import io.fabric8.annotations.ServiceName;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -51,10 +50,10 @@ public class ResolveServicesByNameTest extends VertxTestBase {
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
   private static final String HOST = "127.0.0.1";
-  private HttpClient httpClient;
   public KubernetesMockServer server;
   public Config config;
- // public DefaultKubernetesClient client;
+  private HttpClient httpClient;
+  // public DefaultKubernetesClient client;
 
   public void initKubernetes() {
     KubernetesMockServer plainServer = new KubernetesMockServer(false);
@@ -65,34 +64,59 @@ public class ResolveServicesByNameTest extends VertxTestBase {
     File ca = new File(classLoader.getResource("ca.crt").getFile());
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
-    System.out.println("port: "+port+"  host:"+host);
-    TestingClientConfig.config = new ConfigBuilder()
-        .withMasterUrl(host + ":" +port)
-        .withNamespace("default")
-        .withCaCertFile(ca.getAbsolutePath())
-        .withClientCertFile(clientcert.getAbsolutePath())
-        .withClientKeyFile(clientkey.getAbsolutePath())
-        .build();
-  //  client = new DefaultKubernetesClient(config);
+    System.out.println("port: " + port + "  host:" + host);
+    TestingClientConfig.config =
+        new ConfigBuilder()
+            .withMasterUrl(host + ":" + port)
+            .withNamespace("default")
+            .withCaCertFile(ca.getAbsolutePath())
+            .withClientCertFile(clientcert.getAbsolutePath())
+            .withClientKeyFile(clientkey.getAbsolutePath())
+            .build();
+    //  client = new DefaultKubernetesClient(config);
     server = plainServer;
   }
 
   public void initService() {
-    final ObjectMeta buildmyTestService = new ObjectMetaBuilder().addToLabels("test", "test").withName("myTestService").build();
-    final ServicePort portmyTestService = new ServicePortBuilder().withPort(8080).withProtocol("http").build();
-    final ServiceSpec specmyTestService = new ServiceSpecBuilder().addNewPort().and()
-        .withClusterIP("192.168.1.1").withPorts(portmyTestService).build();
+    final ObjectMeta buildmyTestService =
+        new ObjectMetaBuilder().addToLabels("test", "test").withName("myTestService").build();
+    final ServicePort portmyTestService =
+        new ServicePortBuilder().withPort(8080).withProtocol("http").build();
+    final ServiceSpec specmyTestService =
+        new ServiceSpecBuilder()
+            .addNewPort()
+            .and()
+            .withClusterIP("192.168.1.1")
+            .withPorts(portmyTestService)
+            .build();
 
-    final ObjectMeta buildmyTestService2 = new ObjectMetaBuilder().addToLabels("test", "test2").withName("myTestService2").build();
-    final ServicePort portmyTestService2 = new ServicePortBuilder().withPort(9080).withProtocol("http").build();
-    final ServiceSpec specmyTestService2 = new ServiceSpecBuilder().addNewPort().and()
-        .withClusterIP("192.168.1.2").withPorts(portmyTestService2).build();
+    final ObjectMeta buildmyTestService2 =
+        new ObjectMetaBuilder().addToLabels("test", "test2").withName("myTestService2").build();
+    final ServicePort portmyTestService2 =
+        new ServicePortBuilder().withPort(9080).withProtocol("http").build();
+    final ServiceSpec specmyTestService2 =
+        new ServiceSpecBuilder()
+            .addNewPort()
+            .and()
+            .withClusterIP("192.168.1.2")
+            .withPorts(portmyTestService2)
+            .build();
 
-    final Service servicemyTestService = new ServiceBuilder().withMetadata(buildmyTestService).withSpec(specmyTestService).build();
-    final Service servicemyTestService2 = new ServiceBuilder().withMetadata(buildmyTestService2).withSpec(specmyTestService2).build();
-    server.expect().withPath("/api/v1/namespaces/default/services").andReturn(200, new ServiceListBuilder().addToItems(servicemyTestService,servicemyTestService2).build()).times(2);
-
+    final Service servicemyTestService =
+        new ServiceBuilder().withMetadata(buildmyTestService).withSpec(specmyTestService).build();
+    final Service servicemyTestService2 =
+        new ServiceBuilder().withMetadata(buildmyTestService2).withSpec(specmyTestService2).build();
+    server
+        .expect()
+        .withPath("/api/v1/namespaces/default/services")
+        .andReturn(
+            200,
+            new ServiceListBuilder()
+                .addToItems(servicemyTestService, servicemyTestService2)
+                .build())
+        .times(2);
   }
+
   @Before
   public void startVerticles() throws InterruptedException {
     initKubernetes();
@@ -119,7 +143,6 @@ public class ResolveServicesByNameTest extends VertxTestBase {
     awaitLatch(latch2);
   }
 
-
   @Test
   public void testServiceByName() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
@@ -132,24 +155,20 @@ public class ResolveServicesByNameTest extends VertxTestBase {
         client.get(
             "/wsService/myTestService",
             resp -> {
-              resp.bodyHandler(body -> {
-                String response = body.toString();
-                System.out.println("Response entity '" + response + "' received.");
-                vertx.runOnContext(
-                    context -> {
-                      failed.set(!response.equalsIgnoreCase("192.168.1.1:8080/192.168.1.2:9080"));
+              resp.bodyHandler(
+                  body -> {
+                    String response = body.toString();
+                    System.out.println("Response entity '" + response + "' received.");
+                    vertx.runOnContext(
+                        context -> {
+                          failed.set(
+                              !response.equalsIgnoreCase("192.168.1.1:8080/192.168.1.2:9080"));
 
-                      latch.countDown();
-
-                    });
-
-              });
-
-
+                          latch.countDown();
+                        });
+                  });
             });
     request.end();
-
-
 
     latch.await();
     assertTrue(!failed.get());
@@ -160,22 +179,24 @@ public class ResolveServicesByNameTest extends VertxTestBase {
   @K8SDiscovery(customClientConfiguration = TestingClientConfig.class)
   public class WsServiceOne extends VxmsEndpoint {
 
+    public Config config;
     @ServiceName("myTestService")
     private String service1;
-
     @ServiceName("myTestService2")
     private String service2;
-    public Config config;
 
-    public WsServiceOne(Config config) {this.config =config;}
-
-
+    public WsServiceOne(Config config) {
+      this.config = config;
+    }
 
     @Path("/myTestService")
     @GET
     public void rsstringGETResponse(RestHandler reply) {
       System.out.println("stringResponse: " + reply);
-      reply.response().stringResponse((future) -> future.complete(service1+"/"+service2)).execute();
+      reply
+          .response()
+          .stringResponse((future) -> future.complete(service1 + "/" + service2))
+          .execute();
     }
   }
 }

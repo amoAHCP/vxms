@@ -22,7 +22,8 @@ import org.jacpfx.vxms.k8s.api.CustomClientConfig;
 
 public class TestingClientConfig implements CustomClientConfig {
   public static Config config;
-  public Config createCustomConfiguration(Vertx vertx){
+
+  public Config createCustomConfiguration(Vertx vertx) {
     return config;
   }
 }

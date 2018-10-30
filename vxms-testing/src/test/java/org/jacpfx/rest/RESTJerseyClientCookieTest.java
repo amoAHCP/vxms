@@ -116,23 +116,23 @@ public class RESTJerseyClientCookieTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponseSyncAsync",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponseSyncAsync",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Status: " + resp.statusCode()+" message:"+resp.statusMessage());
-                    assertEquals("xyz", body.toString());
-                    testComplete();
-                  });
-
-            }).putHeader("Cookie", "c1=xyz");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println(
+                            "Status: " + resp.statusCode() + " message:" + resp.statusMessage());
+                        assertEquals("xyz", body.toString());
+                        testComplete();
+                      });
+                })
+            .putHeader("Cookie", "c1=xyz");
     request.end();
     await();
-
   }
 
   public io.vertx.core.http.HttpClient getClient() {

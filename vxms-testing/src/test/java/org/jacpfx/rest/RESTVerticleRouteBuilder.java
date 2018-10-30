@@ -16,7 +16,7 @@
 
 package org.jacpfx.rest;
 
-import com.google.gson.Gson;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -26,19 +26,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import org.jacpfx.entity.Payload;
-import org.jacpfx.entity.encoder.ExampleByteEncoder;
-import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.common.util.Serializer;
+import org.jacpfx.vxms.rest.RouteBuilder;
+import org.jacpfx.vxms.rest.VxmsRESTRoutes;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -110,39 +103,63 @@ public class RESTVerticleRouteBuilder extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointOne",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "test");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "test");
+                      testComplete();
+                    }));
     request.end();
     await();
   }
 
+  @Test
+  public void endpointTwo() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/endpointTwo/123",
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "123");
+                      testComplete();
+                    }));
+    request.end();
+    await();
+  }
 
   public HttpClient getClient() {
     return client;
   }
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  public class WsServiceOne extends VxmsEndpoint {
+  public class WsServiceOne extends AbstractVerticle {
 
-    @Path("/endpointOne")
-    @GET
+    @Override
+    public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+      VxmsRESTRoutes routes =
+          VxmsRESTRoutes.init()
+              .route(RouteBuilder.get("/endpointOne", this::rsEndpointOne))
+              .route(RouteBuilder.get("/endpointTwo/:help", this::rsEndpointTwo));
+      VxmsEndpoint.init(startFuture, this, routes);
+    }
+
     public void rsEndpointOne(RestHandler reply) {
       System.out.println("wsEndpointOne: " + reply);
       reply.response().stringResponse((future) -> future.complete("test")).execute();
     }
 
-    @Path("/endpointTwo/:help")
-    @GET
     public void rsEndpointTwo(RestHandler handler) {
       String productType = handler.request().param("help");
       System.out.println("wsEndpointTwo: " + handler);
       handler.response().stringResponse((future) -> future.complete(productType)).execute();
     }
-
-
   }
 }
