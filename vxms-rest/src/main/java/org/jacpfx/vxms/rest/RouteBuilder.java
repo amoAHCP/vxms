@@ -21,41 +21,58 @@ import org.jacpfx.vxms.rest.VxmsRESTRoutes.RestErrorConsumer;
 import org.jacpfx.vxms.rest.VxmsRESTRoutes.RestHandlerConsumer;
 
 public class RouteBuilder {
-  private final MethodDescriptor decriptor ;
+  private final MethodDescriptor decriptor;
 
   public RouteBuilder(MethodDescriptor decriptor) {
     this.decriptor = decriptor;
   }
 
   public static RouteBuilder get(String path, RestHandlerConsumer methodReference) {
-    return new RouteBuilder(new MethodDescriptor(HttpMethod.GET,path,null,methodReference,null));
+    return new RouteBuilder(
+        new MethodDescriptor(HttpMethod.GET, path, null, methodReference, null));
   }
 
   public static RouteBuilder post(String path, RestHandlerConsumer methodReference) {
-    return new RouteBuilder(new MethodDescriptor(HttpMethod.POST,path,null,methodReference,null));
+    return new RouteBuilder(
+        new MethodDescriptor(HttpMethod.POST, path, null, methodReference, null));
   }
+
   public static RouteBuilder put(String path, RestHandlerConsumer methodReference) {
-    return new RouteBuilder(new MethodDescriptor(HttpMethod.PUT,path,null,methodReference,null));
+    return new RouteBuilder(
+        new MethodDescriptor(HttpMethod.PUT, path, null, methodReference, null));
   }
+
   public static RouteBuilder patch(String path, RestHandlerConsumer methodReference) {
-    return new RouteBuilder(new MethodDescriptor(HttpMethod.PATCH,path,null,methodReference,null));
+    return new RouteBuilder(
+        new MethodDescriptor(HttpMethod.PATCH, path, null, methodReference, null));
   }
+
   public static RouteBuilder delete(String path, RestHandlerConsumer methodReference) {
-    return new RouteBuilder(new MethodDescriptor(HttpMethod.DELETE,path,null,methodReference,null));
+    return new RouteBuilder(
+        new MethodDescriptor(HttpMethod.DELETE, path, null, methodReference, null));
   }
+
   public static RouteBuilder options(String path, RestHandlerConsumer methodReference) {
-    return new RouteBuilder(new MethodDescriptor(HttpMethod.OPTIONS,path,null,methodReference,null));
+    return new RouteBuilder(
+        new MethodDescriptor(HttpMethod.OPTIONS, path, null, methodReference, null));
   }
-  public RouteBuilder consumes(String ...values) {
-    return new RouteBuilder(new MethodDescriptor(decriptor.httpMethod,decriptor.path,values,decriptor.method,null));
+
+  public RouteBuilder consumes(String... values) {
+    return new RouteBuilder(
+        new MethodDescriptor(decriptor.httpMethod, decriptor.path, values, decriptor.method, null));
   }
 
   public RouteBuilder onError(RestErrorConsumer errorMethod) {
-    return new RouteBuilder(new MethodDescriptor(decriptor.httpMethod,decriptor.path,decriptor.consumes,decriptor.method,errorMethod));
+    return new RouteBuilder(
+        new MethodDescriptor(
+            decriptor.httpMethod,
+            decriptor.path,
+            decriptor.consumes,
+            decriptor.method,
+            errorMethod));
   }
 
   protected MethodDescriptor getDescriptor() {
     return this.decriptor;
   }
-
 }

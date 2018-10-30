@@ -26,17 +26,14 @@ import org.jacpfx.vxms.spi.VxmsRoutes;
 
 public class VxmsRESTRoutes implements VxmsRoutes {
 
+  protected final List<MethodDescriptor> descriptors;
 
-  protected List<MethodDescriptor> descriptors;
-
-  public VxmsRESTRoutes(
-      List<MethodDescriptor> descriptors) {
+  public VxmsRESTRoutes(List<MethodDescriptor> descriptors) {
     this.descriptors = descriptors;
-
   }
 
   public static VxmsRESTRoutes init() {
-    return new VxmsRESTRoutes( Collections.emptyList());
+    return new VxmsRESTRoutes(Collections.emptyList());
   }
 
   public VxmsRESTRoutes route(RouteBuilder builder) {
@@ -45,17 +42,11 @@ public class VxmsRESTRoutes implements VxmsRoutes {
     return new VxmsRESTRoutes(tmp);
   }
 
-
-  public interface RestHandlerConsumer extends Consumer<RestHandler> {
-
-  }
-
-  public interface RestErrorConsumer extends BiConsumer<RestHandler, Throwable> {
-
-  }
-
-
   protected List<MethodDescriptor> getDescriptors() {
     return descriptors;
   }
+
+  public interface RestHandlerConsumer extends Consumer<RestHandler> {}
+
+  public interface RestErrorConsumer extends BiConsumer<RestHandler, Throwable> {}
 }

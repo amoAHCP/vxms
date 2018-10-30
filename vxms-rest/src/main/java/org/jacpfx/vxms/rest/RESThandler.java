@@ -35,17 +35,18 @@ public class RESThandler implements RESThandlerSPI {
   }
 
   @Override
-  public void initRESTHandler(VxmsShared vxmsShared, Router router,
-      AbstractVerticle service, VxmsRoutes... routes) {
+  public void initRESTHandler(
+      VxmsShared vxmsShared, Router router, AbstractVerticle service, VxmsRoutes... routes) {
     if (routes == null || routes.length == 0) {
       RESTInitializer.initRESTHandler(vxmsShared, router, service);
     } else {
       // check if VxmsRoutes contains REST routes
-      Stream.of(routes).
-          filter(r -> r instanceof VxmsRESTRoutes).
-          map(restRoutes -> VxmsRESTRoutes.class.cast(restRoutes)).
-          forEach(routesToInit -> RESTInitializer
-              .initRESTHandler(vxmsShared, router, service, routesToInit));
+      Stream.of(routes)
+          .filter(r -> r instanceof VxmsRESTRoutes)
+          .map(VxmsRESTRoutes.class::cast)
+          .forEach(
+              routesToInit ->
+                  RESTInitializer.initRESTHandler(vxmsShared, router, service, routesToInit));
     }
   }
 }

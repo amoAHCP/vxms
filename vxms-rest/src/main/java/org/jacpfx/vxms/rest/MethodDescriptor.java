@@ -27,8 +27,10 @@ public class MethodDescriptor {
   protected final RestHandlerConsumer method;
   protected final RestErrorConsumer errorMethod;
 
-
-  public MethodDescriptor(HttpMethod httpMethod, String path, String[] consumes,
+  public MethodDescriptor(
+      HttpMethod httpMethod,
+      String path,
+      String[] consumes,
       RestHandlerConsumer method,
       RestErrorConsumer errorMethod) {
     this.httpMethod = httpMethod;
@@ -58,4 +60,3 @@ public class MethodDescriptor {
     return errorMethod;
   }
 }
-

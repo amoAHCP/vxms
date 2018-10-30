@@ -32,9 +32,7 @@ import org.jacpfx.vxms.common.concurrent.LocalData;
 import org.jacpfx.vxms.common.throwable.ThrowableFunction;
 import org.jacpfx.vxms.common.throwable.ThrowableSupplier;
 
-/**
- * Created by Andy Moncsek on 19.01.16. Performs blocking Executions and prepares response
- */
+/** Created by Andy Moncsek on 19.01.16. Performs blocking Executions and prepares response */
 public class ResponseExecution {
 
   private static final int DEFAULT_VALUE = 0;
@@ -50,13 +48,13 @@ public class ResponseExecution {
    *
    * @param _methodId the method name/id to be executed
    * @param _supplier the user defined supply method to be executed (mapToStringResponse,
-   * mapToByteResponse, mapToObjectResponse)
+   *     mapToByteResponse, mapToObjectResponse)
    * @param _blockingHandler the result handler, that takes the result
    * @param _errorHandler the intermediate error method, executed on each error
    * @param _onFailureRespond the method to be executed on failure
    * @param _errorMethodHandler the fallback method
    * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
-   * objects per instance
+   *     objects per instance
    * @param _fail last thrown Exception
    * @param _retry the amount of retries
    * @param _timeout, the max timeout time for the method execution
@@ -227,8 +225,7 @@ public class ResponseExecution {
           }
         },
         false,
-        res -> {
-        });
+        res -> {});
   }
 
   private static <T> void executeInitialState(
@@ -284,8 +281,8 @@ public class ResponseExecution {
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       Throwable cause) {
-    final T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler,
-        _blockingHandler, cause);
+    final T result =
+        handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, _blockingHandler, cause);
     if (!_blockingHandler.isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
     }
@@ -358,15 +355,15 @@ public class ResponseExecution {
           final Vertx vertx = vxmsShared.getVertx();
           vertx.executeBlocking(
               bhandler -> {
-                T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler,
-                    _blockingHandler, e);
+                T result =
+                    handleError(
+                        _errorHandler, _onFailureRespond, _errorMethodHandler, _blockingHandler, e);
                 if (!_blockingHandler.isComplete()) {
                   _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
                 }
               },
               false,
-              res -> {
-              });
+              res -> {});
         });
   }
 
@@ -377,8 +374,7 @@ public class ResponseExecution {
         _circuitBreakerTimeout,
         timer -> {
           final long initialRetryCounterValue = (long) (_retry + 1);
-          counter.addAndGet(initialRetryCounterValue, val -> {
-          });
+          counter.addAndGet(initialRetryCounterValue, val -> {});
         });
   }
 
@@ -413,8 +409,7 @@ public class ResponseExecution {
           }
         },
         false,
-        (val) -> {
-        });
+        (val) -> {});
 
     try {
       result = timeoutFuture.get(_timeout, TimeUnit.MILLISECONDS);
@@ -452,8 +447,9 @@ public class ResponseExecution {
         _retry--;
         if (_retry < DEFAULT_VALUE) {
           try {
-            result = handleError(errorHandler, onFailureRespond, errorMethodHandler,
-                _blockingHandler, e);
+            result =
+                handleError(
+                    errorHandler, onFailureRespond, errorMethodHandler, _blockingHandler, e);
             errorHandling = true;
           } catch (Exception ee) {
             _blockingHandler.fail(ee);
