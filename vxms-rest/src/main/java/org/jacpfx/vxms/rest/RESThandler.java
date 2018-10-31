@@ -18,8 +18,10 @@ package org.jacpfx.vxms.rest;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.ext.web.Router;
+import java.util.stream.Stream;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.spi.RESThandlerSPI;
+import org.jacpfx.vxms.spi.VxmsRoutes;
 
 /**
  * Created by amo on 05.08.16. Implements teh RESThandlerSPI and calls the initializer to bootstrap
@@ -30,5 +32,21 @@ public class RESThandler implements RESThandlerSPI {
   @Override
   public void initRESTHandler(VxmsShared vxmsShared, Router router, AbstractVerticle service) {
     RESTInitializer.initRESTHandler(vxmsShared, router, service);
+  }
+
+  @Override
+  public void initRESTHandler(
+      VxmsShared vxmsShared, Router router, AbstractVerticle service, VxmsRoutes... routes) {
+    if (routes == null || routes.length == 0) {
+      RESTInitializer.initRESTHandler(vxmsShared, router, service);
+    } else {
+      // check if VxmsRoutes contains REST routes
+      Stream.of(routes)
+          .filter(r -> r instanceof VxmsRESTRoutes)
+          .map(VxmsRESTRoutes.class::cast)
+          .forEach(
+              routesToInit ->
+                  RESTInitializer.initRESTHandler(vxmsShared, router, service, routesToInit));
+    }
   }
 }

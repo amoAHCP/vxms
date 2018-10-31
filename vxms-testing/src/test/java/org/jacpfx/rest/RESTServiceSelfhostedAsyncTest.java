@@ -35,7 +35,6 @@ import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -112,7 +111,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "test");
+                      assertEquals(body.toString(), "test");
                     });
                 testComplete();
               }
@@ -136,7 +135,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                 resp.bodyHandler(
                     body -> {
                       System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "123");
+                      assertEquals(body.toString(), "123");
                     });
                 testComplete();
               }

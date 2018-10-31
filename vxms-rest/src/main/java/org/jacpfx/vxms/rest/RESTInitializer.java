@@ -19,6 +19,7 @@ package org.jacpfx.vxms.rest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -39,9 +40,12 @@ import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.common.util.ConfigurationUtil;
 import org.jacpfx.vxms.common.util.URIUtil;
+import org.jacpfx.vxms.rest.VxmsRESTRoutes.RestErrorConsumer;
+import org.jacpfx.vxms.rest.VxmsRESTRoutes.RestHandlerConsumer;
 import org.jacpfx.vxms.rest.annotation.OnRestError;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.rest.util.ReflectionUtil;
+import org.jacpfx.vxms.spi.VxmsRoutes;
 
 /**
  * Created by Andy Moncsek on 09.03.16. Handles initialization of vxms rest module implementation
@@ -63,6 +67,122 @@ public class RESTInitializer {
         .filter(m -> m.isAnnotationPresent(Path.class))
         .forEach(restMethod -> initRestMethod(vxmsShared, router, service, restMethod));
   }
+
+  /**
+   * initialize default REST implementation for vxms
+   *
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   *     objects per instance
+   * @param router the Router instance
+   * @param service the Vxms service object itself
+   * @param routes the routes defined by the developer with the fluent API
+   */
+  static void initRESTHandler(
+      VxmsShared vxmsShared, Router router, Object service, VxmsRoutes routes) {
+    if (VxmsRESTRoutes.class.isAssignableFrom(routes.getClass())) {
+      VxmsRESTRoutes userRoutes = VxmsRESTRoutes.class.cast(routes);
+      userRoutes
+          .getDescriptors()
+          .stream()
+          .filter(desc -> desc.httpMethod.equals(HttpMethod.GET))
+          .forEach(descriptor -> initHttpGet(vxmsShared, router, descriptor));
+    }
+  }
+
+  protected static void initHttpGet(
+      VxmsShared vxmsShared, Router router, MethodDescriptor descriptor) {
+    final Route route = router.get(URIUtil.cleanPath(descriptor.path));
+    final Vertx vertx = vxmsShared.getVertx();
+    final Context context = vertx.getOrCreateContext();
+    final String methodId =
+        descriptor.path
+            + HttpMethod.GET.name()
+            + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
+    initHttpOperation(methodId, vxmsShared, route, descriptor);
+  }
+
+  private static void initHttpOperation(
+      String methodId, VxmsShared vxmsShared, Route route, MethodDescriptor descriptor) {
+
+    initHttpRoute(
+        methodId,
+        vxmsShared,
+        descriptor.method,
+        descriptor.consumes,
+        descriptor.errorMethod,
+        route);
+  }
+
+  private static void initHttpRoute(
+      String methodId,
+      VxmsShared vxmsShared,
+      RestHandlerConsumer restMethod,
+      String[] consumes,
+      RestErrorConsumer errorMethod,
+      Route route) {
+    route.handler(
+        routingContext ->
+            handleRESTRoutingContext(
+                methodId, vxmsShared, restMethod, errorMethod, routingContext));
+    updateHttpConsumes(consumes, route);
+  }
+
+  private static void handleRESTRoutingContext(
+      String methodId,
+      VxmsShared vxmsShared,
+      RestHandlerConsumer restMethod,
+      RestErrorConsumer onErrorMethod,
+      RoutingContext routingContext) {
+    try {
+      final Consumer<Throwable> throwableConsumer =
+          throwable ->
+              handleRestError(
+                  methodId + "ERROR", vxmsShared, onErrorMethod, routingContext, throwable);
+      restMethod.accept(
+          new RestHandler(methodId, routingContext, vxmsShared, null, throwableConsumer));
+    } catch (Throwable throwable) {
+      handleRestError(methodId + "ERROR", vxmsShared, onErrorMethod, routingContext, throwable);
+    }
+  }
+
+  private static void handleRestError(
+      String methodId,
+      VxmsShared vxmsShared,
+      RestErrorConsumer onErrorMethod,
+      RoutingContext routingContext,
+      Throwable throwable) {
+    if (onErrorMethod != null) {
+      invokeOnErrorMethod(methodId, vxmsShared, onErrorMethod, routingContext, throwable);
+    } else {
+      // TODO add SPI for custom failure handling
+      failRequest(routingContext, throwable);
+    }
+  }
+
+  private static void invokeOnErrorMethod(
+      String methodId,
+      VxmsShared vxmsShared,
+      RestErrorConsumer onErrorMethod,
+      RoutingContext routingContext,
+      Throwable throwable) {
+    Optional.ofNullable(onErrorMethod)
+        .ifPresent(
+            errorMethod -> {
+              try {
+                onErrorMethod.accept(
+                    new RestHandler(methodId, routingContext, vxmsShared, throwable, null),
+                    throwable);
+              } catch (Throwable t) {
+                failRequest(routingContext, t);
+              }
+            });
+  }
+
+  private static void updateHttpConsumes(String[] consumes, Route route) {
+    Optional.ofNullable(consumes).ifPresent(cs -> Stream.of(cs).forEach(route::consumes));
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Initialize a specific REST method from Service

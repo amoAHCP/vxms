@@ -30,7 +30,6 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.event.annotation.Consume;
 import org.jacpfx.vxms.event.response.EventbusHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -102,7 +101,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               assertTrue(res.succeeded());
-              Assert.assertEquals(res.result().body().toString(), "1 final");
+              assertEquals(res.result().body().toString(), "1 final");
               testComplete();
             });
     await();
@@ -117,7 +116,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               assertTrue(res.succeeded());
-              Assert.assertEquals(res.result().body().toString(), "2 final");
+              assertEquals(res.result().body().toString(), "2 final");
               testComplete();
             });
     await();
@@ -132,7 +131,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error test error");
+              assertEquals(res.result().body().toString(), "error test error");
               testComplete();
             });
     await();
@@ -147,7 +146,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error test error");
+              assertEquals(res.result().body().toString(), "error test error");
               testComplete();
             });
     await();
@@ -161,8 +160,8 @@ public class EventbusChainingStringTest extends VertxTestBase {
             SERVICE_REST_GET + "/basicTestSupplyWithErrorUnhandled",
             "hello",
             res -> {
-              Assert.assertTrue(res.failed());
-              Assert.assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
+              assertTrue(res.failed());
+              assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
               testComplete();
             });
     await();
@@ -177,7 +176,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error 4 test error");
+              assertEquals(res.result().body().toString(), "error 4 test error");
               testComplete();
             });
     await();
@@ -192,7 +191,7 @@ public class EventbusChainingStringTest extends VertxTestBase {
             "hello",
             res -> {
               System.out.println("Got a createResponse: " + res.result().body().toString());
-              Assert.assertEquals(res.result().body().toString(), "error 4 test error");
+              assertEquals(res.result().body().toString(), "error 4 test error");
               testComplete();
             });
     await();

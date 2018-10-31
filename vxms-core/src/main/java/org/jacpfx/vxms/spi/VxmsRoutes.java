@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package org.jacpfx.kuberenetes;
+package org.jacpfx.vxms.spi;
 
-import io.fabric8.kubernetes.client.Config;
-import io.vertx.core.Vertx;
-import org.jacpfx.vxms.k8s.api.CustomClientConfig;
+/**
+ * Marker interface
+ */
+public interface VxmsRoutes {
 
-public class TestingClientConfig implements CustomClientConfig {
-  public static Config config;
-
-  public Config createCustomConfiguration(Vertx vertx) {
-    return config;
-  }
 }

@@ -34,7 +34,6 @@ import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -109,15 +108,15 @@ public class RESTAsyncThreadCheckStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/simpleTest",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "test exception");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "test exception");
+                      testComplete();
+                    }));
     request.end();
     await();
-
   }
 
   @Test
@@ -131,15 +130,15 @@ public class RESTAsyncThreadCheckStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/simpleRetryTest",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "test exception");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "test exception");
+                      testComplete();
+                    }));
     request.end();
     await();
-
   }
 
   @Test
@@ -153,15 +152,15 @@ public class RESTAsyncThreadCheckStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/simpleTimeoutTest",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "operation _timeout");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "operation _timeout");
+                      testComplete();
+                    }));
     request.end();
     await();
-
   }
 
   @Test
@@ -175,17 +174,15 @@ public class RESTAsyncThreadCheckStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/simpleTimeoutWithRetryTest",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "operation _timeout");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "operation _timeout");
+                      testComplete();
+                    }));
     request.end();
     await();
-
-
-
   }
 
   @Test
@@ -198,15 +195,15 @@ public class RESTAsyncThreadCheckStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/statefulTimeoutWithRetryTest/crash",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "operation _timeout");
-                  testComplete();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "operation _timeout");
+                      testComplete();
+                    }));
     request.end();
     await();
-
   }
 
   @Test
@@ -220,58 +217,77 @@ public class RESTAsyncThreadCheckStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/statefulTimeoutWithRetryTest/crash",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Assert.assertEquals(body.toString(), "operation _timeout");
-                  HttpClientRequest request2 =
-                      client.get(
-                          "/wsService/statefulTimeoutWithRetryTest/value",
-                          resp2 -> resp2.bodyHandler(
-                              body2 -> {
-                                System.out.println("Got a createResponse: " + body2.toString());
-                                Assert.assertEquals(body2.toString(), "circuit open");
-                                // wait 1s, but circuit is still open
-                                vertx.setTimer(
-                                    1205,
-                                    handler -> {
-                                      HttpClientRequest request3 =
-                                          client.get(
-                                              "/wsService/statefulTimeoutWithRetryTest/value",
-                                              resp3 -> resp3.bodyHandler(
-                                                  body3 -> {
-                                                    System.out.println("Got a createResponse: " + body3.toString());
-                                                    Assert.assertEquals(body3.toString(), "circuit open");
-                                                    // wait another 1s, now circuit
-                                                    // should be closed
-                                                    vertx.setTimer(
-                                                        2005,
-                                                        handler2 -> {
-                                                          HttpClientRequest request4 =
-                                                              client.get(
-                                                                  "/wsService/statefulTimeoutWithRetryTest/value",
-                                                                  resp4 -> resp4.bodyHandler(
-                                                                      body4 -> {
-                                                                        System.out.println("Got a createResponse: " + body4.toString());
-                                                                        Assert.assertEquals(body4.toString(), "value");
-                                                                        // wait another 1s, now circuit
-                                                                        // should be closed
-                                                                        testComplete();
-                                                                      }));
-                                                          request4.end();
-                                                        });
-                                                  }));
-                                      request3.end();
-                                    });
-                              }));
-                  request2.end();
-                }));
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      assertEquals(body.toString(), "operation _timeout");
+                      HttpClientRequest request2 =
+                          client.get(
+                              "/wsService/statefulTimeoutWithRetryTest/value",
+                              resp2 ->
+                                  resp2.bodyHandler(
+                                      body2 -> {
+                                        System.out.println(
+                                            "Got a createResponse: " + body2.toString());
+                                        assertEquals(body2.toString(), "circuit open");
+                                        // wait 1s, but circuit is still open
+                                        vertx.setTimer(
+                                            1205,
+                                            handler -> {
+                                              HttpClientRequest request3 =
+                                                  client.get(
+                                                      "/wsService/statefulTimeoutWithRetryTest/value",
+                                                      resp3 ->
+                                                          resp3.bodyHandler(
+                                                              body3 -> {
+                                                                System.out.println(
+                                                                    "Got a createResponse: "
+                                                                        + body3.toString());
+                                                                assertEquals(
+                                                                    body3.toString(),
+                                                                    "circuit open");
+                                                                // wait another 1s, now circuit
+                                                                // should be closed
+                                                                vertx.setTimer(
+                                                                    2005,
+                                                                    handler2 -> {
+                                                                      HttpClientRequest request4 =
+                                                                          client.get(
+                                                                              "/wsService/statefulTimeoutWithRetryTest/value",
+                                                                              resp4 ->
+                                                                                  resp4.bodyHandler(
+                                                                                      body4 -> {
+                                                                                        System.out
+                                                                                            .println(
+                                                                                                "Got a createResponse: "
+                                                                                                    + body4
+                                                                                                        .toString());
+                                                                                        assertEquals(
+                                                                                            body4
+                                                                                                .toString(),
+                                                                                            "value");
+                                                                                        // wait
+                                                                                        // another
+                                                                                        // 1s, now
+                                                                                        // circuit
+                                                                                        // should be
+                                                                                        // closed
+                                                                                        testComplete();
+                                                                                      }));
+                                                                      request4.end();
+                                                                    });
+                                                              }));
+                                              request3.end();
+                                            });
+                                      }));
+                      request2.end();
+                    }));
     request.end();
-
-
 
     await(80000, TimeUnit.MILLISECONDS);
   }
+
   public HttpClient getClient() {
     return client;
   }

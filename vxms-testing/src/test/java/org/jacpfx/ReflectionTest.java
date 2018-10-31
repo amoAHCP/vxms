@@ -16,26 +16,28 @@
 
 package org.jacpfx;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.jacpfx.vxms.common.util.CommonReflectionUtil;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class ReflectionTest {
 
   @Test
   public void findByNameTest() {
-    Assert.assertTrue(
+    assertTrue(
         CommonReflectionUtil.findMethodBySignature("postConstruct", new Object[] {}, this)
             .isPresent());
   }
 
   @Test
   public void findByNameTestParam1() {
-    Assert.assertTrue(
+    assertTrue(
         CommonReflectionUtil.findMethodBySignature(
                 "postConstruct", new Object[] {new String("hello"), new Integer(1)}, this)
             .isPresent());
@@ -43,7 +45,7 @@ public class ReflectionTest {
 
   @Test
   public void findByNameTestParam2() {
-    Assert.assertTrue(
+    assertTrue(
         CommonReflectionUtil.findMethodBySignature(
                 "postConstruct", new Object[] {new Integer(1), new String("hello")}, this)
             .isPresent());
@@ -51,7 +53,7 @@ public class ReflectionTest {
 
   @Test
   public void notfindByNameTest() {
-    Assert.assertFalse(
+    assertFalse(
         CommonReflectionUtil.findMethodBySignature(
                 "postConstruct1", new Object[] {new Integer(1), new String("hello")}, this)
             .isPresent());
@@ -72,13 +74,13 @@ public class ReflectionTest {
               method -> {
                 try {
                   method.invoke(this, 1, "hello");
-                  Assert.assertTrue(true);
+                  assertTrue(true);
                 } catch (IllegalAccessException e) {
                   e.printStackTrace();
-                  Assert.assertTrue(false);
+                  assertTrue(false);
                 } catch (InvocationTargetException e) {
                   e.printStackTrace();
-                  Assert.assertTrue(false);
+                  assertTrue(false);
                 }
               });
         });

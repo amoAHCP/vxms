@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /** Created by amo on 23.11.16. */
-public class Testverticl2 extends AbstractVerticle {
+public class TestverticlWithRestBuilder extends AbstractVerticle {
 
   public static void main(String[] args) {
     DeploymentOptions options =
@@ -36,7 +36,7 @@ public class Testverticl2 extends AbstractVerticle {
                 new JsonObject()
                     .put("host", "localhost")
                     .put("serverOptions", "org.jacpfx.verticle.MyCustomServerOptions"));
-    Vertx.vertx().deployVerticle(Testverticl2.class.getName(), options);
+    Vertx.vertx().deployVerticle(TestverticlWithRestBuilder.class.getName(), options);
   }
 
   @Override

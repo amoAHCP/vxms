@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@
 package org.jacpfx.rest;
 
 import com.google.gson.Gson;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
@@ -36,13 +39,15 @@ import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
+import org.jacpfx.vxms.rest.RouteBuilder;
+import org.jacpfx.vxms.rest.VxmsRESTRoutes;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Created by Andy Moncsek on 23.04.15. */
-public class RESTServiceSelfhostedTest extends VertxTestBase {
+public class RESTVerticleRouteBuilder extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -173,13 +178,12 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFourErrorRetryTest?val=123&tmp=456",
-            resp ->
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      assertEquals(body.toString(), "123456");
-                      testComplete();
-                    }));
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
+                  assertEquals(body.toString(), "123456");
+                  testComplete();
+                }));
     request.end();
     await();
   }
@@ -194,15 +198,14 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFourErrorReturnRetryTest?productType=123&product=456",
-            resp ->
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println(
-                          "Got a createResponse endpointFourErrorReturnRetryTest: "
-                              + body.toString());
-                      assertEquals(body.toString(), "456123");
-                      testComplete();
-                    }));
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println(
+                      "Got a createResponse endpointFourErrorReturnRetryTest: "
+                          + body.toString());
+                  assertEquals(body.toString(), "456123");
+                  testComplete();
+                }));
     request.end();
     await();
   }
@@ -410,54 +413,53 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
         client.get(
             "/wsService/endpointNine_exception?val=123&tmp=456",
             resp -> {
-              vertx.runOnContext(
-                  h -> {
-                    assertEquals(500, resp.statusCode());
-                    assertEquals("test", resp.statusMessage());
-                  });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println(
-                        "Got a createResponse endpointFourErrorReturnRetryTest: "
-                            + body.toString());
-
-                    // assertEquals(body.toString(), "123456");
-
-                  });
-              String contentType = resp.getHeader("Content-Type");
-              // assertEquals(contentType, "application/json");
-              String key = resp.getHeader("key");
-              // assertEquals(key, "val");
+              assertEquals(500, resp.statusCode());
+              assertEquals("test", resp.statusMessage());
               testComplete();
             });
     request.end();
     await();
   }
 
+
   public HttpClient getClient() {
     return client;
   }
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  public class WsServiceOne extends VxmsEndpoint {
+  public class WsServiceOne extends AbstractVerticle {
 
-    @Path("/endpointOne")
-    @GET
+    @Override
+    public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+      VxmsRESTRoutes routes =
+          VxmsRESTRoutes.init()
+              .route(RouteBuilder.get("/endpointOne", this::rsEndpointOne))
+              .route(RouteBuilder.get("/endpointTwo/:help", this::rsEndpointTwo))
+              .route(RouteBuilder.get("/endpointThree", this::rsEndpointThree))
+              .route(RouteBuilder.get("/endpointFourErrorRetryTest", this::rsEndpointFourErrorRetryTest))
+              .route(RouteBuilder.get("/endpointFourErrorReturnRetryTest", this::rsEndpointFourErrorReturnRetryTest))
+              .route(RouteBuilder.get("/endpointFive", this::rsEndpointFive))
+              .route(RouteBuilder.get("/endpointFive_error", this::rsEndpointFive_error))
+              .route(RouteBuilder.get("/endpointSix", this::rsEndpointSix))
+              .route(RouteBuilder.get("/endpointSeven", this::rsEndpointSeven))
+              .route(RouteBuilder.get("/endpointSeven_error", this::rsEndpointSeven_error))
+              .route(RouteBuilder.get("/endpointEight_header", this::rsEndpointEight_header))
+              .route(RouteBuilder.get("/endpointEight_put_header", this::rsEndpointEight_put_header))
+              .route(RouteBuilder.get("/endpointNine_exception", this::rsEndpointNine_exception));
+      VxmsEndpoint.init(startFuture, this, routes);
+    }
+
     public void rsEndpointOne(RestHandler reply) {
       System.out.println("wsEndpointOne: " + reply);
       reply.response().stringResponse((future) -> future.complete("test")).execute();
     }
 
-    @Path("/endpointTwo/:help")
-    @GET
     public void rsEndpointTwo(RestHandler handler) {
       String productType = handler.request().param("help");
       System.out.println("wsEndpointTwo: " + handler);
       handler.response().stringResponse((future) -> future.complete(productType)).execute();
     }
 
-    @Path("/endpointThree")
-    @GET
     public void rsEndpointThree(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -468,8 +470,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointFourErrorRetryTest")
-    @GET
+
     public void rsEndpointFourErrorRetryTest(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -495,8 +496,7 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointFourErrorReturnRetryTest")
-    @GET
+
     public void rsEndpointFourErrorReturnRetryTest(RestHandler handler) {
       String productType = handler.request().param("productType");
       String product = handler.request().param("product");
@@ -520,8 +520,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointFive")
-    @GET
     public void rsEndpointFive(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -533,8 +531,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointFive_error")
-    @GET
     public void rsEndpointFive_error(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -557,8 +553,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointSix")
-    @GET
     public void rsEndpointSix(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -570,8 +564,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointSeven")
-    @GET
     public void rsEndpointSeven(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -583,8 +575,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointSeven_error")
-    @GET
     public void rsEndpointSeven_error(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -614,8 +604,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/endpointEight_header")
-    @GET
     public void rsEndpointEight_header(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -631,8 +619,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute("application/json");
     }
 
-    @Path("/endpointEight_put_header")
-    @GET
     public void rsEndpointEight_put_header(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -649,8 +635,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .execute("application/json");
     }
 
-    @Path("/endpointNine_exception")
-    @GET
     public void rsEndpointNine_exception(RestHandler handler) {
       String productType = handler.request().param("val");
       String product = handler.request().param("tmp");
@@ -664,5 +648,6 @@ public class RESTServiceSelfhostedTest extends VertxTestBase {
           .putHeader("key", "val")
           .execute("application/json");
     }
+
   }
 }

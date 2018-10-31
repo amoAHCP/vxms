@@ -39,13 +39,10 @@ import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.annotation.OnRestError;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Created by Andy Moncsek on 23.04.15.
- */
+/** Created by Andy Moncsek on 23.04.15. */
 public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
@@ -161,14 +158,10 @@ public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTes
                     assertEquals(pp.getValue(), "No handlers for address hello1");
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
-
   }
-
 
   @Test
   public void simpleSyncNoConnectionAndExceptionErrorResponse() throws InterruptedException {
@@ -185,8 +178,8 @@ public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTes
             resp -> {
               resp.bodyHandler(
                   body -> {
-                    System.out
-                        .println("RESPONSE-->: " + resp.statusMessage() + "  " + body.getBytes());
+                    System.out.println(
+                        "RESPONSE-->: " + resp.statusMessage() + "  " + body.getBytes());
                     Payload<String> pp = null;
                     try {
                       pp = (Payload<String>) Serializer.deserialize(body.getBytes());
@@ -195,16 +188,13 @@ public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTes
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
-                    assertEquals(pp.getValue(),
-                        "fallback response nullpointer in onFailureRespond");
+                    assertEquals(
+                        pp.getValue(), "fallback response nullpointer in onFailureRespond");
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -222,18 +212,15 @@ public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTes
             resp -> {
               resp.bodyHandler(
                   body -> {
-                    System.out
-                        .println("RESPONSE: " + resp.statusMessage() + "  " + body.toString());
+                    System.out.println(
+                        "RESPONSE: " + resp.statusMessage() + "  " + body.toString());
 
                     assertEquals(resp.statusMessage(), "nullpointer in onFailureRespond");
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -247,98 +234,123 @@ public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTes
     HttpClientRequest request =
         client.get(
             "/wsService/simpleSyncNoConnectionErrorResponseStateful",
-            resp -> resp.bodyHandler(
-                body -> {
-                  System.out.println("Got a createResponse: " + body.toString());
-                  Payload<String> pp = null;
-                  try {
-                    pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                  }
-                  assertEquals(pp.getValue(), "No handlers for address hello1");
-                  HttpClientRequest request2 =
-                      client.get(
-                          "/wsService/simpleSyncNoConnectionErrorResponseStateful",
-                          resp2 -> resp2.bodyHandler(
-                              body2 -> {
-                                System.out.println("Got a createResponse: " + body2.toString());
-                                Payload<String> pp2 = null;
-                                try {
-                                  pp2 = (Payload<String>) Serializer.deserialize(body2.getBytes());
-                                } catch (IOException e) {
-                                  e.printStackTrace();
-                                } catch (ClassNotFoundException e) {
-                                  e.printStackTrace();
-                                }
-                                Assert.assertEquals(pp2.getValue(), "circuit open");
-                                // wait 1s, but circuit is still open
-                                vertx.setTimer(
-                                    1205,
-                                    handler -> {
-                                      HttpClientRequest request3 =
-                                          client.get(
-                                              "/wsService/simpleSyncNoConnectionErrorResponseStateful",
-                                              resp3 -> resp3.bodyHandler(
-                                                  body3 -> {
-                                                    System.out.println(
-                                                        "Got a createResponse: " + body3
-                                                            .toString());
-                                                    Payload<String> pp3 = null;
-                                                    try {
-                                                      pp3 = (Payload<String>) Serializer
-                                                          .deserialize(body3.getBytes());
-                                                    } catch (IOException e) {
-                                                      e.printStackTrace();
-                                                    } catch (ClassNotFoundException e) {
-                                                      e.printStackTrace();
-                                                    }
-                                                    Assert.assertEquals(pp3.getValue(),
-                                                        "circuit open");
-                                                    // wait another 1s, now circuit
-                                                    // should be closed
-                                                    vertx.setTimer(
-                                                        2005,
-                                                        handler2 -> {
-                                                          HttpClientRequest request4 =
-                                                              client.get(
-                                                                  "/wsService/simpleSyncNoConnectionErrorResponseStateful",
-                                                                  resp4 -> resp4.bodyHandler(
-                                                                      body4 -> {
-                                                                        System.out.println(
-                                                                            "Got a createResponse: "
-                                                                                + body4.toString());
-                                                                        Payload<String> pp4 = null;
-                                                                        try {
-                                                                          pp4 = (Payload<String>) Serializer
-                                                                              .deserialize(
-                                                                                  body4.getBytes());
-                                                                        } catch (IOException e) {
-                                                                          e.printStackTrace();
-                                                                        } catch (ClassNotFoundException e) {
-                                                                          e.printStackTrace();
-                                                                        }
-                                                                        Assert.assertEquals(
-                                                                            pp4.getValue(),
-                                                                            "No handlers for address hello1");
+            resp ->
+                resp.bodyHandler(
+                    body -> {
+                      System.out.println("Got a createResponse: " + body.toString());
+                      Payload<String> pp = null;
+                      try {
+                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                      } catch (IOException e) {
+                        e.printStackTrace();
+                      } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                      }
+                      assertEquals(pp.getValue(), "No handlers for address hello1");
+                      HttpClientRequest request2 =
+                          client.get(
+                              "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+                              resp2 ->
+                                  resp2.bodyHandler(
+                                      body2 -> {
+                                        System.out.println(
+                                            "Got a createResponse: " + body2.toString());
+                                        Payload<String> pp2 = null;
+                                        try {
+                                          pp2 =
+                                              (Payload<String>)
+                                                  Serializer.deserialize(body2.getBytes());
+                                        } catch (IOException e) {
+                                          e.printStackTrace();
+                                        } catch (ClassNotFoundException e) {
+                                          e.printStackTrace();
+                                        }
+                                        assertEquals(pp2.getValue(), "circuit open");
+                                        // wait 1s, but circuit is still open
+                                        vertx.setTimer(
+                                            1205,
+                                            handler -> {
+                                              HttpClientRequest request3 =
+                                                  client.get(
+                                                      "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+                                                      resp3 ->
+                                                          resp3.bodyHandler(
+                                                              body3 -> {
+                                                                System.out.println(
+                                                                    "Got a createResponse: "
+                                                                        + body3.toString());
+                                                                Payload<String> pp3 = null;
+                                                                try {
+                                                                  pp3 =
+                                                                      (Payload<String>)
+                                                                          Serializer.deserialize(
+                                                                              body3.getBytes());
+                                                                } catch (IOException e) {
+                                                                  e.printStackTrace();
+                                                                } catch (ClassNotFoundException e) {
+                                                                  e.printStackTrace();
+                                                                }
+                                                                assertEquals(
+                                                                    pp3.getValue(), "circuit open");
+                                                                // wait another 1s, now circuit
+                                                                // should be closed
+                                                                vertx.setTimer(
+                                                                    2005,
+                                                                    handler2 -> {
+                                                                      HttpClientRequest request4 =
+                                                                          client.get(
+                                                                              "/wsService/simpleSyncNoConnectionErrorResponseStateful",
+                                                                              resp4 ->
+                                                                                  resp4.bodyHandler(
+                                                                                      body4 -> {
+                                                                                        System.out
+                                                                                            .println(
+                                                                                                "Got a createResponse: "
+                                                                                                    + body4
+                                                                                                        .toString());
+                                                                                        Payload<
+                                                                                                String>
+                                                                                            pp4 =
+                                                                                                null;
+                                                                                        try {
+                                                                                          pp4 =
+                                                                                              (Payload<
+                                                                                                      String>)
+                                                                                                  Serializer
+                                                                                                      .deserialize(
+                                                                                                          body4
+                                                                                                              .getBytes());
+                                                                                        } catch (
+                                                                                            IOException
+                                                                                                e) {
+                                                                                          e
+                                                                                              .printStackTrace();
+                                                                                        } catch (
+                                                                                            ClassNotFoundException
+                                                                                                e) {
+                                                                                          e
+                                                                                              .printStackTrace();
+                                                                                        }
+                                                                                        assertEquals(
+                                                                                            pp4
+                                                                                                .getValue(),
+                                                                                            "No handlers for address hello1");
 
-                                                                        // should be closed
-                                                                        testComplete();
-                                                                      }));
-                                                          request4.end();
-                                                        });
-                                                  }));
-                                      request3.end();
-                                    });
-                              }));
-                  request2.end();
-                }));
+                                                                                        // should be
+                                                                                        // closed
+                                                                                        testComplete();
+                                                                                      }));
+                                                                      request4.end();
+                                                                    });
+                                                              }));
+                                              request3.end();
+                                            });
+                                      }));
+                      request2.end();
+                    }));
     request.end();
 
     await(80000, TimeUnit.MILLISECONDS);
-
   }
 
   public HttpClient getClient() {
@@ -412,7 +424,8 @@ public class RESTJerseyClientEventObjectCircuitBreakerAsyncTest extends VertxTes
               () -> {
                 System.out.println("alternate");
                 return new Payload<>("fallback response " + tt.getMessage());
-              }, new ExampleByteEncoder())
+              },
+              new ExampleByteEncoder())
           .onError(
               error -> {
                 System.out.println(":::-->" + error.getMessage());

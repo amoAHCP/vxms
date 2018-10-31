@@ -1,5 +1,3 @@
-import org.jacpfx.vxms.spi.RESThandlerSPI;
-
 module vxms.rest {
   requires vxms.core;
   requires vertx.core;
@@ -15,6 +13,6 @@ module vxms.rest {
   exports org.jacpfx.vxms.rest.response.basic;
   exports org.jacpfx.vxms.rest.response.blocking;
 
-  provides org.jacpfx.vxms.spi.RESThandlerSPI with org.jacpfx.vxms.rest.RESThandler;
-
+  provides org.jacpfx.vxms.spi.RESThandlerSPI with
+      org.jacpfx.vxms.rest.RESThandler;
 }

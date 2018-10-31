@@ -35,4 +35,15 @@ public interface RESThandlerSPI {
    * @param service the verticle to be applied
    */
   void initRESTHandler(VxmsShared vxmsShared, Router router, AbstractVerticle service);
+
+  /**
+   * initialize a rest API
+   *
+   * @param vxmsShared the vxmsShared instance, containing the Vertx instance and other shared
+   * objects per instance
+   * @param router the vertx web router
+   * @param service the verticle to be applied
+   * @param routes the user-defined routes
+   */
+  void initRESTHandler(VxmsShared vxmsShared, Router router,  AbstractVerticle service,VxmsRoutes ...routes);
 }

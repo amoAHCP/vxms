@@ -34,7 +34,6 @@ import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.event.annotation.Consume;
 import org.jacpfx.vxms.event.response.EventbusHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -197,9 +196,9 @@ public class EventbusChainingObjectTest extends VertxTestBase {
             SERVICE_REST_GET + "/basicTestSupplyWithErrorUnhandled",
             "hello",
             res -> {
-              Assert.assertTrue(res.failed());
+              assertTrue(res.failed());
 
-              Assert.assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
+              assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
               testComplete();
             });
     await();

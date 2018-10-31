@@ -16,8 +16,8 @@
 
 package org.jacpfx.kuberenetes;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -52,13 +52,14 @@ public class KubernetesMockTest {
     File ca = new File(classLoader.getResource("ca.crt").getFile());
     File clientcert = new File(classLoader.getResource("client.crt").getFile());
     File clientkey = new File(classLoader.getResource("client.key").getFile());
-    System.out.println("port: "+port+"  host:"+host);
-    config = new ConfigBuilder()
-        .withMasterUrl(host + ":" +port)
-        .withCaCertFile(ca.getAbsolutePath())
-        .withClientCertFile(clientcert.getAbsolutePath())
-        .withClientKeyFile(clientkey.getAbsolutePath())
-        .build();
+    System.out.println("port: " + port + "  host:" + host);
+    config =
+        new ConfigBuilder()
+            .withMasterUrl(host + ":" + port)
+            .withCaCertFile(ca.getAbsolutePath())
+            .withClientCertFile(clientcert.getAbsolutePath())
+            .withClientKeyFile(clientkey.getAbsolutePath())
+            .build();
     client = new DefaultKubernetesClient(config);
     server = plainServer;
   }
@@ -66,15 +67,18 @@ public class KubernetesMockTest {
   @Test
   public void findServices() {
     final ObjectMeta build = new ObjectMetaBuilder().addToLabels("test", "test").build();
-    final ServiceSpec spec = new ServiceSpecBuilder().addNewPort().and()
-        .withClusterIP("192.168.1.1").build();
+    final ServiceSpec spec =
+        new ServiceSpecBuilder().addNewPort().and().withClusterIP("192.168.1.1").build();
     final Service service = new ServiceBuilder().withMetadata(build).withSpec(spec).build();
-    server.expect().withPath("/api/v1/namespaces/default/services").andReturn(200, new ServiceListBuilder().addToItems().addToItems(service).build()).once();
+    server
+        .expect()
+        .withPath("/api/v1/namespaces/default/services")
+        .andReturn(200, new ServiceListBuilder().addToItems().addToItems(service).build())
+        .once();
     KubernetesClient client = this.client;
     final ServiceList list = client.services().inNamespace("default").list();
     assertNotNull(list);
     assertEquals("test", list.getItems().get(0).getMetadata().getLabels().get("test"));
     System.out.println(list.getItems().get(0).getSpec().getClusterIP());
   }
-
 }

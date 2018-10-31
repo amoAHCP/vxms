@@ -41,7 +41,6 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -113,16 +112,12 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointOne",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "test");
-                      testComplete();
-                    });
-              }
-            });
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
+                  assertEquals(body.toString(), "test");
+                  testComplete();
+                }));
     request.end();
     await();
   }
@@ -137,16 +132,12 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointTwo/123",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Assert.assertEquals(body.toString(), "123");
-                      testComplete();
-                    });
-              }
-            });
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
+                  assertEquals(body.toString(), "123");
+                  testComplete();
+                }));
     request.end();
     await();
   }
@@ -161,15 +152,13 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointThree?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      assertEquals(body.toString(), "123456");
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "123456");
+                  });
+              testComplete();
             });
     request.end();
     await();
@@ -185,16 +174,12 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFourErrorRetryTest?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      assertEquals(body.toString(), "123456");
-                      testComplete();
-                    });
-              }
-            });
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println("Got a createResponse: " + body.toString());
+                  assertEquals(body.toString(), "123456");
+                  testComplete();
+                }));
     request.end();
     await();
   }
@@ -209,18 +194,14 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFourErrorReturnRetryTest?productType=123&product=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println(
-                          "Got a createResponse endpointFourErrorReturnRetryTest: "
-                              + body.toString());
-                      assertEquals(body.toString(), "456123");
-                      testComplete();
-                    });
-              }
-            });
+            resp -> resp.bodyHandler(
+                body -> {
+                  System.out.println(
+                      "Got a createResponse endpointFourErrorReturnRetryTest: "
+                          + body.toString());
+                  assertEquals(body.toString(), "456123");
+                  testComplete();
+                }));
     request.end();
     await();
   }
@@ -235,16 +216,14 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFive?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
-                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
+                    assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                  });
+              testComplete();
             });
     request.end();
     await();
@@ -260,16 +239,14 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointFive_error?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
-                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
+                    assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                  });
+              testComplete();
             });
     request.end();
     await();
@@ -285,23 +262,21 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointSix?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Payload<String> pp = null;
-                      try {
-                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                      } catch (IOException e) {
-                        e.printStackTrace();
-                      } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                      }
-                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Payload<String> pp = null;
+                    try {
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                      e.printStackTrace();
+                    }
+                    assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                  });
+              testComplete();
             });
     request.end();
     await();
@@ -317,23 +292,21 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointSeven?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      Payload<String> pp = null;
-                      try {
-                        pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                      } catch (IOException e) {
-                        e.printStackTrace();
-                      } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                      }
-                      assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    Payload<String> pp = null;
+                    try {
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                      e.printStackTrace();
+                    }
+                    assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                  });
+              testComplete();
             });
     request.end();
     await();
@@ -379,20 +352,18 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointEight_header?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println(
-                          "Got a createResponse endpointFourErrorReturnRetryTest: "
-                              + body.toString());
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse endpointFourErrorReturnRetryTest: "
+                            + body.toString());
 
-                      assertEquals(body.toString(), "123456");
-                    });
-                String contentType = resp.getHeader("Content-Type");
-                assertEquals(contentType, "application/json");
-                testComplete();
-              }
+                    assertEquals(body.toString(), "123456");
+                  });
+              String contentType = resp.getHeader("Content-Type");
+              assertEquals(contentType, "application/json");
+              testComplete();
             });
     request.end();
     await();
@@ -408,22 +379,20 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointEight_put_header?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println(
-                          "Got a createResponse endpointFourErrorReturnRetryTest: "
-                              + body.toString());
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println(
+                        "Got a createResponse endpointFourErrorReturnRetryTest: "
+                            + body.toString());
 
-                      assertEquals(body.toString(), "123456");
-                    });
-                String contentType = resp.getHeader("Content-Type");
-                assertEquals(contentType, "application/json");
-                String key = resp.getHeader("key");
-                assertEquals(key, "val");
-                testComplete();
-              }
+                    assertEquals(body.toString(), "123456");
+                  });
+              String contentType = resp.getHeader("Content-Type");
+              assertEquals(contentType, "application/json");
+              String key = resp.getHeader("key");
+              assertEquals(key, "val");
+              testComplete();
             });
     request.end();
     await();
@@ -439,29 +408,10 @@ public class RESTServiceSelfhostedTestStaticInitializer extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/endpointNine_exception?val=123&tmp=456",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-
-                vertx.runOnContext(
-                    h -> {
-                      assertEquals(500, resp.statusCode());
-                      assertEquals("test", resp.statusMessage());
-                    });
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println(
-                          "Got a createResponse endpointFourErrorReturnRetryTest: "
-                              + body.toString());
-
-                      // assertEquals(body.toString(), "123456");
-
-                    });
-                String contentType = resp.getHeader("Content-Type");
-                // assertEquals(contentType, "application/json");
-                String key = resp.getHeader("key");
-                // assertEquals(key, "val");
-                testComplete();
-              }
+            resp -> {
+              assertEquals(500, resp.statusCode());
+              assertEquals("test", resp.statusMessage());
+              testComplete();
             });
     request.end();
     await();

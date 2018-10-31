@@ -103,25 +103,23 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            SERVICE_REST_GET + "/session",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                SERVICE_REST_GET + "/session",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertNotNull(body.toString());
-                 //   assertEquals(body.toString(), "<h1>fgdfgdf</h1>");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertNotNull(body.toString());
+                        //   assertEquals(body.toString(), "<h1>fgdfgdf</h1>");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
-
-
   }
 
   public HttpClient getClient() {
@@ -129,11 +127,10 @@ public class RESTJerseyClientSessionTest extends VertxTestBase {
   }
 
   @ServiceEndpoint(
-    name = SERVICE_REST_GET,
-    contextRoot = SERVICE_REST_GET,
-    port = PORT,
-    routerConf = SessionRouterConfig.class
-  )
+      name = SERVICE_REST_GET,
+      contextRoot = SERVICE_REST_GET,
+      port = PORT,
+      routerConf = SessionRouterConfig.class)
   public class WsServiceTwo extends VxmsEndpoint {
 
     @Path("/session")

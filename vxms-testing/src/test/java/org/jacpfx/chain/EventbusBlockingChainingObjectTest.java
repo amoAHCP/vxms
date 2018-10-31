@@ -34,7 +34,6 @@ import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.event.annotation.Consume;
 import org.jacpfx.vxms.event.response.EventbusHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -197,9 +196,9 @@ public class EventbusBlockingChainingObjectTest extends VertxTestBase {
             SERVICE_REST_GET + "/basicTestSupplyWithErrorUnhandled",
             "hello",
             res -> {
-              Assert.assertTrue(res.failed());
+              assertTrue(res.failed());
 
-              Assert.assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
+              assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
               testComplete();
             });
     await();
@@ -480,8 +479,7 @@ public class EventbusBlockingChainingObjectTest extends VertxTestBase {
       reply
           .response()
           .blocking()
-          .<Integer>supply(
-              () -> 1)
+          .<Integer>supply(() -> 1)
           .mapToObjectResponse(
               (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
@@ -564,7 +562,6 @@ public class EventbusBlockingChainingObjectTest extends VertxTestBase {
                 Payload<String> pp = new Payload<>("error " + t.getMessage());
                 System.out.println(t.getMessage());
                 return pp;
-
               },
               new ExampleByteEncoder())
           .execute();

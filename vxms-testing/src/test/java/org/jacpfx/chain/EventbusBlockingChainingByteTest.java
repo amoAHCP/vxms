@@ -33,14 +33,14 @@ import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.event.annotation.Consume;
 import org.jacpfx.vxms.event.response.EventbusHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Created by Andy Moncsek on 23.04.15. */
 public class EventbusBlockingChainingByteTest extends VertxTestBase {
-/****/
+  /** * */
   public static final String SERVICE_REST_GET = "/wsService";
+
   public static final int PORT = 9998;
   private static final int MAX_RESPONSE_ELEMENTS = 4;
   private static final String HOST = "127.0.0.1";
@@ -196,9 +196,9 @@ public class EventbusBlockingChainingByteTest extends VertxTestBase {
             SERVICE_REST_GET + "/basicTestSupplyWithErrorUnhandled",
             "hello",
             res -> {
-              Assert.assertTrue(res.failed());
+              assertTrue(res.failed());
 
-              Assert.assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
+              assertTrue(res.cause().getMessage().equalsIgnoreCase("test error"));
               testComplete();
             });
     await();
@@ -479,8 +479,7 @@ public class EventbusBlockingChainingByteTest extends VertxTestBase {
       reply
           .response()
           .blocking()
-          .<Integer>supply(
-              () -> 1)
+          .<Integer>supply(() -> 1)
           .mapToByteResponse(
               (val) -> {
                 Payload<String> pp = new Payload<>(val + " final");
@@ -495,8 +494,7 @@ public class EventbusBlockingChainingByteTest extends VertxTestBase {
       reply
           .response()
           .blocking()
-          .<Integer>supply(
-              () -> 1)
+          .<Integer>supply(() -> 1)
           .<String>andThen(
               (value) -> {
                 return value + 1 + "";
@@ -529,7 +527,6 @@ public class EventbusBlockingChainingByteTest extends VertxTestBase {
                 Payload<String> pp = new Payload<>("error " + t.getMessage());
                 System.out.println(t.getMessage());
                 return Serializer.serialize(pp);
-
               })
           .execute();
     }
@@ -555,7 +552,6 @@ public class EventbusBlockingChainingByteTest extends VertxTestBase {
                 Payload<String> pp = new Payload<>("error " + t.getMessage());
                 System.out.println(t.getMessage());
                 return Serializer.serialize(pp);
-
               })
           .execute();
     }
@@ -680,8 +676,7 @@ public class EventbusBlockingChainingByteTest extends VertxTestBase {
       reply
           .response()
           .blocking()
-          .<String>supply(
-              () -> val)
+          .<String>supply(() -> val)
           .<String>andThen(
               (v) -> {
                 if (v.equals("crash")) {

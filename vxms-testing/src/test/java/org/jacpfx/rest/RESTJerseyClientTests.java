@@ -36,7 +36,6 @@ import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -107,23 +106,22 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponse",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponse",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "test");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "test");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
-
   }
 
   @Test
@@ -134,26 +132,24 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.post(
-            "/wsService/stringPOST",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .post(
+                "/wsService/stringPOST",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    testComplete();
-                  });
-
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.write("hello");
     request.end();
     await();
-
-
   }
-
 
   @Test
   public void stringPOSTResponse() throws InterruptedException, ExecutionException {
@@ -164,26 +160,24 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.post(
-            "/wsService/stringPOSTResponse",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .post(
+                "/wsService/stringPOSTResponse",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    Assert.assertEquals(body.toString(), "hello");
-                    testComplete();
-                  });
-
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello");
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.write("hello");
     request.end();
     await();
-
-
-
   }
 
   @Test
@@ -195,26 +189,23 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.options(
-            "/wsService/stringOPTIONSResponse",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .options(
+                "/wsService/stringOPTIONSResponse",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    Assert.assertEquals(body.toString(), "hello");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
 
     request.end();
     await();
-
-
-
   }
 
   @Test
@@ -226,25 +217,24 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.put(
-            "/wsService/stringPUTResponse",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .put(
+                "/wsService/stringPUTResponse",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    Assert.assertEquals(body.toString(), "hello");
-                    testComplete();
-                  });
-
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello");
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.write("hello");
     request.end();
     await();
-
-
   }
 
   @Test
@@ -256,23 +246,22 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.delete(
-            "/wsService/stringDELETEResponse",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .delete(
+                "/wsService/stringDELETEResponse",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    Assert.assertEquals(body.toString(), "hello");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
-
   }
 
   @Test
@@ -284,24 +273,22 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/wsService/stringGETResponseWithParameter/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/wsService/stringGETResponseWithParameter/123",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "123");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "123");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
-
-
   }
 
   @Test
@@ -312,24 +299,24 @@ public class RESTJerseyClientTests extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.post(
-            "/wsService/stringPOSTResponseWithParameter/123",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .post(
+                "/wsService/stringPOSTResponseWithParameter/123",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    Assert.assertEquals(body.toString(), "hello:123");
-                    testComplete();
-                  });
-
-            }).putHeader("content-length", String.valueOf("hello".getBytes().length)).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "hello:123");
+                        testComplete();
+                      });
+                })
+            .putHeader("content-length", String.valueOf("hello".getBytes().length))
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.write("hello");
     request.end();
     await();
-
   }
 
   public HttpClient getClient() {

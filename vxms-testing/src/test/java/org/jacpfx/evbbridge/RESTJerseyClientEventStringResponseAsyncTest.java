@@ -123,23 +123,17 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         client.get(
             "/wsService/simpleResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "hello");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -155,23 +149,17 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         client.get(
             "/wsService/complexResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "hello");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -187,22 +175,17 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         client.get(
             "/wsService/complexErrorResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "test exception");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
   }
 
   @Test
@@ -217,26 +200,18 @@ public class RESTJerseyClientEventStringResponseAsyncTest extends VertxTestBase 
         client.get(
             "/wsService/onFailurePass",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "failed");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
   }
-
-
 
   public HttpClient getClient() {
     return client;

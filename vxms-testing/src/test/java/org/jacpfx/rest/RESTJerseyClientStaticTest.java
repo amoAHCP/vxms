@@ -99,23 +99,22 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
     HttpClient client = vertx.createHttpClient(options);
 
     HttpClientRequest request =
-        client.get(
-            "/static/index.html",
-            resp -> {
-              resp.exceptionHandler(error -> {
+        client
+            .get(
+                "/static/index.html",
+                resp -> {
+                  resp.exceptionHandler(error -> {});
 
-              });
-              resp.bodyHandler(
-                  body -> {
-                    System.out.println("Got a createResponse: " + body.toString());
-                    assertEquals(body.toString(), "<h1>fgdfgdf</h1>");
-                    testComplete();
-                  });
-
-            }).putHeader("Content-Type", "application/json;charset=UTF-8");
+                  resp.bodyHandler(
+                      body -> {
+                        System.out.println("Got a createResponse: " + body.toString());
+                        assertEquals(body.toString(), "<h1>fgdfgdf</h1>");
+                        testComplete();
+                      });
+                })
+            .putHeader("Content-Type", "application/json;charset=UTF-8");
     request.end();
     await();
-
   }
 
   public HttpClient getClient() {
@@ -123,9 +122,8 @@ public class RESTJerseyClientStaticTest extends VertxTestBase {
   }
 
   @ServiceEndpoint(
-    name = SERVICE_REST_GET,
-    port = PORT,
-    routerConf = StaticContentRouterConfig.class
-  )
+      name = SERVICE_REST_GET,
+      port = PORT,
+      routerConf = StaticContentRouterConfig.class)
   public class WsServiceTwo extends VxmsEndpoint {}
 }

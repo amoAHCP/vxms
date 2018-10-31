@@ -37,7 +37,6 @@ import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -154,14 +153,12 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
-                    Assert.assertEquals(pp.getValue(), new Payload<>("hello").getValue());
+                    assertEquals(pp.getValue(), new Payload<>("hello").getValue());
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
   }
 
   @Test
@@ -187,14 +184,12 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
-                    Assert.assertEquals(pp.getValue(), new Payload<>("test exception").getValue());
+                    assertEquals(pp.getValue(), new Payload<>("test exception").getValue());
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
   }
 
   @Test
@@ -220,16 +215,14 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
-                    Assert.assertEquals(pp.getValue(), new Payload<>("no connection").getValue());
+                    assertEquals(pp.getValue(), new Payload<>("no connection").getValue());
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
-
   }
+
   @Test
   public void simpleByteNoConnectionRetryErrorResponseTest() throws InterruptedException {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
@@ -252,14 +245,12 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
-                    Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
+                    assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
   }
 
   @Test
@@ -284,14 +275,12 @@ public class RESTJerseyClientEventByteResponseAsyncTest extends VertxTestBase {
                     } catch (ClassNotFoundException e) {
                       e.printStackTrace();
                     }
-                    Assert.assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
+                    assertEquals(pp.getValue(), new Payload<>("hello1").getValue());
                     testComplete();
                   });
-
             });
     request.end();
     await();
-
   }
 
   public HttpClient getClient() {

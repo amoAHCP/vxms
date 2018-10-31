@@ -140,22 +140,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         client.get(
             "/wsService/complexSyncResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
-                   assertEquals(body.toString(), "hello1");
-
+                    assertEquals(body.toString(), "hello1");
                   });
 
               testComplete();
             });
     request.end();
     await();
-
   }
 
   @Test
@@ -170,22 +165,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         client.get(
             "/wsService/complexSyncErrorResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "test exception");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
   }
 
   @Test
@@ -200,23 +190,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         client.get(
             "/wsService/simpleSyncNoConnectionErrorResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "No handlers for address hello1");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -233,23 +217,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         client.get(
             "/wsService/simpleSyncNoConnectionError",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "no connection");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -264,23 +242,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         client.get(
             "/wsService/simpleSyncNoConnectionRetryErrorResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "hello1");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
   }
 
   @Test
@@ -295,24 +267,17 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
         client.get(
             "/wsService/simpleSyncNoConnectionExceptionRetryErrorResponse",
             resp -> {
-
               resp.bodyHandler(
                   body -> {
-                    System.out.println(
-                        "Got a createResponse"
-                            + body.toString());
+                    System.out.println("Got a createResponse" + body.toString());
 
                     assertEquals(body.toString(), "hello1");
-
                   });
 
               testComplete();
             });
     request.end();
     await();
-
-
-
   }
 
   public HttpClient getClient() {
@@ -379,7 +344,7 @@ public class RESTJerseyClientEventStringResponseTest extends VertxTestBase {
           .mapToStringResponse(
               (handler, future) -> future.complete(handler.result().body().toString()))
           . // onFailure(error-> System.out.println("ERROR:"+error.getMessage()+"type:
-            // "+error.getClass())).
+          // "+error.getClass())).
           execute();
     }
 

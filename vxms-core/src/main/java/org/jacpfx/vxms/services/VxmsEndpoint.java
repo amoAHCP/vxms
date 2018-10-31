@@ -41,6 +41,7 @@ import org.jacpfx.vxms.common.configuration.RouterConfiguration;
 import org.jacpfx.vxms.common.util.ConfigurationUtil;
 import org.jacpfx.vxms.common.util.ReflectionExecutionWrapper;
 import org.jacpfx.vxms.common.util.URIUtil;
+import org.jacpfx.vxms.spi.VxmsRoutes;
 
 /**
  * Extend a service verticle to provide pluggable sevices for vet.x microservice project. This class
@@ -65,6 +66,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * AbstractVerticle) as a fully functional Vxms Endpoint). Caution: this start methods completes
    * the start future when it's ready, so it must be the last initialisation (order and callback
    * wise)
+   *
    * @param startFuture the Start Future from Vert.x
    * @param registrationObject the AbstractVerticle to register (mostly this)
    */
@@ -78,6 +80,19 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
 
+  public static void init(final Future<Void> startFuture, AbstractVerticle registrationObject,
+      VxmsRoutes... routes) {
+    // TODO to be used for build in REST and others
+    final Vertx vertx = registrationObject.getVertx();
+    final JsonObject config = vertx.getOrCreateContext().config();
+    vertx.eventBus()
+        .consumer(ConfigurationUtil.getServiceName(config, registrationObject.getClass()) + "-info",
+            VxmsEndpoint::info);
+    initEndpoint(startFuture, registrationObject, new VxmsShared(vertx, new LocalData(vertx)),
+        routes);
+  }
+
+
   /**
    * initiate Endpoint and all Extensions
    *
@@ -85,15 +100,17 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * @param registrationObject, the verticle to initialize
    * @param vxmsShared, the {@link VxmsShared} object
    */
-  private static void initEndpoint(final Future<Void> startFuture, AbstractVerticle registrationObject,
-      VxmsShared vxmsShared) {
+  private static void initEndpoint(final Future<Void> startFuture,
+      final AbstractVerticle registrationObject,
+      final VxmsShared vxmsShared, final VxmsRoutes... routes) {
     final Vertx vertx = vxmsShared.getVertx();
     final JsonObject config = vertx.getOrCreateContext().config();
     final Class<? extends AbstractVerticle> serviceClass = registrationObject.getClass();
     final int port = ConfigurationUtil.getEndpointPort(config, serviceClass);
     final String host = ConfigurationUtil.getEndpointHost(config, serviceClass);
     final String contextRoot = ConfigurationUtil.getContextRoot(config, serviceClass);
-    final CustomServerOptions endpointConfig = ConfigurationUtil.getEndpointOptions(config, serviceClass);
+    final CustomServerOptions endpointConfig = ConfigurationUtil
+        .getEndpointOptions(config, serviceClass);
     final HttpServerOptions options = endpointConfig.getServerOptions(registrationObject.config());
 
     final HttpServer server = vertx.createHttpServer(options.setHost(host).setPort(port));
@@ -105,13 +122,13 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     final Router subRouter = contextRootSet ? Router.router(vertx) : null;
     final Router router = contextRootSet ? subRouter : topRouter;
     final RouterConfiguration routerConfiguration = getRouterConfiguration(
-        config,serviceClass);
+        config, serviceClass);
 
     config.put("secure", secure);
 
     initEndpointConfiguration(routerConfiguration, vertx, router, secure, host, port);
 
-    initExtensions(server, router, registrationObject, vxmsShared);
+    initExtensions(server, router, registrationObject, vxmsShared, routes);
 
     postEndpointConfiguration(routerConfiguration, router);
 
@@ -130,17 +147,18 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
 
   }
 
-  private static void initNoHTTPEndpoint(AbstractVerticle registrationObject, Future<Void> startFuture,
+  private static void initNoHTTPEndpoint(AbstractVerticle registrationObject,
+      Future<Void> startFuture,
       Router topRouter) {
     startFuture.setHandler(result -> logStartfuture(startFuture));
     executePostConstruct(registrationObject, topRouter, startFuture);
   }
 
   private static void initExtensions(HttpServer server, Router router,
-      AbstractVerticle registrationObject, VxmsShared vxmsShared) {
+      AbstractVerticle registrationObject, VxmsShared vxmsShared, VxmsRoutes... routes) {
     initDiscoveryxtensions(registrationObject);
-    initWebSocketExtensions(server, registrationObject,vxmsShared);
-    initRESTExtensions(router, registrationObject, vxmsShared);
+    initWebSocketExtensions(server, registrationObject, vxmsShared);
+    initRESTExtensions(router, registrationObject, vxmsShared, routes);
     initEventBusExtensions(registrationObject, vxmsShared);
   }
 
@@ -152,7 +170,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
    * @param topRouter the router object
    */
   private static void initHTTPEndpoint(AbstractVerticle registrationObject,
-      Future<Void> startFuture,HttpServer server,
+      Future<Void> startFuture, HttpServer server,
       Router topRouter) {
     server.requestHandler(topRouter::accept).listen(status -> {
       if (status.succeeded()) {
@@ -169,7 +187,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   private static void logStartfuture(Future<Void> startFuture) {
     final Throwable cause = startFuture.cause();
     String causeMessage = cause != null ? cause.getMessage() : "";
-    if(!startFuture.failed()) {
+    if (!startFuture.failed()) {
       log("startFuture.isComplete(): " + startFuture.isComplete());
     } else {
       log("startFuture.failed(): "
@@ -179,13 +197,13 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
   }
 
   private static void initRESTExtensions(Router router, AbstractVerticle registrationObject,
-      VxmsShared vxmsShared) {
+      VxmsShared vxmsShared, VxmsRoutes... routes) {
     // check for REST extension
     Optional.
         ofNullable(getRESTSPI()).
         ifPresent(resthandlerSPI -> {
           resthandlerSPI
-              .initRESTHandler(vxmsShared, router, registrationObject);
+              .initRESTHandler(vxmsShared, router, registrationObject, routes);
           log("start REST extension");
         });
   }
@@ -221,7 +239,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     Optional.
         ofNullable(getDiscoverySPI()).
         ifPresent(discoverySPI -> {
-         discoverySPI.initDiscovery(registrationObject);
+          discoverySPI.initDiscovery(registrationObject);
           log("start discovery extension");
         });
   }
@@ -262,7 +280,7 @@ public abstract class VxmsEndpoint extends AbstractVerticle {
     final Optional<ReflectionExecutionWrapper> methodWrapperToInvoke = reflectionExecutionWrapperStream
         .filter(ReflectionExecutionWrapper::isPresent).findFirst();
     methodWrapperToInvoke.ifPresent(ReflectionExecutionWrapper::invoke);
-    if(!methodWrapperToInvoke.isPresent() && !startFuture.isComplete()) {
+    if (!methodWrapperToInvoke.isPresent() && !startFuture.isComplete()) {
       startFuture.complete();
     }
 
