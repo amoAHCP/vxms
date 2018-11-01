@@ -1,5 +1,5 @@
 /*
- * Copyright [2017] [Andy Moncsek]
+ * Copyright [2018] [Andy Moncsek]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.jacpfx.rest;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -35,13 +36,15 @@ import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
+import org.jacpfx.vxms.rest.RouteBuilder;
+import org.jacpfx.vxms.rest.VxmsRESTRoutes;
 import org.jacpfx.vxms.rest.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Created by Andy Moncsek on 23.04.15. */
-public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
+public class RESTVerticleRouteBuilderSelfhostedAsyncTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
@@ -137,7 +140,6 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                     assertEquals(body.toString(), "123");
                     testComplete();
                   });
-
             });
     request.end();
     await();
@@ -192,7 +194,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                     } catch (IOException e) {
 
                       e.printStackTrace();
-                      fail();
+                     fail();
                     } catch (ClassNotFoundException e) {
 
                       e.printStackTrace();
@@ -207,16 +209,27 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
     await();
   }
 
+
   public HttpClient getClient() {
     return client;
   }
 
   @ServiceEndpoint(name = SERVICE_REST_GET, contextRoot = SERVICE_REST_GET, port = PORT)
-  public class WsServiceOne extends VxmsEndpoint {
+  public class WsServiceOne extends AbstractVerticle {
 
-    @Path("/asyncStringResponse")
-    @GET
-    public void rsAsyncStringResponse(RestHandler reply) throws InterruptedException {
+    @Override
+    public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+      VxmsRESTRoutes routes =
+          VxmsRESTRoutes.init()
+              .route(RouteBuilder.get("/asyncStringResponse", this::rsAsyncStringResponse))
+              .route(RouteBuilder.get("/asyncByteResponse", this::rsAsyncByteResponse))
+              .route(RouteBuilder.get("/asyncObjectResponse", this::rsAsyncObjectResponse))
+              .route(RouteBuilder.get("/asyncStringResponseParameter/:help", this::rsAsyncStringResponseParameter))
+              .route(RouteBuilder.get("/asyncByteResponseParameter/:help", this::rsAsyncByteResponseParameter));
+      VxmsEndpoint.init(startFuture, this, routes);
+    }
+
+    public void rsAsyncStringResponse(RestHandler reply) {
       System.out.println("asyncStringResponse: " + reply);
       reply
           .response()
@@ -231,61 +244,6 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
           .execute();
     }
 
-    @Path("/asyncByteResponse")
-    @GET
-    public void rsAsyncByteResponse(RestHandler reply) throws InterruptedException {
-      System.out.println("asyncStringResponse: " + reply);
-      reply
-          .response()
-          .blocking()
-          .byteResponse(
-              () -> {
-                System.out.println("WAIT");
-                Thread.sleep(2500);
-                System.out.println("WAIT END");
-                return Serializer.serialize(new Payload<String>("test"));
-              })
-          .execute();
-    }
-
-    @Path("/asyncObjectResponse")
-    @GET
-    public void rsAsyncObjectResponse(RestHandler reply) throws InterruptedException {
-      System.out.println("asyncStringResponse: " + reply);
-      reply
-          .response()
-          .blocking()
-          .objectResponse(
-              () -> {
-                System.out.println("WAIT");
-                Thread.sleep(2500);
-                System.out.println("WAIT END");
-                return new Payload<String>("test");
-              },
-              new ExampleStringEncoder())
-          .execute();
-    }
-
-    @Path("/asyncByteResponseParameter/:help")
-    @GET
-    public void rsAsyncByteResponseParameter(RestHandler handler) {
-      String productType = handler.request().param("help");
-      System.out.println("asyncByteResponseParameter: " + handler);
-      handler
-          .response()
-          .blocking()
-          .byteResponse(
-              () -> {
-                System.out.println("WAIT");
-                Thread.sleep(2500);
-                System.out.println("WAIT END");
-                return Serializer.serialize(new Payload<String>(productType));
-              })
-          .execute();
-    }
-
-    @Path("/asyncStringResponseParameter/:help")
-    @GET
     public void rsAsyncStringResponseParameter(RestHandler handler) {
       String productType = handler.request().param("help");
       System.out.println("asyncStringResponseParameter: " + handler);
@@ -301,5 +259,58 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
               })
           .execute();
     }
+
+    @Path("/asyncByteResponse")
+    @GET
+    public void rsAsyncByteResponse(RestHandler reply) {
+      System.out.println("asyncStringResponse: " + reply);
+      reply
+          .response()
+          .blocking()
+          .byteResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return Serializer.serialize(new Payload<String>("test"));
+              })
+          .execute();
+    }
+
+    public void rsAsyncByteResponseParameter(RestHandler handler) {
+      String productType = handler.request().param("help");
+      System.out.println("asyncStringResponseParameter: " + handler);
+      handler
+          .response()
+          .blocking()
+          .byteResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return Serializer.serialize(new Payload<String>(productType));
+              })
+          .execute();
+    }
+
+    @Path("/asyncObjectResponse")
+    @GET
+    public void rsAsyncObjectResponse(RestHandler reply)  {
+      System.out.println("asyncStringResponse: " + reply);
+      reply
+          .response()
+          .blocking()
+          .objectResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return new Payload<String>("test");
+              },
+              new ExampleStringEncoder())
+          .execute();
+    }
+
+
   }
 }

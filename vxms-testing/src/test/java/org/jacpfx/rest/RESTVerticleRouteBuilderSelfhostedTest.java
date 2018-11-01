@@ -47,7 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /** Created by Andy Moncsek on 23.04.15. */
-public class RESTVerticleRouteBuilder extends VertxTestBase {
+public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
 
   public static final String SERVICE_REST_GET = "/wsService";
   public static final int PORT = 9998;
