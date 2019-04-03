@@ -1,3 +1,5 @@
+import org.jacpfx.vxms.rest.RestBaseHandler;
+
 module vxms.rest {
   requires vxms.core;
   requires vertx.core;
@@ -6,13 +8,8 @@ module vxms.rest {
   requires io.netty.codec.http;
   requires java.logging;
   requires java.management;
-  requires java.ws.rs;
-
-  exports org.jacpfx.vxms.rest.annotation;
-  exports org.jacpfx.vxms.rest.response;
-  exports org.jacpfx.vxms.rest.response.basic;
-  exports org.jacpfx.vxms.rest.response.blocking;
+  requires vxms.rest.base;
 
   provides org.jacpfx.vxms.spi.RESThandlerSPI with
-      org.jacpfx.vxms.rest.RESThandler;
+          RestBaseHandler;
 }

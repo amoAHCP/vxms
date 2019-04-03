@@ -38,9 +38,20 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <dependency>
+   <dependency>
       <groupId>org.jacpfx</groupId>
       <artifactId>vxms-rest</artifactId>
+      <version>${parent.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.vertx</groupId>
+          <artifactId>vertx-web-common</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+   <dependency>
+      <groupId>org.jacpfx</groupId>
+      <artifactId>vxms-rest-rs</artifactId>
       <version>${parent.version}</version>
       <exclusions>
         <exclusion>

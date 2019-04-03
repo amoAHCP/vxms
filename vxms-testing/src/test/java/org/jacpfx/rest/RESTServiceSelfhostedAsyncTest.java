@@ -17,12 +17,10 @@
 package org.jacpfx.rest;
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
@@ -35,7 +33,7 @@ import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;

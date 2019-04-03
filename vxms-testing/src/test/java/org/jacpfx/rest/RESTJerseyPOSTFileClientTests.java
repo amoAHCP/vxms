@@ -45,7 +45,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,9 +89,7 @@ public class RESTJerseyPOSTFileClientTests extends VertxTestBase {
     CountDownLatch latch2 = new CountDownLatch(1);
     DeploymentOptions options = new DeploymentOptions().setInstances(1);
     options.setConfig(new JsonObject().put("clustered", false).put("host", HOST));
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the
-    // module so you
-    // don'failure have to hardecode it in your tests
+
 
     getVertx()
         .deployVerticle(

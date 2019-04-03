@@ -22,7 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /** Created by amo on 23.11.16. */

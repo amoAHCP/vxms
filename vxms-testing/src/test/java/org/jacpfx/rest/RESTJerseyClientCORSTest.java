@@ -32,7 +32,7 @@ import org.jacpfx.entity.RestrictedCorsRouterConfig;
 import org.jacpfx.entity.RestrictedCorsRouterConfig2;
 import org.jacpfx.entity.RestrictedCorsRouterConfig3;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;

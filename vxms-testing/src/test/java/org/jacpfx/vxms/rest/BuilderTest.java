@@ -22,7 +22,10 @@ import io.vertx.core.http.HttpMethod;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import org.jacpfx.vxms.rest.response.RestHandler;
+
+import org.jacpfx.vxms.rest.base.RouteBuilder;
+import org.jacpfx.vxms.rest.base.VxmsRESTRoutes;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.junit.Test;
 
 public class BuilderTest {

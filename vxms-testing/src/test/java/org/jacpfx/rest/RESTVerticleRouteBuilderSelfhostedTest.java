@@ -19,12 +19,10 @@ package org.jacpfx.rest;
 import com.google.gson.Gson;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
@@ -32,16 +30,15 @@ import io.vertx.test.fakecluster.FakeClusterManager;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleByteEncoder;
 import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.common.util.Serializer;
-import org.jacpfx.vxms.rest.RouteBuilder;
-import org.jacpfx.vxms.rest.VxmsRESTRoutes;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.RouteBuilder;
+import org.jacpfx.vxms.rest.base.VxmsRESTRoutes;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
@@ -161,8 +158,8 @@ public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
                     assertEquals(body.toString(), "123456");
+                      testComplete();
                   });
-              testComplete();
             });
     request.end();
     await();
@@ -224,10 +221,13 @@ public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
               resp.bodyHandler(
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
+                    if(resp.statusCode()!=200) {
+                        fail();
+                    }
                     Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
                     assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                      testComplete();
                   });
-              testComplete();
             });
     request.end();
     await();
@@ -247,10 +247,13 @@ public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
               resp.bodyHandler(
                   body -> {
                     System.out.println("Got a createResponse: " + body.toString());
+                      if(resp.statusCode()!=200) {
+                          fail();
+                      }
                     Payload<String> pp = new Gson().fromJson(body.toString(), Payload.class);
                     assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                      testComplete();
                   });
-              testComplete();
             });
     request.end();
     await();
@@ -273,14 +276,14 @@ public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
                     Payload<String> pp = null;
                     try {
                       pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                       e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                      e.printStackTrace();
+                      fail();
                     }
                     assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                      testComplete();
                   });
-              testComplete();
+
             });
     request.end();
     await();
@@ -303,14 +306,13 @@ public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
                     Payload<String> pp = null;
                     try {
                       pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                    } catch (IOException e) {
-                      e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                      e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        fail();
                     }
                     assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                      testComplete();
                   });
-              testComplete();
             });
     request.end();
     await();
@@ -333,14 +335,13 @@ public class RESTVerticleRouteBuilderSelfhostedTest extends VertxTestBase {
                     Payload<String> pp = null;
                     try {
                       pp = (Payload<String>) Serializer.deserialize(body.getBytes());
-                    } catch (IOException e) {
-                      e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                      e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        fail();
                     }
                     assertEquals(pp.getValue(), new Payload<>("123" + "456").getValue());
+                      testComplete();
                   });
-              testComplete();
             });
     request.end();
     await();
