@@ -49,7 +49,7 @@ import org.jacpfx.vxms.rest.base.util.ReflectionUtil;
 /**
  * Created by Andy Moncsek on 09.03.16. Handles initialization of vxms rest module implementation
  */
-public class RestRsInitializer {
+public class RestRsRouteInitializer {
 
     public static final String HTTP_ALL = "ALL";
 

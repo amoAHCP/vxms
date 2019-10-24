@@ -22,9 +22,6 @@ import org.jacpfx.vxms.common.VxmsShared;
 import org.jacpfx.vxms.spi.RESThandlerSPI;
 import org.jacpfx.vxms.spi.VxmsRoutes;
 
-import java.util.Iterator;
-import java.util.ServiceLoader;
-
 /**
  * Created by amo on 05.08.16. Implements teh RESThandlerSPI and calls the initializer to bootstrap
  * the rest API
@@ -33,7 +30,7 @@ public class RestRsHandler implements RESThandlerSPI {
 
   @Override
   public void initRESTHandler(VxmsShared vxmsShared, Router router, AbstractVerticle service) {
-    RestRsInitializer.initRESTHandler(vxmsShared, router, service);
+    RestRsRouteInitializer.initRESTHandler(vxmsShared, router, service);
   }
 
   @Override
@@ -41,7 +38,7 @@ public class RestRsHandler implements RESThandlerSPI {
       VxmsShared vxmsShared, Router router, AbstractVerticle service, VxmsRoutes... routes) {
     if(routes==null || routes.length>0)
       return;
-    RestRsInitializer.initRESTHandler(vxmsShared, router, service);
+    RestRsRouteInitializer.initRESTHandler(vxmsShared, router, service);
   }
 
 

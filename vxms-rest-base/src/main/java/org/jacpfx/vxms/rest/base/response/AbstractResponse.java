@@ -19,10 +19,8 @@ package org.jacpfx.vxms.rest.base.response;
 import static java.util.Optional.ofNullable;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +57,7 @@ public abstract class AbstractResponse<T> {
       long timeout,
       long circuitBreakerTimeout,
       long delay,
-      Future<ExecutionResult<T>> blockingHandler,
+      Promise<ExecutionResult<T>> blockingHandler,
       ThrowableFunction<Throwable, T> onFailureRespond) {
     ResponseExecution.executeRetryAndCatchAsync(
         methodId,
@@ -153,7 +151,7 @@ public abstract class AbstractResponse<T> {
       String methodId,
       ThrowableFunction stepNext,
       Object res,
-      Future<ExecutionResult<T>> handler,
+      Promise<ExecutionResult<T>> handler,
       ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Consumer<Throwable> errorHandler,

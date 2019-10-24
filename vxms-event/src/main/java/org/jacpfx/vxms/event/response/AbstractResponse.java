@@ -19,10 +19,8 @@ package org.jacpfx.vxms.event.response;
 import static java.util.Optional.ofNullable;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -169,7 +167,7 @@ public abstract class AbstractResponse<T> {
   protected void executeBlocking(
       String methodId,
       ThrowableSupplier<T> supplier,
-      Future<ExecutionResult<T>> blockingHandler,
+      Promise<ExecutionResult<T>> blockingHandler,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable,T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
@@ -198,7 +196,7 @@ public abstract class AbstractResponse<T> {
       String methodId,
       ThrowableFunction stepNext,
       Object result,
-      Future<ExecutionResult<T>> handler,
+      Promise<ExecutionResult<T>> handler,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable,T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,

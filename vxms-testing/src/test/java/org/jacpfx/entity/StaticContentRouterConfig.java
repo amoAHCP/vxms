@@ -26,6 +26,7 @@ public class StaticContentRouterConfig implements RouterConfiguration {
 
   public void staticHandler(Router router) {
     router.route("/static/*").handler(StaticHandler.create());
+    System.out.println("-----");
     // Create a router endpoint for the static content.
     // router.route().handler(StaticHandler.create());
   }
