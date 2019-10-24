@@ -18,6 +18,7 @@ package org.jacpfx.vxms.event.response.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
@@ -65,7 +66,7 @@ public class StepExecution {
       String methodId,
       ThrowableFunction<T, V> step,
       T value,
-      Future<ExecutionResult<V>> resultHandler,
+      Promise<ExecutionResult<V>> resultHandler,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, V> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
@@ -147,7 +148,7 @@ public class StepExecution {
   }
 
   private static <T> void executeErrorState(
-      Future<ExecutionResult<T>> _blockingHandler,
+          Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -166,7 +167,7 @@ public class StepExecution {
       String _methodId,
       ThrowableFunction<T, V> step,
       T value,
-      Future<ExecutionResult<V>> _resultHandler,
+      Promise<ExecutionResult<V>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -237,7 +238,7 @@ public class StepExecution {
       String _methodId,
       ThrowableFunction<T, V> step,
       T value,
-      Future<ExecutionResult<V>> _resultHandler,
+      Promise<ExecutionResult<V>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -271,7 +272,7 @@ public class StepExecution {
   }
 
   private static <T> void releaseLockAndHandleError(
-      Future<ExecutionResult<T>> _resultHandler,
+          Promise<ExecutionResult<T>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -283,13 +284,13 @@ public class StepExecution {
   }
 
   private static <T> void handleErrorExecution(
-      Future<ExecutionResult<T>> _resultHandler,
+          Promise<ExecutionResult<T>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       Throwable cause) {
     final T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, cause);
-    if (!_resultHandler.isComplete()) {
+    if (!_resultHandler.future().isComplete()) {
       _resultHandler.complete(new ExecutionResult<>(result, true, true, null));
     }
   }
@@ -298,7 +299,7 @@ public class StepExecution {
       String _methodId,
       ThrowableFunction<T, V> step,
       T value,
-      Future<ExecutionResult<V>> _resultHandler,
+      Promise<ExecutionResult<V>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, V> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -348,7 +349,7 @@ public class StepExecution {
   }
 
   private static <T> void openCircuitBreakerAndHandleError(
-      Future<ExecutionResult<T>> _resultHandler,
+          Promise<ExecutionResult<T>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -364,7 +365,7 @@ public class StepExecution {
           vertx.executeBlocking(
               bhandler -> {
                 T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler, e);
-                if (!_resultHandler.isComplete()) {
+                if (!_resultHandler.future().isComplete()) {
                   _resultHandler.complete(new ExecutionResult<>(result, true, true, null));
                 }
               },
@@ -384,7 +385,7 @@ public class StepExecution {
   private static <T, V> void executeDefaultState(
       ThrowableFunction<T, V> step,
       T value,
-      Future<ExecutionResult<V>> _resultHandler,
+      Promise<ExecutionResult<V>> _resultHandler,
       VxmsShared vxmsShared,
       long _timeout)
       throws Throwable {
@@ -394,7 +395,7 @@ public class StepExecution {
     } else {
       result = step.apply(value);
     }
-    if (!_resultHandler.isComplete()) {
+    if (!_resultHandler.future().isComplete()) {
       _resultHandler.complete(new ExecutionResult<>(result, true, false, null));
     }
   }
@@ -428,7 +429,7 @@ public class StepExecution {
   private static <T, V> void executeStateless(
       ThrowableFunction<T, V> step,
       T value,
-      Future<ExecutionResult<V>> _blockingHandler,
+      Promise<ExecutionResult<V>> _blockingHandler,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, V> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
@@ -465,7 +466,7 @@ public class StepExecution {
         }
       }
     }
-    if (!_blockingHandler.isComplete() && (result!=null||errorHandler==null)) {
+    if (!_blockingHandler.future().isComplete() && (result!=null||errorHandler==null)) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
     }
   }
@@ -509,11 +510,11 @@ public class StepExecution {
       LockedConsumer consumer,
       String _methodId,
       VxmsShared vxmsShared,
-      Future<ExecutionResult<T>> _resultHandler,
+      Promise<ExecutionResult<T>> _resultHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
-      Future<U> blockingCodeHandler) {
+      Promise<U> blockingCodeHandler) {
     final LocalData sharedData = vxmsShared.getLocalData();
     sharedData.getLockWithTimeout(
         _methodId,
@@ -534,7 +535,7 @@ public class StepExecution {
                         _errorMethodHandler,
                         resultHandler.cause(),
                         lock);
-                    Optional.ofNullable(blockingCodeHandler).ifPresent(Future::complete);
+                    Optional.ofNullable(blockingCodeHandler).ifPresent(Promise::complete);
                   }
                 });
           } else {
@@ -544,7 +545,7 @@ public class StepExecution {
                 _onFailureRespond,
                 _errorMethodHandler,
                 lockHandler.cause());
-            Optional.ofNullable(blockingCodeHandler).ifPresent(Future::complete);
+            Optional.ofNullable(blockingCodeHandler).ifPresent(Promise::complete);
           }
         });
   }

@@ -18,6 +18,7 @@ package org.jacpfx.vxms.event.response.blocking;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
@@ -65,7 +66,7 @@ public class ResponseExecution {
   public static <T> void createResponseBlocking(
       String methodId,
       ThrowableSupplier<T> supplier,
-      Future<ExecutionResult<T>> blockingHandler,
+      Promise<ExecutionResult<T>> blockingHandler,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
@@ -144,7 +145,7 @@ public class ResponseExecution {
   }
 
   private static <T> void executeErrorState(
-      Future<ExecutionResult<T>> _blockingHandler,
+          Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -162,7 +163,7 @@ public class ResponseExecution {
   private static <T> void executeDefault(
       String _methodId,
       ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -232,7 +233,7 @@ public class ResponseExecution {
   private static <T> void executeInitialState(
       String _methodId,
       ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -265,7 +266,7 @@ public class ResponseExecution {
   }
 
   private static <T> void releaseLockAndHandleError(
-      Future<ExecutionResult<T>> _blockingHandler,
+          Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -277,14 +278,14 @@ public class ResponseExecution {
   }
 
   private static <T> void handleErrorExecution(
-      Future<ExecutionResult<T>> _blockingHandler,
+          Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
       Throwable cause) {
     final T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler,
         _blockingHandler, cause);
-    if (!_blockingHandler.isComplete()) {
+    if (!_blockingHandler.future().isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
     }
   }
@@ -292,7 +293,7 @@ public class ResponseExecution {
   private static <T> void handleStatefulError(
       String _methodId,
       ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -341,7 +342,7 @@ public class ResponseExecution {
   }
 
   private static <T> void openCircuitBreakerAndHandleError(
-      Future<ExecutionResult<T>> _blockingHandler,
+          Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
@@ -358,7 +359,7 @@ public class ResponseExecution {
               bhandler -> {
                 T result = handleError(_errorHandler, _onFailureRespond, _errorMethodHandler,
                     _blockingHandler, e);
-                if (!_blockingHandler.isComplete()) {
+                if (!_blockingHandler.future().isComplete()) {
                   _blockingHandler.complete(new ExecutionResult<>(result, true, true, null));
                 }
               },
@@ -379,7 +380,7 @@ public class ResponseExecution {
 
   private static <T> void executeDefaultState(
       ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       VxmsShared vxmsShared,
       long _timeout)
       throws Throwable {
@@ -389,7 +390,7 @@ public class ResponseExecution {
     } else {
       result = _supplier.get();
     }
-    if (!_blockingHandler.isComplete()) {
+    if (!_blockingHandler.future().isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, false, null));
     }
   }
@@ -422,7 +423,7 @@ public class ResponseExecution {
 
   private static <T> void executeStateless(
       ThrowableSupplier<T> _supplier,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
@@ -460,9 +461,9 @@ public class ResponseExecution {
         }
       }
     }
-    if (!_blockingHandler.isComplete() && result != null) {
+    if (!_blockingHandler.future().isComplete() && result != null) {
       _blockingHandler.complete(new ExecutionResult<>(result, true, errorHandling, null));
-    } else if (!_blockingHandler.isComplete()) {
+    } else if (!_blockingHandler.future().isComplete()) {
       _blockingHandler.complete(new ExecutionResult<>(result, false, errorHandling, null));
     }
   }
@@ -481,7 +482,7 @@ public class ResponseExecution {
       Consumer<Throwable> errorHandler,
       ThrowableFunction<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       Throwable e) {
     T result = null;
     try {
@@ -507,11 +508,11 @@ public class ResponseExecution {
       LockedConsumer consumer,
       String _methodId,
       VxmsShared vxmsShared,
-      Future<ExecutionResult<T>> _blockingHandler,
+      Promise<ExecutionResult<T>> _blockingHandler,
       Consumer<Throwable> _errorHandler,
       ThrowableFunction<Throwable, T> _onFailureRespond,
       Consumer<Throwable> _errorMethodHandler,
-      Future<U> blockingCodeHandler) {
+      Promise<U> blockingCodeHandler) {
     final LocalData sharedData = vxmsShared.getLocalData();
     sharedData.getLockWithTimeout(
         _methodId,
@@ -532,7 +533,7 @@ public class ResponseExecution {
                         _errorMethodHandler,
                         resultHandler.cause(),
                         lock);
-                    Optional.ofNullable(blockingCodeHandler).ifPresent(Future::complete);
+                    Optional.ofNullable(blockingCodeHandler).ifPresent(Promise::complete);
                   }
                 });
           } else {
@@ -542,7 +543,7 @@ public class ResponseExecution {
                 _onFailureRespond,
                 _errorMethodHandler,
                 lockHandler.cause());
-            Optional.ofNullable(blockingCodeHandler).ifPresent(Future::complete);
+            Optional.ofNullable(blockingCodeHandler).ifPresent(Promise::complete);
           }
         });
   }

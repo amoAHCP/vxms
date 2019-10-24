@@ -43,9 +43,9 @@
       <version>${parent.version}</version>
     </dependency>
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>2.1</version>
+      <groupId>org.jacpfx</groupId>
+      <artifactId>vxms-rest-base</artifactId>
+      <version>${parent.version}</version>
     </dependency>
   </dependencies>
   <profiles>
@@ -60,8 +60,6 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
               <compilerArgs>
-                <arg>--add-modules</arg>
-                <arg>java.ws.rs</arg>
                 <arg>--add-modules</arg>
                 <arg>vertx.core</arg>
               </compilerArgs>

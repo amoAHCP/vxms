@@ -16,7 +16,10 @@
 
 package org.jacpfx.vxms.common.util;
 
+import java.util.Iterator;
 import java.util.ServiceLoader;
+import java.util.stream.StreamSupport;
+
 import org.jacpfx.vxms.spi.EventhandlerSPI;
 import org.jacpfx.vxms.spi.RESThandlerSPI;
 import org.jacpfx.vxms.spi.ServiceDiscoverySPI;
@@ -47,12 +50,12 @@ public class ServiceUtil {
    *
    * @return an implementation of {@link RESThandlerSPI}
    */
-  public static RESThandlerSPI getRESTSPI() {
+  public static Iterator<RESThandlerSPI> getRESTSPI() {
     ServiceLoader<RESThandlerSPI> loader = ServiceLoader.load(RESThandlerSPI.class);
     if (!loader.iterator().hasNext()) {
       return null;
     }
-    return loader.iterator().next();
+    return loader.iterator();
   }
 
   /**
@@ -60,12 +63,12 @@ public class ServiceUtil {
    *
    * @return an implementation of {@link EventhandlerSPI}
    */
-  public static EventhandlerSPI getEventBusSPI() {
+  public static Iterator<EventhandlerSPI> getEventBusSPI() {
     ServiceLoader<EventhandlerSPI> loader = ServiceLoader.load(EventhandlerSPI.class);
     if (!loader.iterator().hasNext()) {
       return null;
     }
-    return loader.iterator().next();
+    return loader.iterator();
   }
 
   /**
@@ -73,11 +76,11 @@ public class ServiceUtil {
    *
    * @return an implementation of {@link WebSockethandlerSPI}
    */
-  public static WebSockethandlerSPI getWebSocketSPI() {
+  public static Iterator<WebSockethandlerSPI> getWebSocketSPI() {
     ServiceLoader<WebSockethandlerSPI> loader = ServiceLoader.load(WebSockethandlerSPI.class);
     if (!loader.iterator().hasNext()) {
       return null;
     }
-    return loader.iterator().next();
+    return loader.iterator();
   }
 }

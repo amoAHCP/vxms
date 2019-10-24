@@ -17,23 +17,23 @@
 package org.jacpfx.rest;
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.test.core.VertxTestBase;
 import io.vertx.test.fakecluster.FakeClusterManager;
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import org.jacpfx.entity.Payload;
 import org.jacpfx.entity.encoder.ExampleStringEncoder;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.common.util.Serializer;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,15 +106,13 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/asyncStringResponse",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      assertEquals(body.toString(), "test");
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "test");
+                    testComplete();
+                  });
             });
     request.end();
     await();
@@ -130,15 +128,78 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
     HttpClientRequest request =
         client.get(
             "/wsService/asyncStringResponseParameter/123",
-            new Handler<HttpClientResponse>() {
-              public void handle(HttpClientResponse resp) {
-                resp.bodyHandler(
-                    body -> {
-                      System.out.println("Got a createResponse: " + body.toString());
-                      assertEquals(body.toString(), "123");
-                    });
-                testComplete();
-              }
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    System.out.println("Got a createResponse: " + body.toString());
+                    assertEquals(body.toString(), "123");
+                    testComplete();
+                  });
+
+            });
+    request.end();
+    await();
+  }
+
+  @Test
+  public void asyncByteResponse() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/asyncByteResponse",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    Payload<String> pp = null;
+                    try {
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                    } catch (IOException e) {
+                      e.printStackTrace(); fail();
+                    } catch (ClassNotFoundException e) {
+                      e.printStackTrace(); fail();
+
+                    }
+                    assertEquals(pp.getValue(), new Payload<>("test").getValue());
+                    testComplete();
+                  });
+
+            });
+    request.end();
+    await();
+  }
+  @Test
+  public void asyncByteResponseParameter() throws InterruptedException {
+    HttpClientOptions options = new HttpClientOptions();
+    options.setDefaultPort(PORT);
+    options.setDefaultHost(HOST);
+    HttpClient client = vertx.createHttpClient(options);
+
+    HttpClientRequest request =
+        client.get(
+            "/wsService/asyncByteResponseParameter/123",
+            resp -> {
+              resp.bodyHandler(
+                  body -> {
+                    Payload<String> pp = null;
+                    try {
+                      pp = (Payload<String>) Serializer.deserialize(body.getBytes());
+                    } catch (IOException e) {
+
+                      e.printStackTrace();
+                      fail();
+                    } catch (ClassNotFoundException e) {
+
+                      e.printStackTrace();
+                      fail();
+                    }
+                    assertEquals(pp.getValue(), new Payload<>("123").getValue());
+                    testComplete();
+                  });
+
             });
     request.end();
     await();
@@ -180,7 +241,7 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                 System.out.println("WAIT");
                 Thread.sleep(2500);
                 System.out.println("WAIT END");
-                return "test".getBytes();
+                return Serializer.serialize(new Payload<String>("test"));
               })
           .execute();
     }
@@ -200,6 +261,24 @@ public class RESTServiceSelfhostedAsyncTest extends VertxTestBase {
                 return new Payload<String>("test");
               },
               new ExampleStringEncoder())
+          .execute();
+    }
+
+    @Path("/asyncByteResponseParameter/:help")
+    @GET
+    public void rsAsyncByteResponseParameter(RestHandler handler) {
+      String productType = handler.request().param("help");
+      System.out.println("asyncByteResponseParameter: " + handler);
+      handler
+          .response()
+          .blocking()
+          .byteResponse(
+              () -> {
+                System.out.println("WAIT");
+                Thread.sleep(2500);
+                System.out.println("WAIT END");
+                return Serializer.serialize(new Payload<String>(productType));
+              })
           .execute();
     }
 

@@ -24,7 +24,7 @@ import io.vertx.ext.web.Router;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /** Created by amo on 22.11.16. */

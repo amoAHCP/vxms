@@ -157,7 +157,7 @@
                         exports org.jacpfx.vxms.rest.response.blocking;
 
                         provides org.jacpfx.vxms.spi.RESThandlerSPI with
-                        org.jacpfx.vxms.rest.RESThandler;
+                        org.jacpfx.vxms.rest.RestRsHandler;
 
                         }
                       </moduleInfoSource>

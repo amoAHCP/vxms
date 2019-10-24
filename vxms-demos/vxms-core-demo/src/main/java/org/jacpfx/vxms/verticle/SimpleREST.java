@@ -18,9 +18,11 @@ package org.jacpfx.vxms.verticle;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import org.jacpfx.vxms.common.ServiceEndpoint;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
@@ -28,18 +30,28 @@ import org.jacpfx.vxms.services.VxmsEndpoint;
 /**
  * Created by Andy Moncsek on 25.01.16.
  */
-@ServiceEndpoint(port = 9090)
+@ServiceEndpoint(port = 8080)
 public class SimpleREST extends VxmsEndpoint {
 
     @Override
     public void postConstruct(Router router, final Future<Void> startFuture) {
-        router.get("/helloGET").handler(helloGet -> helloGet.response().end("simple response"));
-        router.get("/helloGET/:name").handler(helloGet -> helloGet.response().end("hello World " + helloGet.request().getParam("name")));
+        router.get("/helloGET").handler(getSimpleResponse());
+        router.get("/helloGET/:name").handler(getName());
         startFuture.complete();
+    }
+
+    private Handler<RoutingContext> getName() {
+        return helloGet -> helloGet.response().end("hello World " + helloGet.request().getParam("name"));
+    }
+
+    private Handler<RoutingContext> getSimpleResponse() {
+        return helloGet -> helloGet.response().end("simple response");
     }
 
     public static void main(String[] args) {
         DeploymentOptions options = new DeploymentOptions();
-        Vertx.vertx().deployVerticle(SimpleREST.class.getName(), options);
+        System.out.println("test");
+        SimpleREST t = new SimpleREST();
+        Vertx.vertx().deployVerticle(t, options);
     }
 }
