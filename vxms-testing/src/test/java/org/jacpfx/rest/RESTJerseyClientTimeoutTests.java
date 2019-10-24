@@ -258,7 +258,7 @@ public class RESTJerseyClientTimeoutTests extends VertxTestBase {
                           HOST,
                           SERVICE_REST_GET + "/long",
                           response -> {
-                            if (!future.isComplete()) {
+                            if (!future.future().isComplete()) {
                               future.complete("reply");
                             }
                           }))

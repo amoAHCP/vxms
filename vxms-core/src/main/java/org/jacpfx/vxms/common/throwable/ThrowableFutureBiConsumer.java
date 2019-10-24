@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.common.throwable;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 
 /**
  * Created by Andy Moncsek on 21.01.16.
@@ -34,5 +35,5 @@ public interface ThrowableFutureBiConsumer<H, T> {
    * @param value the input argument
    * @throws Throwable the throwable
    */
-  void accept(H value, Future<T> operationResult) throws Throwable;
+  void accept(H value, Promise<T> operationResult) throws Throwable;
 }

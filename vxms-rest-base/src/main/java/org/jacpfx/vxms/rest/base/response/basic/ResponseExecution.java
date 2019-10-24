@@ -16,10 +16,7 @@
 
 package org.jacpfx.vxms.rest.base.response.basic;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.shareddata.Counter;
@@ -118,8 +115,9 @@ public class ResponseExecution {
       Consumer<Throwable> errorMethodHandler,
       VxmsShared vxmsShared,
       Consumer<ExecutionResult<T>> resultConsumer) {
-    final Future<T> operationResult = Future.future();
-    operationResult.setHandler(
+    final Promise<T> operationResult = Promise.promise();
+    final Future<T> operationResultFuture = operationResult.future();
+    operationResultFuture.setHandler(
         event -> {
           if (event.failed()) {
             int retryTemp = retry - 1;
@@ -144,7 +142,7 @@ public class ResponseExecution {
           timeout,
           vxmsShared.getVertx(),
           (l) -> {
-            if (!operationResult.isComplete()) {
+            if (!operationResultFuture.isComplete()) {
               operationResult.fail(new TimeoutException("operation timeout"));
             }
           });
@@ -153,7 +151,7 @@ public class ResponseExecution {
   }
 
   private static <T> void executeAndCompleate(
-      ThrowableFutureConsumer<T> userOperation, Future<T> operationResult) {
+      ThrowableFutureConsumer<T> userOperation, Promise<T> operationResult) {
 
     try {
       userOperation.accept(operationResult);
@@ -204,8 +202,9 @@ public class ResponseExecution {
       VxmsShared vxmsShared,
       Throwable t,
       Consumer<ExecutionResult<T>> resultConsumer) {
-    final Future<T> operationResult = Future.future();
-    operationResult.setHandler(
+    final Promise<T> operationResult = Promise.promise();
+    final Future<T> operationResultFuture = operationResult.future();
+    operationResultFuture.setHandler(
         event -> {
           if (event.failed()) {
             statefulErrorHandling(
@@ -273,7 +272,7 @@ public class ResponseExecution {
       long _timeout,
       ThrowableFutureConsumer<T> _userOperation,
       VxmsShared vxmsShared,
-      Future<T> operationResult,
+      Promise<T> operationResult,
       Lock lock) {
     lock.release();
     if (_timeout > DEFAULT_LONG_VALUE) {
@@ -281,7 +280,7 @@ public class ResponseExecution {
           _timeout,
           vxmsShared.getVertx(),
           (l) -> {
-            if (!operationResult.isComplete()) {
+            if (!operationResult.future().isComplete()) {
               operationResult.fail(new TimeoutException("operation timeout"));
             }
           });
@@ -294,7 +293,7 @@ public class ResponseExecution {
       long timeout,
       ThrowableFutureConsumer<T> _userOperation,
       VxmsShared vxmsShared,
-      Future<T> operationResult,
+      Promise<T> operationResult,
       Lock lock,
       Counter counter) {
     final long initialRetryCounterValue = (long) (retry + 1);
