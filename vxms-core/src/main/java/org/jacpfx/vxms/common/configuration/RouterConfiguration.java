@@ -19,7 +19,7 @@ package org.jacpfx.vxms.common.configuration;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CookieHandler;
+
 
 /**
  * Created by Andy Moncsek on 18.02.16.
@@ -45,14 +45,7 @@ public interface RouterConfiguration {
     router.route().handler(BodyHandler.create());
   }
 
-  /**
-   * Define a cookie handler for your service, a cookie handler is always defined by default
-   *
-   * @param router {@link Router}
-   */
-  default void cookieHandler(Router router) {
-    router.route().handler(CookieHandler.create());
-  }
+
 
   /**
    * Define the static handler
