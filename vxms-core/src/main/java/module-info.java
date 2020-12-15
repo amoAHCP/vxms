@@ -1,8 +1,8 @@
 import org.jacpfx.vxms.spi.EventhandlerSPI;
 
 module vxms.core {
-  requires vertx.core;
-  requires vertx.web;
+  requires io.vertx.core;
+  requires io.vertx.web;
   requires java.logging;
   requires java.management;
 

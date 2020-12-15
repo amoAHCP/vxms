@@ -17,8 +17,8 @@
 
 module vxms.event {
   requires vxms.core;
-  requires vertx.core;
-  requires vertx.web;
+  requires io.vertx.core;
+  requires io.vertx.web;
   requires io.netty.codec;
   requires io.netty.codec.http;
   requires java.logging;
