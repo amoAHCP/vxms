@@ -22,6 +22,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.Arguments;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
@@ -35,11 +36,11 @@ import java.util.concurrent.ConcurrentMap;
  * Created by amo on 23.03.17. Local Data implementation to get lock and counters without involving
  * cluster manager when running in clustered mode
  */
-@SuppressWarnings("unchecked")
+
 public class LocalData {
 
-  private final ConcurrentMap<String, Counter> localCounters = new ConcurrentHashMap();
-  private final ConcurrentMap<String, LocalAsyncLocks> localLocks = new ConcurrentHashMap();
+  private final ConcurrentMap<String, Counter> localCounters = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, LocalAsyncLocks> localLocks = new ConcurrentHashMap<>();
   private final Vertx vertx;
 
   public LocalData(Vertx vertx) {
@@ -76,9 +77,9 @@ public class LocalData {
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(resultHandler, "resultHandler");
     Arguments.require(timeout >= 0L, "timeout must be >= 0");
-    LocalAsyncLocks lock = this.localLocks
+    final LocalAsyncLocks lock = this.localLocks
         .computeIfAbsent(name, (n) -> new LocalAsyncLocks());
-    lock.acquire(this.vertx.getOrCreateContext(),name,timeout, resultHandler);
+    lock.acquire(ContextInternal.current(), name, timeout).onComplete(resultHandler);
 
   }
 
