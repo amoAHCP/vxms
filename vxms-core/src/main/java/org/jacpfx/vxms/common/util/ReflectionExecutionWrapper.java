@@ -17,6 +17,8 @@
 package org.jacpfx.vxms.common.util;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -30,14 +32,14 @@ public class ReflectionExecutionWrapper {
   private final String methodName;
   private final Object objectToInvoke;
   private final Object[] parameters;
-  private final Future<Void> startFuture;
+  private final Promise<Void> startFuture;
 
   public ReflectionExecutionWrapper(String methodName, Object objectToInvoke,
-      Object[] parameters, Future<Void> startFuture) {
+      Object[] parameters, Promise<Void> startPromise) {
     this.methodName = methodName;
     this.objectToInvoke = objectToInvoke;
     this.parameters = parameters;
-    this.startFuture = startFuture;
+    this.startFuture = startPromise;
   }
 
   /**
