@@ -39,6 +39,9 @@ import org.jacpfx.vxms.rest.base.VxmsRESTRoutes.RestHandlerConsumer;
 import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.spi.VxmsRoutes;
 
+import static io.vertx.core.http.HttpMethod.GET;
+import static io.vertx.core.http.HttpMethod.POST;
+
 /**
  * Created by Andy Moncsek on 09.03.16. Handles initialization of vxms rest module implementation
  */
@@ -56,30 +59,17 @@ public class RestRouteInitializer {
     static void initRESTHandler(
             VxmsShared vxmsShared, Router router, VxmsRoutes routes) {
         if (VxmsRESTRoutes.class.isAssignableFrom(routes.getClass())) {
-            VxmsRESTRoutes userRoutes = VxmsRESTRoutes.class.cast(routes);
+            VxmsRESTRoutes userRoutes = (VxmsRESTRoutes) routes;
             userRoutes
                     .getDescriptors()
-                    .stream()
                     .forEach(descriptor -> {
-                        switch (descriptor.httpMethod) {
-                            case GET:
-                                initHttpGet(vxmsShared, router, descriptor);
-                                break;
-                            case POST:
-                                initHttpPost(vxmsShared, router, descriptor);
-                                break;
-                            case PUT:
-                                initHttpPut(vxmsShared, router, descriptor);
-                                break;
-                            case DELETE:
-                                initHttpDelete(vxmsShared, router, descriptor);
-                                break;
-                            case OPTIONS:
-                                initHttpOptions(vxmsShared, router, descriptor);
-                                break;
-                            default:
-                                initHttpGet(vxmsShared, router, descriptor);
-
+                        switch (descriptor.httpMethod.name()) {
+                            case "GET" -> initHttpGet(vxmsShared, router, descriptor);
+                            case "POST" -> initHttpPost(vxmsShared, router, descriptor);
+                            case "PUT" -> initHttpPut(vxmsShared, router, descriptor);
+                            case "DELETE" -> initHttpDelete(vxmsShared, router, descriptor);
+                            case "OPTIONS" -> initHttpOptions(vxmsShared, router, descriptor);
+                            default -> initHttpGet(vxmsShared, router, descriptor);
                         }
 
                     });
@@ -114,7 +104,7 @@ public class RestRouteInitializer {
         final Context context = getContext(vxmsShared);
         final String methodId =
                 descriptor.path
-                        + HttpMethod.POST.name()
+                        + POST.name()
                         + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vxmsShared, route, descriptor);
     }
@@ -125,7 +115,7 @@ public class RestRouteInitializer {
         final Context context = getContext(vxmsShared);
         final String methodId =
                 descriptor.path
-                        + HttpMethod.POST.name()
+                        + POST.name()
                         + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vxmsShared, route, descriptor);
     }
@@ -137,7 +127,7 @@ public class RestRouteInitializer {
         final Context context = getContext(vxmsShared);
         final String methodId =
                 descriptor.path
-                        + HttpMethod.GET.name()
+                        + GET.name()
                         + ConfigurationUtil.getCircuitBreakerIDPostfix(context.config());
         initHttpOperation(methodId, vxmsShared, route, descriptor);
     }
