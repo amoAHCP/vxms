@@ -17,7 +17,7 @@
 package org.jacpfx.vxms.rest.base.response;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.web.Cookie;
+import io.vertx.core.http.Cookie;
 import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Set;
@@ -74,14 +74,6 @@ public class RESTRequest {
     return context.fileUploads();
   }
 
-  /**
-   * Returns a set of cookies
-   *
-   * @return the set of cookies
-   */
-  public Set<Cookie> cookies() {
-    return context.cookies();
-  }
 
   /**
    * Returns a cookie by name
@@ -90,7 +82,7 @@ public class RESTRequest {
    * @return the cookie
    */
   public Cookie cookie(String name) {
-    return context.getCookie(name);
+    return context.request().getCookie(name);
   }
 
   /**
