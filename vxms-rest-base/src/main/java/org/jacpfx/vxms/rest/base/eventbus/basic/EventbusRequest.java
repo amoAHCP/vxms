@@ -107,7 +107,7 @@ public class EventbusRequest {
     final Vertx vertx = vxmsShared.getVertx();
     vertx
         .eventBus()
-        .send(
+        .request(
             targetId,
             message,
             options != null ? options : new DeliveryOptions(),
@@ -116,11 +116,7 @@ public class EventbusRequest {
               if (event.failed()) {
                 response.setStatusCode(HttpResponseStatus.SERVICE_UNAVAILABLE.code()).end();
               }
-              Optional.ofNullable(event.result())
-                  .ifPresent(
-                      result ->
-                          Optional.ofNullable(result.body())
-                              .ifPresent(resp -> respond(response, resp)));
+              Optional.ofNullable(event.result()).flatMap(result -> Optional.ofNullable(result.body())).ifPresent(resp -> respond(response, resp));
             });
   }
 
@@ -130,9 +126,9 @@ public class EventbusRequest {
     } else if (resp instanceof byte[]) {
       response.end(Buffer.buffer((byte[]) resp));
     } else if (resp instanceof JsonObject) {
-      response.end(JsonObject.class.cast(resp).encode());
+      response.end(((JsonObject) resp).encode());
     } else if (resp instanceof JsonArray) {
-      response.end(JsonArray.class.cast(resp).encode());
+      response.end(((JsonArray) resp).encode());
     }
   }
 
