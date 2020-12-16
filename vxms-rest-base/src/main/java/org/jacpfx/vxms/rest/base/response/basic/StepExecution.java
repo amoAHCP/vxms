@@ -118,7 +118,7 @@ public class StepExecution {
             Consumer<ExecutionResult<V>> resultConsumer) {
         final Promise<V> operationResult = Promise.promise();
         final Future<V> operationResultFuture = operationResult.future();
-        operationResultFuture.setHandler(
+        operationResultFuture.onComplete(
                 event -> {
                     if (event.failed()) {
                         int retryTemp = retry - 1;
@@ -209,7 +209,7 @@ public class StepExecution {
             Consumer<ExecutionResult<V>> resultConsumer) {
         final Promise<V> operationResult = Promise.promise();
         final Future<V> operationResultFuture = operationResult.future();
-        operationResultFuture.setHandler(
+        operationResultFuture.onComplete(
                 event -> {
                     if (event.failed()) {
                         statefulErrorHandling(
@@ -312,7 +312,7 @@ public class StepExecution {
             Promise<V> operationResult,
             Lock lock,
             Counter counter) {
-        final long initialRetryCounterValue = (long) (retry + 1);
+        final long initialRetryCounterValue = retry + 1;
         counter.addAndGet(
                 initialRetryCounterValue,
                 rHandler ->
@@ -456,8 +456,9 @@ public class StepExecution {
             Consumer<ExecutionResult<T>> resultConsumer,
             AsyncResult<T> event) {
         try {
-            final Future<T> errorResult = Future.future();
-            errorResult.setHandler(
+            final Promise<T> errorPromise = Promise.promise();
+            final Future<T> errorResult = errorPromise.future();
+            errorResult.onComplete(
                     resultHandler -> {
                         if (resultHandler.succeeded()) {
                             resultConsumer.accept(
@@ -468,7 +469,7 @@ public class StepExecution {
                         }
                     });
             handleExecutionError(
-                    errorResult, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
+                    errorPromise, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
 
         } catch (Exception e) {
             resultConsumer.accept(new ExecutionResult<>(null, false, e));
@@ -505,20 +506,21 @@ public class StepExecution {
     }
 
     private static <T> void handleExecutionError(
-            Future<T> errorResult,
+            Promise<T> errorPromise,
             Consumer<Throwable> errorHandler,
             ThrowableErrorConsumer<Throwable, T> onFailureRespond,
             Consumer<Throwable> errorMethodHandler,
             Throwable e) {
         StepExecution.handleError(errorHandler, e);
+        if(errorPromise==null) return;
         try {
             if (onFailureRespond != null) {
-                onFailureRespond.accept(e, errorResult);
+                onFailureRespond.accept(e, errorPromise.future());
             } else {
                 errorMethodHandler.accept(e);
             }
         } catch (Throwable throwable) {
-            errorResult.fail(throwable);
+            errorPromise.fail(throwable);
         }
     }
 
