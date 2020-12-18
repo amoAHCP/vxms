@@ -512,14 +512,17 @@ public class StepExecution {
             Consumer<Throwable> errorMethodHandler,
             Throwable e) {
         StepExecution.handleError(errorHandler, e);
-        if(errorPromise==null) return;
         try {
-            if (onFailureRespond != null) {
+            if (onFailureRespond != null && errorPromise!=null) {
                 onFailureRespond.accept(e, errorPromise.future());
             } else {
                 errorMethodHandler.accept(e);
             }
         } catch (Throwable throwable) {
+            if(errorPromise==null) {
+                throwable.printStackTrace();
+                return;
+            }
             errorPromise.fail(throwable);
         }
     }

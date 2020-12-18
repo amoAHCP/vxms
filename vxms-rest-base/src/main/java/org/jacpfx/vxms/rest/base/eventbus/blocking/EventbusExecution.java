@@ -341,7 +341,7 @@ public class EventbusExecution {
     final Vertx vertx = vxmsShared.getVertx();
     vertx
         .eventBus()
-        .send(
+        .request(
             id,
             message,
             deliveryOptions,

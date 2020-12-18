@@ -117,7 +117,7 @@ public class ResponseExecution {
       Consumer<ExecutionResult<T>> resultConsumer) {
     final Promise<T> operationResult = Promise.promise();
     final Future<T> operationResultFuture = operationResult.future();
-    operationResultFuture.setHandler(
+    operationResultFuture.onComplete(
         event -> {
           if (event.failed()) {
             int retryTemp = retry - 1;
@@ -204,7 +204,7 @@ public class ResponseExecution {
       Consumer<ExecutionResult<T>> resultConsumer) {
     final Promise<T> operationResult = Promise.promise();
     final Future<T> operationResultFuture = operationResult.future();
-    operationResultFuture.setHandler(
+    operationResultFuture.onComplete(
         event -> {
           if (event.failed()) {
             statefulErrorHandling(
@@ -296,7 +296,7 @@ public class ResponseExecution {
       Promise<T> operationResult,
       Lock lock,
       Counter counter) {
-    final long initialRetryCounterValue = (long) (retry + 1);
+    final long initialRetryCounterValue = retry + 1;
     counter.addAndGet(
         initialRetryCounterValue,
         rHandler ->
@@ -435,8 +435,9 @@ public class ResponseExecution {
       Consumer<ExecutionResult<T>> resultConsumer,
       AsyncResult<T> event) {
     try {
-      final Future<T> errorResult = Future.future();
-      errorResult.setHandler(
+      final Promise<T> errorPromise = Promise.promise();
+      final Future<T> errorResult = errorPromise.future();
+      errorResult.onComplete(
           resultHandler -> {
             if (resultHandler.succeeded()) {
               resultConsumer.accept(
@@ -447,7 +448,7 @@ public class ResponseExecution {
             }
           });
       handleExecutionError(
-          errorResult, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
+              errorPromise, errorHandler, onFailureRespond, errorMethodHandler, event.cause());
 
     } catch (Exception e) {
       resultConsumer.accept(new ExecutionResult<>(null, false, e));
@@ -482,20 +483,24 @@ public class ResponseExecution {
   }
 
   private static <T> void handleExecutionError(
-      Future<T> errorResult,
+          Promise<T> errorPromise,
       Consumer<Throwable> errorHandler,
       ThrowableErrorConsumer<Throwable, T> onFailureRespond,
       Consumer<Throwable> errorMethodHandler,
       Throwable e) {
     ResponseExecution.handleError(errorHandler, e);
     try {
-      if (onFailureRespond != null) {
-        onFailureRespond.accept(e, errorResult);
+      if (onFailureRespond != null && errorPromise!=null) {
+        onFailureRespond.accept(e, errorPromise.future());
       } else {
         errorMethodHandler.accept(e);
       }
     } catch (Throwable throwable) {
-      errorResult.fail(throwable);
+      if(errorPromise==null) {
+        throwable.printStackTrace();
+        return;
+      }
+      errorPromise.fail(throwable);
     }
   }
 

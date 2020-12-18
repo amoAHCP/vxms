@@ -296,7 +296,7 @@ public class EventbusBridgeExecution {
     final Vertx vertx = vxmsShared.getVertx();
     vertx
         .eventBus()
-        .send(
+        .request(
             targetId,
             message,
             requestDeliveryOptions,

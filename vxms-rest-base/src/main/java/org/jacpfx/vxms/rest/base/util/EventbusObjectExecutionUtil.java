@@ -37,7 +37,6 @@ import org.jacpfx.vxms.common.throwable.ThrowableFutureConsumer;
 import org.jacpfx.vxms.rest.base.eventbus.basic.EventbusExecution;
 
 /** Created by Andy Moncsek on 05.04.16. Typed execution of event-bus calls and string response */
-@SuppressWarnings("unchecked")
 public class EventbusObjectExecutionUtil {
 
   /**
@@ -161,7 +160,7 @@ public class EventbusObjectExecutionUtil {
             timeout,
             circuitBreakerTimeout) -> {
           final int decrementedCount = retryCount - 1;
-          //noinspection unchecked
+
           mapToObjectResponse(
                   methodId,
                   id,

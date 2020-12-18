@@ -112,7 +112,7 @@ public class EventbusBridgeRequest {
     final Vertx vertx = vxmsShared.getVertx();
     vertx
         .eventBus()
-        .send(
+        .request(
             id,
             message,
             requestOptions != null ? requestOptions : new DeliveryOptions(),
@@ -144,15 +144,15 @@ public class EventbusBridgeRequest {
       }
     } else if (resp instanceof JsonObject) {
       if (options != null) {
-        requestmessage.reply(JsonObject.class.cast(resp).encode(), options);
+        requestmessage.reply(((JsonObject) resp).encode(), options);
       } else {
-        requestmessage.reply(JsonObject.class.cast(resp).encode());
+        requestmessage.reply(((JsonObject) resp).encode());
       }
     } else if (resp instanceof JsonArray) {
       if (options != null) {
-        requestmessage.reply(JsonArray.class.cast(resp).encode(), options);
+        requestmessage.reply(((JsonArray) resp).encode(), options);
       } else {
-        requestmessage.reply(JsonArray.class.cast(resp).encode());
+        requestmessage.reply(((JsonArray) resp).encode());
       }
     }
   }
