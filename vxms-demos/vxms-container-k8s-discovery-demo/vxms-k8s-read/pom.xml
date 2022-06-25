@@ -37,7 +37,7 @@
     <vertx-spring-ext.version>2.3</vertx-spring-ext.version>
     <reactor-core.version>3.1.8.RELEASE</reactor-core.version>
     <mongodb-driver-reactivestreams.version>1.8.0</mongodb-driver-reactivestreams.version>
-    <spring-data-mongodb.version>2.0.8.RELEASE</spring-data-mongodb.version>
+    <spring-data-mongodb.version>3.3.5</spring-data-mongodb.version>
     <vxms-verticle.version>1.2-SNAPSHOT</vxms-verticle.version>
   </properties>
 
