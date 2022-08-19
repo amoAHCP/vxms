@@ -16,10 +16,7 @@
 
 package org.jacpfx.verticle;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
@@ -37,7 +34,7 @@ public class Testverticle extends AbstractVerticle {
   }
 
   @Override
-  public void start(Future<Void> startFuture) throws Exception {
+  public void start(Promise<Void> startFuture) throws Exception {
     final HttpServer localhost =
         vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080));
     final Router router = Router.router(vertx);
@@ -47,7 +44,7 @@ public class Testverticle extends AbstractVerticle {
             handler -> {
               handler.response().end("hello");
             });
-    localhost.requestHandler(router::accept).listen();
+    localhost.requestHandler(router::handle).listen();
     startFuture.complete();
   }
 }

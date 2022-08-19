@@ -17,6 +17,7 @@
 package org.jacpfx.vxms.common.throwable;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 
 /**
  * Created by Andy Moncsek on 21.01.16.
@@ -34,5 +35,5 @@ public interface ThrowableErrorConsumer<T, R> {
    * @param operationResult the response argument
    * @throws Throwable the throwable
    */
-  void accept(T error, Future<R> operationResult) throws Throwable;
+  void accept(T error, Promise<R> operationResult) throws Throwable;
 }

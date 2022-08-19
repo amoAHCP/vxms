@@ -40,7 +40,7 @@ public class Testverticl2 extends AbstractVerticle {
   }
 
   @Override
-  public void start(io.vertx.core.Future<Void> startFuture) throws Exception {
+  public void start(io.vertx.core.Promise<Void> startFuture) throws Exception {
     VxmsEndpoint.start(startFuture, this);
   }
 

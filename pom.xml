@@ -215,20 +215,20 @@
     <plugins>
 
       <!-- Other plugins required by the build -->
+      <!-- create source jar
+           <plugin>
 
-      <plugin>
-        <!-- create source jar -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>${artifactId}-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-source-plugin</artifactId>
+             <executions>
+               <execution>
+                 <id>${artifactId}-sources</id>
+                 <goals>
+                   <goal>jar</goal>
+                 </goals>
+               </execution>
+             </executions>
+           </plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>

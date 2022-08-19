@@ -18,6 +18,7 @@ package org.jacpfx.verticle;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -39,7 +40,7 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
     Vertx.vertx().deployVerticle(CircuitBreakerServiceTest.class.getName(), options);
   }
 
-  public void postConstruct(Router router, final Future<Void> startFuture) {
+  public void postConstruct(Router router, final Promise<Void> startFuture) {
     router
         .get("/test")
         .handler(
@@ -167,8 +168,6 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
         .closeCircuitBreaker(4000)
         .onFailureRespond(
             (error) -> {
-              //  System.out.println("---stateless stringResponse: " + val);
-              //  System.out.println(error.getMessage());
               return error.getMessage();
             })
         .execute();
@@ -197,7 +196,7 @@ public class CircuitBreakerServiceTest extends VxmsEndpoint {
             (error, future) -> {
               // System.out.println("---stateless stringResponse: " + val);
               // System.out.println(error.getMessage());
-              future.complete(error.getMessage());
+                future.complete(error.getMessage());
             })
         .execute();
   }

@@ -509,7 +509,7 @@ public class StepExecution {
         StepExecution.handleError(errorHandler, e);
         try {
             if (onFailureRespond != null && errorPromise != null) {
-                onFailureRespond.accept(e, errorPromise.future());
+                onFailureRespond.accept(e, errorPromise);
             } else {
                 errorMethodHandler.accept(e);
             }
