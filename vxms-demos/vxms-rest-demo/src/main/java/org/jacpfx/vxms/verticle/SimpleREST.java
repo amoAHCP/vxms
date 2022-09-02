@@ -17,24 +17,36 @@
 package org.jacpfx.vxms.verticle;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+
+
+
 import org.jacpfx.vxms.common.ServiceEndpoint;
-import org.jacpfx.vxms.rest.annotation.OnRestError;
-import org.jacpfx.vxms.rest.response.RestHandler;
+import org.jacpfx.vxms.rest.base.RouteBuilder;
+import org.jacpfx.vxms.rest.base.VxmsRESTRoutes;
+import org.jacpfx.vxms.rest.base.response.RestHandler;
 import org.jacpfx.vxms.services.VxmsEndpoint;
 
 /**
  * Created by Andy Moncsek on 25.01.16.
  */
 @ServiceEndpoint(port = 9090)
-public class SimpleREST extends VxmsEndpoint {
+public class SimpleREST  extends AbstractVerticle {
 
-  @Path("/helloGET")
-  @GET
+  @Override
+  public void start(Promise<Void> startFuture) throws Exception {
+    VxmsRESTRoutes routes =
+            VxmsRESTRoutes.init()
+                    .route(RouteBuilder.get("/helloGET", this::simpleRESTHello))
+                    .route(RouteBuilder.get("/helloGET/:name", this::simpleRESTHelloWithParameter));
+    VxmsEndpoint.init(startFuture, this, routes);
+  }
+
+
   public void simpleRESTHello(RestHandler handler) {
     handler.
         response().
@@ -42,28 +54,34 @@ public class SimpleREST extends VxmsEndpoint {
         execute();
   }
 
-
-  @Path("/helloGET/:name")
-  @GET
   public void simpleRESTHelloWithParameter(RestHandler handler) {
 
     handler.
         response().
         stringResponse((response) -> {
           final String name = handler.request().param("name");
-          response.complete("hello World " + name);
+          new Thread(()->{
+              try {
+                  Thread.sleep(2500);
+              } catch (InterruptedException e) {
+                  throw new RuntimeException(e);
+              }
+              response.complete("hello World 123 " + name);
+          }).start();
+    System.out.println("-------");
+
         }).
-        timeout(2000).
-        onFailureRespond((error, future) -> future.complete("error")).
-        httpErrorCode(HttpResponseStatus.BAD_REQUEST).
-        retry(3).
+        timeout(100).
+        onFailureRespond((error, future) -> future.complete("error, sorry")).
+        httpErrorCode(HttpResponseStatus.SERVICE_UNAVAILABLE).
+        retry(5).
         closeCircuitBreaker(2000).
         execute();
   }
 
 
   public static void main(String[] args) {
-    DeploymentOptions options = new DeploymentOptions().setInstances(4)
+    DeploymentOptions options = new DeploymentOptions().setInstances(1)
         .setConfig(new JsonObject().put("host", "localhost"));
     Vertx.vertx().deployVerticle(SimpleREST.class.getName(), options);
   }
